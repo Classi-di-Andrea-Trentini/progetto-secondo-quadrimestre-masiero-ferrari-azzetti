@@ -14,3 +14,6 @@ Pagine generate
 Services
 - TODO: service della nostra api
 - users-service
+
+Guards
+- auth-guard
