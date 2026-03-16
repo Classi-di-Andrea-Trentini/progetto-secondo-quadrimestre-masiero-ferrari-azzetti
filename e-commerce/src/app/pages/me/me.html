@@ -1,1 +1,140 @@
-<p>me works!</p>
+<div class="max-w-4xl mx-auto px-4 py-10">
+
+  <nav class="flex justify-center gap-10 border-b border-gray-200 mb-12">
+    <a (click)="activeTab.set('profile')" 
+       class="pb-4 text-sm font-semibold uppercase tracking-wider cursor-pointer transition-colors"
+       [ngClass]="activeTab() === 'profile' ? 'text-black border-b-2 border-black' : 'text-gray-400 hover:text-gray-700'">
+      Profile
+    </a>
+
+    <a (click)="activeTab.set('orders')" 
+       class="pb-4 text-sm font-semibold uppercase tracking-wider cursor-pointer transition-colors"
+       [ngClass]="activeTab() === 'orders' ? 'text-black border-b-2 border-black' : 'text-gray-400 hover:text-gray-700'">
+      Orders
+    </a>
+
+    <a (click)="activeTab.set('favorites')" 
+       class="pb-4 text-sm font-semibold uppercase tracking-wider cursor-pointer transition-colors"
+       [ngClass]="activeTab() === 'favorites' ? 'text-black border-b-2 border-black' : 'text-gray-400 hover:text-gray-700'">
+      Favorites
+    </a>
+
+    <a (click)="activeTab.set('settings')" 
+       class="pb-4 text-sm font-semibold uppercase tracking-wider cursor-pointer transition-colors"
+       [ngClass]="activeTab() === 'settings' ? 'text-black border-b-2 border-black' : 'text-gray-400 hover:text-gray-700'">
+      Settings
+    </a>
+  </nav>
+
+  <div>
+    @switch (activeTab()) {
+      
+      @case ('profile') {
+        <section class="animate-fade-in">
+          
+          <div class="mb-12">
+            <div class="flex justify-between items-center border-b border-gray-100 pb-4 mb-6">
+              <h2 class="text-xl font-bold">Personal Information</h2>
+              <button class="text-sm text-gray-400 hover:text-black underline transition-colors">Edit</button>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div>
+                <p class="text-xs text-gray-400 uppercase tracking-widest mb-1">Full Name</p>
+                <p class="font-medium">User Name</p>
+              </div>
+              <div>
+                <p class="text-xs text-gray-400 uppercase tracking-widest mb-1">Email Address</p>
+                <p class="font-medium">user.name&#64;example.com</p>
+              </div>
+              <div>
+                <p class="text-xs text-gray-400 uppercase tracking-widest mb-1">Phone</p>
+                <p class="font-medium">+39 333 1234567</p>
+              </div>
+              <div>
+                <p class="text-xs text-gray-400 uppercase tracking-widest mb-1">Date of Birth</p>
+                <p class="font-medium">May 15, 1995</p>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="flex justify-between items-center border-b border-gray-100 pb-4 mb-6">
+              <h2 class="text-xl font-bold">Main Shipping Address</h2>
+              <button class="text-sm text-gray-400 hover:text-black underline transition-colors">Edit</button>
+            </div>
+            <div class="leading-relaxed font-medium">
+              <p>Nome del Utente</p>
+              <p>Via del utente</p>
+              <p>CAP e citta</p>
+              <p>Nazione</p>
+            </div>
+          </div>
+
+        </section>
+      }
+
+      @case ('orders') {
+        <section class="animate-fade-in">
+          <h2 class="text-xl font-bold border-b border-gray-100 pb-4 mb-6">Order History</h2>
+          
+          <div class="flex flex-col gap-4">
+            
+            <div class="flex flex-col md:flex-row md:items-center justify-between p-6 border border-gray-100 rounded-lg bg-white">
+              <div class="mb-4 md:mb-0">
+                <p class="font-bold text-gray-900">#ORD-1042</p>
+                <p class="text-sm text-gray-400 mt-1">Placed on Feb 23, 2026</p>
+              </div>
+              
+              <div class="mb-4 md:mb-0">
+                <span class="px-4 py-1.5 text-xs font-bold tracking-widest uppercase rounded-full bg-teal-50 text-teal-700">
+                  Shipped
+                </span>
+              </div>
+              
+              <div class="text-left md:text-right">
+                <p class="font-bold text-lg">€ 145,00</p>
+                <button class="text-sm text-gray-400 hover:text-black underline mt-1 transition-colors">View Details</button>
+              </div>
+            </div>
+
+            <div class="flex flex-col md:flex-row md:items-center justify-between p-6 border border-gray-100 rounded-lg bg-white">
+              <div class="mb-4 md:mb-0">
+                <p class="font-bold text-gray-900">#ORD-0988</p>
+                <p class="text-sm text-gray-400 mt-1">Placed on Jan 10, 2026</p>
+              </div>
+              
+              <div class="mb-4 md:mb-0">
+                <span class="px-4 py-1.5 text-xs font-bold tracking-widest uppercase rounded-full bg-gray-100 text-gray-500">
+                  Delivered
+                </span>
+              </div>
+              
+              <div class="text-left md:text-right">
+                <p class="font-bold text-lg">€ 89,00</p>
+                <button class="text-sm text-gray-400 hover:text-black underline mt-1 transition-colors">View Details</button>
+              </div>
+            </div>
+
+          </div>
+        </section>
+      }
+
+      @case ('favorites') {
+        <section class="animate-fade-in">
+          <h2 class="text-xl font-bold border-b border-gray-100 pb-4 mb-6">Your Saved Products</h2>
+          <p class="text-gray-400 text-sm">Nessun prodotto tra i preferiti</p>
+        </section>
+      }
+
+      @case ('settings') {
+        <section class="animate-fade-in">
+          <h2 class="text-xl font-bold border-b border-gray-100 pb-4 mb-6">Security Settings</h2>
+          <p class="text-gray-400 text-sm">Contenuto delle impostazioni in arrivo...</p>
+        </section>
+      }
+
+    }
+  </div>
+
+</div>
