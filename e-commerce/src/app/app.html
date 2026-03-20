@@ -1,3 +1,25 @@
-<app-nav-bar></app-nav-bar>
-<router-outlet></router-outlet>
-<app-footer></app-footer>
+@if (!cookiesAccepted()) {
+	<div class="consent-overlay">
+		<div class="consent-card">
+			<p class="consent-label">Cookie Consent Required</p>
+			<h1 class="consent-title">Before entering COMMON ERA</h1>
+			<p class="consent-text">
+				This is a school demo app. We use only essential cookies for core functionality
+				and to save your consent choice. Please accept to continue.
+			</p>
+			<div class="consent-links">
+				<a href="/legal/privacy">Privacy Policy</a>
+				<a href="/legal/cookies">Cookie Policy</a>
+				<a href="/legal/terms">Terms of Service</a>
+			</div>
+			<div class="consent-actions">
+				<button type="button" class="consent-btn consent-btn-secondary" (click)="rejectCookies()">Reject and Exit</button>
+				<button type="button" class="consent-btn" (click)="acceptCookies()">Accept and Continue</button>
+			</div>
+		</div>
+	</div>
+} @else {
+	<app-nav-bar></app-nav-bar>
+	<router-outlet></router-outlet>
+	<app-footer></app-footer>
+}
