@@ -1,0 +1,225 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Cormorant+Garamond:wght@500;600;700&display=swap');
+
+:host {
+	display: block;
+	font-family: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+	--fp-offwhite: #f0f0f0;
+	--fp-gray: #8f8f8f;
+	--fp-sand: #c3a88d;
+	--fp-aqua: #6cd0d0;
+	--fp-black: #000000;
+}
+
+.footer-shell {
+	background: linear-gradient(180deg, #ffffff 0%, #f8f8f8 100%);
+	color: var(--fp-black);
+}
+
+/* Newsletter Section */
+.footer-newsletter {
+	background: linear-gradient(135deg, #f0f0f0 0%, #ececec 100%);
+	position: relative;
+	overflow: hidden;
+}
+
+.footer-newsletter::before {
+	content: '';
+	position: absolute;
+	top: -50%;
+	right: -20%;
+	height: 400px;
+	width: 400px;
+	border-radius: 50%;
+	background: radial-gradient(circle, rgba(108, 208, 208, 0.12) 0%, transparent 70%);
+	pointer-events: none;
+}
+
+.footer-newsletter::after {
+	content: '';
+	position: absolute;
+	bottom: -30%;
+	left: -15%;
+	height: 350px;
+	width: 350px;
+	border-radius: 50%;
+	background: radial-gradient(circle, rgba(195, 168, 141, 0.1) 0%, transparent 70%);
+	pointer-events: none;
+}
+
+.footer-newsletter h2 {
+	font-family: 'Cormorant Garamond', Georgia, serif;
+	font-weight: 600;
+	position: relative;
+	z-index: 1;
+}
+
+.footer-newsletter p {
+	position: relative;
+	z-index: 1;
+}
+
+.footer-newsletter form {
+	position: relative;
+	z-index: 1;
+}
+
+.footer-newsletter input {
+	font-family: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+}
+
+.footer-newsletter button {
+	font-family: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+}
+
+.footer-subscribe-message {
+	font-size: 0.82rem;
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: #2f7e7e;
+	position: relative;
+	z-index: 1;
+}
+
+/* Main Footer Content */
+.footer-content {
+	background: #ffffff;
+	position: relative;
+}
+
+.footer-content h3 {
+	font-family: 'Cormorant Garamond', Georgia, serif;
+	font-weight: 600;
+	letter-spacing: -0.02em;
+}
+
+.footer-content h4 {
+	font-family: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+}
+
+.footer-content a {
+	font-family: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Meta Section */
+.footer-meta {
+	background: #f9f9f9;
+}
+
+.footer-meta a {
+	font-family: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+	position: relative;
+	display: inline-flex;
+}
+
+.footer-meta a svg {
+	transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.footer-meta a:hover svg {
+	transform: translateY(-2px);
+}
+
+/* Copyright Section */
+.footer-copyright {
+	background: linear-gradient(180deg, #f9f9f9 0%, #f5f5f5 100%);
+	font-family: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+}
+
+.footer-copyright a {
+	position: relative;
+}
+
+.footer-copyright a::after {
+	content: '';
+	position: absolute;
+	bottom: -2px;
+	left: 0;
+	width: 0;
+	height: 1px;
+	background: var(--fp-aqua);
+	transition: width 200ms ease;
+}
+
+.footer-copyright a:hover::after {
+	width: 100%;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 640px) {
+	.footer-content {
+		padding-top: 2rem;
+		padding-bottom: 2rem;
+	}
+
+	.footer-content > div {
+		grid-template-columns: 1fr !important;
+	}
+
+	.footer-newsletter::before,
+	.footer-newsletter::after {
+		opacity: 0.5;
+	}
+
+	.footer-meta {
+		flex-direction: column;
+		gap: 1.5rem;
+	}
+
+	.footer-meta > div {
+		width: 100%;
+		justify-content: center;
+	}
+
+	.footer-copyright {
+		text-align: center;
+	}
+
+	.footer-copyright div {
+		flex-direction: column;
+		gap: 1rem;
+	}
+
+	.footer-copyright nav {
+		gap: 0.5rem;
+	}
+}
+
+@media (min-width: 768px) {
+	.footer-content {
+		display: grid;
+	}
+
+	.footer-meta {
+		display: flex;
+	}
+}
+
+/* Focus States for Accessibility */
+.footer-newsletter input:focus,
+.footer-newsletter button:focus {
+	outline: none;
+}
+
+.footer-content a:focus-visible,
+.footer-meta a:focus-visible,
+.footer-copyright a:focus-visible {
+	outline: 2px solid var(--fp-aqua);
+	outline-offset: 2px;
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+	.footer-meta a svg {
+		transition: none;
+	}
+
+	.footer-copyright a::after {
+		transition: none;
+	}
+
+	.footer-newsletter::before,
+	.footer-newsletter::after {
+		animation: none;
+	}
+}
