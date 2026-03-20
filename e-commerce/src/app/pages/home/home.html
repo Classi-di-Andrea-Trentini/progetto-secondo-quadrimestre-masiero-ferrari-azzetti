@@ -1,1 +1,96 @@
-<p>home works!</p>
+<section class="hero-shell relative isolate overflow-hidden">
+	<div class="hero-glow hero-glow-right"></div>
+	<div class="hero-glow hero-glow-left"></div>
+	<div class="hero-panel-lines"></div>
+
+	<div class="relative mx-auto max-w-5xl px-6 py-16 text-center sm:py-24 lg:px-8 lg:py-28">
+		<div class="fade-up" style="animation-delay: 0.08s">
+			<h1 class="hero-title mx-auto mt-2 max-w-4xl text-5xl leading-tight text-stone-900 sm:text-6xl lg:text-8xl">
+				Eleganza quotidiana,
+				<span class="block text-stone-600">pensata per durare.</span>
+			</h1>
+
+			<p class="mx-auto mt-7 max-w-2xl text-base leading-relaxed text-stone-700 sm:text-xl">
+				Una selezione raffinata di capi e accessori con linee pulite, materiali premium
+				e una vestibilita essenziale che valorizza ogni look.
+			</p>
+
+			<div class="mt-10 flex flex-wrap items-center justify-center gap-4">
+				<a
+					href="/products"
+					class="btn-primary inline-flex items-center justify-center rounded-full px-8 py-3.5 text-sm font-semibold text-white"
+				>
+					Scopri la collezione
+				</a>
+				<a
+					href="/login"
+					class="btn-secondary inline-flex items-center justify-center rounded-full border border-stone-300/90 bg-white/70 px-8 py-3.5 text-sm font-semibold text-stone-800"
+				>
+					Accedi al tuo account
+				</a>
+			</div>
+		</div>
+	</div>
+</section>
+
+<section class="collection-shell px-6 pb-18 pt-8 sm:pb-24 lg:px-8">
+	<div class="mx-auto max-w-6xl">
+		<div class="collection-stage fade-up" style="animation-delay: 0.28s">
+			@for (item of collectionHighlights; track item.title; let i = $index) {
+				<article
+					class="collection-card"
+					[class.card-active]="isActive(i)"
+					[class.card-left]="isLeft(i)"
+					[class.card-right]="isRight(i)"
+					[class.card-hidden]="isHidden(i)"
+				>
+					<img
+						src="{{ item.image }}"
+						alt="{{ item.title }}"
+						class="h-full w-full rounded-[1.9rem] object-cover"
+						loading="lazy"
+					/>
+					<div class="collection-overlay rounded-[1.9rem]"></div>
+					<div class="collection-meta">
+					</div>
+				</article>
+			}
+		</div>
+
+		<div class="mt-8 flex items-center justify-center gap-3">
+			<button
+				type="button"
+				(click)="prevSlide()"
+				class="collection-nav-btn"
+				aria-label="Slide precedente"
+			>
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-5 w-5">
+					<path d="M15 6l-6 6 6 6" stroke-linecap="round" stroke-linejoin="round" />
+				</svg>
+			</button>
+
+			<button
+				type="button"
+				(click)="nextSlide()"
+				class="collection-nav-btn"
+				aria-label="Slide successiva"
+			>
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-5 w-5">
+					<path d="M9 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
+				</svg>
+			</button>
+		</div>
+
+		<div class="mt-6 flex items-center justify-center gap-2.5">
+			@for (item of collectionHighlights; track item.title; let i = $index) {
+				<button
+					type="button"
+					(click)="goToSlide(i)"
+					class="collection-dot"
+					[class.collection-dot-active]="activeSlide() === i"
+					aria-label="Vai alla slide {{ i + 1 }}"
+				></button>
+			}
+		</div>
+	</div>
+</section>

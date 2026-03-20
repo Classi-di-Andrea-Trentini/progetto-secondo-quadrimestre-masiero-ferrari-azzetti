@@ -1,0 +1,295 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Cormorant+Garamond:wght@500;600;700&display=swap');
+
+:host {
+	display: block;
+	font-family: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+}
+
+.hero-shell {
+	background:
+		linear-gradient(180deg, #f6f4f1 0%, #f2efeb 48%, #efebe6 100%);
+}
+
+.hero-panel-lines {
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+	background:
+		linear-gradient(90deg, transparent 0 10%, rgba(120, 104, 85, 0.08) 10% 10.2%, transparent 10.2% 100%),
+		linear-gradient(90deg, transparent 0 78%, rgba(120, 104, 85, 0.08) 78% 78.2%, transparent 78.2% 100%);
+	opacity: 0.75;
+}
+
+.hero-glow {
+	position: absolute;
+	height: 18rem;
+	width: 18rem;
+	border-radius: 9999px;
+	filter: blur(70px);
+	opacity: 0.35;
+	animation: floatGlow 9s ease-in-out infinite;
+}
+
+.hero-glow-right {
+	top: -4rem;
+	right: -6rem;
+	background: rgba(211, 199, 182, 0.55);
+}
+
+.hero-glow-left {
+	bottom: -5rem;
+	left: -4.5rem;
+	background: rgba(227, 213, 188, 0.5);
+	animation-delay: -4s;
+}
+
+.eyebrow {
+	letter-spacing: 0.22em;
+}
+
+.hero-title {
+	font-family: 'Cormorant Garamond', Georgia, serif;
+	font-weight: 600;
+	line-height: 0.94;
+}
+
+.btn-primary {
+	background: linear-gradient(160deg, #25201b 0%, #171411 100%);
+	box-shadow: 0 12px 32px rgba(17, 12, 7, 0.24);
+	transition: transform 200ms ease, box-shadow 200ms ease, filter 200ms ease;
+}
+
+.btn-primary:hover {
+	transform: translateY(-1px);
+	box-shadow: 0 16px 36px rgba(17, 12, 7, 0.28);
+	filter: brightness(1.07);
+}
+
+.btn-secondary {
+	transition: transform 200ms ease, background-color 200ms ease, border-color 200ms ease;
+}
+
+.btn-secondary:hover {
+	transform: translateY(-1px);
+	background-color: rgba(255, 255, 255, 0.95);
+	border-color: rgba(146, 137, 125, 0.65);
+}
+
+.hero-card {
+	box-shadow: 0 20px 42px rgba(62, 49, 38, 0.12);
+	transition: transform 360ms ease, box-shadow 360ms ease;
+}
+
+.hero-card:hover {
+	transform: translateY(-2px) scale(1.005);
+	box-shadow: 0 24px 50px rgba(62, 49, 38, 0.16);
+}
+
+.hero-image {
+	filter: saturate(0.8) contrast(0.92) brightness(0.97);
+	opacity: 0.93;
+}
+
+.glass-chip {
+	border: 1px solid rgba(255, 255, 255, 0.7);
+	background: linear-gradient(170deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.72));
+	backdrop-filter: blur(10px);
+}
+
+.fade-up {
+	opacity: 0;
+	transform: translateY(18px);
+	animation: fadeUp 820ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.collection-shell {
+	background: linear-gradient(180deg, #efebe6 0%, #efebe6 6%, #f5f4f2 32%, #f5f4f2 100%);
+}
+
+.collection-stage {
+	position: relative;
+	height: 21rem;
+	overflow: visible;
+}
+
+.collection-card {
+	position: absolute;
+	top: 0;
+	left: 50%;
+	height: 19.5rem;
+	width: min(72vw, 24rem);
+	border-radius: 2rem;
+	border: 1px solid rgba(255, 255, 255, 0.85);
+	overflow: hidden;
+	background: #cfcac3;
+	box-shadow: 0 18px 34px rgba(70, 56, 42, 0.2);
+	transform-origin: center;
+	transition:
+		transform 520ms cubic-bezier(0.22, 1, 0.36, 1),
+		opacity 360ms ease,
+		filter 360ms ease,
+		box-shadow 360ms ease;
+}
+
+.collection-meta {
+	position: absolute;
+	left: 1.2rem;
+	right: 1.2rem;
+	bottom: 1rem;
+	z-index: 2;
+	opacity: 0;
+	transform: translateY(8px);
+	transition: transform 300ms ease, opacity 300ms ease;
+}
+
+.collection-overlay {
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(to top, rgba(23, 18, 12, 0.54), rgba(23, 18, 12, 0.05) 52%, transparent 70%);
+	opacity: 0.9;
+}
+
+.card-active {
+	z-index: 3;
+	opacity: 1;
+	filter: saturate(1) brightness(1);
+	transform: translateX(-50%) translateY(0) scale(1) rotate(0deg);
+	box-shadow: 0 28px 52px rgba(56, 43, 30, 0.3);
+}
+
+.card-active .collection-meta {
+	opacity: 1;
+	transform: translateY(0);
+}
+
+.card-left {
+	z-index: 2;
+	opacity: 0.9;
+	filter: saturate(0.86) brightness(0.92);
+	transform: translateX(calc(-50% - 12.4rem)) translateY(1.05rem) scale(0.89) rotate(-6deg);
+}
+
+.card-right {
+	z-index: 2;
+	opacity: 0.9;
+	filter: saturate(0.86) brightness(0.92);
+	transform: translateX(calc(-50% + 12.4rem)) translateY(1.05rem) scale(0.89) rotate(6deg);
+}
+
+.card-hidden {
+	z-index: 0;
+	opacity: 0;
+	pointer-events: none;
+	transform: translateX(-50%) translateY(2.2rem) scale(0.8);
+}
+
+.collection-nav-btn {
+	display: inline-flex;
+	height: 2.85rem;
+	width: 2.85rem;
+	align-items: center;
+	justify-content: center;
+	border-radius: 9999px;
+	border: 1px solid rgba(186, 176, 164, 0.55);
+	background: rgba(255, 255, 255, 0.95);
+	color: #7a6c5d;
+	box-shadow: 0 8px 20px rgba(66, 52, 39, 0.12);
+	transition: transform 180ms ease, box-shadow 180ms ease, color 180ms ease;
+}
+
+.collection-nav-btn:hover {
+	transform: translateY(-1px);
+	color: #4a3f34;
+	box-shadow: 0 12px 25px rgba(66, 52, 39, 0.18);
+}
+
+.collection-dot {
+	height: 0.52rem;
+	width: 0.52rem;
+	border-radius: 9999px;
+	background: #bbb1a4;
+	opacity: 0.65;
+	transition: transform 180ms ease, opacity 180ms ease, background-color 180ms ease;
+}
+
+.collection-dot:hover {
+	transform: scale(1.08);
+	opacity: 0.88;
+}
+
+.collection-dot-active {
+	background: #15120f;
+	opacity: 1;
+	transform: scale(1.2);
+}
+
+@keyframes fadeUp {
+	from {
+		opacity: 0;
+		transform: translateY(18px);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes floatGlow {
+	0%,
+	100% {
+		transform: translateY(0) translateX(0);
+	}
+
+	50% {
+		transform: translateY(-10px) translateX(6px);
+	}
+}
+
+@media (max-width: 640px) {
+	.hero-title {
+		line-height: 1.02;
+	}
+
+	.hero-card:hover {
+		transform: none;
+	}
+
+	.collection-stage {
+		height: 17.8rem;
+	}
+
+	.collection-card {
+		height: 16rem;
+		width: min(90vw, 20rem);
+	}
+
+	.card-left {
+		transform: translateX(calc(-50% - 8.2rem)) translateY(0.8rem) scale(0.86) rotate(-6deg);
+	}
+
+	.card-right {
+		transform: translateX(calc(-50% + 8.2rem)) translateY(0.8rem) scale(0.86) rotate(6deg);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.hero-glow,
+	.fade-up {
+		animation: none;
+	}
+
+	.fade-up {
+		opacity: 1;
+		transform: none;
+	}
+
+	.btn-primary,
+	.btn-secondary,
+	.hero-card,
+	.collection-card,
+	.collection-dot,
+	.collection-nav-btn {
+		transition: none;
+	}
+}
