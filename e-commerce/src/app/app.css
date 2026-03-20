@@ -1,0 +1,99 @@
+.consent-overlay {
+	position: fixed;
+	inset: 0;
+	display: grid;
+	place-items: center;
+	padding: 1.25rem;
+	background: rgba(0, 0, 0, 0.62);
+	z-index: 9999;
+}
+
+.consent-card {
+	width: min(36rem, 100%);
+	border-radius: 1rem;
+	padding: 1.4rem;
+	background: #f0f0f0;
+	color: #000000;
+	box-shadow: 0 16px 36px rgba(0, 0, 0, 0.24);
+	font-family: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+}
+
+.consent-label {
+	font-size: 0.73rem;
+	font-weight: 700;
+	letter-spacing: 0.11em;
+	text-transform: uppercase;
+	color: #8f8f8f;
+}
+
+.consent-title {
+	margin-top: 0.6rem;
+	font-family: 'Cormorant Garamond', Georgia, serif;
+	font-size: clamp(1.9rem, 3vw, 2.5rem);
+	line-height: 1;
+}
+
+.consent-text {
+	margin-top: 0.9rem;
+	font-size: 0.95rem;
+	line-height: 1.65;
+	color: #434343;
+}
+
+.consent-links {
+	margin-top: 0.9rem;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+}
+
+.consent-links a {
+	font-size: 0.78rem;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	color: #6d6d6d;
+	text-decoration: none;
+}
+
+.consent-links a:hover {
+	color: #000000;
+}
+
+.consent-btn {
+	margin-top: 1rem;
+	width: 100%;
+	border: none;
+	border-radius: 9999px;
+	padding: 0.72rem 1rem;
+	font-size: 0.82rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: #f0f0f0;
+	background: #000000;
+	cursor: pointer;
+	transition: filter 160ms ease;
+}
+
+.consent-btn:hover {
+	filter: brightness(1.08);
+}
+
+.consent-actions {
+	margin-top: 1rem;
+	display: grid;
+	gap: 0.6rem;
+}
+
+.consent-actions .consent-btn {
+	margin-top: 0;
+}
+
+.consent-btn-secondary {
+	color: #000000;
+	background: #d9d9d9;
+}
+
+.consent-btn-secondary:hover {
+	filter: brightness(0.98);
+}
