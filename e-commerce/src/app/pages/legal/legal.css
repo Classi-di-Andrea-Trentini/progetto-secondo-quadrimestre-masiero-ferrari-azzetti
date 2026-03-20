@@ -1,68 +1,68 @@
 :host {
-	display: block;
-	background: #f0f0f0;
-	color: #000000;
-	font-family: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+  display: block;
+  background: #f0f0f0;
+  color: #000000;
+  font-family: 'Manrope', ui-sans-serif, system-ui, sans-serif;
 }
 
 .legal-shell {
-	min-height: 60vh;
+  min-height: 60vh;
 }
 
 .legal-title {
-	font-family: 'Cormorant Garamond', Georgia, serif;
-	font-size: clamp(2.3rem, 5vw, 3.4rem);
-	line-height: 1;
-	font-weight: 600;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(2.3rem, 5vw, 3.4rem);
+  line-height: 1;
+  font-weight: 600;
 }
 
 .legal-updated {
-	font-size: 0.8rem;
-	text-transform: uppercase;
-	letter-spacing: 0.08em;
-	color: #8f8f8f;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #8f8f8f;
 }
 
 .legal-intro {
-	font-size: 1.05rem;
-	line-height: 1.7;
-	color: #4f4f4f;
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: #4f4f4f;
 }
 
 .legal-chip {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	padding: 0.42rem 0.9rem;
-	font-size: 0.74rem;
-	text-transform: uppercase;
-	letter-spacing: 0.06em;
-	border-radius: 9999px;
-	background: rgba(255, 255, 255, 0.85);
-	color: #5d5d5d;
-	text-decoration: none;
-	transition: background-color 160ms ease, color 160ms ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.42rem 0.9rem;
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.85);
+  color: #5d5d5d;
+  text-decoration: none;
+  transition: background-color 160ms ease, color 160ms ease;
 }
 
 .legal-chip:hover {
-	background: #ffffff;
-	color: #000000;
+  background: #ffffff;
+  color: #000000;
 }
 
 .legal-section {
-	background: rgba(255, 255, 255, 0.65);
-	border-radius: 0.9rem;
-	padding: 1rem 1.1rem;
+  background: rgba(255, 255, 255, 0.65);
+  border-radius: 0.9rem;
+  padding: 1rem 1.1rem;
 }
 
 .legal-section-title {
-	font-size: 1.1rem;
-	font-weight: 600;
-	letter-spacing: 0.01em;
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
 }
 
 .legal-section-text {
-	font-size: 0.97rem;
-	line-height: 1.72;
-	color: #4a4a4a;
+  font-size: 0.97rem;
+  line-height: 1.72;
+  color: #4a4a4a;
 }

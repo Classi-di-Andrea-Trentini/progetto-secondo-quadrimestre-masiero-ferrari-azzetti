@@ -1,24 +1,24 @@
 <section class="legal-shell px-6 py-14 sm:py-18 lg:px-8">
-	<div class="mx-auto max-w-4xl">
-		<nav class="legal-nav mb-8 flex flex-wrap gap-3" aria-label="Legal pages navigation">
-			<a routerLink="/legal/privacy" class="legal-chip">Privacy</a>
-			<a routerLink="/legal/terms" class="legal-chip">Terms</a>
-			<a routerLink="/legal/cookies" class="legal-chip">Cookies</a>
-		</nav>
+  <div class="mx-auto max-w-4xl">
+    <nav class="legal-nav mb-8 flex flex-wrap gap-3" aria-label="Legal pages navigation">
+      <a href="/legal/privacy" class="legal-chip">Privacy</a>
+      <a href="/legal/terms" class="legal-chip">Terms</a>
+      <a href="/legal/cookies" class="legal-chip">Cookies</a>
+    </nav>
 
-		<header class="legal-header mb-10">
-			<h1 class="legal-title">{{ doc.title }}</h1>
-			<p class="legal-updated mt-2">Last updated: {{ doc.updatedAt }}</p>
-			<p class="legal-intro mt-5">{{ doc.intro }}</p>
-		</header>
+    <header class="legal-header mb-10">
+      <h1 class="legal-title">{{ doc.title }}</h1>
+      <p class="legal-updated mt-2">Last updated: {{ doc.updatedAt }}</p>
+      <p class="legal-intro mt-5">{{ doc.intro }}</p>
+    </header>
 
-		<div class="legal-body space-y-7">
-			@for (section of doc.sections; track section.heading) {
-				<article class="legal-section">
-					<h2 class="legal-section-title">{{ section.heading }}</h2>
-					<p class="legal-section-text mt-2">{{ section.body }}</p>
-				</article>
-			}
-		</div>
-	</div>
+    <div class="legal-body space-y-7">
+      @for (section of doc.sections; track section.heading) {
+        <article class="legal-section">
+          <h2 class="legal-section-title">{{ section.heading }}</h2>
+          <p class="legal-section-text mt-2">{{ section.body }}</p>
+        </article>
+      }
+    </div>
+  </div>
 </section>

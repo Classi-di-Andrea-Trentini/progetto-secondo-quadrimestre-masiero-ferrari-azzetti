@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 
 type LegalKey = 'privacy' | 'cookies' | 'terms';
 
@@ -12,7 +12,7 @@ type LegalDoc = {
 
 @Component({
 	selector: 'app-legal',
-	imports: [RouterLink],
+	imports: [],
 	templateUrl: './legal.html',
 	styleUrl: './legal.css',
 })
