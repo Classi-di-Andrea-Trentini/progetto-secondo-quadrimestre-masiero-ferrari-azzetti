@@ -48,6 +48,37 @@ export class Home {
 
   readonly activeSlide = signal(0);
 
+  readonly promoShowcase = [
+    {
+      label: 'new season',
+      title: 'New Collection',
+      description:
+        'Essential pieces with refined proportions and carefully selected materials for every day.',
+      notes: ['Modern silhouettes', 'Premium fabrics', 'Timeless palette'],
+      cta: 'Discover More',
+      link: '/products',
+    },
+    {
+      label: 'seasonal sale',
+      title: 'Up to',
+      highlight: '-60%',
+      description:
+        'An exclusive selection of essential items at special prices for a limited time.',
+      notes: ['Limited-time prices', 'Best-selling edits', 'Fast worldwide shipping'],
+      cta: 'Shop the Sale',
+      link: '/products',
+    },
+    {
+      label: 'members benefits',
+      title: 'Early Access',
+      description:
+        'Sign in to preview upcoming drops, save wishlists, and unlock private offers.',
+      notes: ['Private offers', 'Wishlist sync', 'Early product drops'],
+      cta: 'Go to Account',
+      link: '/login',
+    },
+  ];
+
   prevSlide(): void {
     const total = this.collectionHighlights.length;
     this.activeSlide.update((value) => (value - 1 + total) % total);

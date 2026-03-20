@@ -3,37 +3,64 @@
 	<div class="hero-glow hero-glow-left"></div>
 	<div class="hero-panel-lines"></div>
 
-	<div class="relative mx-auto max-w-5xl px-6 py-16 text-center sm:py-24 lg:px-8 lg:py-28">
-		<div class="fade-up" style="animation-delay: 0.08s">
-			<h1 class="hero-title mx-auto mt-2 max-w-4xl text-5xl leading-tight text-stone-900 sm:text-6xl lg:text-8xl">
-				Eleganza quotidiana,
-				<span class="block text-stone-600">pensata per durare.</span>
-			</h1>
+	<div class="relative mx-auto max-w-6xl px-6 py-14 sm:py-20 lg:px-8 lg:py-24">
+		<div class="hero-grid fade-up" style="animation-delay: 0.08s">
+			<div class="hero-copy text-center lg:text-left">
+				<p class="mx-auto w-fit rounded-full border border-[#8F8F8F]/40 bg-[#F0F0F0]/70 px-4 py-1 text-[0.68rem] font-medium uppercase tracking-[0.35em] text-[#8F8F8F] lg:mx-0">
+					new editorial drop
+				</p>
 
-			<p class="mx-auto mt-7 max-w-2xl text-base leading-relaxed text-stone-700 sm:text-xl">
-				Una selezione raffinata di capi e accessori con linee pulite, materiali premium
-				e una vestibilita essenziale che valorizza ogni look.
-			</p>
+				<h1 class="hero-title mt-4 text-5xl leading-tight text-[#000000] sm:text-6xl lg:text-7xl xl:text-8xl">
+					Everyday elegance,
+					<span class="block text-[#8F8F8F]">designed to last.</span>
+				</h1>
 
-			<div class="mt-10 flex flex-wrap items-center justify-center gap-4">
-				<a
-					href="/products"
-					class="btn-primary inline-flex items-center justify-center rounded-full px-8 py-3.5 text-sm font-semibold text-white"
-				>
-					Scopri la collezione
-				</a>
-				<a
-					href="/login"
-					class="btn-secondary inline-flex items-center justify-center rounded-full border border-stone-300/90 bg-white/70 px-8 py-3.5 text-sm font-semibold text-stone-800"
-				>
-					Accedi al tuo account
-				</a>
+				<p class="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-[#8F8F8F] sm:text-xl lg:mx-0">
+					A curated selection of refined apparel and accessories with clean lines,
+					premium fabrics, and effortless fits built for daily wear.
+				</p>
+
+				<div class="mt-10 flex flex-wrap items-center justify-center gap-4 lg:justify-start">
+					<a
+						href="/products"
+						class="btn-primary inline-flex items-center justify-center rounded-full px-8 py-3.5 text-sm font-semibold text-white"
+					>
+						Explore Collection
+					</a>
+					<a
+						href="/login"
+						class="btn-secondary inline-flex items-center justify-center rounded-full border px-8 py-3.5 text-sm font-semibold"
+					>
+						Sign In
+					</a>
+				</div>
+
+				<div class="hero-metrics mt-8">
+					<span class="hero-chip">48H Dispatch</span>
+					<span class="hero-chip">Easy Returns</span>
+					<span class="hero-chip">Weekly New Drops</span>
+				</div>
 			</div>
+
+			<a href="/products" class="hero-visual" aria-label="Open featured collection">
+				<img
+					src="{{ collectionHighlights[0].image }}"
+					alt="{{ collectionHighlights[0].title }}"
+					class="hero-visual-image"
+					loading="eager"
+				/>
+				<div class="hero-visual-overlay"></div>
+				<div class="hero-visual-meta">
+					<p class="text-[0.65rem] uppercase tracking-[0.32em] text-[#F0F0F0]/80">featured drop</p>
+					<h2 class="mt-2 font-['Cormorant_Garamond'] text-4xl text-[#F0F0F0]">{{ collectionHighlights[0].title }}</h2>
+					<p class="mt-1.5 text-sm text-[#F0F0F0]/80">{{ collectionHighlights[0].subtitle }}</p>
+				</div>
+			</a>
 		</div>
 	</div>
 </section>
 
-<section class="collection-shell px-6 pb-18 pt-8 sm:pb-24 lg:px-8">
+<section class="collection-shell px-6 pb-20 pt-6 sm:pb-24 lg:px-8">
 	<div class="mx-auto max-w-6xl">
 		<div class="collection-stage fade-up" style="animation-delay: 0.28s">
 			@for (item of collectionHighlights; track item.title; let i = $index) {
@@ -52,6 +79,9 @@
 					/>
 					<div class="collection-overlay rounded-[1.9rem]"></div>
 					<div class="collection-meta">
+						<p class="text-[0.66rem] uppercase tracking-[0.32em] text-[#F0F0F0]/80">look {{ i + 1 }}</p>
+						<h3 class="mt-1.5 font-['Cormorant_Garamond'] text-3xl text-[#F0F0F0]">{{ item.title }}</h3>
+						<p class="mt-1 text-sm text-[#F0F0F0]/80">{{ item.subtitle }}</p>
 					</div>
 				</article>
 			}
@@ -62,7 +92,7 @@
 				type="button"
 				(click)="prevSlide()"
 				class="collection-nav-btn"
-				aria-label="Slide precedente"
+				aria-label="Previous slide"
 			>
 				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-5 w-5">
 					<path d="M15 6l-6 6 6 6" stroke-linecap="round" stroke-linejoin="round" />
@@ -73,7 +103,7 @@
 				type="button"
 				(click)="nextSlide()"
 				class="collection-nav-btn"
-				aria-label="Slide successiva"
+				aria-label="Next slide"
 			>
 				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-5 w-5">
 					<path d="M9 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
@@ -88,9 +118,53 @@
 					(click)="goToSlide(i)"
 					class="collection-dot"
 					[class.collection-dot-active]="activeSlide() === i"
-					aria-label="Vai alla slide {{ i + 1 }}"
+					aria-label="Go to slide {{ i + 1 }}"
 				></button>
 			}
 		</div>
+	</div>
+</section>
+
+<section class="promo-shell px-0 py-8 sm:py-12">
+	<div class="promo-board w-full overflow-hidden rounded-none">
+		@for (block of promoShowcase; track block.title + block.label; let i = $index) {
+			<article class="promo-article relative px-6 py-16 text-center sm:px-10 sm:py-20" [class.promo-article-sale]="i === 1">
+				@if (i > 0) {
+					<div class="promo-divider absolute left-6 right-6 top-0 sm:left-10 sm:right-10"></div>
+				}
+
+				<p class="text-[0.7rem] font-medium uppercase tracking-[0.45em] text-[#8F8F8F] sm:text-xs">
+					{{ block.label }}
+				</p>
+
+				<h2 class="mt-5 font-['Cormorant_Garamond'] text-5xl leading-none text-[#000000] sm:text-6xl">
+					{{ block.title }}
+					@if (block.highlight) {
+						<span class="pl-2 font-semibold text-[#000000]">{{ block.highlight }}</span>
+					}
+				</h2>
+
+				<p class="mx-auto mt-7 max-w-3xl text-lg leading-relaxed text-[#8F8F8F] sm:text-[1.35rem]">
+					{{ block.description }}
+				</p>
+
+				<div class="promo-tags mt-7">
+					@for (note of block.notes; track note) {
+						<span class="promo-tag">{{ note }}</span>
+					}
+				</div>
+
+				@if (i === 1) {
+					<p class="promo-countdown mt-6">Sale window closes this Sunday at midnight.</p>
+				}
+
+				<a
+					href="{{ block.link }}"
+					class="mt-10 inline-flex min-w-40 items-center justify-center border border-[#000000] px-8 py-3 text-sm font-medium tracking-[0.08em] text-[#000000] transition hover:-translate-y-0.5 hover:bg-[#000000] hover:text-[#F0F0F0] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6CD0D0] focus-visible:ring-offset-2"
+				>
+					{{ block.cta }}
+				</a>
+			</article>
+		}
 	</div>
 </section>
