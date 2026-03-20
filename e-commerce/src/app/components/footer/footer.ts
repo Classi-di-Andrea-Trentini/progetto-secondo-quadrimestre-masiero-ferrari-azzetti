@@ -1,5 +1,7 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { NavigationEnd, Router } from '@angular/router';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-footer',
@@ -8,8 +10,19 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './footer.css',
 })
 export class Footer {
+  private readonly router = inject(Router);
+
   email = signal('');
   subscribeMessage = signal('');
+  isHomePage = signal(this.isHomeRoute(this.router.url));
+
+  constructor() {
+    this.router.events
+      .pipe(filter((event) => event instanceof NavigationEnd))
+      .subscribe(() => {
+        this.isHomePage.set(this.isHomeRoute(this.router.url));
+      });
+  }
 
   onSubscribe(): void {
     const emailValue = this.email();
@@ -28,5 +41,9 @@ export class Footer {
   private isValidEmail(email: string): boolean {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
+  }
+
+  private isHomeRoute(url: string): boolean {
+    return url === '/' || url === '/home' || url.startsWith('/home?') || url.startsWith('/home#');
   }
 }

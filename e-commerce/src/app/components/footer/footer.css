@@ -15,6 +15,10 @@
 	color: var(--fp-black);
 }
 
+.footer-shell-separated {
+	border-top: 1px solid rgba(143, 143, 143, 0.28);
+}
+
 /* Newsletter Section */
 .footer-newsletter {
 	background: linear-gradient(135deg, #f0f0f0 0%, #ececec 100%);
