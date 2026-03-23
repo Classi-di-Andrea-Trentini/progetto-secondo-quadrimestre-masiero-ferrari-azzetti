@@ -18,9 +18,6 @@ function buildConnectionString(): string {
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
   constructor() {
     const adapter = new PrismaPg({ connectionString: buildConnectionString() });
-    const adapter = new PrismaPg({
-      connectionString: process.env.DATABASE_URL,
-    });
     super({ adapter });
   }
 
