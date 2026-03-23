@@ -1,5 +1,4 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA, inject, computed } from '@angular/core';
-import { Component, CUSTOM_ELEMENTS_SCHEMA, EventEmitter, Output } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, EventEmitter, Output, inject, computed } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../services/auth';
 
@@ -13,6 +12,8 @@ import { AuthService } from '../../services/auth';
 export class NavBar {
   readonly auth = inject(AuthService);
 
+  @Output() cartClick = new EventEmitter<void>();
+
   readonly initials = computed(() => {
     const user = this.auth.currentUser();
     if (!user) return null;
@@ -21,11 +22,6 @@ export class NavBar {
     const last = parts[1]?.[0] ?? '';
     return (first + last).toUpperCase() || first.toUpperCase();
   });
-}
-  schemas: [CUSTOM_ELEMENTS_SCHEMA]
-})
-export class NavBar {
-  @Output() cartClick = new EventEmitter<void>();
 
   onCartClick(): void {
     this.cartClick.emit();
