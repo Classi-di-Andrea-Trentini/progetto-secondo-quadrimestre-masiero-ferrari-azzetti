@@ -88,6 +88,20 @@ export function emailChangedAlert(oldEmail: string, fullName: string, newEmail: 
   );
 }
 
+export function emailVerification(fullName: string, verificationUrl: string): string {
+  const firstName = fullName.split(' ')[0];
+  return base(
+    'Verifica il tuo indirizzo email',
+    `<h1>Verifica la tua email.</h1>
+    <hr class="divider" />
+    <p>Ciao <strong>${firstName}</strong>, clicca il pulsante qui sotto per verificare il tuo indirizzo email. Il link è valido per <strong>24 ore</strong>.</p>
+    <a class="btn" href="${verificationUrl}">Verifica email</a>
+    <div class="url-box">${verificationUrl}</div>
+    <hr class="divider" />
+    <div class="alert-bar"><p>Se non hai richiesto questa verifica, puoi ignorare questa email in sicurezza.</p></div>`,
+  );
+}
+
 export function passwordChangedAlert(fullName: string): string {
   const firstName = fullName.split(' ')[0];
   return base(
