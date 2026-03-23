@@ -5,6 +5,7 @@ import { Home } from './pages/home/home';
 import { Products } from './pages/products/products';
 import { MeComponent } from './pages/me/me';
 import { Legal } from './pages/legal/legal';
+import { VerifyEmail } from './pages/verify-email/verify-email';
 import { authGuardGuard } from './guards/auth-guard-guard';
 import { adminGuardGuard } from './guards/admin-guard-guard';
 
@@ -15,6 +16,7 @@ export const routes: Routes = [
   { path: 'register', component: Register },
   { path: 'products', component: Products },
   { path: 'me', component: MeComponent, canActivate: [authGuardGuard] },
+  { path: 'verify-email/:token', component: VerifyEmail },
   { path: 'legal/:pagina', component: Legal },
   { path: '**', redirectTo: 'home' },
 ];

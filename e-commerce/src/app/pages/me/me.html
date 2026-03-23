@@ -154,6 +154,13 @@
                     <p class="text-xs text-green-600 mt-0.5">Verificata</p>
                   } @else {
                     <p class="text-xs text-amber-600 mt-0.5">Non verificata</p>
+                    <button (click)="sendVerification()" [disabled]="verifyLoading()"
+                      class="mt-1.5 text-xs text-black underline hover:no-underline disabled:opacity-50 transition-opacity">
+                      @if (verifyLoading()) { Invio in corso... } @else { Invia email di verifica }
+                    </button>
+                    @if (verifyMessage()) {
+                      <p class="mt-1 text-xs text-gray-500">{{ verifyMessage() }}</p>
+                    }
                   }
                 </div>
                 <button (click)="emailChangeVisible.set(!emailChangeVisible())"
