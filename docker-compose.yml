@@ -46,3 +46,13 @@ services:
 
 volumes:
   pgdata:
+
+
+  # collegare con una network il backend e il db
+  # container non collegato in rete agli altri due con frontend
+  # pubblico con node
+  # davanti container con nginx + reverse proxy per redirezionare le richieste al frontend e al backend
+  # certificato SSL per https
+  # da nginx a node http
+
+  
