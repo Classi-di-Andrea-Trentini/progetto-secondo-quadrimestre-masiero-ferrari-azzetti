@@ -1,4 +1,5 @@
 import { Component, CUSTOM_ELEMENTS_SCHEMA, inject, computed } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, EventEmitter, Output } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../services/auth';
 
@@ -20,4 +21,13 @@ export class NavBar {
     const last = parts[1]?.[0] ?? '';
     return (first + last).toUpperCase() || first.toUpperCase();
   });
+}
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]
+})
+export class NavBar {
+  @Output() cartClick = new EventEmitter<void>();
+
+  onCartClick(): void {
+    this.cartClick.emit();
+  }
 }
