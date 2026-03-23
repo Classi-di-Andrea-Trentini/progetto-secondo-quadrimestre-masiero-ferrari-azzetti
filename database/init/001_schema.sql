@@ -1,74 +1,71 @@
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
+-- Gli enum devono avere nomi PascalCase quotati per corrispondere
+-- a quello che Prisma 7 genera nelle query.
+
 DO $$
 BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'user_role') THEN
-    CREATE TYPE user_role AS ENUM ('user', 'admin');
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'UserRole') THEN
+    CREATE TYPE "UserRole" AS ENUM ('user', 'admin');
   END IF;
 END $$;
 
 DO $$
 BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'order_status') THEN
-    CREATE TYPE order_status AS ENUM (
-      'pending',
-      'paid',
-      'processing',
-      'shipped',
-      'delivered',
-      'completed',
-      'cancelled',
-      'refunded'
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'OrderStatus') THEN
+    CREATE TYPE "OrderStatus" AS ENUM (
+      'pending', 'paid', 'processing', 'shipped',
+      'delivered', 'completed', 'cancelled', 'refunded'
     );
   END IF;
 END $$;
 
 DO $$
 BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'discount_type') THEN
-    CREATE TYPE discount_type AS ENUM ('percentage', 'fixed_amount');
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'DiscountType') THEN
+    CREATE TYPE "DiscountType" AS ENUM ('percentage', 'fixed_amount');
   END IF;
 END $$;
 
 DO $$
 BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'payment_status') THEN
-    CREATE TYPE payment_status AS ENUM ('pending', 'succeeded', 'failed', 'refunded');
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'PaymentStatus') THEN
+    CREATE TYPE "PaymentStatus" AS ENUM ('pending', 'succeeded', 'failed', 'refunded');
   END IF;
 END $$;
 
 DO $$
 BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'payment_method') THEN
-    CREATE TYPE payment_method AS ENUM ('credit_card', 'paypal', 'gift_card', 'bank_transfer');
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'PaymentMethod') THEN
+    CREATE TYPE "PaymentMethod" AS ENUM ('credit_card', 'paypal', 'gift_card', 'bank_transfer');
   END IF;
 END $$;
 
 DO $$
 BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'notification_type') THEN
-    CREATE TYPE notification_type AS ENUM ('order_update', 'promo', 'system', 'review_reply', 'outfit_suggestion');
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'NotificationType') THEN
+    CREATE TYPE "NotificationType" AS ENUM ('order_update', 'promo', 'system', 'review_reply', 'outfit_suggestion');
   END IF;
 END $$;
 
 DO $$
 BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'ai_feedback') THEN
-    CREATE TYPE ai_feedback AS ENUM ('liked', 'disliked', 'ignored');
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'AiFeedback') THEN
+    CREATE TYPE "AiFeedback" AS ENUM ('liked', 'disliked', 'ignored');
   END IF;
 END $$;
 
 DO $$
 BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'return_status') THEN
-    CREATE TYPE return_status AS ENUM ('requested', 'approved', 'rejected', 'received', 'refunded');
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'ReturnStatus') THEN
+    CREATE TYPE "ReturnStatus" AS ENUM ('requested', 'approved', 'rejected', 'received', 'refunded');
   END IF;
 END $$;
 
 DO $$
 BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'review_status') THEN
-    CREATE TYPE review_status AS ENUM ('pending', 'approved', 'rejected');
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'ReviewStatus') THEN
+    CREATE TYPE "ReviewStatus" AS ENUM ('pending', 'approved', 'rejected');
   END IF;
 END $$;
 
@@ -77,7 +74,7 @@ CREATE TABLE IF NOT EXISTS users (
   email VARCHAR(255) NOT NULL UNIQUE,
   password_hash TEXT NOT NULL,
   full_name VARCHAR(255) NOT NULL,
-  role user_role NOT NULL DEFAULT 'user',
+  role "UserRole" NOT NULL DEFAULT 'user',
   is_active BOOLEAN NOT NULL DEFAULT true,
   avatar_url TEXT,
   phone VARCHAR(30),
@@ -149,7 +146,7 @@ CREATE TABLE IF NOT EXISTS password_resets (
 CREATE TABLE IF NOT EXISTS notifications (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users (id) ON DELETE CASCADE,
-  type notification_type NOT NULL,
+  type "NotificationType" NOT NULL,
   title VARCHAR(255) NOT NULL,
   body TEXT,
   link TEXT,
@@ -250,7 +247,7 @@ CREATE TABLE IF NOT EXISTS discounts (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   product_id UUID REFERENCES products (id) ON DELETE CASCADE,
   variant_id UUID REFERENCES product_variants (id) ON DELETE CASCADE,
-  type discount_type NOT NULL,
+  type "DiscountType" NOT NULL,
   value NUMERIC(10, 2) NOT NULL,
   label VARCHAR(100),
   starts_at TIMESTAMP,
@@ -274,7 +271,7 @@ CREATE INDEX IF NOT EXISTS idx_wishlists_user_id ON wishlists (user_id);
 CREATE TABLE IF NOT EXISTS promo_codes (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   code VARCHAR(50) NOT NULL UNIQUE,
-  type discount_type NOT NULL,
+  type "DiscountType" NOT NULL,
   value NUMERIC(10, 2) NOT NULL,
   description TEXT,
   max_uses INT,
@@ -327,7 +324,7 @@ CREATE TABLE IF NOT EXISTS orders (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users (id) ON DELETE RESTRICT,
   address_id UUID REFERENCES user_addresses (id) ON DELETE SET NULL,
-  status order_status NOT NULL DEFAULT 'pending',
+  status "OrderStatus" NOT NULL DEFAULT 'pending',
   subtotal NUMERIC(10, 2) NOT NULL,
   discount_total NUMERIC(10, 2) NOT NULL DEFAULT 0,
   shipping_cost NUMERIC(10, 2) NOT NULL DEFAULT 0,
@@ -368,7 +365,7 @@ CREATE INDEX IF NOT EXISTS idx_order_items_variant_id ON order_items (variant_id
 CREATE TABLE IF NOT EXISTS order_status_history (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   order_id UUID NOT NULL REFERENCES orders (id) ON DELETE CASCADE,
-  status order_status NOT NULL,
+  status "OrderStatus" NOT NULL,
   changed_by UUID REFERENCES users (id) ON DELETE SET NULL,
   note TEXT,
   created_at TIMESTAMP NOT NULL DEFAULT now()
@@ -378,7 +375,7 @@ CREATE TABLE IF NOT EXISTS returns (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   order_id UUID NOT NULL REFERENCES orders (id) ON DELETE RESTRICT,
   user_id UUID NOT NULL REFERENCES users (id) ON DELETE RESTRICT,
-  status return_status NOT NULL DEFAULT 'requested',
+  status "ReturnStatus" NOT NULL DEFAULT 'requested',
   reason TEXT NOT NULL,
   admin_note TEXT,
   refund_amount NUMERIC(10, 2),
@@ -398,8 +395,8 @@ CREATE TABLE IF NOT EXISTS payments (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   order_id UUID NOT NULL REFERENCES orders (id) ON DELETE RESTRICT,
   user_id UUID NOT NULL REFERENCES users (id) ON DELETE RESTRICT,
-  status payment_status NOT NULL DEFAULT 'pending',
-  method payment_method NOT NULL,
+  status "PaymentStatus" NOT NULL DEFAULT 'pending',
+  method "PaymentMethod" NOT NULL,
   amount NUMERIC(10, 2) NOT NULL,
   currency VARCHAR(3) NOT NULL DEFAULT 'EUR',
   provider VARCHAR(50),
@@ -443,7 +440,7 @@ CREATE TABLE IF NOT EXISTS reviews (
   rating SMALLINT NOT NULL CHECK (rating BETWEEN 1 AND 5),
   title VARCHAR(150),
   body TEXT,
-  status review_status NOT NULL DEFAULT 'pending',
+  status "ReviewStatus" NOT NULL DEFAULT 'pending',
   is_verified BOOLEAN NOT NULL DEFAULT false,
   helpful_count INT NOT NULL DEFAULT 0,
   created_at TIMESTAMP NOT NULL DEFAULT now(),
@@ -474,7 +471,7 @@ CREATE TABLE IF NOT EXISTS ai_outfit_suggestions (
   user_id UUID NOT NULL REFERENCES users (id) ON DELETE CASCADE,
   prompt_context TEXT,
   ai_response TEXT,
-  feedback ai_feedback,
+  feedback "AiFeedback",
   feedback_note TEXT,
   model_used VARCHAR(80),
   created_at TIMESTAMP NOT NULL DEFAULT now()
