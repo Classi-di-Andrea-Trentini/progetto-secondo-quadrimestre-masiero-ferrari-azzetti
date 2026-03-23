@@ -1,1 +1,72 @@
-<p>login works!</p>
+<div class="min-h-screen flex items-center justify-center px-4 py-16 bg-white">
+  <div class="w-full max-w-sm">
+
+    <div class="mb-10 text-center">
+      <h1 class="text-2xl font-bold tracking-tight text-gray-900">Accedi</h1>
+      <p class="mt-2 text-sm text-gray-500">
+        Non hai un account?
+        <a routerLink="/register" class="font-medium text-black underline underline-offset-2">
+          Registrati
+        </a>
+      </p>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate class="space-y-5">
+
+      <div>
+        <label for="email" class="block text-xs font-semibold uppercase tracking-widest text-gray-500 mb-1.5">
+          Email
+        </label>
+        <input
+          id="email"
+          type="email"
+          formControlName="email"
+          autocomplete="email"
+          placeholder="nome@esempio.it"
+          class="w-full border px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-black transition"
+          [ngClass]="email.invalid && email.touched ? 'border-red-400' : 'border-gray-300'"
+        />
+        @if (email.invalid && email.touched) {
+          <p class="mt-1 text-xs text-red-500">Inserisci un indirizzo email valido</p>
+        }
+      </div>
+
+      <div>
+        <label for="password" class="block text-xs font-semibold uppercase tracking-widest text-gray-500 mb-1.5">
+          Password
+        </label>
+        <input
+          id="password"
+          type="password"
+          formControlName="password"
+          autocomplete="current-password"
+          placeholder="••••••••"
+          class="w-full border px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-black transition"
+          [ngClass]="password.invalid && password.touched ? 'border-red-400' : 'border-gray-300'"
+        />
+        @if (password.invalid && password.touched) {
+          <p class="mt-1 text-xs text-red-500">La password deve essere di almeno 8 caratteri</p>
+        }
+      </div>
+
+      @if (error()) {
+        <div class="px-4 py-3 bg-red-50 border border-red-200 text-sm text-red-700 rounded">
+          {{ error() }}
+        </div>
+      }
+
+      <button
+        type="submit"
+        [disabled]="loading()"
+        class="w-full bg-black text-white text-sm font-semibold uppercase tracking-widest py-3.5 hover:bg-gray-900 transition disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        @if (loading()) {
+          Accesso in corso...
+        } @else {
+          Accedi
+        }
+      </button>
+
+    </form>
+  </div>
+</div>
