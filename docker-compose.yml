@@ -13,13 +13,20 @@ services:
     build: ./server
     ports:
       - "3000:3000"
+    env_file:
+      - ./.env
     environment:
       PORT: 3000
+      NODE_ENV: development
+      DATABASE_URL: postgresql://user:password@db:5432/mydb
       DB_HOST: db
       DB_PORT: 5432
       DB_USER: user
       DB_PASSWORD: password
       DB_NAME: mydb
+      JWT_SECRET: changeme_in_production_use_a_long_random_string
+      FRONTEND_URL: http://localhost:4200
+      BACKEND_URL: http://localhost:3000
     volumes:
       - ./server:/app
       - /app/node_modules

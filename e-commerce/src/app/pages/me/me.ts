@@ -1,16 +1,164 @@
-import { Component, signal } from '@angular/core';
-import { NgClass } from '@angular/common';
+import { Component, inject, signal, effect } from '@angular/core';
+import { NgClass, DatePipe } from '@angular/common';
+import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { AuthService } from '../../services/auth';
 
 type TabSection = 'profile' | 'orders' | 'favorites' | 'settings';
 
 @Component({
   selector: 'app-me',
   standalone: true,
-  imports: [NgClass],
+  imports: [NgClass, DatePipe, ReactiveFormsModule],
   templateUrl: './me.html',
-  styleUrls: ['./me.css']
+  styleUrls: ['./me.css'],
 })
 export class MeComponent {
-  // Gestisce quale scheda è attiva. Parte da 'profile'
+  readonly auth = inject(AuthService);
+  private readonly fb = inject(FormBuilder);
+
   activeTab = signal<TabSection>('profile');
+
+  // -- Modifica profilo --
+  isEditing = signal(false);
+  saveLoading = signal(false);
+  saveError = signal<string | null>(null);
+  saveSuccess = signal(false);
+
+  readonly profileForm = this.fb.nonNullable.group({
+    fullName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(255)]],
+    phone: [''],
+    birthDate: [''],
+    gender: [''],
+  });
+
+  // -- Cambio password --
+  passwordLoading = signal(false);
+  passwordError = signal<string | null>(null);
+  passwordSuccess = signal<string | null>(null);
+
+  readonly passwordForm = this.fb.nonNullable.group(
+    {
+      currentPassword: ['', [Validators.required, Validators.minLength(1)]],
+      newPassword: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(72)]],
+      confirmPassword: ['', [Validators.required]],
+    },
+    { validators: (g) => g.get('newPassword')?.value === g.get('confirmPassword')?.value ? null : { mismatch: true } },
+  );
+
+  // -- Cambio email --
+  emailChangeVisible = signal(false);
+  emailLoading = signal(false);
+  emailError = signal<string | null>(null);
+  emailSuccess = signal<string | null>(null);
+
+  readonly emailForm = this.fb.nonNullable.group({
+    newEmail: ['', [Validators.required, Validators.email, Validators.maxLength(255)]],
+    currentPassword: ['', [Validators.required, Validators.minLength(1)]],
+  });
+
+  constructor() {
+    // Popola il form con i dati attuali dell'utente ogni volta che cambia
+    effect(() => {
+      const user = this.auth.currentUser();
+      if (user && !this.isEditing()) {
+        this.profileForm.setValue({
+          fullName: user.fullName,
+          phone: user.phone ?? '',
+          birthDate: user.birthDate ? user.birthDate.split('T')[0] : '',
+          gender: user.gender ?? '',
+        });
+      }
+    });
+  }
+
+  startEditing() {
+    const user = this.auth.currentUser();
+    if (!user) return;
+    this.profileForm.setValue({
+      fullName: user.fullName,
+      phone: user.phone ?? '',
+      birthDate: user.birthDate ? user.birthDate.split('T')[0] : '',
+      gender: user.gender ?? '',
+    });
+    this.saveError.set(null);
+    this.saveSuccess.set(false);
+    this.isEditing.set(true);
+  }
+
+  cancelEditing() {
+    this.isEditing.set(false);
+    this.saveError.set(null);
+  }
+
+  async saveProfile() {
+    if (this.profileForm.invalid || this.saveLoading()) return;
+
+    this.saveLoading.set(true);
+    this.saveError.set(null);
+    this.saveSuccess.set(false);
+
+    try {
+      const { fullName, phone, birthDate, gender } = this.profileForm.getRawValue();
+      await this.auth.updateProfile({
+        fullName,
+        phone: phone || undefined,
+        birthDate: birthDate || undefined,
+        gender: gender || undefined,
+      });
+      this.saveSuccess.set(true);
+      this.isEditing.set(false);
+    } catch (err) {
+      this.saveError.set(this.auth.extractErrorMessage(err));
+    } finally {
+      this.saveLoading.set(false);
+    }
+  }
+
+  async submitEmailChange() {
+    if (this.emailForm.invalid || this.emailLoading()) return;
+
+    this.emailLoading.set(true);
+    this.emailError.set(null);
+    this.emailSuccess.set(null);
+
+    try {
+      const { newEmail, currentPassword } = this.emailForm.getRawValue();
+      const msg = await this.auth.requestEmailChange(newEmail, currentPassword);
+      this.emailSuccess.set(msg);
+      this.emailForm.reset();
+    } catch (err) {
+      this.emailError.set(this.auth.extractErrorMessage(err));
+    } finally {
+      this.emailLoading.set(false);
+    }
+  }
+
+  async submitPasswordChange() {
+    if (this.passwordForm.invalid || this.passwordLoading()) return;
+
+    this.passwordLoading.set(true);
+    this.passwordError.set(null);
+    this.passwordSuccess.set(null);
+
+    try {
+      const { currentPassword, newPassword } = this.passwordForm.getRawValue();
+      const msg = await this.auth.changePassword(currentPassword, newPassword);
+      this.passwordSuccess.set(msg);
+      this.passwordForm.reset();
+    } catch (err) {
+      this.passwordError.set(this.auth.extractErrorMessage(err));
+    } finally {
+      this.passwordLoading.set(false);
+    }
+  }
+
+  async logout() {
+    await this.auth.logout();
+  }
+
+  get fullName() { return this.profileForm.controls.fullName; }
+  get newEmail() { return this.emailForm.controls.newEmail; }
+  get currentPassword() { return this.emailForm.controls.currentPassword; }
+  get newPassword() { return this.passwordForm.controls.newPassword; }
+  get confirmPassword() { return this.passwordForm.controls.confirmPassword; }
 }
