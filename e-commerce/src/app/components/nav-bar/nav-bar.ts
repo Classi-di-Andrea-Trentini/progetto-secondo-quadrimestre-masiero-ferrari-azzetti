@@ -1,4 +1,4 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, EventEmitter, Output } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
 @Component({
@@ -6,9 +6,12 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
   imports: [RouterLink, RouterLinkActive],
   templateUrl: './nav-bar.html',
   styleUrl: './nav-bar.css',
-  schemas: [CUSTOM_ELEMENTS_SCHEMA] // for allowing elements like el-disclosure
-  // not recognized by angular (generating errors)
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class NavBar {
+  @Output() cartClick = new EventEmitter<void>();
 
+  onCartClick(): void {
+    this.cartClick.emit();
+  }
 }
