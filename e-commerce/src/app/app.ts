@@ -1,6 +1,6 @@
 import { Component, PLATFORM_ID, inject, signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { RouterOutlet } from '@angular/router';
+import { RouterOutlet, Router } from '@angular/router';
 import { NavBar } from './components/nav-bar/nav-bar';
 import { Footer } from './components/footer/footer';
 
@@ -17,7 +17,7 @@ export class App {
   protected readonly title = signal('e-commerce');
   protected readonly cookiesAccepted = signal(false);
 
-  constructor() {
+  constructor(public router: Router) {
     if (isPlatformBrowser(this.platformId)) {
       const accepted = localStorage.getItem(this.cookieStorageKey) === 'accepted';
       this.cookiesAccepted.set(accepted);
@@ -36,5 +36,9 @@ export class App {
       localStorage.removeItem(this.cookieStorageKey);
       window.location.href = 'about:blank';
     }
+  }
+
+  isHome(): boolean {
+    return this.router.url === '/home';
   }
 }
