@@ -8,10 +8,15 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { MailModule } from './mail/mail.module';
 import { ProductsModule } from './products/products.module';
+import { ConfigModule } from '@nestjs/config';
+
 
 @Module({
   imports: [
     // Rate limiting globale: 100 richieste al minuto per IP
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     ThrottlerModule.forRoot([
       {
         ttl: 60000,
