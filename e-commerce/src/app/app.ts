@@ -3,10 +3,11 @@ import { isPlatformBrowser } from '@angular/common';
 import { RouterOutlet, Router } from '@angular/router';
 import { NavBar } from './components/nav-bar/nav-bar';
 import { Footer } from './components/footer/footer';
+import { Cart } from './components/cart/cart';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, NavBar, Footer],
+  imports: [RouterOutlet, NavBar, Footer, Cart],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
@@ -14,6 +15,7 @@ export class App {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly cookieStorageKey = 'common_era_cookie_consent';
 
+  protected readonly cartOpen = signal(false);
   protected readonly title = signal('e-commerce');
   protected readonly cookiesAccepted = signal(false);
 
@@ -40,5 +42,15 @@ export class App {
 
   isHome(): boolean {
     return this.router.url === '/home';
+  }
+
+  // Metodo per aprire il carrello quando si clicca sull'icona del carrello nella NavBar
+  openCart(): void {
+    this.cartOpen.set(true);
+  }
+
+  // Metodo per chiudere il carrello
+  closeCart(): void {
+    this.cartOpen.set(false);
   }
 }
