@@ -49,6 +49,8 @@
 										<td class="px-4 py-4">
 											@if (promo.status === 'Active') {
 												<span class="inline-flex rounded-lg bg-[#6CD0D0]/30 px-3 py-1 text-base font-bold text-[#000000]">Active</span>
+											} @else if (promo.status === 'Finished') {
+												<span class="inline-flex rounded-lg bg-[#8F8F8F]/20 px-3 py-1 text-base font-bold text-[#8F8F8F]">Finished</span>
 											} @else {
 												<span class="inline-flex rounded-lg bg-[#C3A88D]/30 px-3 py-1 text-base font-bold text-[#000000]">Scheduled</span>
 											}
@@ -134,6 +136,14 @@
 							/>
 						</div>
 					</div>
+
+					@if (isDateRangeInvalid()) {
+						<p class="text-sm font-semibold text-[#000000]">La data di fine non puo essere prima della data di inizio.</p>
+					}
+
+					@if (formError) {
+						<p class="text-sm font-semibold text-[#000000]">{{ formError }}</p>
+					}
 				</div>
 
 				<footer class="mt-8 flex items-center justify-end gap-6 border-t border-[#8F8F8F]/20 pt-6">
@@ -141,7 +151,8 @@
 					<button
 						type="button"
 						(click)="savePromotion()"
-						class="rounded-2xl bg-[#6CD0D0] px-8 py-3 text-2xl font-bold text-[#000000] transition hover:bg-[#C3A88D]"
+						[disabled]="isSaveDisabled()"
+						class="rounded-2xl bg-[#6CD0D0] px-8 py-3 text-2xl font-bold text-[#000000] transition hover:bg-[#C3A88D] disabled:cursor-not-allowed disabled:opacity-50"
 					>
 						{{ isEditing ? 'Save Changes' : 'Save Promotion' }}
 					</button>
