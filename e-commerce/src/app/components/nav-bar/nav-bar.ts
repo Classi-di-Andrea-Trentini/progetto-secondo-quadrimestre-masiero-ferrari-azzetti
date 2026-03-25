@@ -1,6 +1,5 @@
 import { NgClass } from '@angular/common';
-import { Component, computed, CUSTOM_ELEMENTS_SCHEMA, HostListener, signal } from '@angular/core';
-import { Component, CUSTOM_ELEMENTS_SCHEMA, EventEmitter, Output, inject, computed } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, EventEmitter, Output, inject, computed, HostListener, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../services/auth';
 
@@ -12,6 +11,23 @@ import { AuthService } from '../../services/auth';
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class NavBar {
+  readonly auth = inject(AuthService);
+
+  @Output() cartClick = new EventEmitter<void>();
+
+  readonly initials = computed(() => {
+    const user = this.auth.currentUser();
+    if (!user) return null;
+    const parts = user.fullName.trim().split(' ');
+    const first = parts[0]?.[0] ?? '';
+    const last = parts[1]?.[0] ?? '';
+    return (first + last).toUpperCase() || first.toUpperCase();
+  });
+
+  onCartClick(): void {
+    this.cartClick.emit();
+  }
+
   private lastScrollY = 0;
   private readonly THRESHOLD = 8;
 
@@ -44,20 +60,8 @@ export class NavBar {
     }
 
     this.lastScrollY = currentScrollY;
-  readonly auth = inject(AuthService);
-
-  @Output() cartClick = new EventEmitter<void>();
-
-  readonly initials = computed(() => {
-    const user = this.auth.currentUser();
-    if (!user) return null;
-    const parts = user.fullName.trim().split(' ');
-    const first = parts[0]?.[0] ?? '';
-    const last = parts[1]?.[0] ?? '';
-    return (first + last).toUpperCase() || first.toUpperCase();
-  });
-
-  onCartClick(): void {
-    this.cartClick.emit();
   }
+
+
+  
 }
