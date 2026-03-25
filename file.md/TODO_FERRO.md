@@ -3,3 +3,4 @@ TODO:
 - configurazione prisma
 - API
 - GESTIRE CORS
+- sistemare il paddi ng della navbar + scroll up/down
