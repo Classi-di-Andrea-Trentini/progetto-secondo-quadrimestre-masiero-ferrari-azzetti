@@ -146,6 +146,71 @@ export class UsersService {
     return { message: 'Email confermata e aggiornata con successo' };
   }
 
+  async sendVerificationEmail(userId: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new NotFoundException();
+
+    if (user.emailVerifiedAt) {
+      throw new ConflictException('Email già verificata');
+    }
+
+    // Invalida eventuali token precedenti (stesso userId, scopo verify)
+    await this.prisma.emailVerification.deleteMany({ where: { userId } });
+
+    const token = this.jwtService.sign(
+      { sub: userId, purpose: 'email-verify' },
+      { expiresIn: '24h' },
+    );
+
+    await this.prisma.emailVerification.create({
+      data: {
+        userId,
+        token,
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      },
+    });
+
+    const frontendUrl = process.env.FRONTEND_URL ?? 'http://localhost:4200';
+    const verificationUrl = `${frontendUrl}/verify-email/${token}`;
+
+    this.mail.sendEmailVerification(user.email, user.fullName, verificationUrl).catch(() => {});
+
+    return { message: 'Email di verifica inviata. Hai 24 ore per confermare.' };
+  }
+
+  async confirmVerification(token: string) {
+    let payload: { sub: string; purpose: string };
+    try {
+      payload = this.jwtService.verify(token);
+    } catch {
+      throw new UnauthorizedException('Link non valido o scaduto');
+    }
+
+    if (payload.purpose !== 'email-verify') {
+      throw new UnauthorizedException('Link non valido');
+    }
+
+    const verification = await this.prisma.emailVerification.findUnique({ where: { token } });
+    if (!verification || verification.usedAt) {
+      throw new UnauthorizedException('Link già utilizzato o non trovato');
+    }
+    if (verification.expiresAt < new Date()) {
+      throw new UnauthorizedException('Link scaduto');
+    }
+
+    await this.prisma.user.update({
+      where: { id: payload.sub },
+      data: { emailVerifiedAt: new Date() },
+    });
+
+    await this.prisma.emailVerification.update({
+      where: { id: verification.id },
+      data: { usedAt: new Date() },
+    });
+
+    return { message: 'Email verificata con successo' };
+  }
+
   async changePassword(userId: string, currentSessionId: string, dto: ChangePasswordDto) {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new NotFoundException();

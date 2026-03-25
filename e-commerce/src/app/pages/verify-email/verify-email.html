@@ -1,0 +1,54 @@
+<div class="min-h-screen bg-[#F0F0F0] flex items-center justify-center px-4 py-16">
+  <div class="w-full max-w-md bg-white px-12 py-14 text-center">
+
+    @switch (status()) {
+
+      @case ('loading') {
+        <div class="flex flex-col items-center gap-4">
+          <div class="w-8 h-8 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+          <p class="text-sm text-gray-400 uppercase tracking-widest">Verifica in corso...</p>
+        </div>
+      }
+
+      @case ('success') {
+        <span class="block text-xs font-bold uppercase tracking-[.35em] text-black mb-10">Common Era</span>
+        <div class="w-12 h-12 mx-auto mb-8 flex items-center justify-center border border-gray-200">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <h1 class="font-serif text-2xl font-semibold text-black mb-4" style="font-family: 'Cormorant Garamond', Georgia, serif">
+          Email verificata.
+        </h1>
+        <p class="text-sm text-gray-400 leading-relaxed mb-10">
+          Il tuo indirizzo email è stato confermato con successo.
+        </p>
+        <a routerLink="/me"
+          class="inline-block bg-black text-white text-xs font-bold uppercase tracking-widest px-8 py-3.5 hover:bg-gray-900 transition-colors">
+          Vai al profilo
+        </a>
+      }
+
+      @case ('error') {
+        <span class="block text-xs font-bold uppercase tracking-[.35em] text-black mb-10">Common Era</span>
+        <div class="w-12 h-12 mx-auto mb-8 flex items-center justify-center border border-gray-200">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </div>
+        <h1 class="font-serif text-2xl font-semibold text-black mb-4" style="font-family: 'Cormorant Garamond', Georgia, serif">
+          Link non valido.
+        </h1>
+        <p class="text-sm text-gray-400 leading-relaxed mb-10">
+          {{ message() ?? 'Il link è scaduto o è già stato utilizzato.' }}
+        </p>
+        <a routerLink="/me"
+          class="inline-block bg-black text-white text-xs font-bold uppercase tracking-widest px-8 py-3.5 hover:bg-gray-900 transition-colors">
+          Torna al profilo
+        </a>
+      }
+
+    }
+
+  </div>
+</div>

@@ -24,6 +24,18 @@ export class UsersController {
 
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
+  @Post('me/send-verification')
+  sendVerificationEmail(@Req() req: any) {
+    return this.usersService.sendVerificationEmail(req.user.id);
+  }
+
+  @Get('verify-email/:token')
+  confirmVerification(@Param('token') token: string) {
+    return this.usersService.confirmVerification(token);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
   @Post('me/change-password')
   changePassword(@Req() req: any, @Body() dto: ChangePasswordDto) {
     return this.usersService.changePassword(req.user.id, req.user.sessionId, dto);
