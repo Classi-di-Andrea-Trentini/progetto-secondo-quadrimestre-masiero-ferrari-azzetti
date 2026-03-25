@@ -45,6 +45,23 @@ export class MeComponent {
     { validators: (g) => g.get('newPassword')?.value === g.get('confirmPassword')?.value ? null : { mismatch: true } },
   );
 
+  // -- Verifica email --
+  verifyLoading = signal(false);
+  verifyMessage = signal<string | null>(null);
+
+  async sendVerification() {
+    this.verifyLoading.set(true);
+    this.verifyMessage.set(null);
+    try {
+      const msg = await this.auth.sendVerificationEmail();
+      this.verifyMessage.set(msg);
+    } catch (err) {
+      this.verifyMessage.set(this.auth.extractErrorMessage(err));
+    } finally {
+      this.verifyLoading.set(false);
+    }
+  }
+
   // -- Cambio email --
   emailChangeVisible = signal(false);
   emailLoading = signal(false);

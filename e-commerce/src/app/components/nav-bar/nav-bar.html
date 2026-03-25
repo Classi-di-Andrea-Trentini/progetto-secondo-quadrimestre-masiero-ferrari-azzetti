@@ -33,12 +33,23 @@
       </div>
       <!-- SEARCH, ME E CART A DESTRA -->
       <div class="absolute inset-y-0 right-0 flex items-center gap-4 sm:gap-8 pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
-        <a routerLink="/me" class="relative flex rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
-          <i class="fa-regular fa-user transition-transform duration-300 hover:scale-110"></i>
+        <a routerLink="/me" class="relative flex items-center justify-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
+          @if (initials()) {
+            <span class="w-8 h-8 rounded-full bg-black text-white text-xs font-bold flex items-center justify-center tracking-wider transition-transform duration-300 hover:scale-110 select-none">
+              {{ initials() }}
+            </span>
+          } @else {
+            <i class="fa-regular fa-user transition-transform duration-300 hover:scale-110"></i>
+          }
         </a>
-        <a routerLink="/cart" class="relative flex rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
+        <button
+          type="button"
+          (click)="onCartClick()"
+          aria-label="Open cart"
+          class="relative flex rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 cursor-pointe"
+        >
           <i class="fa-solid fa-cart-shopping transition-transform duration-300 hover:scale-110"></i>
-        </a>
+        </button>
       </div>
 
     </div>

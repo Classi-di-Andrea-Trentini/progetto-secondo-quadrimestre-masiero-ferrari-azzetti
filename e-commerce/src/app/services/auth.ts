@@ -110,6 +110,24 @@ export class AuthService {
     this._currentUser.set(res);
   }
 
+  async confirmVerification(token: string): Promise<string> {
+    const res = await firstValueFrom(
+      this.http.get<{ message: string }>(`${API_URL}/users/verify-email/${token}`),
+    );
+    return res.message;
+  }
+
+  async sendVerificationEmail(): Promise<string> {
+    const res = await firstValueFrom(
+      this.http.post<{ message: string }>(
+        `${API_URL}/users/me/send-verification`,
+        {},
+        { withCredentials: true },
+      ),
+    );
+    return res.message;
+  }
+
   async changePassword(currentPassword: string, newPassword: string): Promise<string> {
     const res = await firstValueFrom(
       this.http.post<{ message: string }>(
