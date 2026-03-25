@@ -11,7 +11,7 @@ export class ProductsController {
         return this.productsService.findAll(dto);
     }
 
-    @Get()
+    @Get(':id')
     product(@Param('id') id: string) {
         return this.productsService.findOne(id);
     }
