@@ -17,7 +17,11 @@
 			<div class="rounded-2xl border border-[#8F8F8F]/30 bg-[#F0F0F0] p-6 shadow-sm lg:p-8">
 				<header class="flex flex-col gap-4 border-b border-[#8F8F8F]/30 pb-6 sm:flex-row sm:items-center sm:justify-between">
 					<h1 class="text-5xl font-extrabold tracking-tight text-[#000000]">Promotions and Discounts</h1>
-					<button type="button" class="rounded-xl bg-[#000000] px-6 py-3 text-xl font-bold text-[#F0F0F0] transition hover:bg-[#8F8F8F] hover:text-[#000000]">
+					<button
+						type="button"
+						(click)="openCreateModal()"
+						class="rounded-xl bg-[#000000] px-6 py-3 text-xl font-bold text-[#F0F0F0] transition hover:bg-[#8F8F8F] hover:text-[#000000]"
+					>
 						+ New Promotion
 					</button>
 				</header>
@@ -35,15 +39,114 @@
 									<th class="px-4 py-4 text-right text-lg font-bold uppercase tracking-wider text-[#8F8F8F]">Actions</th>
 								</tr>
 							</thead>
-							<tbody></tbody>
+							<tbody>
+								@for (promo of promotions; track promo.code + $index) {
+									<tr class="border-b border-[#8F8F8F]/20">
+										<td class="px-4 py-4 text-xl font-semibold text-[#000000]">{{ promo.campaignName }}</td>
+										<td class="px-4 py-4 text-lg font-bold text-[#000000]">{{ promo.code }}</td>
+										<td class="px-4 py-4 text-xl font-bold text-[#6CD0D0]">-{{ promo.discountValue }}%</td>
+										<td class="px-4 py-4 text-lg text-[#8F8F8F]">{{ promo.validity }}</td>
+										<td class="px-4 py-4">
+											@if (promo.status === 'Active') {
+												<span class="inline-flex rounded-lg bg-[#6CD0D0]/30 px-3 py-1 text-base font-bold text-[#000000]">Active</span>
+											} @else {
+												<span class="inline-flex rounded-lg bg-[#C3A88D]/30 px-3 py-1 text-base font-bold text-[#000000]">Scheduled</span>
+											}
+										</td>
+										<td class="px-4 py-4 text-right">
+											<button type="button" (click)="openEditModal($index)" class="text-xl font-semibold text-[#6CD0D0] hover:text-[#000000]">Edit</button>
+										</td>
+									</tr>
+								}
+							</tbody>
 						</table>
 					</div>
 
-					<div class="flex h-[30rem] items-center justify-center border-t border-[#8F8F8F]/20 bg-[#F0F0F0]">
-						<p class="text-xl font-semibold text-[#8F8F8F]">Nessuna promozione disponibile.</p>
-					</div>
+					@if (promotions.length === 0) {
+						<div class="flex h-[30rem] items-center justify-center border-t border-[#8F8F8F]/20 bg-[#F0F0F0]">
+							<p class="text-xl font-semibold text-[#8F8F8F]">Nessuna promozione disponibile.</p>
+						</div>
+					}
 				</div>
 			</div>
 		</section>
 	</div>
+
+	@if (isModalOpen) {
+		<div class="fixed inset-0 z-50 flex items-center justify-center bg-[#000000]/45 p-4">
+			<div class="w-full max-w-3xl rounded-3xl bg-[#F0F0F0] p-8 shadow-2xl">
+				<header class="flex items-start justify-between">
+					<h2 class="text-5xl font-extrabold text-[#000000]">{{ isEditing ? 'Edit Promotion' : 'Create New Promotion' }}</h2>
+					<button type="button" (click)="closeModal()" class="text-5xl leading-none text-[#8F8F8F] hover:text-[#000000]">&times;</button>
+				</header>
+
+				<div class="mt-8 space-y-6">
+					<div>
+						<label class="mb-2 block text-sm font-bold uppercase tracking-wider text-[#8F8F8F]">Campaign Name</label>
+						<input
+							type="text"
+							[(ngModel)]="modalForm.campaignName"
+							placeholder="E.g. Winter Sales"
+							class="w-full rounded-2xl border border-[#8F8F8F]/40 bg-[#F0F0F0] px-4 py-3 text-xl text-[#000000] placeholder:text-[#8F8F8F] focus:border-[#6CD0D0] focus:outline-none"
+						/>
+					</div>
+
+					<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+						<div>
+							<label class="mb-2 block text-sm font-bold uppercase tracking-wider text-[#8F8F8F]">Discount Code</label>
+							<input
+								type="text"
+								[(ngModel)]="modalForm.code"
+								placeholder="E.G. WINTER20"
+								class="w-full rounded-2xl border border-[#8F8F8F]/40 bg-[#F0F0F0] px-4 py-3 text-xl text-[#000000] placeholder:text-[#8F8F8F] focus:border-[#6CD0D0] focus:outline-none"
+							/>
+						</div>
+
+						<div>
+							<label class="mb-2 block text-sm font-bold uppercase tracking-wider text-[#8F8F8F]">Discount Value (%)</label>
+							<input
+								type="number"
+								min="1"
+								max="100"
+								[(ngModel)]="modalForm.discountValue"
+								placeholder="E.g. 20"
+								class="w-full rounded-2xl border border-[#8F8F8F]/40 bg-[#F0F0F0] px-4 py-3 text-xl text-[#000000] placeholder:text-[#8F8F8F] focus:border-[#6CD0D0] focus:outline-none"
+							/>
+						</div>
+					</div>
+
+					<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+						<div>
+							<label class="mb-2 block text-sm font-bold uppercase tracking-wider text-[#8F8F8F]">Start Date</label>
+							<input
+								type="date"
+								[(ngModel)]="modalForm.startDate"
+								class="w-full rounded-2xl border border-[#8F8F8F]/40 bg-[#F0F0F0] px-4 py-3 text-xl text-[#000000] focus:border-[#6CD0D0] focus:outline-none"
+							/>
+						</div>
+
+						<div>
+							<label class="mb-2 block text-sm font-bold uppercase tracking-wider text-[#8F8F8F]">End Date (Optional)</label>
+							<input
+								type="date"
+								[(ngModel)]="modalForm.endDate"
+								class="w-full rounded-2xl border border-[#8F8F8F]/40 bg-[#F0F0F0] px-4 py-3 text-xl text-[#000000] focus:border-[#6CD0D0] focus:outline-none"
+							/>
+						</div>
+					</div>
+				</div>
+
+				<footer class="mt-8 flex items-center justify-end gap-6 border-t border-[#8F8F8F]/20 pt-6">
+					<button type="button" (click)="closeModal()" class="text-2xl font-semibold text-[#8F8F8F] hover:text-[#000000]">Cancel</button>
+					<button
+						type="button"
+						(click)="savePromotion()"
+						class="rounded-2xl bg-[#6CD0D0] px-8 py-3 text-2xl font-bold text-[#000000] transition hover:bg-[#C3A88D]"
+					>
+						{{ isEditing ? 'Save Changes' : 'Save Promotion' }}
+					</button>
+				</footer>
+			</div>
+		</div>
+	}
 </div>
