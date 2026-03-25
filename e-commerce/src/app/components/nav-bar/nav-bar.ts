@@ -2,6 +2,7 @@ import { NgClass } from '@angular/common';
 import { Component, CUSTOM_ELEMENTS_SCHEMA, EventEmitter, Output, inject, computed, HostListener, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../services/auth';
+import { CartService } from '../../services/cart-service';
 
 @Component({
   selector: 'app-nav-bar',
@@ -12,8 +13,7 @@ import { AuthService } from '../../services/auth';
 })
 export class NavBar {
   readonly auth = inject(AuthService);
-
-  @Output() cartClick = new EventEmitter<void>();
+  readonly cart = inject(CartService);
 
   readonly initials = computed(() => {
     const user = this.auth.currentUser();
@@ -23,10 +23,6 @@ export class NavBar {
     const last = parts[1]?.[0] ?? '';
     return (first + last).toUpperCase() || first.toUpperCase();
   });
-
-  onCartClick(): void {
-    this.cartClick.emit();
-  }
 
   private lastScrollY = 0;
   private readonly THRESHOLD = 8;
@@ -61,7 +57,5 @@ export class NavBar {
 
     this.lastScrollY = currentScrollY;
   }
-
-
   
 }
