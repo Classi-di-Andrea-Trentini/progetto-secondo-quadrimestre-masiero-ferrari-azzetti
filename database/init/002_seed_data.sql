@@ -38,14 +38,14 @@ INSERT INTO user_addresses (id, user_id, label, full_name, phone, street, city, 
 
 -- ==================== CATEGORIE ====================
 INSERT INTO categories (id, parent_id, name, slug, description, image_url, is_active, sort_order, created_at) VALUES
-('b0000001-bbbb-bbbb-bbbb-bbbbbbbbbbbb', NULL, 'Abbigliamento', 'abbigliamento', 'Tutti i capi di abbigliamento per uomo, donna e bambino', 'https://via.placeholder.com/300x200?text=Abbigliamento', true, 1, now()),
-('b0000002-bbbb-bbbb-bbbb-bbbbbbbbbbbb', NULL, 'Scarpe', 'scarpe', 'Scarpe e stivali per tutte le occasioni', 'https://via.placeholder.com/300x200?text=Scarpe', true, 2, now()),
-('b0000003-bbbb-bbbb-bbbb-bbbbbbbbbbbb', NULL, 'Accessori', 'accessori', 'Accessori moda e complementi di stile', 'https://via.placeholder.com/300x200?text=Accessori', true, 3, now()),
-('b0000004-bbbb-bbbb-bbbb-bbbbbbbbbbbb', NULL, 'Borse', 'borse', 'Borse e zaini di qualità', 'https://via.placeholder.com/300x200?text=Borse', true, 4, now()),
+('b0000001-bbbb-bbbb-bbbb-bbbbbbbbbbbb', NULL, 'Clothing', 'clothing', 'Tutti i capi di abbigliamento per uomo, donna e bambino', 'https://via.placeholder.com/300x200?text=Abbigliamento', true, 1, now()),
+('b0000002-bbbb-bbbb-bbbb-bbbbbbbbbbbb', NULL, 'Shoes', 'shoes', 'Scarpe e stivali per tutte le occasioni', 'https://via.placeholder.com/300x200?text=Scarpe', true, 2, now()),
+('b0000003-bbbb-bbbb-bbbb-bbbbbbbbbbbb', NULL, 'Accessories', 'accessories', 'Accessori moda e complementi di stile', 'https://via.placeholder.com/300x200?text=Accessori', true, 3, now()),
+('b0000004-bbbb-bbbb-bbbb-bbbbbbbbbbbb', NULL, 'Bags', 'bags', 'Borse e zaini di qualità', 'https://via.placeholder.com/300x200?text=Borse', true, 4, now()),
 ('b0000005-bbbb-bbbb-bbbb-bbbbbbbbbbbb', NULL, 'Gioielli', 'gioielli', 'Gioielli eleganti e contemporanei', 'https://via.placeholder.com/300x200?text=Gioielli', true, 5, now()),
-('b1000001-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'b0000001-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'T-Shirt', 't-shirt', 'T-shirt e magliette', 'https://via.placeholder.com/300x200?text=T-Shirt', true, 1, now()),
+('b1000001-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'b0000001-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'T-Shirts', 't-shirts', 'T-shirt e magliette', 'https://via.placeholder.com/300x200?text=T-Shirt', true, 1, now()),
 ('b1000002-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'b0000001-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Jeans', 'jeans', 'Jeans di vari modelli e colori', 'https://via.placeholder.com/300x200?text=Jeans', true, 2, now()),
-('b1000003-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'b0000001-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Giacche', 'giacche', 'Giacche e capispalla', 'https://via.placeholder.com/300x200?text=Giacche', true, 3, now()),
+('b1000003-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'b0000001-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Jackets', 'jackets', 'Giacche e capispalla', 'https://via.placeholder.com/300x200?text=Giacche', true, 3, now()),
 ('b2000001-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'b0000002-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Sneakers', 'sneakers', 'Scarpe sportive e casual', 'https://via.placeholder.com/300x200?text=Sneakers', true, 1, now()),
 ('b2000002-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'b0000002-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Tacchi', 'tacchi', 'Scarpe con tacco', 'https://via.placeholder.com/300x200?text=Tacchi', true, 2, now());
 
