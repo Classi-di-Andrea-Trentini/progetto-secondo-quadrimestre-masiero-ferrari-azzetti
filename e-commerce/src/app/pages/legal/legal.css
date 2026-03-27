@@ -65,4 +65,61 @@
   font-size: 0.97rem;
   line-height: 1.72;
   color: #4a4a4a;
+  white-space: pre-line;
+}
+
+/* ── Cookie table ─────────────────────────────────────────── */
+.cookie-table-wrap {
+  overflow-x: auto;
+  border-radius: 0.5rem;
+  border: 1px solid #e0e0e0;
+}
+
+.cookie-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+  min-width: 600px;
+}
+
+.cookie-table th {
+  background: #f8f8f8;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #555;
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.cookie-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid #f0f0f0;
+  color: #3a3a3a;
+  vertical-align: top;
+  line-height: 1.6;
+}
+
+.cookie-table tbody tr:last-child td { border-bottom: none; }
+
+.cookie-table code {
+  font-family: 'Courier New', monospace;
+  font-size: 0.82rem;
+  background: #f0f0f0;
+  padding: 2px 6px;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+.cookie-badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: #000;
+  color: #fff;
+  padding: 2px 8px;
 }
