@@ -5,6 +5,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { firstValueFrom } from 'rxjs';
 
 const API_URL = 'http://localhost:3000';
+const arturo = 'arturo';
 
 export interface AuthUser {
   id: string;

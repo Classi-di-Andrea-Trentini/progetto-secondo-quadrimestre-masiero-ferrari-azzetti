@@ -1,38 +1,104 @@
-<!-- cart.html -->
-<div class="fixed inset-0 bg-black/40 z-50 transition-opacity duration-300"
-     [class.opacity-100]="cart.isOpen()"
-     [class.opacity-0]="!cart.isOpen()"
-     [class.pointer-events-none]="!cart.isOpen()"
-     (click)="cart.close()">
-</div>
+<!-- Backdrop -->
+<div
+  class="cart-backdrop"
+  [class.cart-backdrop-visible]="cart.isOpen()"
+  (click)="cart.close()"
+></div>
 
-<div class="fixed top-0 right-0 h-full w-80 bg-white z-50 shadow-2xl transition-transform duration-300 ease-in-out flex flex-col"
-     [class.translate-x-0]="cart.isOpen()"
-     [class.translate-x-full]="!cart.isOpen()">
+<!-- Drawer -->
+<aside class="cart-drawer" [class.cart-drawer-open]="cart.isOpen()" aria-label="Shopping cart">
 
   <!-- Header -->
-  <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-    <h2 class="text-lg font-semibold text-gray-900">Il tuo carrello</h2>
-    <button (click)="cart.close()" class="p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="size-5">
-        <path d="M6 18 18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" />
+  <div class="cart-header">
+    <div class="cart-header-left">
+      <h2 class="cart-title">Cart</h2>
+      @if (cart.itemCount() > 0) {
+        <span class="cart-count">{{ cart.itemCount() }}</span>
+      }
+    </div>
+    <button class="cart-close-btn" (click)="cart.close()" aria-label="Close cart">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20">
+        <path d="M6 18 18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </button>
   </div>
 
-  <!-- Contenuto scrollabile -->
-  <div class="flex-1 overflow-y-auto px-6 py-4">
-    <p class="text-sm text-gray-500">Il carrello è vuoto.</p>
+  <!-- Items -->
+  <div class="cart-body">
+    @if (cart.items().length === 0) {
+      <div class="cart-empty">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#c8c8c8" stroke-width="1.2" width="48" height="48">
+          <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <path d="M16 10a4 4 0 0 1-8 0"/>
+        </svg>
+        <p class="cart-empty-title">Your cart is empty</p>
+        <p class="cart-empty-sub">Add something from the collection.</p>
+        <a href="/products" (click)="cart.close()" class="cart-browse-link">Browse collection</a>
+      </div>
+    } @else {
+      <ul class="cart-list">
+        @for (item of cart.items(); track item.productId + (item.variantId ?? '')) {
+          <li class="cart-item">
+            <a [routerLink]="['/product', item.slug]" (click)="cart.close()" class="cart-item-img-wrap">
+              <img [src]="item.image" [alt]="item.name" class="cart-item-img" loading="lazy"/>
+            </a>
+            <div class="cart-item-body">
+              <div class="cart-item-top">
+                <a [routerLink]="['/product', item.slug]" (click)="cart.close()" class="cart-item-name">
+                  {{ item.name }}
+                </a>
+                <button class="cart-remove-btn" (click)="remove(item)" aria-label="Remove item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="15" height="15">
+                    <path d="M6 18 18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+
+              @if (item.color || item.size) {
+                <p class="cart-item-meta">
+                  @if (item.color) { <span>{{ item.color }}</span> }
+                  @if (item.color && item.size) { <span class="cart-item-sep">·</span> }
+                  @if (item.size) { <span>{{ item.size }}</span> }
+                </p>
+              }
+
+              <div class="cart-item-bottom">
+                <div class="cart-qty">
+                  <button class="cart-qty-btn" (click)="dec(item)" [disabled]="item.quantity <= 1" aria-label="Decrease">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
+                      <line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
+                  </button>
+                  <span class="cart-qty-val">{{ item.quantity }}</span>
+                  <button class="cart-qty-btn" (click)="inc(item)" aria-label="Increase">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
+                      <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
+                  </button>
+                </div>
+                <span class="cart-item-price">{{ formatPrice(item.price * item.quantity) }}</span>
+              </div>
+            </div>
+          </li>
+        }
+      </ul>
+    }
   </div>
 
   <!-- Footer -->
-  <div class="px-6 py-4 border-t border-gray-100 space-y-3">
-    <div class="flex justify-between text-sm font-medium text-gray-900">
-      <span>Totale</span>
-      <span>€0,00</span>
+  @if (cart.items().length > 0) {
+    <div class="cart-footer">
+      <div class="cart-subtotal-row">
+        <span class="cart-subtotal-label">Subtotal</span>
+        <span class="cart-subtotal-value">{{ formatPrice(cart.subtotal()) }}</span>
+      </div>
+      <p class="cart-shipping-note">Shipping and taxes calculated at checkout</p>
+      <button class="cart-checkout-btn" disabled>
+        Checkout — coming soon
+      </button>
+      <button class="cart-clear-btn" (click)="cart.clear()">Clear cart</button>
     </div>
-    <button class="w-full bg-black text-white py-3 rounded-md text-sm font-medium hover:bg-gray-800 transition-colors">
-      Procedi al checkout
-    </button>
-  </div>
-</div>
+  }
+
+</aside>
