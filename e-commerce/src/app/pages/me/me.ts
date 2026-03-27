@@ -110,9 +110,9 @@ export class MeComponent {
     const p = item.product;
     if (!p) return '';
     const d = p.discounts?.[0];
-    let price = p.basePrice;
-    if (d?.type === 'percentage') price = price * (1 - d.value / 100);
-    else if (d?.type === 'fixed_amount') price -= d.value;
+    let price = parseFloat(String(p.basePrice));
+    if (d?.type === 'percentage') price = price * (1 - parseFloat(String(d.value)) / 100);
+    else if (d?.type === 'fixed_amount') price -= parseFloat(String(d.value));
     return '€ ' + price.toFixed(2).replace('.', ',');
   }
 
