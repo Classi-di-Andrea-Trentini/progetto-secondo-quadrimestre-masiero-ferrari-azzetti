@@ -1,1 +1,136 @@
-<p>admin-users works!</p>
+<div class="min-h-screen bg-[#F0F0F0] text-[#000000]">
+	<div class="flex min-h-screen flex-col lg:flex-row">
+		<aside class="w-full bg-[#000000] px-8 py-8 text-[#F0F0F0] lg:sticky lg:top-16 lg:h-[calc(100vh-4rem)] lg:w-64 lg:overflow-y-auto">
+			<h2 class="text-3xl font-extrabold tracking-wide text-[#C3A88D]">ECOMMERCE</h2>
+			<p class="mt-10 text-xs font-bold uppercase tracking-wider text-[#8F8F8F]">Main Menu</p>
+
+			<nav class="mt-5 space-y-2">
+				<a href="/admin-dashboard" class="block rounded-xl px-3 py-2 text-xl font-semibold text-[#8F8F8F] hover:bg-[#8F8F8F]/20 hover:text-[#F0F0F0]">Dashboard</a>
+				<a href="/admin-users" class="block rounded-xl bg-[#6CD0D0] px-3 py-2 text-xl font-semibold text-[#000000]">User Management</a>
+				<a href="/admin-orders" class="block rounded-xl px-3 py-2 text-xl font-semibold text-[#8F8F8F] hover:bg-[#8F8F8F]/20 hover:text-[#F0F0F0]">Orders</a>
+				<a href="/admin-products" class="block rounded-xl px-3 py-2 text-xl font-semibold text-[#8F8F8F] hover:bg-[#8F8F8F]/20 hover:text-[#F0F0F0]">Products</a>
+				<a href="/admin-promo" class="block rounded-xl px-3 py-2 text-xl font-semibold text-[#8F8F8F] hover:bg-[#8F8F8F]/20 hover:text-[#F0F0F0]">Promotions</a>
+			</nav>
+		</aside>
+
+		<section class="flex-1 px-6 py-8 lg:px-8 lg:py-10">
+			<div class="rounded-2xl border border-[#8F8F8F]/30 bg-[#F0F0F0] p-6 shadow-sm lg:p-8">
+				<header class="flex flex-col gap-4 border-b border-[#8F8F8F]/30 pb-6 sm:flex-row sm:items-center sm:justify-between">
+					<h1 class="text-5xl font-extrabold tracking-tight text-[#000000]">User Management</h1>
+					<button
+						type="button"
+						(click)="openCreateModal()"
+						class="rounded-xl bg-[#000000] px-6 py-3 text-xl font-bold text-[#F0F0F0] transition hover:bg-[#8F8F8F] hover:text-[#000000]"
+					>
+						+ New User
+					</button>
+				</header>
+
+				<div class="mt-8 overflow-hidden rounded-2xl border border-[#8F8F8F]/30">
+					<div class="overflow-x-auto">
+						<table class="min-w-full border-collapse bg-[#F0F0F0]">
+							<thead>
+								<tr class="border-b border-[#8F8F8F]/30 bg-[#F0F0F0]">
+									<th class="px-4 py-4 text-left text-lg font-bold uppercase tracking-wider text-[#8F8F8F]">Username</th>
+									<th class="px-4 py-4 text-left text-lg font-bold uppercase tracking-wider text-[#8F8F8F]">Email</th>
+									<th class="px-4 py-4 text-left text-lg font-bold uppercase tracking-wider text-[#8F8F8F]">Role</th>
+									<th class="px-4 py-4 text-left text-lg font-bold uppercase tracking-wider text-[#8F8F8F]">Status</th>
+									<th class="px-4 py-4 text-right text-lg font-bold uppercase tracking-wider text-[#8F8F8F]">Actions</th>
+								</tr>
+							</thead>
+							<tbody>
+								@for (user of users; track user.email; let i = $index) {
+									<tr class="border-b border-[#8F8F8F]/20">
+										<td class="px-4 py-4 text-xl font-semibold text-[#000000]">{{ user.fullName }}</td>
+										<td class="px-4 py-4 text-lg text-[#8F8F8F]">{{ user.email }}</td>
+										<td class="px-4 py-4 text-xl font-semibold text-[#000000]">{{ user.role }}</td>
+										<td class="px-4 py-4">
+											<span class="inline-flex rounded-lg bg-[#6CD0D0]/30 px-3 py-1 text-base font-bold text-[#000000]">{{ user.status }}</span>
+										</td>
+										<td class="px-4 py-4 text-right">
+											<button type="button" (click)="openEditModal(i)" class="text-xl font-semibold text-[#6CD0D0] hover:text-[#000000]">Edit</button>
+										</td>
+									</tr>
+								}
+							</tbody>
+						</table>
+					</div>
+
+					@if (users.length === 0) {
+						<div class="flex h-[28rem] items-center justify-center border-t border-[#8F8F8F]/20 bg-[#F0F0F0]">
+							<p class="text-xl font-semibold text-[#8F8F8F]">Nessun utente inserito.</p>
+						</div>
+					}
+				</div>
+			</div>
+		</section>
+	</div>
+
+	@if (isModalOpen) {
+		<div class="fixed inset-0 z-50 flex items-center justify-center bg-[#000000]/40 p-4">
+			<div class="w-full max-w-2xl rounded-3xl bg-[#F0F0F0] p-8 shadow-2xl">
+				<header class="flex items-start justify-between">
+					<h2 class="text-4xl font-extrabold text-[#000000]">{{ isEditing ? 'Edit User' : 'Add New User' }}</h2>
+					<button type="button" (click)="closeModal()" class="text-4xl leading-none text-[#8F8F8F] hover:text-[#000000]">&times;</button>
+				</header>
+
+				<div class="mt-8 space-y-6">
+					<div>
+						<label class="mb-2 block text-sm font-bold uppercase tracking-wider text-[#8F8F8F]">Full Name</label>
+						<input
+							type="text"
+							[(ngModel)]="modalForm.fullName"
+							placeholder="Ex. Mario Rossi"
+							class="w-full rounded-2xl border border-[#8F8F8F]/40 bg-[#F0F0F0] px-4 py-3 text-xl text-[#000000] placeholder:text-[#8F8F8F] focus:border-[#6CD0D0] focus:outline-none"
+						/>
+					</div>
+
+					<div>
+						<label class="mb-2 block text-sm font-bold uppercase tracking-wider text-[#8F8F8F]">Email Address</label>
+						<input
+							type="email"
+							[(ngModel)]="modalForm.email"
+							placeholder="mario.rossi@email.com"
+							class="w-full rounded-2xl border border-[#8F8F8F]/40 bg-[#F0F0F0] px-4 py-3 text-xl text-[#000000] placeholder:text-[#8F8F8F] focus:border-[#6CD0D0] focus:outline-none"
+						/>
+					</div>
+
+					<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+						<div>
+							<label class="mb-2 block text-sm font-bold uppercase tracking-wider text-[#8F8F8F]">Role</label>
+							<select
+								[(ngModel)]="modalForm.role"
+								class="w-full rounded-2xl border border-[#8F8F8F]/40 bg-[#F0F0F0] px-4 py-3 text-xl text-[#000000] focus:border-[#6CD0D0] focus:outline-none"
+							>
+								<option value="Customer">Customer</option>
+								<option value="Admin">Admin</option>
+							</select>
+						</div>
+
+						<div>
+							<label class="mb-2 block text-sm font-bold uppercase tracking-wider text-[#8F8F8F]">Status</label>
+							<select
+								[(ngModel)]="modalForm.status"
+								class="w-full rounded-2xl border border-[#8F8F8F]/40 bg-[#F0F0F0] px-4 py-3 text-xl text-[#000000] focus:border-[#6CD0D0] focus:outline-none"
+							>
+								<option value="Active">Active</option>
+								<option value="Inactive">Inactive</option>
+							</select>
+						</div>
+					</div>
+				</div>
+
+				<footer class="mt-8 flex items-center justify-end gap-6 border-t border-[#8F8F8F]/20 pt-6">
+					<button type="button" (click)="closeModal()" class="text-2xl font-semibold text-[#8F8F8F] hover:text-[#000000]">Cancel</button>
+					<button
+						type="button"
+						(click)="saveModal()"
+						class="rounded-2xl bg-[#6CD0D0] px-8 py-3 text-2xl font-bold text-[#000000] transition hover:bg-[#C3A88D]"
+					>
+						{{ isEditing ? 'Save Changes' : 'Create User' }}
+					</button>
+				</footer>
+			</div>
+		</div>
+	}
+</div>

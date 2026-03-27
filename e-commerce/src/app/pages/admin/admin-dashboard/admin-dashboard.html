@@ -1,1 +1,47 @@
-<p>admin-dashboard works!</p>
+<div class="min-h-screen bg-[#F0F0F0] text-[#000000]">
+  <div class="flex min-h-screen flex-col lg:flex-row">
+    <aside class="w-full bg-[#000000] px-8 py-8 text-[#F0F0F0] lg:sticky lg:top-16 lg:h-[calc(100vh-4rem)] lg:w-64 lg:overflow-y-auto">
+      <h2 class="text-3xl font-extrabold tracking-wide text-[#C3A88D]">ECOMMERCE</h2>
+      <p class="mt-10 text-xs font-bold uppercase tracking-wider text-[#8F8F8F]">Menu Principale</p>
+
+      <nav class="mt-5 space-y-1">
+        <a href="/admin-dashboard" class="block rounded-md px-3 py-2 text-xl font-semibold text-[#F0F0F0] hover:bg-[#8F8F8F]/20">Dashboard</a>
+        <a href="/admin-users" class="block rounded-md px-3 py-2 text-xl font-semibold text-[#8F8F8F] hover:bg-[#8F8F8F]/20 hover:text-[#F0F0F0]">Gestione Utenti</a>
+        <a href="/admin-orders" class="block rounded-md px-3 py-2 text-xl font-semibold text-[#8F8F8F] hover:bg-[#8F8F8F]/20 hover:text-[#F0F0F0]">Ordini</a>
+        <a href="/admin-products" class="block rounded-md px-3 py-2 text-xl font-semibold text-[#8F8F8F] hover:bg-[#8F8F8F]/20 hover:text-[#F0F0F0]">Prodotti</a>
+        <a href="/admin-promo" class="block rounded-md px-3 py-2 text-xl font-semibold text-[#8F8F8F] hover:bg-[#8F8F8F]/20 hover:text-[#F0F0F0]">Promozioni</a>
+      </nav>
+    </aside>
+
+    <section class="flex-1 px-6 py-8 lg:px-8 lg:py-10">
+      <div class="rounded-2xl bg-[#F0F0F0] p-7 shadow-sm">
+        <header class="border-b border-[#8F8F8F]/40 pb-6">
+          <h1 class="text-5xl font-extrabold tracking-tight text-[#000000]">Dashboard</h1>
+        </header>
+
+        <div class="mt-8 grid grid-cols-1 gap-6 xl:grid-cols-3">
+          <div class="rounded-2xl border border-[#8F8F8F]/30 bg-[#F0F0F0] p-8 shadow-sm">
+            <p class="mb-3 text-sm font-semibold text-[#8F8F8F]">Vendite del Mese</p>
+            <p class="text-5xl font-extrabold text-[#000000]">€ ...</p>
+          </div>
+
+          <div class="rounded-2xl border border-[#8F8F8F]/30 bg-[#F0F0F0] p-8 shadow-sm">
+            <p class="mb-3 text-sm font-semibold text-[#8F8F8F]">Ordini in Attesa</p>
+            <p class="text-5xl font-extrabold text-[#6CD0D0]">...</p>
+          </div>
+
+          <div class="rounded-2xl border border-[#8F8F8F]/30 bg-[#F0F0F0] p-8 shadow-sm">
+            <p class="mb-3 text-sm font-semibold text-[#8F8F8F]">Nuovi Utenti</p>
+            <p class="text-5xl font-extrabold text-[#C3A88D]">...</p>
+          </div>
+        </div>
+
+        <div class="mt-8 flex min-h-[28rem] items-center justify-center rounded-2xl border border-[#8F8F8F]/30 bg-[#F0F0F0] p-12 shadow-sm lg:min-h-[35rem]">
+          <p class="text-xl font-medium text-[#8F8F8F]">
+            Seleziona una voce dal menu laterale per visualizzare i dettagli.
+          </p>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
