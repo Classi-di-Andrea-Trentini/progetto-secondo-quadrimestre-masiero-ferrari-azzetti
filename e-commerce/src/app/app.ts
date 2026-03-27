@@ -15,7 +15,6 @@ export class App {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly cookieStorageKey = 'common_era_cookie_consent';
 
-  protected readonly cartDrawerOpen = signal(false);
   protected readonly title = signal('e-commerce');
   protected readonly cookiesAccepted = signal(false);
 
@@ -42,13 +41,5 @@ export class App {
 
   isHome(): boolean {
     return this.router.url === '/home';
-  }
-
-  openCartDrawer(): void {
-    this.cartDrawerOpen.set(true);
-  }
-
-  closeCartDrawer(): void {
-    this.cartDrawerOpen.set(false);
   }
 }

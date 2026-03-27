@@ -19,27 +19,10 @@
 		</div>
 	</div>
 } @else {
-	<app-nav-bar (cartClick)="openCartDrawer()"></app-nav-bar>	
-	<router-outlet></router-outlet>
-	
-  @if (cartDrawerOpen()) {
-    <div class="cart-drawer-backdrop" (click)="closeCartDrawer()"></div>
-
-    <aside class="cart-drawer" role="dialog" aria-modal="true" aria-label="Cart drawer">
-      <div class="cart-drawer-header">
-        <h2>Cart</h2>
-        <button
-          type="button"
-          class="cart-drawer-close"
-          (click)="closeCartDrawer()"
-          aria-label="Close cart"
-        >
-          &times;
-        </button>
-      </div>
-
-      <app-cart></app-cart>
-    </aside>
-  }
-	<app-footer></app-footer>
+  <app-nav-bar />
+  <app-cart />
+  <main class="pt-16">
+    <router-outlet />
+  </main>
+  <app-footer />
 }
