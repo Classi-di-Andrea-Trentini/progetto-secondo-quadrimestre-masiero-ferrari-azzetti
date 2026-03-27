@@ -19,8 +19,5 @@ export class ProductsController {
     @Get(':slug')
     findBySlug(@Param('slug') slug: string) {
         return this.productsService.findBySlug(slug);
-    @Get(':id')
-    product(@Param('id') id: string) {
-        return this.productsService.findOne(id);
     }
 }
