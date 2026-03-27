@@ -1,19 +1,22 @@
 import { Component, inject, signal, effect } from '@angular/core';
 import { NgClass, DatePipe } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth';
+import { WishlistService } from '../../services/wishlist.service';
 
 type TabSection = 'profile' | 'orders' | 'favorites' | 'settings';
 
 @Component({
   selector: 'app-me',
   standalone: true,
-  imports: [NgClass, DatePipe, ReactiveFormsModule],
+  imports: [NgClass, DatePipe, ReactiveFormsModule, RouterModule],
   templateUrl: './me.html',
   styleUrls: ['./me.css'],
 })
 export class MeComponent {
   readonly auth = inject(AuthService);
+  readonly wishlist = inject(WishlistService);
   private readonly fb = inject(FormBuilder);
 
   activeTab = signal<TabSection>('profile');
@@ -86,6 +89,31 @@ export class MeComponent {
         });
       }
     });
+  }
+
+  setTab(tab: TabSection) {
+    this.activeTab.set(tab);
+    if (tab === 'favorites') this.wishlist.loadItems();
+  }
+
+  async removeFromWishlist(productId: string) {
+    await this.wishlist.toggle(productId);
+  }
+
+  wishlistCoverImage(item: any): string {
+    return item.product?.images?.find((i: any) => i.isCover)?.url
+      ?? item.product?.images?.[0]?.url
+      ?? '';
+  }
+
+  wishlistPrice(item: any): string {
+    const p = item.product;
+    if (!p) return '';
+    const d = p.discounts?.[0];
+    let price = p.basePrice;
+    if (d?.type === 'percentage') price = price * (1 - d.value / 100);
+    else if (d?.type === 'fixed_amount') price -= d.value;
+    return '€ ' + price.toFixed(2).replace('.', ',');
   }
 
   startEditing() {

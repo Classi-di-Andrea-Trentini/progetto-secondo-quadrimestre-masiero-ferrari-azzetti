@@ -1,0 +1,202 @@
+@if (loading()) {
+  <div class="detail-loading">
+    <div class="spinner"></div>
+  </div>
+} @else if (error()) {
+  <div class="detail-error">
+    <p>{{ error() }}</p>
+    <a routerLink="/products">← Back to products</a>
+  </div>
+} @else if (product()) {
+  <div class="detail-page">
+
+    <!-- ── BREADCRUMB ─────────────────────────────────────── -->
+    <nav class="breadcrumb">
+      <a routerLink="/products">Collection</a>
+      <span>/</span>
+      <a [routerLink]="['/products']" [queryParams]="{category: product()!.category.id}">
+        {{ product()!.category.name }}
+      </a>
+      <span>/</span>
+      <span>{{ product()!.name }}</span>
+    </nav>
+
+    <!-- ── MAIN LAYOUT ────────────────────────────────────── -->
+    <div class="detail-layout">
+
+      <!-- LEFT: Gallery -->
+      <div class="gallery">
+        <div class="gallery-main">
+          @if (activeImage()) {
+            <img
+              [src]="activeImage()!.url"
+              [alt]="product()!.name"
+              class="main-img">
+          }
+        </div>
+
+        @if (product()!.images.length > 1) {
+          <div class="gallery-thumbs">
+            @for (img of product()!.images; track img.id; let i = $index) {
+              <button
+                class="thumb"
+                [class.active]="activeImageIndex() === i"
+                (click)="setActiveImage(i)">
+                <img [src]="img.url" [alt]="product()!.name + ' ' + (i + 1)">
+              </button>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- RIGHT: Info -->
+      <div class="detail-info">
+
+        <!-- Header -->
+        <div class="info-header">
+          <p class="brand">{{ product()!.brand }}</p>
+          <div class="name-row">
+            <h1 class="product-name">{{ product()!.name }}</h1>
+            <button
+              class="heart-btn-detail"
+              [class.saved]="wishlist.isSaved(product()!.id)"
+              (click)="toggleWishlist()"
+              [title]="wishlist.isSaved(product()!.id) ? 'Remove from wishlist' : 'Save to wishlist'">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Price -->
+          <div class="price-row">
+            @if (product()!.discounts.length) {
+              <span class="price-original">{{ formatPrice(product()!.basePrice) }}</span>
+              <span class="price-sale">{{ formatPrice(displayPrice()) }}</span>
+              @if (product()!.discounts[0].label) {
+                <span class="discount-tag">{{ product()!.discounts[0].label }}</span>
+              }
+            } @else {
+              <span class="price-main">{{ formatPrice(displayPrice()) }}</span>
+            }
+          </div>
+
+          <!-- Rating -->
+          @if (product()!.avgRating) {
+            <div class="rating-row">
+              @for (_ of [1,2,3,4,5]; track $index; let i = $index) {
+                <span class="star" [class.filled]="i < Math.round(+product()!.avgRating!)">★</span>
+              }
+              <span class="rating-count">({{ product()!.soldCount }} sold)</span>
+            </div>
+          }
+        </div>
+
+        <!-- Color selector -->
+        @if (uniqueColors().length > 0) {
+          <div class="selector-block">
+            <p class="selector-label">COLOR: <strong>{{ selectedColorName() }}</strong></p>
+            <div class="color-row">
+              @for (v of uniqueColors(); track v.id) {
+                <button
+                  class="color-circle"
+                  [style.background]="v.colorHex"
+                  [class.selected]="selectedColor() === v.colorHex"
+                  [title]="v.color ?? ''"
+                  (click)="selectColor(v.colorHex!)">
+                </button>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Size selector -->
+        @if (availableSizes().length > 0) {
+          <div class="selector-block">
+            <p class="selector-label">SELECT SIZE</p>
+            <div class="size-grid">
+              @for (v of availableSizes(); track v.id) {
+                <button
+                  class="size-btn"
+                  [class.selected]="selectedSize() === v.size"
+                  [class.out-of-stock]="v.stockQty === 0"
+                  [disabled]="v.stockQty === 0"
+                  (click)="selectSize(v.size!)">
+                  {{ v.size }}
+                </button>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Add to cart -->
+        <button
+          class="add-to-cart"
+          [class.added]="addedToCart()"
+          [disabled]="!selectedSize() || !inStock()"
+          (click)="addToCart()">
+          @if (addedToCart()) {
+            ✓ ADDED TO CART
+          } @else if (!selectedSize()) {
+            SELECT A SIZE
+          } @else if (!inStock()) {
+            OUT OF STOCK
+          } @else {
+            ADD TO CART
+          }
+        </button>
+
+        <!-- Accordions -->
+        <div class="accordions">
+          @for (sec of accordionSections; track sec.id) {
+            <div class="accordion">
+              <button
+                type="button"
+                class="accordion-head"
+                (click)="toggleAccordion(sec.id)">
+                <span>{{ sec.label }}</span>
+                <span class="acc-icon">
+                  @if (openAccordion() === sec.id) { − } @else { + }
+                </span>
+              </button>
+              @if (openAccordion() === sec.id) {
+                <div class="accordion-body">
+                  {{ accordionText(sec.id) }}
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── RELATED PRODUCTS ───────────────────────────────── -->
+    @if (related().length > 0) {
+      <div class="related-section">
+        <h2 class="related-title">YOU MIGHT ALSO LIKE</h2>
+        <div class="related-grid">
+          @for (p of related(); track p.id) {
+            <a [routerLink]="['/product', p.slug]" class="related-card">
+              <div class="related-img">
+                <img [src]="coverImageOf(p)" [alt]="p.name" loading="lazy">
+              </div>
+              <div class="related-info">
+                <span class="related-name">{{ p.name }}</span>
+                <span class="related-price">
+                  @if (discountedPrice(p) !== null) {
+                    <s>{{ formatPrice(p.basePrice) }}</s>
+                    {{ formatPrice(discountedPrice(p)!) }}
+                  } @else {
+                    {{ formatPrice(p.basePrice) }}
+                  }
+                </span>
+              </div>
+            </a>
+          }
+        </div>
+      </div>
+    }
+
+  </div>
+}

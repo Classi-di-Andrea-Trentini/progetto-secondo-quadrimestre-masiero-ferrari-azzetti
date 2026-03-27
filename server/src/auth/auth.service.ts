@@ -107,7 +107,9 @@ export class AuthService {
         avatarUrl: user.avatarUrl,
         phone: user.phone,
         birthDate: user.birthDate,
+        gender: user.gender,
         newsletterOptIn: user.newsletterOptIn,
+        emailVerifiedAt: user.emailVerifiedAt,
         createdAt: user.createdAt,
       },
     };
