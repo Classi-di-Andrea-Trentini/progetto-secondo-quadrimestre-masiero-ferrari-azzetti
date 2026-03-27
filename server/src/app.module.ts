@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { MailModule } from './mail/mail.module';
 import { ProductsModule } from './products/products.module';
+import { WishlistModule } from './wishlist/wishlist.module';
 import { ConfigModule } from '@nestjs/config';
 
 
@@ -28,6 +29,7 @@ import { ConfigModule } from '@nestjs/config';
     UsersModule,
     MailModule,
     ProductsModule,
+    WishlistModule,
   ],
   controllers: [AppController],
   providers: [
