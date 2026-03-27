@@ -17,6 +17,33 @@
         <article class="legal-section">
           <h2 class="legal-section-title">{{ section.heading }}</h2>
           <p class="legal-section-text mt-2">{{ section.body }}</p>
+
+          @if (section.cookies?.length) {
+            <div class="cookie-table-wrap mt-5">
+              <table class="cookie-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Purpose</th>
+                    <th>Duration</th>
+                    <th>Category</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (c of section.cookies; track c.name) {
+                    <tr>
+                      <td><code>{{ c.name }}</code></td>
+                      <td>{{ c.type }}</td>
+                      <td>{{ c.purpose }}</td>
+                      <td>{{ c.duration }}</td>
+                      <td><span class="cookie-badge">{{ c.category }}</span></td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
         </article>
       }
     </div>

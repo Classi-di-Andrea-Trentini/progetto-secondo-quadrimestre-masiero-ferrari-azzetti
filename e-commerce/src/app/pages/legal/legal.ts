@@ -3,11 +3,19 @@ import { ActivatedRoute } from '@angular/router';
 
 type LegalKey = 'privacy' | 'cookies' | 'terms';
 
+type CookieRow = { name: string; type: string; purpose: string; duration: string; category: string };
+
+type LegalSection = {
+	heading: string;
+	body: string;
+	cookies?: CookieRow[];
+};
+
 type LegalDoc = {
 	title: string;
 	updatedAt: string;
 	intro: string;
-	sections: Array<{ heading: string; body: string }>;
+	sections: LegalSection[];
 };
 
 @Component({
@@ -47,20 +55,48 @@ export class Legal {
 		},
 		cookies: {
 			title: 'Cookie Policy',
-			updatedAt: '20 March 2026',
-			intro: 'This school demo uses only technical cookies required for basic application behavior.',
+			updatedAt: '27 March 2026',
+			intro: 'This page explains exactly which cookies and local storage entries Common Era uses, why they are necessary, and how long they persist. We use only essential technical cookies — no advertising, analytics, or profiling cookies of any kind.',
 			sections: [
 				{
-					heading: 'Essential Cookies',
-					body: 'Essential cookies are used to manage minimal session state and the cookie consent decision needed to access the app.',
+					heading: 'What Are Cookies?',
+					body: 'Cookies are small text files that a website stores on your browser or device. They allow the site to remember information between page visits — such as whether you are logged in. Local storage works similarly but persists independently of the browser\'s cookie jar. Both can be cleared at any time from your browser settings.',
 				},
 				{
-					heading: 'No Marketing Cookies',
-					body: 'This demo does not use advertising, profiling, or third-party marketing cookies.',
+					heading: 'Cookies We Use',
+					body: 'The table below lists every cookie and storage entry set by Common Era. We do not use any third-party, advertising, or tracking cookies.',
+					cookies: [
+						{
+							name: 'access_token',
+							type: 'HTTP Cookie (HttpOnly)',
+							purpose: 'Stores your authentication session as a signed JWT token. Sent automatically with every request to keep you logged in across page reloads. HttpOnly means it cannot be read by JavaScript — only by the server.',
+							duration: '7 days (deleted on logout)',
+							category: 'Essential',
+						},
+						{
+							name: 'common_era_cookie_consent',
+							type: 'localStorage',
+							purpose: 'Remembers your cookie consent decision ("accepted" or "rejected") so the consent banner does not reappear on subsequent visits.',
+							duration: 'Persistent (until you clear browser storage)',
+							category: 'Essential',
+						},
+					],
 				},
 				{
-					heading: 'Managing Cookies',
-					body: 'You can clear browser storage at any time. Disabling technical cookies may prevent access to protected demo flows.',
+					heading: 'Essential Cookies — Always Active',
+					body: 'Essential cookies cannot be disabled because the site cannot function without them. The authentication cookie is required to keep you logged in; removing it logs you out immediately. The consent cookie is required to honour your own preference and avoid showing the banner on every page load.',
+				},
+				{
+					heading: 'No Analytics or Marketing Cookies',
+					body: 'Common Era does not use Google Analytics, Meta Pixel, advertising networks, or any other third-party tracking service. No data about your browsing behaviour is shared with external parties. This is a school demo project with no commercial data collection.',
+				},
+				{
+					heading: 'How to Manage or Delete Cookies',
+					body: 'You can delete all cookies and local storage at any time:\n• Chrome / Edge: Settings → Privacy and security → Clear browsing data\n• Firefox: Settings → Privacy & Security → Cookies and Site Data → Clear Data\n• Safari: Settings → Advanced → Website Data → Remove All Website Data\n\nDeleting the access_token cookie will log you out. Deleting common_era_cookie_consent will cause the consent banner to reappear on your next visit.',
+				},
+				{
+					heading: 'Changes to This Policy',
+					body: 'If new cookies are introduced (e.g. analytics in a future version), this page will be updated before deployment and the consent banner will reappear to collect a fresh decision.',
 				},
 			],
 		},
