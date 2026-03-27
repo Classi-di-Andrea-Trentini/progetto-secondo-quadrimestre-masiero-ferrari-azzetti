@@ -1,63 +1,47 @@
-// src/products/dto/get-products.dto.ts
-import { IsOptional, IsString, IsNumber, IsBoolean, Min, Max } from 'class-validator';
+import { IsOptional, IsString, IsNumber, IsBoolean, IsArray, IsIn, Min, Max } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 
 export class GetProductsDto {
+    @IsOptional() @IsString()
+    search?: string;
 
+    @IsOptional() @IsString()
+    categoryId?: string;
 
-    // ricerca
+    @IsOptional() @IsString()
+    brand?: string;
+
+    @IsOptional() @Type(() => Number) @IsNumber() @Min(0)
+    minPrice?: number;
+
+    @IsOptional() @Type(() => Number) @IsNumber() @Min(0)
+    maxPrice?: number;
+
+    @IsOptional() @Transform(({ value }) => value === 'true') @IsBoolean()
+    isFeatured?: boolean;
+
+    @IsOptional() @Transform(({ value }) => value === 'true') @IsBoolean()
+    isNewArrival?: boolean;
+
+    // Filtro colori: ?colors[]=#FF0000&colors[]=#000000
     @IsOptional()
-    @IsString()
-    search?: string;          
+    @Transform(({ value }) => Array.isArray(value) ? value : [value])
+    @IsArray()
+    colors?: string[];
 
-    // categoria
+    // Filtro taglie: ?sizes[]=M&sizes[]=L
     @IsOptional()
-    @IsString()
-    categoryId?: string;      
+    @Transform(({ value }) => Array.isArray(value) ? value : [value])
+    @IsArray()
+    sizes?: string[];
 
-    // brand
-    @IsOptional()
-    @IsString()
-    brand?: string;           
+    @IsOptional() @IsString()
+    @IsIn(['newest', 'popular', 'price_asc', 'price_desc', 'rating'])
+    sortBy?: string = 'newest';
 
-    // prezzo minimo
-    @IsOptional()
-    @Type(() => Number)
-    @IsNumber()
-    @Min(0)
-    minPrice?: number;        
+    @IsOptional() @Type(() => Number) @IsNumber() @Min(1)
+    page?: number = 1;
 
-    // prezzo massimo
-    @IsOptional()
-    @Type(() => Number)
-    @IsNumber()
-    @Min(0)
-    maxPrice?: number;        
-
-    // prodotti in vetrina (SCONTATI???)
-    @IsOptional()
-    @Transform(({ value }) => value === 'true')
-    @IsBoolean()
-    isFeatured?: boolean;     
-
-    // nuovi arrivi
-    @IsOptional()
-    @Transform(({ value }) => value === 'true')
-    @IsBoolean()
-    isNewArrival?: boolean;   
-
-    // divisione in pagine
-    @IsOptional()
-    @Type(() => Number)
-    @IsNumber()
-    @Min(1)
-    page?: number = 1;        
-
-    // limite risultati (DA GESTIRE)
-    @IsOptional()
-    @Type(() => Number)
-    @IsNumber()
-    @Min(1)
-    @Max(100)
-    limit?: number = 20;      
+    @IsOptional() @Type(() => Number) @IsNumber() @Min(1) @Max(100)
+    limit?: number = 24;
 }

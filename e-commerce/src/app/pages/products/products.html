@@ -1,1 +1,280 @@
-<p>products works!</p>
+<div class="products-page">
+
+  <!-- ── BANNER ──────────────────────────────────────────── -->
+  <div class="collection-banner">
+    <h1>Collection</h1>
+    <p>{{ totalProducts() }} items</p>
+  </div>
+
+  <!-- ── TOOLBAR ─────────────────────────────────────────── -->
+  <div class="toolbar">
+    <button class="filter-toggle" (click)="filtersOpen.set(!filtersOpen())">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="14" y2="12"/><line x1="4" y1="18" x2="10" y2="18"/>
+      </svg>
+      Filters
+      @if (activeFiltersCount() > 0) {
+        <span class="badge">{{ activeFiltersCount() }}</span>
+      }
+    </button>
+
+    <div class="sort-wrap">
+      <select [ngModel]="sortBy()" (ngModelChange)="setSortBy($event)">
+        @for (o of sortOptions; track o.value) {
+          <option [value]="o.value">{{ o.label }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  <!-- ── MOBILE BACKDROP ───────────────────────────────────── -->
+  @if (filtersOpen()) {
+    <div class="sidebar-backdrop" (click)="filtersOpen.set(false)"></div>
+  }
+
+  <!-- ── LAYOUT ──────────────────────────────────────────── -->
+  <div class="layout" [class.filters-open]="filtersOpen()">
+
+    <!-- ── SIDEBAR ─────────────────────────────────────────── -->
+    <aside class="sidebar" [class.open]="filtersOpen()">
+      <div class="sidebar-inner">
+
+        <div class="sidebar-header">
+          <span>Filters</span>
+          <div class="sidebar-header-actions">
+            @if (activeFiltersCount() > 0) {
+              <button class="clear-btn" (click)="clearFilters()">Clear all</button>
+            }
+            <button class="sidebar-close" (click)="filtersOpen.set(false)" aria-label="Close filters">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Category -->
+        <div class="filter-section">
+          <h3>Category</h3>
+          <ul class="cat-list">
+            @for (cat of rootCategories(); track cat.id) {
+              <li>
+                <button
+                  class="cat-btn"
+                  [class.active]="selectedCategory() === cat.id"
+                  (click)="setCategory(cat.id)">
+                  {{ cat.name }}
+                </button>
+                @if (selectedCategory() === cat.id && subCategories().length) {
+                  <ul class="subcat-list">
+                    @for (sub of subCategories(); track sub.id) {
+                      <li>
+                        <button
+                          class="cat-btn sub"
+                          [class.active]="selectedCategory() === sub.id"
+                          (click)="setCategory(sub.id)">
+                          {{ sub.name }}
+                        </button>
+                      </li>
+                    }
+                  </ul>
+                }
+              </li>
+            }
+          </ul>
+        </div>
+
+        <!-- Price -->
+        <div class="filter-section">
+          <h3>Price</h3>
+          <div class="price-inputs">
+            <div class="price-field">
+              <label>Min</label>
+              <input type="number" placeholder="0" [ngModel]="minPrice()"
+                     (ngModelChange)="minPrice.set($event)" (blur)="applyPriceFilter()" min="0">
+            </div>
+            <span class="price-sep">—</span>
+            <div class="price-field">
+              <label>Max</label>
+              <input type="number" placeholder="∞" [ngModel]="maxPrice()"
+                     (ngModelChange)="maxPrice.set($event)" (blur)="applyPriceFilter()" min="0">
+            </div>
+          </div>
+        </div>
+
+        <!-- Color -->
+        @if (filters()?.colors?.length) {
+          <div class="filter-section">
+            <h3>Color</h3>
+            <div class="color-grid">
+              @for (c of filters()!.colors; track c.colorHex) {
+                <button
+                  class="color-swatch"
+                  [style.background]="c.colorHex"
+                  [class.selected]="selectedColors().includes(c.colorHex)"
+                  [title]="c.color"
+                  (click)="toggleColor(c.colorHex)">
+                  @if (selectedColors().includes(c.colorHex)) {
+                    <svg viewBox="0 0 10 10" width="10" height="10">
+                      <path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+                    </svg>
+                  }
+                </button>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Size -->
+        @if (filters()?.sizes?.length) {
+          <div class="filter-section">
+            <h3>Size</h3>
+            <div class="size-grid">
+              @for (s of filters()!.sizes; track s) {
+                <button
+                  class="size-btn"
+                  [class.selected]="selectedSizes().includes(s!)"
+                  (click)="toggleSize(s!)">
+                  {{ s }}
+                </button>
+              }
+            </div>
+          </div>
+        }
+
+      </div>
+    </aside>
+
+    <!-- ── GRID AREA ──────────────────────────────────────── -->
+    <main class="grid-area">
+
+      @if (loading()) {
+        <div class="skeleton-grid">
+          @for (_ of [1,2,3,4,5,6,7,8]; track _) {
+            <div class="skeleton-card">
+              <div class="skeleton-img"></div>
+              <div class="skeleton-text">
+                <div class="skeleton-line w60"></div>
+                <div class="skeleton-line w40"></div>
+              </div>
+            </div>
+          }
+        </div>
+      } @else if (products().length === 0) {
+        <div class="empty-state">
+          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.2">
+            <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+          </svg>
+          <p>No products found</p>
+          <button (click)="clearFilters()">Clear filters</button>
+        </div>
+      } @else {
+        <div class="product-grid">
+          @for (p of products(); track p.id) {
+            <a
+              [routerLink]="['/product', p.slug]"
+              class="product-card"
+              (mouseenter)="hoveredId.set(p.id)"
+              (mouseleave)="hoveredId.set(null)">
+
+              <div class="card-image"
+                   [style.background]="cardColor(p.id) || '#F5F5F5'">
+
+                <!-- Badges -->
+                @if (discountLabel(p)) {
+                  <span class="badge-pill sale">{{ discountLabel(p) }}</span>
+                } @else if (p.isNewArrival) {
+                  <span class="badge-pill new">NEW</span>
+                }
+
+                <!-- Wishlist -->
+                <button
+                  class="heart-btn"
+                  [class.saved]="wishlist.isSaved(p.id)"
+                  (click)="toggleWishlist($event, p.id)"
+                  [title]="wishlist.isSaved(p.id) ? 'Remove from wishlist' : 'Save to wishlist'">
+                  <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                  </svg>
+                </button>
+
+                <!-- Cover image -->
+                <img
+                  [src]="coverImage(p)"
+                  [alt]="p.name"
+                  class="img-primary"
+                  [class.fade-out]="hoveredId() === p.id && hasHoverImage(p)"
+                  loading="lazy">
+
+                <!-- Hover image -->
+                @if (hasHoverImage(p)) {
+                  <img
+                    [src]="hoverImage(p)"
+                    [alt]="p.name + ' alternate'"
+                    class="img-hover"
+                    [class.fade-in]="hoveredId() === p.id"
+                    loading="lazy">
+                }
+
+                <!-- Quick-view hint -->
+                <div class="card-overlay">
+                  <span>View product</span>
+                </div>
+
+              </div>
+
+              <!-- Color dots — fuori dall'immagine, sotto -->
+              @if (uniqueColors(p).length > 1) {
+                <div class="color-dots-row">
+                  @for (v of uniqueColors(p).slice(0, 6); track v.id) {
+                    <button
+                      class="dot-btn"
+                      [class.dot-active]="isColorSelected(p.id, v.colorHex!)"
+                      [style.background]="v.colorHex"
+                      [title]="v.color ?? ''"
+                      (click)="selectCardColor($event, p.id, v.colorHex!)">
+                    </button>
+                  }
+                  @if (uniqueColors(p).length > 6) {
+                    <span class="dot-more">+{{ uniqueColors(p).length - 6 }}</span>
+                  }
+                </div>
+              }
+
+              <div class="card-info">
+                <div class="card-left">
+                  <div class="card-name">{{ p.name }}</div>
+                  @if (p.shortDesc) {
+                    <div class="card-desc">{{ p.shortDesc }}</div>
+                  }
+                </div>
+                <div class="card-prices">
+                  @if (discountedPrice(p) !== null) {
+                    <span class="price-strike">{{ formatPrice(p.basePrice) }}</span>
+                    <span class="price-red">{{ formatPrice(discountedPrice(p)!) }}</span>
+                  } @else {
+                    <span class="price-normal">{{ formatPrice(p.basePrice) }}</span>
+                  }
+                </div>
+              </div>
+
+            </a>
+          }
+        </div>
+
+        <!-- Pagination -->
+        @if (totalPages() > 1) {
+          <div class="pagination">
+            <button [disabled]="currentPage() === 1" (click)="goToPage(currentPage() - 1)">‹</button>
+            @for (pg of pages(); track pg) {
+              <button [class.active]="pg === currentPage()" (click)="goToPage(pg)">{{ pg }}</button>
+            }
+            <button [disabled]="currentPage() === totalPages()" (click)="goToPage(currentPage() + 1)">›</button>
+          </div>
+        }
+      }
+
+    </main>
+  </div>
+
+</div>

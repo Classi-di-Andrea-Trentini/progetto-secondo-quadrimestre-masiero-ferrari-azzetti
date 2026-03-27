@@ -45,9 +45,6 @@ Thumbs.db
 .env.test.local
 .env.production.local
 
-# Misc
-.claude
-
 # IDE and Editor specific files
 .idea/
 .vscode/
