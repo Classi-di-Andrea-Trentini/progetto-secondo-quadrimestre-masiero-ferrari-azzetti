@@ -141,22 +141,18 @@
 	<div class="promo-board w-full overflow-hidden rounded-none">
 		@for (block of promoShowcase; track block.title + block.label; let i = $index) {
 			<article class="promo-article relative px-6 py-16 text-center sm:px-10 sm:py-20" [class.promo-article-sale]="i === 1">
-				@if (i > 0) {
-					<div class="promo-divider absolute left-6 right-6 top-0 sm:left-10 sm:right-10"></div>
-				}
-
-				<p class="text-[0.7rem] font-medium uppercase tracking-[0.45em] text-[#8F8F8F] sm:text-xs">
+				<p class="promo-label text-[0.7rem] font-medium uppercase tracking-[0.45em] sm:text-xs">
 					{{ block.label }}
 				</p>
 
-				<h2 class="mt-5 font-['Cormorant_Garamond'] text-5xl leading-none text-[#000000] sm:text-6xl">
+				<h2 class="promo-title mt-5 font-['Cormorant_Garamond'] text-5xl leading-none sm:text-6xl">
 					{{ block.title }}
 					@if (block.highlight) {
-						<span class="pl-2 font-semibold text-[#000000]">{{ block.highlight }}</span>
+						<span class="promo-highlight pl-2 font-semibold">{{ block.highlight }}</span>
 					}
 				</h2>
 
-				<p class="mx-auto mt-7 max-w-3xl text-lg leading-relaxed text-[#8F8F8F] sm:text-[1.35rem]">
+				<p class="promo-desc mx-auto mt-7 max-w-3xl text-lg leading-relaxed sm:text-[1.35rem]">
 					{{ block.description }}
 				</p>
 
@@ -172,7 +168,7 @@
 
 				<a
 					[routerLink]="block.loginLink ? (auth.isAuthenticated() ? block.link : block.loginLink) : block.link"
-					class="mt-10 inline-flex min-w-40 items-center justify-center border border-[#000000] px-8 py-3 text-sm font-medium tracking-[0.08em] text-[#000000] transition hover:-translate-y-0.5 hover:bg-[#000000] hover:text-[#F0F0F0] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6CD0D0] focus-visible:ring-offset-2"
+					class="promo-cta mt-10 inline-flex min-w-40 items-center justify-center border px-8 py-3 text-sm font-medium tracking-[0.08em] transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6CD0D0] focus-visible:ring-offset-2"
 				>
 					@if (block.loginLink && auth.isAuthenticated()) {
 						My Account
@@ -184,3 +180,48 @@
 		}
 	</div>
 </section>
+
+@if (featuredProducts().length) {
+<section class="featured-shell px-6 py-16 sm:py-20 lg:px-8">
+	<div class="mx-auto max-w-6xl">
+		<div class="mb-10 text-center">
+			<p class="text-[0.7rem] font-medium uppercase tracking-[0.45em] text-[#8F8F8F]">just dropped</p>
+			<h2 class="mt-3 font-['Cormorant_Garamond'] text-4xl text-[#000000] sm:text-5xl">New Arrivals</h2>
+		</div>
+
+		<div class="featured-grid">
+			@for (product of featuredProducts(); track product.id) {
+				<a [routerLink]="['/product', product.slug]" class="featured-card">
+					<div class="featured-img-wrap">
+						<img
+							[src]="getCoverImage(product)"
+							[alt]="product.name"
+							class="featured-img"
+							loading="lazy"
+						/>
+						@if (hasDiscount(product)) {
+							<span class="featured-badge">Sale</span>
+						} @else if (product.isNewArrival) {
+							<span class="featured-badge featured-badge-new">New</span>
+						}
+					</div>
+					<div class="featured-info">
+						<p class="featured-cat">{{ product.category.name }}</p>
+						<h3 class="featured-name">{{ product.name }}</h3>
+						<p class="featured-price">{{ formatPrice(product) }}</p>
+					</div>
+				</a>
+			}
+		</div>
+
+		<div class="mt-12 text-center">
+			<a
+				href="/products"
+				class="inline-flex items-center justify-center border border-[#000000] px-8 py-3 text-sm font-medium tracking-[0.08em] text-[#000000] transition hover:-translate-y-0.5 hover:bg-[#000000] hover:text-[#F0F0F0] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6CD0D0] focus-visible:ring-offset-2"
+			>
+				View All Products
+			</a>
+		</div>
+	</div>
+</section>
+}
