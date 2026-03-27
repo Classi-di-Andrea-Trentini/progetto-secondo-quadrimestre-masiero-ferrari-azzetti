@@ -1,12 +1,15 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
+import { RouterModule } from '@angular/router';
+import { AuthService } from '../../services/auth';
 
 @Component({
   selector: 'app-home',
-  imports: [],
+  imports: [RouterModule],
   templateUrl: './home.html',
   styleUrl: './home.css',
 })
 export class Home {
+  readonly auth = inject(AuthService);
   readonly collectionHighlights = [
     {
       image:
@@ -75,7 +78,8 @@ export class Home {
         'Sign in to preview upcoming drops, save wishlists, and unlock private offers.',
       notes: ['Private offers', 'Wishlist sync', 'Early product drops'],
       cta: 'Go to Account',
-      link: '/login',
+      link: '/me',
+      loginLink: '/login',
     },
   ];
 

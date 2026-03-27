@@ -27,12 +27,24 @@
 					>
 						Explore Collection
 					</a>
-					<a
-						href="/login"
-						class="btn-secondary inline-flex items-center justify-center rounded-full border px-8 py-3.5 text-sm font-semibold"
-					>
-						Sign In
-					</a>
+					@if (auth.currentUser(); as user) {
+						<a
+							routerLink="/me"
+							class="btn-secondary inline-flex items-center justify-center gap-2 rounded-full border px-6 py-3.5 text-sm font-semibold"
+						>
+							<span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-black text-white text-xs font-bold flex-shrink-0">
+								{{ user.fullName.charAt(0).toUpperCase() }}
+							</span>
+							{{ user.fullName.split(' ')[0] }}
+						</a>
+					} @else {
+						<a
+							routerLink="/login"
+							class="btn-secondary inline-flex items-center justify-center rounded-full border px-8 py-3.5 text-sm font-semibold"
+						>
+							Sign In
+						</a>
+					}
 				</div>
 
 				<div class="hero-metrics mt-8">
@@ -159,10 +171,14 @@
 				}
 
 				<a
-					href="{{ block.link }}"
+					[routerLink]="block.loginLink ? (auth.isAuthenticated() ? block.link : block.loginLink) : block.link"
 					class="mt-10 inline-flex min-w-40 items-center justify-center border border-[#000000] px-8 py-3 text-sm font-medium tracking-[0.08em] text-[#000000] transition hover:-translate-y-0.5 hover:bg-[#000000] hover:text-[#F0F0F0] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6CD0D0] focus-visible:ring-offset-2"
 				>
-					{{ block.cta }}
+					@if (block.loginLink && auth.isAuthenticated()) {
+						My Account
+					} @else {
+						{{ block.cta }}
+					}
 				</a>
 			</article>
 		}
