@@ -1,7 +1,7 @@
 const year = new Date().getFullYear();
 
 const base = (title: string, content: string) => `<!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -35,7 +35,7 @@ const base = (title: string, content: string) => `<!DOCTYPE html>
     </div>
     <div class="footer">
       <p>© ${year} Common Era &nbsp;&middot;&nbsp; <a href="mailto:noreply@commonera.it">noreply@commonera.it</a></p>
-      <p style="margin-top:6px;">Hai ricevuto questa email perché sei registrato su Common Era.</p>
+      <p style="margin-top:6px;">You received this email because you have an account on Common Era.</p>
     </div>
   </div>
 </body>
@@ -44,13 +44,13 @@ const base = (title: string, content: string) => `<!DOCTYPE html>
 export function welcomeEmail(fullName: string): string {
   const firstName = fullName.split(' ')[0];
   return base(
-    'Benvenuto in Common Era',
-    `<h1>Benvenuto,<br>${firstName}.</h1>
+    'Welcome to Common Era',
+    `<h1>Welcome,<br>${firstName}.</h1>
     <hr class="divider" />
-    <p>Il tuo account Common Era è stato creato con successo. Ora puoi accedere al tuo profilo, salvare i tuoi prodotti preferiti e seguire i tuoi ordini.</p>
-    <p>Siamo felici di averti con noi.</p>
+    <p>Your Common Era account has been created successfully. You can now access your profile, save your favourite products, and track your orders.</p>
+    <p>We're glad to have you with us.</p>
     <hr class="divider" />
-    <p style="font-size:12px; color:#8F8F8F;">Se non hai creato questo account, ignora questa email.</p>`,
+    <p style="font-size:12px; color:#8F8F8F;">If you did not create this account, you can safely ignore this email.</p>`,
   );
 }
 
@@ -61,56 +61,68 @@ export function emailChangeConfirmation(
 ): string {
   const firstName = fullName.split(' ')[0];
   return base(
-    'Conferma il cambio email',
-    `<h1>Conferma la nuova email.</h1>
+    'Confirm your new email address',
+    `<h1>Confirm your new email.</h1>
     <hr class="divider" />
-    <p>Ciao <strong>${firstName}</strong>, hai richiesto di cambiare il tuo indirizzo email con:</p>
+    <p>Hi <strong>${firstName}</strong>, you requested to change your email address to:</p>
     <p><strong>${newEmail}</strong></p>
-    <p>Clicca il pulsante qui sotto per confermare il cambio. Il link è valido per <strong>24 ore</strong>.</p>
-    <a class="btn" href="${confirmationUrl}">Conferma email</a>
+    <p>Click the button below to confirm the change. The link is valid for <strong>24 hours</strong>.</p>
+    <a class="btn" href="${confirmationUrl}">Confirm email</a>
     <div class="url-box">${confirmationUrl}</div>
     <hr class="divider" />
-    <div class="alert-bar"><p>Se non hai richiesto questo cambio, la tua email attuale rimane invariata. Puoi ignorare questa email in sicurezza.</p></div>`,
+    <div class="alert-bar"><p>If you did not request this change, your current email address remains unchanged. You can safely ignore this email.</p></div>`,
   );
 }
 
 export function emailChangedAlert(oldEmail: string, fullName: string, newEmail: string): string {
   const firstName = fullName.split(' ')[0];
   return base(
-    'Il tuo indirizzo email è stato aggiornato',
-    `<h1>Email aggiornata.</h1>
+    'Your email address has been updated',
+    `<h1>Email updated.</h1>
     <hr class="divider" />
-    <p>Ciao <strong>${firstName}</strong>, il tuo indirizzo email è stato aggiornato con successo.</p>
-    <p>Il nuovo indirizzo è: <strong>${newEmail}</strong></p>
-    <p>D'ora in poi utilizza questo indirizzo per accedere al tuo account.</p>
+    <p>Hi <strong>${firstName}</strong>, your email address has been successfully updated.</p>
+    <p>Your new address is: <strong>${newEmail}</strong></p>
+    <p>Please use this address to sign in from now on.</p>
     <hr class="divider" />
-    <div class="alert-bar"><p>Se non hai autorizzato questo cambio, contatta immediatamente il nostro supporto all'indirizzo <a href="mailto:support@commonera.it" style="color:#C3A88D;">support@commonera.it</a>.</p></div>`,
+    <div class="alert-bar"><p>If you did not authorise this change, please contact our support team immediately at <a href="mailto:support@commonera.it" style="color:#C3A88D;">support@commonera.it</a>.</p></div>`,
   );
 }
 
 export function emailVerification(fullName: string, verificationUrl: string): string {
   const firstName = fullName.split(' ')[0];
   return base(
-    'Verifica il tuo indirizzo email',
-    `<h1>Verifica la tua email.</h1>
+    'Verify your email address',
+    `<h1>Verify your email.</h1>
     <hr class="divider" />
-    <p>Ciao <strong>${firstName}</strong>, clicca il pulsante qui sotto per verificare il tuo indirizzo email. Il link è valido per <strong>24 ore</strong>.</p>
-    <a class="btn" href="${verificationUrl}">Verifica email</a>
+    <p>Hi <strong>${firstName}</strong>, click the button below to verify your email address. The link is valid for <strong>24 hours</strong>.</p>
+    <a class="btn" href="${verificationUrl}">Verify email</a>
     <div class="url-box">${verificationUrl}</div>
     <hr class="divider" />
-    <div class="alert-bar"><p>Se non hai richiesto questa verifica, puoi ignorare questa email in sicurezza.</p></div>`,
+    <div class="alert-bar"><p>If you did not request this verification, you can safely ignore this email.</p></div>`,
+  );
+}
+
+export function newsletterConfirmation(name: string): string {
+  return base(
+    'You\'re subscribed to Common Era',
+    `<h1>Welcome to the<br>Common Era circle.</h1>
+    <hr class="divider" />
+    <p>Hi <strong>${name}</strong>, your newsletter subscription is confirmed.</p>
+    <p>You'll receive updates on new collections, exclusive drops, and offers reserved for subscribers.</p>
+    <hr class="divider" />
+    <p style="font-size:12px; color:#8F8F8F;">If you did not request this subscription, you can safely ignore this email. We will not send further messages without your consent.</p>`,
   );
 }
 
 export function passwordChangedAlert(fullName: string): string {
   const firstName = fullName.split(' ')[0];
   return base(
-    'La tua password è stata modificata',
-    `<h1>Password aggiornata.</h1>
+    'Your password has been changed',
+    `<h1>Password updated.</h1>
     <hr class="divider" />
-    <p>Ciao <strong>${firstName}</strong>, la password del tuo account Common Era è stata modificata con successo.</p>
-    <p>Per sicurezza, tutte le sessioni attive su altri dispositivi sono state disconnesse.</p>
+    <p>Hi <strong>${firstName}</strong>, the password for your Common Era account has been successfully changed.</p>
+    <p>For your security, all active sessions on other devices have been signed out.</p>
     <hr class="divider" />
-    <div class="alert-bar"><p>Se non hai effettuato questa modifica, contatta immediatamente il supporto: <a href="mailto:support@commonera.it" style="color:#C3A88D;">support@commonera.it</a></p></div>`,
+    <div class="alert-bar"><p>If you did not make this change, please contact support immediately: <a href="mailto:support@commonera.it" style="color:#C3A88D;">support@commonera.it</a></p></div>`,
   );
 }

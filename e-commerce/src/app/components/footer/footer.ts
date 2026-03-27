@@ -1,7 +1,10 @@
 import { Component, inject, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs/operators';
+
+const API_URL = 'http://localhost:3000';
 
 @Component({
   selector: 'app-footer',
@@ -11,9 +14,12 @@ import { filter } from 'rxjs/operators';
 })
 export class Footer {
   private readonly router = inject(Router);
+  private readonly http = inject(HttpClient);
 
   email = signal('');
   subscribeMessage = signal('');
+  subscribeError = signal('');
+  subscribing = signal(false);
   isHomePage = signal(this.isHomeRoute(this.router.url));
 
   constructor() {
@@ -26,16 +32,25 @@ export class Footer {
 
   onSubscribe(): void {
     const emailValue = this.email();
-    if (emailValue && this.isValidEmail(emailValue)) {
-      // In a real app, you'd send this to a backend service
-      console.log('Newsletter subscription:', emailValue);
-      
-      // Reset form
-      this.email.set('');
+    if (!emailValue || !this.isValidEmail(emailValue)) return;
 
-      // Show inline success feedback without intrusive popups
-      this.subscribeMessage.set('Thank you for subscribing! Stay tuned for updates.');
-    }
+    this.subscribing.set(true);
+    this.subscribeError.set('');
+    this.subscribeMessage.set('');
+
+    this.http.post<{ message: string }>(`${API_URL}/newsletter/subscribe`, { email: emailValue })
+      .subscribe({
+        next: (res) => {
+          this.email.set('');
+          this.subscribeMessage.set(res.message);
+          this.subscribing.set(false);
+        },
+        error: (err) => {
+          const msg = err?.error?.message ?? 'Something went wrong. Please try again.';
+          this.subscribeError.set(msg);
+          this.subscribing.set(false);
+        },
+      });
   }
 
   private isValidEmail(email: string): boolean {

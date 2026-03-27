@@ -5,6 +5,7 @@ import {
   emailChangeConfirmation,
   emailChangedAlert,
   passwordChangedAlert,
+  newsletterConfirmation,
 } from './templates';
 
 @Injectable()
@@ -55,19 +56,19 @@ export class MailService {
   async sendEmailVerification(email: string, fullName: string, verificationUrl: string) {
     await this.send(
       email,
-      'Verifica il tuo indirizzo email — Common Era',
+      'Verify your email address — Common Era',
       emailVerification(fullName, verificationUrl),
     );
   }
 
   async sendWelcome(email: string, fullName: string) {
-    await this.send(email, 'Benvenuto in Common Era', welcomeEmail(fullName));
+    await this.send(email, 'Welcome to Common Era', welcomeEmail(fullName));
   }
 
   async sendEmailChangeConfirmation(newEmail: string, fullName: string, confirmationUrl: string) {
     await this.send(
       newEmail,
-      'Conferma il cambio email — Common Era',
+      'Confirm your new email address — Common Era',
       emailChangeConfirmation(fullName, newEmail, confirmationUrl),
     );
   }
@@ -75,7 +76,7 @@ export class MailService {
   async sendEmailChangedAlert(oldEmail: string, fullName: string, newEmail: string) {
     await this.send(
       oldEmail,
-      'Il tuo indirizzo email è stato aggiornato',
+      'Your email address has been updated — Common Era',
       emailChangedAlert(oldEmail, fullName, newEmail),
     );
   }
@@ -83,8 +84,16 @@ export class MailService {
   async sendPasswordChangedAlert(email: string, fullName: string) {
     await this.send(
       email,
-      'La tua password è stata modificata',
+      'Your password has been changed — Common Era',
       passwordChangedAlert(fullName),
+    );
+  }
+
+  async sendNewsletterConfirmation(email: string, name: string) {
+    await this.send(
+      email,
+      'You\'re subscribed to Common Era',
+      newsletterConfirmation(name),
     );
   }
 }
