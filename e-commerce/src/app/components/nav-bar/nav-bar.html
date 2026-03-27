@@ -49,6 +49,11 @@
           class="relative flex rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 cursor-pointer"
         >
           <i class="fa-solid fa-cart-shopping transition-transform duration-300 hover:scale-110"></i>
+          @if (cart.itemCount() > 0) {
+            <span class="absolute -top-1.5 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-black px-1 text-[0.6rem] font-bold text-white leading-none">
+              {{ cart.itemCount() }}
+            </span>
+          }
         </button>
       </div>
 

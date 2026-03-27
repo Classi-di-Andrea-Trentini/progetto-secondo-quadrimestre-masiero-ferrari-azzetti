@@ -4,6 +4,7 @@ import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { ProductsService, ProductFull, ProductListItem, ProductImage } from '../../services/products.service';
 import { WishlistService } from '../../services/wishlist.service';
 import { AuthService } from '../../services/auth';
+import { CartService } from '../../services/cart-service';
 
 @Component({
   selector: 'app-product-detail',
@@ -18,6 +19,7 @@ export class ProductDetail implements OnInit {
   private router = inject(Router);
   readonly wishlist = inject(WishlistService);
   readonly auth = inject(AuthService);
+  readonly cartService = inject(CartService);
 
   product = signal<ProductFull | null>(null);
   related = signal<ProductListItem[]>([]);
@@ -183,7 +185,25 @@ export class ProductDetail implements OnInit {
   }
 
   addToCart() {
-    if (!this.selectedSize()) return;
+    const p = this.product();
+    if (!p || !this.selectedSize()) return;
+
+    const variant = this.selectedVariant();
+    const colorName = this.selectedColorName();
+    const coverImg = p.images.find(i => i.isCover)?.url ?? p.images[0]?.url ?? '';
+
+    this.cartService.addItem({
+      productId: p.id,
+      variantId: variant?.id ?? null,
+      name: p.name,
+      slug: p.slug,
+      image: coverImg,
+      price: this.displayPrice(),
+      color: colorName || null,
+      colorHex: this.selectedColor() || null,
+      size: this.selectedSize(),
+    });
+
     this.addedToCart.set(true);
     setTimeout(() => this.addedToCart.set(false), 2000);
   }
