@@ -1,0 +1,144 @@
+<footer class="footer-shell" [class.footer-shell-separated]="!isHomePage()">
+	@if (isHomePage()) {
+		<!-- Newsletter Signup -->
+		<section class="footer-newsletter px-6 py-12 sm:py-16 lg:px-8">
+			<div class="mx-auto max-w-3xl text-center">
+				<h2 class="text-4xl font-semibold leading-tight text-[#000000] sm:text-5xl">
+					Join Our Circle
+				</h2>
+				<p class="mt-4 text-lg leading-relaxed text-[#8F8F8F]">
+					Discover new collections, exclusive offers, and weekly style insights delivered to your inbox.
+				</p>
+				@if (!subscribeMessage()) {
+				<form class="mt-8 flex flex-col gap-3 sm:flex-row sm:gap-0" (ngSubmit)="onSubscribe()">
+					<input
+						type="email"
+						placeholder="Enter your email"
+						class="flex-1 border border-[#8F8F8F]/30 bg-[#F0F0F0] px-6 py-3.5 text-sm placeholder-[#8F8F8F]/50 outline-none transition hover:border-[#8F8F8F]/50 focus:border-[#6CD0D0] focus:ring-2 focus:ring-[#6CD0D0]/20"
+						required
+						[(ngModel)]="email"
+						name="email"
+					/>
+					<button
+						type="submit"
+						[disabled]="subscribing()"
+						class="inline-flex items-center justify-center bg-[#000000] px-8 py-3.5 text-sm font-semibold text-[#F0F0F0] transition hover:bg-[#2a2a2a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6CD0D0] sm:rounded-none sm:border-l sm:border-[#8F8F8F]/20 disabled:opacity-50"
+					>
+						{{ subscribing() ? 'Sending…' : 'Subscribe' }}
+					</button>
+				</form>
+				@if (subscribeError()) {
+					<p class="mt-4 text-sm text-red-500" aria-live="polite">
+						{{ subscribeError() }}
+					</p>
+				}
+			} @else {
+				<p class="footer-subscribe-message mt-8" aria-live="polite">
+					✓ {{ subscribeMessage() }}
+				</p>
+			}
+			</div>
+		</section>
+	}
+
+	<!-- Main Footer Content -->
+	<section class="footer-content px-6 py-16 sm:py-20 lg:px-8">
+		<div class="mx-auto grid max-w-7xl grid-cols-1 gap-12 md:grid-cols-4 md:gap-8">
+			<!-- Brand Column -->
+			<div class="md:col-span-1">
+				<h3 class="font-['Cormorant_Garamond'] text-3xl font-semibold text-[#000000]">
+					COMMON ERA
+				</h3>
+				<p class="mt-4 text-sm leading-relaxed text-[#8F8F8F]">
+					Refined apparel and accessories crafted for everyday elegance. Premium quality, thoughtful design, lasting impact.
+				</p>
+			</div>
+
+			<!-- Shop Links -->
+			<div class="md:col-span-1">
+			<h4 class="text-sm font-semibold uppercase tracking-wide text-[#000000]">
+					Shop
+				</h4>
+				<nav class="mt-6 flex flex-col gap-3">
+					<a href="/products" class="text-sm text-[#8F8F8F] transition hover:text-[#000000]">All Products</a>
+					<a href="/products" class="text-sm text-[#8F8F8F] transition hover:text-[#000000]">New Arrivals</a>
+					<a href="/products" class="text-sm text-[#8F8F8F] transition hover:text-[#000000]">Sale</a>
+					<a href="/products" class="text-sm text-[#8F8F8F] transition hover:text-[#000000]">Collections</a>
+					<a href="/products" class="text-sm text-[#8F8F8F] transition hover:text-[#000000]">Gift Cards</a>
+				</nav>
+			</div>
+
+			<!-- Customer Service -->
+			<div class="md:col-span-1">
+			<h4 class="text-sm font-semibold uppercase tracking-wide text-[#000000]">
+					Support
+				</h4>
+				<nav class="mt-6 flex flex-col gap-3">
+					<a href="#" class="text-sm text-[#8F8F8F] transition hover:text-[#000000]">Contact Us</a>
+					<a href="#" class="text-sm text-[#8F8F8F] transition hover:text-[#000000]">Shipping Info</a>
+					<a href="#" class="text-sm text-[#8F8F8F] transition hover:text-[#000000]">Returns & Exchanges</a>
+					<a href="#" class="text-sm text-[#8F8F8F] transition hover:text-[#000000]">Size Guide</a>
+					<a href="#" class="text-sm text-[#8F8F8F] transition hover:text-[#000000]">FAQ</a>
+				</nav>
+			</div>
+
+			<!-- Company Info -->
+			<div class="md:col-span-1">
+			<h4 class="text-sm font-semibold uppercase tracking-wide text-[#000000]">
+					Company
+				</h4>
+				<nav class="mt-6 flex flex-col gap-3">
+					<a href="#" class="text-sm text-[#8F8F8F] transition hover:text-[#000000]">About Us</a>
+					<a href="#" class="text-sm text-[#8F8F8F] transition hover:text-[#000000]">Sustainability</a>
+					<a href="#" class="text-sm text-[#8F8F8F] transition hover:text-[#000000]">Press</a>
+					<a href="#" class="text-sm text-[#8F8F8F] transition hover:text-[#000000]">Careers</a>
+					<a href="#" class="text-sm text-[#8F8F8F] transition hover:text-[#000000]">Blog</a>
+				</nav>
+			</div>
+		</div>
+	</section>
+
+	<!-- Payment Methods -->
+	<section class="footer-meta px-6 py-10 sm:py-12 lg:px-8">
+		<div class="mx-auto flex max-w-7xl flex-col items-center justify-center gap-8 md:flex-row">
+			<!-- Payment Methods -->
+			<div class="flex items-center gap-3">
+				<span class="text-xs font-medium uppercase tracking-[0.08em] text-[#8F8F8F]">
+					Secure Payments
+				</span>
+				<div class="flex gap-2">
+					<span class="inline-flex h-6 w-10 items-center justify-center rounded border border-[#8F8F8F]/20 bg-[#F0F0F0] text-[0.6rem] font-semibold text-[#8F8F8F]">
+						VISA
+					</span>
+					<span class="inline-flex h-6 w-10 items-center justify-center rounded border border-[#8F8F8F]/20 bg-[#F0F0F0] text-[0.6rem] font-semibold text-[#8F8F8F]">
+						MC
+					</span>
+					<span class="inline-flex h-6 w-10 items-center justify-center rounded border border-[#8F8F8F]/20 bg-[#F0F0F0] text-[0.6rem] font-semibold text-[#8F8F8F]">
+						AMEX
+					</span>
+					<span class="inline-flex h-6 w-10 items-center justify-center rounded border border-[#8F8F8F]/20 bg-[#F0F0F0] text-[0.6rem] font-semibold text-[#8F8F8F]">
+						PAYPAL
+					</span>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- Copyright & Legal -->
+	<section class="footer-copyright bg-[#F0F0F0]/60 px-6 py-8 lg:px-8">
+		<div class="mx-auto max-w-7xl">
+			<div class="flex flex-col items-center justify-between gap-6 text-center md:flex-row md:text-left">
+				<p class="text-xs text-[#8F8F8F]">
+				&copy; 2026 COMMON ERA. All rights reserved. Crafted with care.
+				</p>
+				<nav class="flex flex-wrap items-center justify-center gap-6 md:justify-end">
+					<a href="/legal/privacy" class="text-xs text-[#8F8F8F] transition hover:text-[#000000]">Privacy Policy</a>
+					<span class="text-[#8F8F8F]/30">|</span>
+					<a href="/legal/terms" class="text-xs text-[#8F8F8F] transition hover:text-[#000000]">Terms of Service</a>
+					<span class="text-[#8F8F8F]/30">|</span>
+					<a href="/legal/cookies" class="text-xs text-[#8F8F8F] transition hover:text-[#000000]">Cookie Policy</a>
+				</nav>
+			</div>
+		</div>
+	</section>
+</footer>

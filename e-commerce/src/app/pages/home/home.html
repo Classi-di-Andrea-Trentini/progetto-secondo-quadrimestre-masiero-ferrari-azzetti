@@ -1,0 +1,227 @@
+<section class="hero-shell relative isolate overflow-hidden">
+	<div class="hero-glow hero-glow-right"></div>
+	<div class="hero-glow hero-glow-left"></div>
+	<div class="hero-panel-lines"></div>
+
+	<div class="relative mx-auto max-w-6xl px-6 py-14 sm:py-20 lg:px-8 lg:py-24">
+		<div class="hero-grid fade-up" style="animation-delay: 0.08s">
+			<div class="hero-copy text-center lg:text-left">
+				<p class="mx-auto w-fit rounded-full border border-[#8F8F8F]/40 bg-[#F0F0F0]/70 px-4 py-1 text-[0.68rem] font-medium uppercase tracking-[0.35em] text-[#8F8F8F] lg:mx-0">
+					new editorial drop
+				</p>
+
+				<h1 class="hero-title mt-4 text-5xl leading-tight text-[#000000] sm:text-6xl lg:text-7xl xl:text-8xl">
+					Everyday elegance,
+					<span class="block text-[#8F8F8F]">designed to last.</span>
+				</h1>
+
+				<p class="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-[#8F8F8F] sm:text-xl lg:mx-0">
+					A curated selection of refined apparel and accessories with clean lines,
+					premium fabrics, and effortless fits built for daily wear.
+				</p>
+
+				<div class="mt-10 flex flex-wrap items-center justify-center gap-4 lg:justify-start">
+					<a
+						href="/products"
+						class="btn-primary inline-flex items-center justify-center rounded-full px-8 py-3.5 text-sm font-semibold text-white"
+					>
+						Explore Collection
+					</a>
+					@if (auth.currentUser(); as user) {
+						<a
+							routerLink="/me"
+							class="btn-secondary inline-flex items-center justify-center gap-2 rounded-full border px-6 py-3.5 text-sm font-semibold"
+						>
+							<span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-black text-white text-xs font-bold flex-shrink-0">
+								{{ user.fullName.charAt(0).toUpperCase() }}
+							</span>
+							{{ user.fullName.split(' ')[0] }}
+						</a>
+					} @else {
+						<a
+							routerLink="/login"
+							class="btn-secondary inline-flex items-center justify-center rounded-full border px-8 py-3.5 text-sm font-semibold"
+						>
+							Sign In
+						</a>
+					}
+				</div>
+
+				<div class="hero-metrics mt-8">
+					<span class="hero-chip">48H Dispatch</span>
+					<span class="hero-chip">Easy Returns</span>
+					<span class="hero-chip">Weekly New Drops</span>
+				</div>
+			</div>
+
+			<a href="/products" class="hero-visual" aria-label="Open featured collection">
+				<img
+					src="{{ collectionHighlights[0].image }}"
+					alt="{{ collectionHighlights[0].title }}"
+					class="hero-visual-image"
+					loading="eager"
+				/>
+				<div class="hero-visual-overlay"></div>
+				<div class="hero-visual-meta">
+					<p class="text-[0.65rem] uppercase tracking-[0.32em] text-[#F0F0F0]/80">featured drop</p>
+					<h2 class="mt-2 font-['Cormorant_Garamond'] text-4xl text-[#F0F0F0]">{{ collectionHighlights[0].title }}</h2>
+					<p class="mt-1.5 text-sm text-[#F0F0F0]/80">{{ collectionHighlights[0].subtitle }}</p>
+				</div>
+			</a>
+		</div>
+	</div>
+</section>
+
+<section class="collection-shell px-6 pb-20 pt-6 sm:pb-24 lg:px-8">
+	<div class="mx-auto max-w-6xl">
+		<div class="collection-stage fade-up" style="animation-delay: 0.28s">
+			@for (item of collectionHighlights; track item.title; let i = $index) {
+				<article
+					class="collection-card"
+					[class.card-active]="isActive(i)"
+					[class.card-left]="isLeft(i)"
+					[class.card-right]="isRight(i)"
+					[class.card-hidden]="isHidden(i)"
+				>
+					<img
+						src="{{ item.image }}"
+						alt="{{ item.title }}"
+						class="h-full w-full rounded-[1.9rem] object-cover"
+						loading="lazy"
+					/>
+					<div class="collection-overlay rounded-[1.9rem]"></div>
+					<div class="collection-meta">
+						<p class="text-[0.66rem] uppercase tracking-[0.32em] text-[#F0F0F0]/80">look {{ i + 1 }}</p>
+						<h3 class="mt-1.5 font-['Cormorant_Garamond'] text-3xl text-[#F0F0F0]">{{ item.title }}</h3>
+						<p class="mt-1 text-sm text-[#F0F0F0]/80">{{ item.subtitle }}</p>
+					</div>
+				</article>
+			}
+		</div>
+
+		<div class="mt-8 flex items-center justify-center gap-3">
+			<button
+				type="button"
+				(click)="prevSlide()"
+				class="collection-nav-btn"
+				aria-label="Previous slide"
+			>
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-5 w-5">
+					<path d="M15 6l-6 6 6 6" stroke-linecap="round" stroke-linejoin="round" />
+				</svg>
+			</button>
+
+			<button
+				type="button"
+				(click)="nextSlide()"
+				class="collection-nav-btn"
+				aria-label="Next slide"
+			>
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-5 w-5">
+					<path d="M9 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
+				</svg>
+			</button>
+		</div>
+
+		<div class="mt-6 flex items-center justify-center gap-2.5">
+			@for (item of collectionHighlights; track item.title; let i = $index) {
+				<button
+					type="button"
+					(click)="goToSlide(i)"
+					class="collection-dot"
+					[class.collection-dot-active]="activeSlide() === i"
+					aria-label="Go to slide {{ i + 1 }}"
+				></button>
+			}
+		</div>
+	</div>
+</section>
+
+<section class="promo-shell px-0 py-8 sm:py-12">
+	<div class="promo-board w-full overflow-hidden rounded-none">
+		@for (block of promoShowcase; track block.title + block.label; let i = $index) {
+			<article class="promo-article relative px-6 py-16 text-center sm:px-10 sm:py-20" [class.promo-article-sale]="i === 1">
+				<p class="promo-label text-[0.7rem] font-medium uppercase tracking-[0.45em] sm:text-xs">
+					{{ block.label }}
+				</p>
+
+				<h2 class="promo-title mt-5 font-['Cormorant_Garamond'] text-5xl leading-none sm:text-6xl">
+					{{ block.title }}
+					@if (block.highlight) {
+						<span class="promo-highlight pl-2 font-semibold">{{ block.highlight }}</span>
+					}
+				</h2>
+
+				<p class="promo-desc mx-auto mt-7 max-w-3xl text-lg leading-relaxed sm:text-[1.35rem]">
+					{{ block.description }}
+				</p>
+
+				<div class="promo-tags mt-7">
+					@for (note of block.notes; track note) {
+						<span class="promo-tag">{{ note }}</span>
+					}
+				</div>
+
+				@if (i === 1) {
+					<p class="promo-countdown mt-6">Sale window closes this Sunday at midnight.</p>
+				}
+
+				<a
+					[routerLink]="block.loginLink ? (auth.isAuthenticated() ? block.link : block.loginLink) : block.link"
+					class="promo-cta mt-10 inline-flex min-w-40 items-center justify-center border px-8 py-3 text-sm font-medium tracking-[0.08em] transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6CD0D0] focus-visible:ring-offset-2"
+				>
+					@if (block.loginLink && auth.isAuthenticated()) {
+						My Account
+					} @else {
+						{{ block.cta }}
+					}
+				</a>
+			</article>
+		}
+	</div>
+</section>
+
+@if (featuredProducts().length) {
+<section class="featured-shell px-6 py-16 sm:py-20 lg:px-8">
+	<div class="mx-auto max-w-6xl">
+		<div class="mb-10 text-center">
+			<p class="text-[0.7rem] font-medium uppercase tracking-[0.45em] text-[#8F8F8F]">just dropped</p>
+			<h2 class="mt-3 font-['Cormorant_Garamond'] text-4xl text-[#000000] sm:text-5xl">New Arrivals</h2>
+		</div>
+
+		<div class="featured-grid">
+			@for (product of featuredProducts(); track product.id) {
+				<a [routerLink]="['/product', product.slug]" class="featured-card">
+					<div class="featured-img-wrap">
+						<img
+							[src]="getCoverImage(product)"
+							[alt]="product.name"
+							class="featured-img"
+							loading="lazy"
+						/>
+						@if (hasDiscount(product)) {
+							<span class="featured-badge">Sale</span>
+						} @else if (product.isNewArrival) {
+							<span class="featured-badge featured-badge-new">New</span>
+						}
+					</div>
+					<div class="featured-info">
+						<p class="featured-cat">{{ product.category.name }}</p>
+						<h3 class="featured-name">{{ product.name }}</h3>
+						<p class="featured-price">{{ formatPrice(product) }}</p>
+					</div>
+				</a>
+			}
+		</div>
+
+		<div class="mt-12 text-center">
+			<a
+				href="/products"
+				class="inline-flex items-center justify-center border border-[#000000] px-8 py-3 text-sm font-medium tracking-[0.08em] text-[#000000] transition hover:-translate-y-0.5 hover:bg-[#000000] hover:text-[#F0F0F0] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6CD0D0] focus-visible:ring-offset-2"
+			>
+				View All Products
+			</a>
+		</div>
+	</div>
+</section>
+}

@@ -1,0 +1,65 @@
+services:
+  frontend:
+    build: ./e-commerce
+    ports:
+      - "4200:4200"
+    volumes:
+      - ./e-commerce:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+
+  backend:
+    build: ./server
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./.env
+    environment:
+      PORT: 3000
+      NODE_ENV: development
+      DATABASE_URL: postgresql://user:password@db:5432/mydb
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: user
+      DB_PASSWORD: password
+      DB_NAME: mydb
+      JWT_SECRET: changeme_in_production_use_a_long_random_string
+      FRONTEND_URL: http://localhost:4200
+      BACKEND_URL: http://localhost:3000
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: mydb
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d mydb"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pgdata:
+
+
+  # collegare con una network il backend e il db
+  # container non collegato in rete agli altri due con frontend
+  # pubblico con node
+  # davanti container con nginx + reverse proxy per redirezionare le richieste al frontend e al backend
+  # certificato SSL per https
+  # da nginx a node http
+
+  

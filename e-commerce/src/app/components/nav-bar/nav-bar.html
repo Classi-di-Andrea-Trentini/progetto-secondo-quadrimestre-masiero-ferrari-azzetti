@@ -1,0 +1,65 @@
+<!-- Include this script tag or install `@tailwindplus/elements` via npm: -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/@tailwindplus/elements@1" type="module"></script> -->
+<nav [ngClass]="navClasses()">
+  <div class="w-full px-2 sm:px-6 lg:px-8">
+    <div class="relative flex h-16 items-center justify-between">
+      <div class="absolute inset-y-0 left-0 flex items-center sm:hidden">
+        <!-- Mobile menu button-->
+        <button type="button" command="--toggle" commandfor="mobile-menu" class="relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-white/5 hover:text-white focus:outline-2 focus:-outline-offset-1 focus:outline-indigo-500">
+          <span class="absolute -inset-0.5"></span>
+          <span class="sr-only">Open main menu</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6 in-aria-expanded:hidden">
+            <path d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6 not-in-aria-expanded:hidden">
+            <path d="M6 18 18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+      </div>
+      <!-- PARTE SINISTRA (ABOUT E PRODUCTS)-->
+      <div class="hidden sm:flex flex-1 items-center justify-start">
+        <div class="flex shrink-0 items-center">
+          <div class="flex space-x-4">
+            <a routerLink="/products" routerLinkActive="underline underline-offset-2" aria-current="page" class="px-3 py-2 text-sm font-medium text-black hover:underline underline-offset-2">Products</a>
+            <a routerLink="/about" routerLinkActive="underline underline-offset-2" class="px-3 py-2 text-sm font-medium text-black hover:underline underline-offset-2">About us</a>
+          </div>
+        </div>
+      </div>
+      <!-- LOGO AL CENTRO -->
+      <div class="flex items-center justify-center absolute left-1/2 -translate-x-1/2">
+        <a routerLink="/home" routerLinkActive="" [routerLinkActiveOptions]="{exact: true}" class="transition-transform duration-300 hover:scale-110">
+          <img src="commonEra.png" alt="Your Company" class="-mt-1 w-32 sm:w-60 h-auto px-4" />
+        </a>
+      </div>
+      <!-- SEARCH, ME E CART A DESTRA -->
+      <div class="absolute inset-y-0 right-0 flex items-center gap-4 sm:gap-8 pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
+        <a routerLink="/me" class="relative flex items-center justify-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
+          @if (initials()) {
+            <span class="w-8 h-8 rounded-full bg-black text-white text-xs font-bold flex items-center justify-center tracking-wider transition-transform duration-300 hover:scale-110 select-none">
+              {{ initials() }}
+            </span>
+          } @else {
+            <i class="fa-regular fa-user transition-transform duration-300 hover:scale-110"></i>
+          }
+        </a>
+        <button
+          type="button"
+          (click)="cart.toggle()"
+          aria-label="Open cart"
+          class="relative flex rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 cursor-pointer"
+        >
+          <i class="fa-solid fa-cart-shopping transition-transform duration-300 hover:scale-110"></i>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <el-disclosure id="mobile-menu" hidden class="block sm:hidden">
+    <div class="space-y-1 px-2 pt-2 pb-3">
+      <a routerLink="/products" class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-white/5 hover:text-white">Products</a>
+      <a routerLink="/about" class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-white/5 hover:text-white">About us</a>
+    </div>
+  </el-disclosure>
+</nav>
+

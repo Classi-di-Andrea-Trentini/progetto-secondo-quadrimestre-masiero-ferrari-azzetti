@@ -1,0 +1,354 @@
+<div class="max-w-4xl mx-auto px-4 py-10">
+
+  <nav class="flex justify-center gap-10 border-b border-gray-200 mb-12">
+    <a (click)="activeTab.set('profile')"
+       class="pb-4 text-sm font-semibold uppercase tracking-wider cursor-pointer transition-colors"
+       [ngClass]="activeTab() === 'profile' ? 'text-black border-b-2 border-black' : 'text-gray-400 hover:text-gray-700'">
+      Profile
+    </a>
+    <a (click)="activeTab.set('orders')"
+       class="pb-4 text-sm font-semibold uppercase tracking-wider cursor-pointer transition-colors"
+       [ngClass]="activeTab() === 'orders' ? 'text-black border-b-2 border-black' : 'text-gray-400 hover:text-gray-700'">
+      Orders
+    </a>
+    <a (click)="setTab('favorites')"
+       class="pb-4 text-sm font-semibold uppercase tracking-wider cursor-pointer transition-colors"
+       [ngClass]="activeTab() === 'favorites' ? 'text-black border-b-2 border-black' : 'text-gray-400 hover:text-gray-700'">
+      Saved
+    </a>
+    <a (click)="activeTab.set('settings')"
+       class="pb-4 text-sm font-semibold uppercase tracking-wider cursor-pointer transition-colors"
+       [ngClass]="activeTab() === 'settings' ? 'text-black border-b-2 border-black' : 'text-gray-400 hover:text-gray-700'">
+      Settings
+    </a>
+  </nav>
+
+  <div>
+    @switch (activeTab()) {
+
+      @case ('profile') {
+        <section>
+          @if (auth.currentUser(); as user) {
+
+            <!-- Personal information -->
+            <div class="mb-12">
+              <div class="flex justify-between items-center border-b border-gray-100 pb-4 mb-6">
+                <h2 class="text-xl font-bold">Personal Information</h2>
+                @if (!isEditing()) {
+                  <button (click)="startEditing()"
+                    class="text-sm text-gray-400 hover:text-black underline transition-colors">
+                    Edit
+                  </button>
+                }
+              </div>
+
+              @if (saveSuccess()) {
+                <div class="mb-6 px-4 py-3 bg-green-50 border border-green-200 text-sm text-green-700 rounded">
+                  Profile updated successfully.
+                </div>
+              }
+
+              @if (!isEditing()) {
+                <!-- Read view -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div>
+                    <p class="text-xs text-gray-400 uppercase tracking-widest mb-1">Full name</p>
+                    <p class="font-medium">{{ user.fullName }}</p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-gray-400 uppercase tracking-widest mb-1">Phone</p>
+                    <p class="font-medium">{{ user.phone ?? '—' }}</p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-gray-400 uppercase tracking-widest mb-1">Date of birth</p>
+                    <p class="font-medium">
+                      {{ user.birthDate ? (user.birthDate | date: 'longDate') : '—' }}
+                    </p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-gray-400 uppercase tracking-widest mb-1">Gender</p>
+                    <p class="font-medium">{{ user.gender ?? '—' }}</p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-gray-400 uppercase tracking-widest mb-1">Member since</p>
+                    <p class="font-medium">{{ user.createdAt | date: 'MMMM y' }}</p>
+                  </div>
+                </div>
+
+              } @else {
+                <!-- Edit form -->
+                <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" novalidate class="space-y-5">
+
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div class="md:col-span-2">
+                      <label class="block text-xs font-semibold uppercase tracking-widest text-gray-500 mb-1.5">
+                        Full name
+                      </label>
+                      <input type="text" formControlName="fullName"
+                        class="w-full border px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-black transition"
+                        [ngClass]="fullName.invalid && fullName.touched ? 'border-red-400' : 'border-gray-300'" />
+                      @if (fullName.invalid && fullName.touched) {
+                        <p class="mt-1 text-xs text-red-500">Minimum 2 characters</p>
+                      }
+                    </div>
+
+                    <div>
+                      <label class="block text-xs font-semibold uppercase tracking-widest text-gray-500 mb-1.5">
+                        Phone
+                      </label>
+                      <input type="tel" formControlName="phone"
+                        placeholder="+39 333 1234567"
+                        class="w-full border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-black transition" />
+                    </div>
+
+                    <div>
+                      <label class="block text-xs font-semibold uppercase tracking-widest text-gray-500 mb-1.5">
+                        Date of birth
+                      </label>
+                      <input type="date" formControlName="birthDate"
+                        class="w-full border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-black transition" />
+                    </div>
+
+                    <div>
+                      <label class="block text-xs font-semibold uppercase tracking-widest text-gray-500 mb-1.5">
+                        Gender
+                      </label>
+                      <select formControlName="gender"
+                        class="w-full border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-black transition bg-white">
+                        <option value="">Not specified</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  @if (saveError()) {
+                    <div class="px-4 py-3 bg-red-50 border border-red-200 text-sm text-red-700 rounded">
+                      {{ saveError() }}
+                    </div>
+                  }
+
+                  <div class="flex gap-3 pt-2">
+                    <button type="submit" [disabled]="saveLoading()"
+                      class="px-6 py-2.5 bg-black text-white text-sm font-semibold uppercase tracking-widest hover:bg-gray-900 transition disabled:opacity-50">
+                      @if (saveLoading()) { Saving… } @else { Save }
+                    </button>
+                    <button type="button" (click)="cancelEditing()"
+                      class="px-6 py-2.5 border border-gray-300 text-sm font-semibold uppercase tracking-widest hover:border-black transition">
+                      Cancel
+                    </button>
+                  </div>
+
+                </form>
+              }
+            </div>
+
+            <!-- Email -->
+            <div class="border-t border-gray-100 pt-8">
+              <div class="flex justify-between items-center mb-4">
+                <div>
+                  <p class="text-xs text-gray-400 uppercase tracking-widest mb-1">Email</p>
+                  <p class="font-medium">{{ user.email }}</p>
+                  @if (user.emailVerifiedAt) {
+                    <p class="text-xs text-green-600 mt-0.5">Verified</p>
+                  } @else {
+                    <p class="text-xs text-amber-600 mt-0.5">Not verified</p>
+                    <button (click)="sendVerification()" [disabled]="verifyLoading()"
+                      class="mt-1.5 text-xs text-black underline hover:no-underline disabled:opacity-50 transition-opacity">
+                      @if (verifyLoading()) { Sending… } @else { Send verification email }
+                    </button>
+                    @if (verifyMessage()) {
+                      <p class="mt-1 text-xs text-gray-500">{{ verifyMessage() }}</p>
+                    }
+                  }
+                </div>
+                <button (click)="emailChangeVisible.set(!emailChangeVisible())"
+                  class="text-sm text-gray-400 hover:text-black underline transition-colors">
+                  {{ emailChangeVisible() ? 'Cancel' : 'Change email' }}
+                </button>
+              </div>
+
+              @if (emailChangeVisible()) {
+                <div class="mt-4 p-5 bg-gray-50 border border-gray-200 rounded">
+                  <p class="text-xs text-gray-500 mb-4">
+                    Changing your email requires confirmation via a link sent to the new address.
+                    Please enter your current password to proceed.
+                  </p>
+
+                  <form [formGroup]="emailForm" (ngSubmit)="submitEmailChange()" novalidate class="space-y-4">
+                    <div>
+                      <label class="block text-xs font-semibold uppercase tracking-widest text-gray-500 mb-1.5">
+                        New email
+                      </label>
+                      <input type="email" formControlName="newEmail"
+                        autocomplete="email"
+                        placeholder="new@email.com"
+                        class="w-full border px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-black transition"
+                        [ngClass]="newEmail.invalid && newEmail.touched ? 'border-red-400' : 'border-gray-300'" />
+                      @if (newEmail.invalid && newEmail.touched) {
+                        <p class="mt-1 text-xs text-red-500">Please enter a valid email address</p>
+                      }
+                    </div>
+
+                    <div>
+                      <label class="block text-xs font-semibold uppercase tracking-widest text-gray-500 mb-1.5">
+                        Current password
+                      </label>
+                      <input type="password" formControlName="currentPassword"
+                        autocomplete="current-password"
+                        placeholder="••••••••"
+                        class="w-full border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-black transition" />
+                    </div>
+
+                    @if (emailError()) {
+                      <div class="px-4 py-3 bg-red-50 border border-red-200 text-sm text-red-700 rounded">
+                        {{ emailError() }}
+                      </div>
+                    }
+                    @if (emailSuccess()) {
+                      <div class="px-4 py-3 bg-green-50 border border-green-200 text-sm text-green-700 rounded">
+                        {{ emailSuccess() }}
+                      </div>
+                    }
+
+                    <button type="submit" [disabled]="emailLoading()"
+                      class="px-6 py-2.5 bg-black text-white text-sm font-semibold uppercase tracking-widest hover:bg-gray-900 transition disabled:opacity-50">
+                      @if (emailLoading()) { Sending… } @else { Send change request }
+                    </button>
+                  </form>
+                </div>
+              }
+            </div>
+
+          }
+        </section>
+      }
+
+      @case ('orders') {
+        <section>
+          <h2 class="text-xl font-bold border-b border-gray-100 pb-4 mb-6">Order History</h2>
+          <p class="text-gray-400 text-sm">No orders yet.</p>
+        </section>
+      }
+
+      @case ('favorites') {
+        <section>
+          <h2 class="text-xl font-bold border-b border-gray-100 pb-4 mb-6">Saved Products</h2>
+
+          @if (wishlist.items().length === 0) {
+            <div class="text-center py-16">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.2" class="mx-auto mb-4">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+              </svg>
+              <p class="text-gray-400 text-sm mb-4">No saved products yet.</p>
+              <a routerLink="/products" class="inline-block bg-black text-white text-xs tracking-widest uppercase px-6 py-3 hover:bg-gray-800 transition-colors">
+                Browse the collection
+              </a>
+            </div>
+          } @else {
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1">
+              @for (item of wishlist.items(); track item.id) {
+                <div class="relative group">
+                  <a [routerLink]="['/product', item.product.slug]" class="block">
+                    <div class="aspect-[3/4] bg-gray-100 overflow-hidden">
+                      <img
+                        [src]="wishlistCoverImage(item)"
+                        [alt]="item.product.name"
+                        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                    </div>
+                    <div class="flex justify-between items-baseline pt-2 pb-4 px-0.5">
+                      <span class="text-sm">{{ item.product.name }}</span>
+                      <span class="text-sm font-medium flex-shrink-0 ml-2">{{ wishlistPrice(item) }}</span>
+                    </div>
+                  </a>
+                  <button
+                    (click)="removeFromWishlist(item.product.id)"
+                    class="absolute top-2 right-2 bg-white/85 backdrop-blur w-8 h-8 rounded-full flex items-center justify-center text-red-500 hover:scale-110 transition-transform shadow-sm">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="#e02020" stroke="#e02020" stroke-width="1.6">
+                      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                    </svg>
+                  </button>
+                </div>
+              }
+            </div>
+          }
+        </section>
+      }
+
+      @case ('settings') {
+        <section>
+          <h2 class="text-xl font-bold border-b border-gray-100 pb-4 mb-6">Account Settings</h2>
+
+          <!-- Change password -->
+          <div class="mb-10">
+            <h3 class="text-sm font-semibold uppercase tracking-widest text-gray-500 mb-5">Change password</h3>
+            <form [formGroup]="passwordForm" (ngSubmit)="submitPasswordChange()" novalidate class="space-y-4 max-w-sm">
+              <div>
+                <label class="block text-xs font-semibold uppercase tracking-widest text-gray-500 mb-1.5">
+                  Current password
+                </label>
+                <input type="password" formControlName="currentPassword"
+                  autocomplete="current-password"
+                  placeholder="••••••••"
+                  class="w-full border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-black transition" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold uppercase tracking-widest text-gray-500 mb-1.5">
+                  New password
+                </label>
+                <input type="password" formControlName="newPassword"
+                  autocomplete="new-password"
+                  placeholder="••••••••"
+                  class="w-full border px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-black transition"
+                  [ngClass]="newPassword.invalid && newPassword.touched ? 'border-red-400' : 'border-gray-300'" />
+                @if (newPassword.invalid && newPassword.touched) {
+                  <p class="mt-1 text-xs text-red-500">Minimum 8 characters</p>
+                }
+              </div>
+              <div>
+                <label class="block text-xs font-semibold uppercase tracking-widest text-gray-500 mb-1.5">
+                  Confirm new password
+                </label>
+                <input type="password" formControlName="confirmPassword"
+                  autocomplete="new-password"
+                  placeholder="••••••••"
+                  class="w-full border px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-black transition"
+                  [ngClass]="passwordForm.hasError('mismatch') && confirmPassword.touched ? 'border-red-400' : 'border-gray-300'" />
+                @if (passwordForm.hasError('mismatch') && confirmPassword.touched) {
+                  <p class="mt-1 text-xs text-red-500">Passwords do not match</p>
+                }
+              </div>
+
+              @if (passwordError()) {
+                <div class="px-4 py-3 bg-red-50 border border-red-200 text-sm text-red-700 rounded">
+                  {{ passwordError() }}
+                </div>
+              }
+              @if (passwordSuccess()) {
+                <div class="px-4 py-3 bg-green-50 border border-green-200 text-sm text-green-700 rounded">
+                  {{ passwordSuccess() }}
+                </div>
+              }
+
+              <button type="submit" [disabled]="passwordLoading()"
+                class="px-6 py-2.5 bg-black text-white text-sm font-semibold uppercase tracking-widest hover:bg-gray-900 transition disabled:opacity-50">
+                @if (passwordLoading()) { Saving… } @else { Update password }
+              </button>
+            </form>
+          </div>
+
+          <div class="border-t border-gray-100 pt-6">
+            <h3 class="text-sm font-semibold uppercase tracking-widest text-gray-500 mb-4">Session</h3>
+            <button (click)="logout()"
+              class="px-6 py-2.5 border border-black text-sm font-semibold uppercase tracking-widest hover:bg-black hover:text-white transition">
+              Sign out
+            </button>
+          </div>
+        </section>
+      }
+
+    }
+  </div>
+
+</div>
