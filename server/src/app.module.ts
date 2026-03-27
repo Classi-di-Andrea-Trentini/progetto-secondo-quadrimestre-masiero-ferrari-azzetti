@@ -9,6 +9,7 @@ import { UsersModule } from './users/users.module';
 import { MailModule } from './mail/mail.module';
 import { ProductsModule } from './products/products.module';
 import { WishlistModule } from './wishlist/wishlist.module';
+import { NewsletterModule } from './newsletter/newsletter.module';
 import { ConfigModule } from '@nestjs/config';
 
 
@@ -30,6 +31,7 @@ import { ConfigModule } from '@nestjs/config';
     MailModule,
     ProductsModule,
     WishlistModule,
+    NewsletterModule,
   ],
   controllers: [AppController],
   providers: [

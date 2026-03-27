@@ -1,12 +1,21 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal, OnInit, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { AuthService } from '../../services/auth';
+import { ProductsService, ProductListItem } from '../../services/products.service';
 
 @Component({
   selector: 'app-home',
-  imports: [],
+  imports: [RouterModule],
   templateUrl: './home.html',
   styleUrl: './home.css',
 })
-export class Home {
+export class Home implements OnInit {
+  readonly auth = inject(AuthService);
+  private readonly productsService = inject(ProductsService);
+  private readonly platformId = inject(PLATFORM_ID);
+
+  readonly featuredProducts = signal<ProductListItem[]>([]);
   readonly collectionHighlights = [
     {
       image:
@@ -75,9 +84,34 @@ export class Home {
         'Sign in to preview upcoming drops, save wishlists, and unlock private offers.',
       notes: ['Private offers', 'Wishlist sync', 'Early product drops'],
       cta: 'Go to Account',
-      link: '/login',
+      link: '/me',
+      loginLink: '/login',
     },
   ];
+
+  ngOnInit(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    this.productsService.getProducts({ sortBy: 'newest', limit: 4 }).subscribe({
+      next: (res) => this.featuredProducts.set(res.data),
+    });
+  }
+
+  getCoverImage(product: ProductListItem): string {
+    return product.images.find((i) => i.isCover)?.url ?? product.images[0]?.url ?? '';
+  }
+
+  formatPrice(product: ProductListItem): string {
+    const base = parseFloat(String(product.basePrice));
+    const d = product.discounts[0];
+    if (!d) return '€ ' + base.toFixed(2).replace('.', ',');
+    const val = parseFloat(String(d.value));
+    const eff = d.type === 'percentage' ? base * (1 - val / 100) : base - val;
+    return '€ ' + eff.toFixed(2).replace('.', ',');
+  }
+
+  hasDiscount(product: ProductListItem): boolean {
+    return product.discounts.length > 0;
+  }
 
   prevSlide(): void {
     const total = this.collectionHighlights.length;

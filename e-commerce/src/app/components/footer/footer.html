@@ -9,6 +9,7 @@
 				<p class="mt-4 text-lg leading-relaxed text-[#8F8F8F]">
 					Discover new collections, exclusive offers, and weekly style insights delivered to your inbox.
 				</p>
+				@if (!subscribeMessage()) {
 				<form class="mt-8 flex flex-col gap-3 sm:flex-row sm:gap-0" (ngSubmit)="onSubscribe()">
 					<input
 						type="email"
@@ -20,16 +21,22 @@
 					/>
 					<button
 						type="submit"
-						class="inline-flex items-center justify-center bg-[#000000] px-8 py-3.5 text-sm font-semibold text-[#F0F0F0] transition hover:bg-[#2a2a2a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6CD0D0] sm:rounded-none sm:border-l sm:border-[#8F8F8F]/20"
+						[disabled]="subscribing()"
+						class="inline-flex items-center justify-center bg-[#000000] px-8 py-3.5 text-sm font-semibold text-[#F0F0F0] transition hover:bg-[#2a2a2a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6CD0D0] sm:rounded-none sm:border-l sm:border-[#8F8F8F]/20 disabled:opacity-50"
 					>
-						Subscribe
+						{{ subscribing() ? 'Sending…' : 'Subscribe' }}
 					</button>
 				</form>
-				@if (subscribeMessage()) {
-					<p class="footer-subscribe-message mt-4" aria-live="polite">
-						{{ subscribeMessage() }}
+				@if (subscribeError()) {
+					<p class="mt-4 text-sm text-red-500" aria-live="polite">
+						{{ subscribeError() }}
 					</p>
 				}
+			} @else {
+				<p class="footer-subscribe-message mt-8" aria-live="polite">
+					✓ {{ subscribeMessage() }}
+				</p>
+			}
 			</div>
 		</section>
 	}

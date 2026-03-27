@@ -1,28 +1,72 @@
-@if (!cookiesAccepted()) {
-	<div class="consent-overlay">
-		<div class="consent-card">
-			<p class="consent-label">Cookie Consent Required</p>
-			<h1 class="consent-title">Before entering COMMON ERA</h1>
-			<p class="consent-text">
-				This is a school demo app. We use only essential cookies for core functionality
-				and to save your consent choice. Please accept to continue.
-			</p>
-			<div class="consent-links">
-				<a href="/legal/privacy">Privacy Policy</a>
-				<a href="/legal/cookies">Cookie Policy</a>
-				<a href="/legal/terms">Terms of Service</a>
-			</div>
-			<div class="consent-actions">
-				<button type="button" class="consent-btn consent-btn-secondary" (click)="rejectCookies()">Reject and Exit</button>
-				<button type="button" class="consent-btn" (click)="acceptCookies()">Accept and Continue</button>
-			</div>
-		</div>
-	</div>
-} @else {
-  <app-nav-bar />
-  <app-cart />
-  <main class="pt-16">
-    <router-outlet />
-  </main>
-  <app-footer />
+<app-nav-bar />
+<app-cart />
+<main class="pt-16">
+  <router-outlet />
+</main>
+<app-footer />
+
+@if (bannerVisible()) {
+  <div class="cookie-banner" role="dialog" aria-label="Cookie consent">
+
+    @if (!customizing()) {
+      <!-- ── DEFAULT BANNER ─────────────────────────────── -->
+      <div class="cookie-banner-text">
+        <p class="cookie-banner-title">Cookie preferences</p>
+        <p class="cookie-banner-desc">
+          We use only essential cookies to keep you logged in and remember your consent choice.
+          No analytics or marketing cookies are used.
+          <a routerLink="/legal/cookies" (click)="bannerVisible.set(false)">Cookie Policy</a>
+        </p>
+      </div>
+      <div class="cookie-banner-actions">
+        <button type="button" class="cookie-btn cookie-btn-ghost" (click)="openCustomize()">Customize</button>
+        <button type="button" class="cookie-btn cookie-btn-outline" (click)="decline()">Decline</button>
+        <button type="button" class="cookie-btn" (click)="acceptAll()">Accept all</button>
+      </div>
+
+    } @else {
+      <!-- ── CUSTOMIZE PANEL ────────────────────────────── -->
+      <div class="cookie-customize">
+        <button type="button" class="cookie-back" (click)="backToBanner()">
+          ← Back
+        </button>
+        <p class="cookie-banner-title" style="margin-top:10px">Customize cookies</p>
+
+        <div class="cookie-toggle-row">
+          <div class="cookie-toggle-info">
+            <span class="cookie-toggle-label">Essential cookies</span>
+            <span class="cookie-toggle-desc">Authentication session and consent preference. Cannot be disabled.</span>
+          </div>
+          <div class="cookie-toggle-switch cookie-toggle-switch--on" aria-disabled="true" title="Always active">
+            <span>Always on</span>
+          </div>
+        </div>
+
+        <div class="cookie-toggle-row cookie-toggle-row--muted">
+          <div class="cookie-toggle-info">
+            <span class="cookie-toggle-label">Analytics cookies</span>
+            <span class="cookie-toggle-desc">Not used. No analytics or tracking services are configured on this site.</span>
+          </div>
+          <div class="cookie-toggle-switch" aria-disabled="true" title="Not used">
+            <span>Not used</span>
+          </div>
+        </div>
+
+        <div class="cookie-toggle-row cookie-toggle-row--muted">
+          <div class="cookie-toggle-info">
+            <span class="cookie-toggle-label">Marketing cookies</span>
+            <span class="cookie-toggle-desc">Not used. No advertising or profiling services are configured on this site.</span>
+          </div>
+          <div class="cookie-toggle-switch" aria-disabled="true" title="Not used">
+            <span>Not used</span>
+          </div>
+        </div>
+
+        <div class="cookie-banner-actions" style="margin-top:14px">
+          <button type="button" class="cookie-btn" (click)="saveCustom()">Save preferences</button>
+        </div>
+      </div>
+    }
+
+  </div>
 }
