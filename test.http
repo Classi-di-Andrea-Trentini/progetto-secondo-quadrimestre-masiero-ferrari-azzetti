@@ -1,73 +1,22 @@
-# ==================== PRODUCTS ====================
-
-# Lista prodotti
-curl http://localhost:3000/products
-
-# Lista con filtri
-###
-curl "http://localhost:3000/products?page=1&limit=5"
-###
-curl "http://localhost:3000/products?search=jeans"
-###
-curl "http://localhost:3000/products?isFeatured=true"
-###
-curl "http://localhost:3000/products?isNewArrival=true"
-###
-curl "http://localhost:3000/products?minPrice=50&maxPrice=100"
-###
-curl "http://localhost:3000/products?sortBy=price_asc"
-###
-curl "http://localhost:3000/products?sortBy=popular"
-
-# Filtri disponibili
-###
-curl http://localhost:3000/products/filters
-
-# Dettaglio prodotto per slug
-###
-curl http://localhost:3000/products/t-shirt-bianca-basic
-###
-curl http://localhost:3000/products/jeans-blu-classico
-###
-curl http://localhost:3000/products/sneakers-bianche-casual
-
-# ==================== AUTH ====================
-
-# Registrazione
-###
-curl -X POST http://localhost:3000/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"email":"test@test.it","password":"Password123!","fullName":"Test User"}'
-
-# Login
-###
+# ==================== LOGIN (salva il cookie) ====================
 curl -X POST http://localhost:3000/auth/login \
   -H "Content-Type: application/json" \
   -c cookies.txt \
-  -d '{"email":"admin@ecommerce.it","password":"admin123"}'
+  -d '{"email":"giacomo@ecommerce.it","password":"admin123"}'
 
-# Profilo utente (richiede login prima)
+# ==================== IUSER ====================
 ###
 curl http://localhost:3000/auth/me \
   -b cookies.txt
 
-# Logout
+# ==================== IPRODUCT + IPRODUCTVARIANT + IPRODUCTIMAGE + IDISCOUNT ====================
 ###
-curl -X POST http://localhost:3000/auth/logout \
-  -b cookies.txt
+curl http://localhost:3000/products/t-shirt-bianca-basic
 
-# ==================== USERS ====================
-
-# Aggiorna profilo (richiede login)
+# ==================== IPRODUCTS (lista paginata + meta) ====================
 ###
-curl -X PATCH http://localhost:3000/users/me \
-  -H "Content-Type: application/json" \
-  -b cookies.txt \
-  -d '{"fullName":"Nuovo Nome","phone":"3331234567"}'
+curl "http://localhost:3000/products?page=1&limit=5"
 
-# Cambia password (richiede login)
+# ==================== ICATEGORY ====================
 ###
-curl -X POST http://localhost:3000/users/me/change-password \
-  -H "Content-Type: application/json" \
-  -b cookies.txt \
-  -d '{"currentPassword":"admin123","newPassword":"NuovaPassword123!"}'
+curl http://localhost:3000/products/filters
