@@ -6,18 +6,18 @@ import { GetProductsDto } from './dto/get-products.dto';
 export class ProductsController {
     public constructor(private readonly productsService: ProductsService) {}
 
-    @Get()
-    findAll(@Query() dto: GetProductsDto) {
-        return this.productsService.findAll(dto);
-    }
-
     @Get('filters')
     getFilters() {
         return this.productsService.getFilters();
     }
 
+    @Get()
+    products(@Query() dto: GetProductsDto) {
+        return this.productsService.findAll(dto);
+    }
+
     @Get(':slug')
-    findBySlug(@Param('slug') slug: string) {
+    product(@Param('slug') slug: string) {
         return this.productsService.findBySlug(slug);
     }
 }
