@@ -2,65 +2,157 @@
 
 ## Entry point — main.ts
 
-`server/src/main.ts` is the bootstrap file. It creates the NestJS application, applies global middleware and configuration, and starts the HTTP server.
+`server/src/main.ts` is the first file executed when the backend starts. Its only job is to create the NestJS application, wire up global middleware and configuration, and call `app.listen()`. Nothing that belongs to a specific feature lives here.
 
-The middleware applied here affects every request:
+```typescript
+const app = await NestFactory.create(AppModule);
+app.use(helmet());
+app.use(cookieParser());
+app.enableCors({ origin: process.env.FRONTEND_URL, credentials: true, ... });
+app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true, ... }));
+await app.listen(process.env.PORT ?? 3000);
+```
 
-**helmet** — sets a collection of security-related HTTP response headers (Content-Security-Policy, X-Frame-Options, etc.). It is applied as raw Express middleware via `app.use(helmet())`.
+### helmet
 
-**cookie-parser** — required for reading the `access_token` HttpOnly cookie. Without this, `req.cookies` would be undefined and JWT authentication would break entirely.
+`helmet()` is Express middleware that sets a collection of HTTP response headers that browsers use to block common attack vectors. Examples of what it sets: `Content-Security-Policy` (controls which scripts, images and frames can load), `X-Frame-Options: SAMEORIGIN` (prevents the page from being embedded in an iframe on another site), `X-Content-Type-Options: nosniff` (stops the browser from guessing MIME types), `Strict-Transport-Security` (in production, forces HTTPS). Applied as the very first middleware so it affects every response including error responses.
 
-**CORS** — configured to accept requests only from `FRONTEND_URL` (default `http://localhost:4200`), with `credentials: true` so the browser sends cookies cross-origin. The allowed methods cover everything the frontend uses.
+### cookie-parser
 
-**ValidationPipe** — applied globally. This is the pipe that enforces DTO validation across all controllers. `whitelist: true` silently strips any property that is not declared in the DTO class. `transform: true` automatically converts incoming query strings and body values to the types declared on the DTO (e.g. `"24"` becomes the number `24`). `forbidNonWhitelisted: true` goes one step further and throws a 400 if an undeclared property is present instead of just stripping it.
+NestJS is built on Express. Without `cookie-parser`, `req.cookies` is undefined. The JWT authentication strategy reads the `access_token` cookie from `req.cookies`, so if this middleware is missing, every authenticated request gets a 401. Applied before the NestJS routing layer.
+
+### CORS
+
+Configured with `credentials: true`, which allows the browser to send cookies in cross-origin requests. Without this flag, the browser refuses to include cookies even if `withCredentials: true` is set on the Angular `HttpClient` call. The `origin` is restricted to the `FRONTEND_URL` environment variable, so the backend will not respond to credentialed requests from any other domain. In development this is `http://localhost:4200`.
+
+### ValidationPipe
+
+The global validation pipe intercepts every incoming request body before it reaches a controller method. It uses the DTO class and its `class-validator` decorators to validate and transform the incoming data.
+
+- `whitelist: true` — strips any property not declared in the DTO. If a client sends `{ email: "x", role: "admin" }` and the DTO only has `email`, the `role` field is silently removed before the controller sees it. This prevents mass assignment attacks.
+- `forbidNonWhitelisted: true` — instead of silently stripping, throws a `400 Bad Request` if an unknown field is present. More strict than whitelist alone.
+- `transform: true` — converts incoming values to the TypeScript types declared in the DTO. A query string parameter is always a string in HTTP; with `transform: true`, a `@Type(() => Number)` decorated field gets converted to a number automatically. Without this, `page: "2"` would be passed to Prisma's `skip` as the string `"2"`, causing incorrect results.
+
+---
 
 ## AppModule — app.module.ts
 
-The root module imports everything. Notable points:
+The root module composes the entire application. NestJS reads it when building the dependency injection container. Every module imported here becomes part of the application.
 
-**ConfigModule** — `@nestjs/config` loaded as global, which means `process.env` variables are available everywhere. The `.env` file at the project root is picked up automatically when `isGlobal: true`.
+### ConfigModule
 
-**ThrottlerModule** — global rate limiting. Configured as 100 requests per 60 seconds per IP. The `ThrottlerGuard` is registered as a global `APP_GUARD` in the `providers` array, so every route gets rate limiting by default. Individual controllers can override the limit using the `@Throttle()` decorator (as the auth controller does for login and register).
+`ConfigModule.forRoot({ isGlobal: true })` loads the `.env` file and makes `process.env` available everywhere. `isGlobal: true` means no other module needs to import `ConfigModule` to access environment variables — they are available through `process.env` in every service. In practice the codebase reads env vars directly from `process.env` rather than through the injected `ConfigService`.
 
-**PrismaModule** — declared `@Global()` in its own module file, which means any other module can inject `PrismaService` without explicitly importing `PrismaModule`. This is why you do not see `PrismaModule` in the `imports` array of feature modules.
+### ThrottlerModule
 
-**MailModule** — also declared `@Global()` for the same reason. `MailService` can be injected anywhere.
+Rate limiting applied globally. Configured as 100 requests per 60 seconds per IP address.
 
-The rest of the imports are the feature modules, each self-contained with their own controller and service.
+```typescript
+ThrottlerModule.forRoot([{ ttl: 60000, limit: 100 }])
+```
+
+The `ThrottlerGuard` is registered as an `APP_GUARD` in the providers array. An `APP_GUARD` is applied to every route in the application automatically, without needing `@UseGuards()` on each controller. Individual routes can override the default limits with the `@Throttle()` decorator — the auth controller uses this to apply stricter limits (5 registrations per 15 minutes, 10 logins per 15 minutes) because login and register endpoints are typical targets for brute-force attacks.
+
+### PrismaModule and MailModule
+
+Both are marked `@Global()` in their own module files and both `exports` their service. A global module in NestJS means its exports are available in the entire application injection context without needing to import the module again in each feature module. This is why `AddressesModule`, `OrdersModule`, etc. do not list `PrismaModule` in their `imports` — `PrismaService` is just injected in their service constructors and NestJS resolves it.
+
+---
 
 ## PrismaService — prisma/prisma.service.ts
 
-`PrismaService` extends `PrismaClient` directly, which is the standard NestJS + Prisma pattern. It implements `OnModuleInit` and `OnModuleDestroy` to manage the database connection lifecycle cleanly within the NestJS IoC container.
+```typescript
+@Injectable()
+export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
+  constructor() {
+    const adapter = new PrismaPg({ connectionString: buildConnectionString() });
+    super({ adapter });
+  }
+  async onModuleInit() { await this.$connect(); }
+  async onModuleDestroy() { await this.$disconnect(); }
+}
+```
 
-The constructor builds the connection string from environment variables. If `DATABASE_URL` is set, it uses that. Otherwise it assembles a URL from the individual `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` variables. Inside Docker Compose the `DATABASE_URL` is always set, so the fallback is only relevant when running the backend locally outside of Docker.
+`PrismaService extends PrismaClient` is the standard approach. Because it inherits `PrismaClient`, every model accessor is available on the service instance: `this.prisma.user`, `this.prisma.product`, `this.prisma.order`, and so on. IDE autocompletion works fully on these because Prisma generates typed accessors from the schema.
 
-It uses `PrismaPg` from `@prisma/adapter-pg` as the driver adapter, which is the newer driver-adapter approach rather than the older native binding.
+`OnModuleInit` and `OnModuleDestroy` are NestJS lifecycle hooks. `$connect()` is called when the module initialises, establishing the connection pool. `$disconnect()` is called on shutdown to cleanly close all connections. Without these hooks, the connection would be established lazily on the first query and never explicitly closed.
 
-Because `PrismaService extends PrismaClient`, all Prisma model accessors (`this.prisma.user`, `this.prisma.product`, etc.) are available through the service instance.
+`buildConnectionString()` has a fallback that assembles a Postgres URL from individual `DB_HOST`, `DB_PORT`, etc. variables if `DATABASE_URL` is not set. Inside Docker Compose, `DATABASE_URL` is always set so the fallback only matters when running the backend locally outside of Docker.
 
-## Module structure convention
+The `PrismaPg` adapter from `@prisma/adapter-pg` is the driver-adapter approach introduced in Prisma 5, replacing the older native binary binding. It uses the `pg` npm package as the underlying Postgres client.
 
-Every feature follows the same pattern:
+---
+
+## Module and file conventions
+
+Every feature follows a strict three-layer structure:
 
 ```
 feature/
-├── feature.module.ts      imports controller + service, no further config
-├── feature.controller.ts  HTTP routing, extracts req.user, delegates to service
-├── feature.service.ts     all business logic and Prisma queries
+├── feature.module.ts      NestJS module: registers controller and provider
+├── feature.controller.ts  HTTP layer: routing, extracting req.user, delegating
+├── feature.service.ts     business logic and all Prisma queries
 └── dto/
-    └── *.dto.ts           class-validator decorated classes for request bodies
+    └── *.dto.ts           request body shapes with class-validator decorators
 ```
 
-The controller's job is to receive the HTTP request, extract the authenticated user from `req.user` (injected by the JWT strategy), and call the appropriate service method. No business logic lives in controllers.
+### Controller responsibilities
 
-The service's job is to talk to Prisma and implement the rules (ownership checks, state validation, atomic transactions, etc.). Services never know about HTTP — they receive plain values and return plain objects.
+Controllers have one job: translate an HTTP request into a service call. They extract the route parameters and query strings, pull the authenticated user from `req.user` (which is injected by the JWT strategy after authentication), and call the service. They do not contain conditionals, database queries, or calculations.
 
-DTOs use `class-validator` decorators (`@IsString()`, `@IsUUID()`, `@Min()`, etc.) combined with the global `ValidationPipe` to validate incoming request bodies automatically before the controller method is even called.
+```typescript
+@Get(':id')
+findOne(@Req() req: any, @Param('id') id: string) {
+  return this.svc.findOne(req.user.id, id);  // two lines total
+}
+```
+
+The return value from the service is serialised to JSON automatically by NestJS/Express. No manual `res.json()` calls are needed.
+
+### Service responsibilities
+
+Services contain all the business logic. They receive plain values (strings, numbers, DTOs) and return plain objects or throw NestJS HTTP exceptions (`NotFoundException`, `ForbiddenException`, `BadRequestException`). NestJS catches these exceptions and maps them to the appropriate HTTP status codes automatically.
+
+Services never import `Request`, `Response`, or any HTTP concept. This makes them easy to test in isolation.
+
+### DTO classes
+
+DTOs are plain TypeScript classes with `class-validator` decorators. The global `ValidationPipe` reads these decorators to validate incoming request bodies before the controller method is called. If validation fails, a `400 Bad Request` is returned automatically with a `message` array listing every failed field. Example:
+
+```typescript
+export class CreateAddressDto {
+  @IsString()
+  @MaxLength(255)
+  street: string;
+
+  @IsString()
+  @MaxLength(100)
+  city: string;
+
+  @IsPostalCode('IT')
+  postalCode: string;
+}
+```
+
+---
 
 ## Authentication guard — JwtAuthGuard
 
-`JwtAuthGuard` is a thin wrapper around `AuthGuard('jwt')` from `@nestjs/passport`. Apply it to a controller or method with `@UseGuards(JwtAuthGuard)`.
+```typescript
+@Injectable()
+export class JwtAuthGuard extends AuthGuard('jwt') {}
+```
 
-When the guard runs, Passport calls `JwtStrategy.validate()`. That method takes the decoded JWT payload, calls `AuthService.validateSession()` with the `sub` (userId) and `sid` (sessionId) claims, verifies the session exists in the database and has not expired, and returns the user object. The returned value is attached to `req.user` and is available in every protected controller method.
+Applied with `@UseGuards(JwtAuthGuard)` at controller or method level. When the guard runs, it calls the Passport `jwt` strategy (`JwtStrategy`). The strategy extracts the token from the `access_token` cookie, verifies the JWT signature using `JWT_SECRET`, decodes the payload, and calls `AuthService.validateSession()` to confirm the session row still exists in the database.
 
-The guard does not differentiate between user roles. Admin-only restrictions are handled manually in service methods by checking `req.user.role`.
+If everything passes, the user object returned by `validateSession()` is attached to `req.user`. If the token is missing, expired, or the session no longer exists, the guard throws a `401 Unauthorized` automatically.
+
+The guard does not check user roles. There is no `@Roles()` decorator. Admin access restrictions in the admin area (when implemented) will need to be enforced manually in service methods by checking `req.user.role === 'admin'` or by creating a separate `AdminGuard`.
+
+### Why a database check on every request
+
+Purely JWT-based auth is stateless — the server only needs to verify the signature. But that means there is no way to invalidate a token before it expires. If a user logs out or changes their password, an attacker holding a stolen token could continue making requests until it expires (up to 7 days).
+
+By storing sessions in the database and checking the session row on every request, the server can invalidate a session immediately by deleting the row. Logout deletes the row. Password change deletes all rows except the current session. The JWT is just a signed carrier for the `sessionId` — the authoritative check is the database lookup.
+
+The cost is one extra database query per authenticated request. For this application's scale this is entirely acceptable.
