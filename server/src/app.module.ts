@@ -10,6 +10,12 @@ import { MailModule } from './mail/mail.module';
 import { ProductsModule } from './products/products.module';
 import { WishlistModule } from './wishlist/wishlist.module';
 import { NewsletterModule } from './newsletter/newsletter.module';
+import { AddressesModule } from './addresses/addresses.module';
+import { OrdersModule } from './orders/orders.module';
+import { CheckoutModule } from './checkout/checkout.module';
+import { ReviewsModule } from './reviews/reviews.module';
+import { PromoCodesModule } from './promo-codes/promo-codes.module';
+import { ReturnsModule } from './returns/returns.module';
 import { ConfigModule } from '@nestjs/config';
 
 
@@ -32,6 +38,12 @@ import { ConfigModule } from '@nestjs/config';
     ProductsModule,
     WishlistModule,
     NewsletterModule,
+    AddressesModule,
+    OrdersModule,
+    CheckoutModule,
+    ReviewsModule,
+    PromoCodesModule,
+    ReturnsModule,
   ],
   controllers: [AppController],
   providers: [
