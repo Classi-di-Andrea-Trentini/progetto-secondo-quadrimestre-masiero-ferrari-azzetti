@@ -1,12 +1,12 @@
 export interface IProductImage {
   id: string
   productId: string
-  variantId: any
+  variantId: string | null
   url: string
-  altText: string
+  altText: string | null
   sortOrder: number
   isCover: boolean
-  width: any
-  height: any
+  width: number | null
+  height: number | null
   createdAt: string
 }

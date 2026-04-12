@@ -88,5 +88,5 @@ docker compose -f "$COMPOSE_FILE" exec -T db \
 
 echo ""
 hr
-ok "Seed complete. 12 products loaded into the database."
+ok "Seed complete. Product catalog loaded into the database."
 hr
