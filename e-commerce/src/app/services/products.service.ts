@@ -5,6 +5,7 @@ const API_URL = 'http://localhost:3000';
 
 export interface ProductImage {
   id: string;
+  variantId: string | null;
   url: string;
   altText: string | null;
   isCover: boolean;

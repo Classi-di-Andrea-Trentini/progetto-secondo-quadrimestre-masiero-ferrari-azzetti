@@ -56,7 +56,6 @@ export class ProductsService {
                     category: { select: { id: true, name: true, slug: true } },
                     images: {
                         orderBy: [{ isCover: 'desc' }, { sortOrder: 'asc' }],
-                        take: 2,
                     },
                     variants: {
                         where: { isActive: true },
