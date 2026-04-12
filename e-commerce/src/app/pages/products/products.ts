@@ -106,17 +106,36 @@ export class Products implements OnInit {
   });
 
   // ─── Product helpers ─────────────────────────────────────
+  displayedImages(p: ProductListItem) {
+    const selected = this.cardColor(p.id);
+    if (!selected) return p.images;
+
+    const variantIds = new Set(
+      p.variants
+        .filter(v => v.colorHex === selected)
+        .map(v => v.id)
+    );
+
+    const variantImages = p.images.filter(i => i.variantId && variantIds.has(i.variantId));
+    if (variantImages.length) return variantImages;
+
+    const genericImages = p.images.filter(i => !i.variantId);
+    return genericImages.length ? genericImages : p.images;
+  }
+
   coverImage(p: ProductListItem) {
-    return p.images.find(i => i.isCover)?.url ?? p.images[0]?.url ?? '';
+    const imgs = this.displayedImages(p);
+    return imgs.find(i => i.isCover)?.url ?? imgs[0]?.url ?? '';
   }
 
   hoverImage(p: ProductListItem) {
-    const nonCover = p.images.find(i => !i.isCover);
+    const imgs = this.displayedImages(p);
+    const nonCover = imgs.find(i => !i.isCover);
     return nonCover?.url ?? this.coverImage(p);
   }
 
   hasHoverImage(p: ProductListItem) {
-    return p.images.length >= 2;
+    return this.displayedImages(p).length >= 2;
   }
 
   discountedPrice(p: ProductListItem): number | null {

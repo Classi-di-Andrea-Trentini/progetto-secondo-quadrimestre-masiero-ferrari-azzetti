@@ -78,8 +78,29 @@ export class ProductDetail implements OnInit {
   }
 
   // ─── Computed ────────────────────────────────────────────
+  readonly galleryImages = computed<ProductImage[]>(() => {
+    const p = this.product();
+    if (!p) return [];
+
+    const color = this.selectedColor();
+    if (!color) return p.images;
+
+    const variantIds = new Set(
+      p.variants
+        .filter(v => v.colorHex === color)
+        .map(v => v.id)
+    );
+
+    const variantImages = p.images.filter(i => i.variantId && variantIds.has(i.variantId));
+    if (variantImages.length) return variantImages;
+
+    // Fallback for products with only generic images.
+    const genericImages = p.images.filter(i => !i.variantId);
+    return genericImages.length ? genericImages : p.images;
+  });
+
   readonly activeImage = computed<ProductImage | null>(() => {
-    const imgs = this.product()?.images ?? [];
+    const imgs = this.galleryImages();
     return imgs[this.activeImageIndex()] ?? imgs[0] ?? null;
   });
 
@@ -154,6 +175,7 @@ export class ProductDetail implements OnInit {
   selectColor(hex: string) {
     this.selectedColor.set(hex);
     this.selectedSize.set('');
+    this.activeImageIndex.set(0);
   }
 
   selectSize(size: string) {
