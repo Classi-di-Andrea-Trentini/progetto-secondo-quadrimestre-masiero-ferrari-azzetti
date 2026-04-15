@@ -6,7 +6,10 @@ import { GetProductsDto } from './dto/get-products.dto';
 export class ProductsService {
     constructor(private prisma: PrismaService) {}
 
+    // findAll con dto
     async findAll(dto: GetProductsDto) {
+
+        // vari "campi"
         const {
             search, categoryId, brand,
             minPrice, maxPrice,
@@ -16,7 +19,9 @@ export class ProductsService {
             page = 1, limit = 24,
         } = dto;
 
+        // var where, intanto ho messo tipo any
         const where: any = {
+            // aggiorno tutti i vari campi
             isActive: true,
             ...(search && { name: { contains: search, mode: 'insensitive' } }),
             ...(categoryId && { categoryId }),
@@ -40,6 +45,7 @@ export class ProductsService {
             }),
         };
 
+        // ordinamento
         const orderBy: any =
             sortBy === 'price_asc'  ? { basePrice: 'asc' } :
             sortBy === 'price_desc' ? { basePrice: 'desc' } :
@@ -47,6 +53,7 @@ export class ProductsService {
             sortBy === 'rating'     ? { avgRating: 'desc' } :
                                       { createdAt: 'desc' };
 
+        // per trovare pià prodotti
         const [products, total] = await Promise.all([
             this.prisma.product.findMany({
                 where,
@@ -78,7 +85,9 @@ export class ProductsService {
         };
     }
 
+    // find by slug
     async findBySlug(slug: string) {
+        // sta volta find unique (1 prodotto per slug)
         const product = await this.prisma.product.findUnique({
             where: { slug },
             include: {
@@ -96,8 +105,10 @@ export class ProductsService {
             },
         });
 
-        if (!product) throw new NotFoundException('Prodotto non trovato');
+        // problemi
+        if (!product) throw new NotFoundException('Product not found!');
 
+        // per trovare tutti quei prodotti con slug
         const related = await this.prisma.product.findMany({
             where: {
                 isActive: true,
@@ -115,7 +126,9 @@ export class ProductsService {
         return { product, related };
     }
 
+    // metodo per fare il get filtrato
     async getFilters() {
+        // vari filtri
         const [categories, colors, sizes, priceRange] = await Promise.all([
             this.prisma.category.findMany({
                 where: { isActive: true },
