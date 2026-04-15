@@ -8,10 +8,12 @@ import { MeComponent } from './pages/me/me';
 import { Legal } from './pages/legal/legal';
 import { VerifyEmail } from './pages/verify-email/verify-email';
 import { authGuardGuard } from './guards/auth-guard-guard';
+import { Admin } from './pages/admin/admin';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
   { path: 'home', component: Home },
+  { path: 'admin', component: Admin },
   { path: 'login', component: Login },
   { path: 'register', component: Register },
   { path: 'products', component: Products },

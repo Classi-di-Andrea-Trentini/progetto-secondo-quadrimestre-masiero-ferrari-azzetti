@@ -1,1 +1,12 @@
-<p>admin works!</p>
+<!-- BLOCCO DOVE CONTROLLO SE SONO LOGGATO o meno-->
+@if (isAdmin()) {
+    <div class="grid h-48 grid-cols-2 place-content-start gap-4 ...">
+        <div>Dashboard</div>
+        <div>02</div>
+        <div>03</div>
+        <div>04</div>
+    </div>
+} 
+@else {
+    
+}
