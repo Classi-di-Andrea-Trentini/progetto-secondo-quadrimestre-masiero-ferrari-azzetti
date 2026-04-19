@@ -19,7 +19,7 @@ export class ProductsService {
             page = 1, limit = 24,
         } = dto;
 
-        // var where, intanto ho messo tipo any
+        // costruzione campo where per db
         const where: any = {
             // aggiorno tutti i vari campi
             isActive: true,
@@ -105,7 +105,7 @@ export class ProductsService {
             },
         });
 
-        // problemi
+        // gestione errori
         if (!product) throw new NotFoundException('Product not found!');
 
         // per trovare tutti quei prodotti con slug
