@@ -1,12 +1,77 @@
-<!-- BLOCCO DOVE CONTROLLO SE SONO LOGGATO o meno-->
+<!-- BLOCCO DOVE CONTROLLO SE SONO LOGGATO E SE È ADMIN -->
 @if (isAdmin()) {
-    <div class="grid h-48 grid-cols-2 place-content-start gap-4 ...">
-        <div>Dashboard</div>
-        <div>02</div>
-        <div>03</div>
-        <div>04</div>
-    </div>
-} 
-@else {
-    
+  <div class="flex min-h-screen">
+    <!-- SIDEBAR (laterale fissa) -->
+    <aside class="w-64 bg-gray-800 text-white p-4">
+      <h2 class="text-xl font-bold mb-6">Area Admin</h2>
+      <nav>
+        <ul class="space-y-2">
+          <li>
+            <a routerLink="/admin/dashboard" routerLinkActive="bg-gray-700" class="block px-4 py-2 rounded hover:bg-gray-700">
+              Dashboard
+            </a>
+          </li>
+          <li>
+            <a routerLink="/admin/users" routerLinkActive="bg-gray-700" class="block px-4 py-2 rounded hover:bg-gray-700">
+              Users
+            </a>
+          </li>
+          <li>
+            <a routerLink="/admin/orders" routerLinkActive="bg-gray-700" class="block px-4 py-2 rounded hover:bg-gray-700">
+              Orders
+            </a>
+          </li>
+          <li>
+            <a routerLink="/admin/products" routerLinkActive="bg-gray-700" class="block px-4 py-2 rounded hover:bg-gray-700">
+              Products
+            </a>
+          </li>
+          <li>
+            <a routerLink="/admin/promo" routerLinkActive="bg-gray-700" class="block px-4 py-2 rounded hover:bg-gray-700">
+              Promo
+            </a>
+          </li>
+          <li>
+          </li>
+          <hr class="my-4 border-gray-600" />
+          <li>
+            <button (click)="logout()" class="w-full text-left px-4 py-2 rounded hover:bg-red-600">
+              Logout
+            </button>
+          </li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- CONTENUTO PRINCIPALE (dove verranno caricati i componenti) -->
+    <main class="flex-1 p-6 bg-gray-100">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+} @else if (isLoggedIn()) {
+  <!-- Sidebar per utente normale -->
+  <div class="flex min-h-screen">
+    <aside class="w-64 bg-gray-800 text-white p-4">
+      <h2 class="text-xl font-bold mb-6">Area Personale</h2>
+      <nav>
+        <ul class="space-y-2">
+          <li><a routerLink="/profile" routerLinkActive="bg-gray-700" class="block px-4 py-2 rounded">Profile</a></li>
+          <li><a routerLink="/my-orders" routerLinkActive="bg-gray-700" class="block px-4 py-2 rounded">My orders</a></li>
+          <li><a routerLink="/wishlist" routerLinkActive="bg-gray-700" class="block px-4 py-2 rounded">Wishlist</a></li>
+          <li><a routerLink="/returns" routerLinkActive="bg-gray-700" class="block px-4 py-2 rounded">Returns</a></li>
+          <hr class="my-4 border-gray-600" />
+          <li><button (click)="logout()" class="w-full text-left px-4 py-2 rounded hover:bg-red-600">Logout</button></li>
+        </ul>
+      </nav>
+    </aside>
+    <main class="flex-1 p-6 bg-gray-100">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+} @else {
+  <!-- Non loggato: mostra un messaggio o reindirizza al login -->
+  <div class="text-center p-8">
+    <p>You must login to access this area</p>
+    <a routerLink="/login" class="mt-4 inline-block bg-blue-500 text-white px-4 py-2 rounded">Go to login</a>
+  </div>
 }
