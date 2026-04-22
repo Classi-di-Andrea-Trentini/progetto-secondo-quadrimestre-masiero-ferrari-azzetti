@@ -88,7 +88,7 @@ export class UsersService {
     });
 
     const backendUrl = process.env.BACKEND_URL ?? 'http://localhost:3000';
-    const confirmationUrl = `${backendUrl}/users/confirm-email/${token}`;
+    const confirmationUrl = `${backendUrl}/api/users/confirm-email/${token}`;
 
     this.mail.sendEmailChangeConfirmation(newEmail, user.fullName, confirmationUrl).catch(() => {});
 

@@ -17,6 +17,12 @@ async function bootstrap() {
   // Cookie parser richiesto per leggere i cookie HttpOnly
   app.use(cookieParser());
 
+  // Prefisso globale: tutte le route del backend sono esposte sotto /api/*.
+  // Questo permette al dev server Angular di fare proxy di /api/** verso il
+  // backend lasciando che tutto il resto venga servito dalla SPA, ed evita
+  // collisioni fra rotte frontend e backend (es. /products esiste in entrambi).
+  app.setGlobalPrefix('api');
+
   // CORS: accetta richieste con credenziali dall'origine del frontend.
   // Oltre a FRONTEND_URL supporta gli host effimeri di GitHub Codespaces
   // (*.app.github.dev) e i domini extra indicati in CORS_EXTRA_ORIGINS
