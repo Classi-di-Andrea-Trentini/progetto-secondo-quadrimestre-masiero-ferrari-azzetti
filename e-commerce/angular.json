@@ -63,6 +63,14 @@
         },
         "serve": {
           "builder": "@angular/build:dev-server",
+          "options": {
+            "allowedHosts": [
+              ".app.github.dev",
+              ".github.dev",
+              ".gitpod.io",
+              "localhost"
+            ]
+          },
           "configurations": {
             "production": {
               "buildTarget": "e-commerce:build:production"

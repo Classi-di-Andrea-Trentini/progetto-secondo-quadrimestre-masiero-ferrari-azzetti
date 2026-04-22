@@ -1,10 +1,14 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, Logger } from '@nestjs/common';
 import helmet from 'helmet';
-import cookieParser from 'cookie-parser';
+// cookie-parser è CommonJS puro (niente campo "exports"). Con `module: nodenext`
+// l'import default non si risolve in modo affidabile, quindi usiamo la sintassi
+// import-equals che mappa esattamente a `require` mantenendo i tipi.
+import cookieParser = require('cookie-parser');
 import { AppModule } from './app.module';
 
 async function bootstrap() {
+  const logger = new Logger('Bootstrap');
   const app = await NestFactory.create(AppModule);
 
   // Intestazioni di sicurezza HTTP
@@ -15,20 +19,34 @@ async function bootstrap() {
 
   // CORS: accetta richieste con credenziali dall'origine del frontend.
   // Oltre a FRONTEND_URL supporta gli host effimeri di GitHub Codespaces
-  // (*.app.github.dev), dove frontend e backend girano su sottodomini diversi.
+  // (*.app.github.dev) e i domini extra indicati in CORS_EXTRA_ORIGINS
+  // (lista separata da virgole). Gli origin rifiutati vengono loggati per
+  // semplificare la diagnosi di "Failed to fetch" lato browser.
   const frontendUrl = process.env.FRONTEND_URL ?? 'http://localhost:4200';
+  const extraOrigins = (process.env.CORS_EXTRA_ORIGINS ?? '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+
   app.enableCors({
     origin: (origin, cb) => {
       if (!origin) return cb(null, true);
       try {
         const { hostname } = new URL(origin);
-        if (origin === frontendUrl || hostname.endsWith('.app.github.dev')) {
-          return cb(null, true);
-        }
+        const allowed =
+          origin === frontendUrl ||
+          extraOrigins.includes(origin) ||
+          hostname === 'localhost' ||
+          hostname === '127.0.0.1' ||
+          hostname.endsWith('.app.github.dev') ||
+          hostname.endsWith('.gitpod.io') ||
+          hostname.endsWith('.github.dev');
+        if (allowed) return cb(null, true);
       } catch {
-        // origin malformato: rifiuta
+        // origin malformato: cade in rifiuto
       }
-      return cb(new Error('Origin non consentito da CORS'));
+      logger.warn(`CORS: origin rifiutato -> ${origin}`);
+      return cb(new Error(`Origin non consentito da CORS: ${origin}`));
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
@@ -47,6 +65,16 @@ async function bootstrap() {
     }),
   );
 
-  await app.listen(process.env.PORT ?? 3000);
+  const port = process.env.PORT ?? 3000;
+  await app.listen(port);
+  logger.log(`Backend in ascolto sulla porta ${port}`);
+  logger.log(`FRONTEND_URL configurato: ${frontendUrl}`);
+  if (extraOrigins.length > 0) {
+    logger.log(`CORS extra origins: ${extraOrigins.join(', ')}`);
+  }
 }
-bootstrap();
+bootstrap().catch((err) => {
+  // eslint-disable-next-line no-console
+  console.error('Errore fatale durante il bootstrap:', err);
+  process.exit(1);
+});
