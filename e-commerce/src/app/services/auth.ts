@@ -153,9 +153,45 @@ export class AuthService {
     if (err instanceof HttpErrorResponse) {
       const msg = err.error?.message;
       if (typeof msg === 'string') return msg;
-      if (Array.isArray(msg)) return msg.join('. ');
-      if (err.status === 0) return 'Impossibile connettersi al server';
-      if (err.status === 429) return 'Troppi tentativi, riprova tra qualche minuto';
+      if (Array.isArray(msg) && msg.length > 0) return msg.join('. ');
+
+      switch (err.status) {
+        case 0:
+          // Stato 0 = richiesta bloccata prima della risposta: DNS, rete,
+          // CORS, mixed content HTTPS→HTTP. Su Codespaces è il sintomo
+          // tipico quando il backend non è raggiungibile all'URL derivato.
+          // eslint-disable-next-line no-console
+          console.error('[Auth] Richiesta fallita verso', err.url, err);
+          return 'Impossibile contattare il server. Verifica la connessione o che il backend sia raggiungibile.';
+        case 400:
+          return 'Richiesta non valida';
+        case 401:
+          return 'Credenziali non valide o sessione scaduta';
+        case 403:
+          return 'Operazione non consentita';
+        case 404:
+          return 'Risorsa non trovata';
+        case 409:
+          return 'Conflitto: la risorsa esiste già o è in uso';
+        case 422:
+          return 'Dati non validi';
+        case 429:
+          return 'Troppi tentativi, riprova tra qualche minuto';
+        case 500:
+        case 502:
+        case 503:
+        case 504:
+          return 'Servizio temporaneamente non disponibile, riprova più tardi';
+      }
+
+      if (err.status >= 500) {
+        return 'Errore del server, riprova più tardi';
+      }
+    }
+
+    if (err instanceof Error) {
+      // eslint-disable-next-line no-console
+      console.error('[Auth] Errore generico:', err);
     }
     return 'Si è verificato un errore, riprova';
   }
