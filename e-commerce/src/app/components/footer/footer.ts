@@ -3,8 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs/operators';
-
-const API_URL = 'http://localhost:3000';
+import { API_URL } from '../../services/api.config';
 
 @Component({
   selector: 'app-footer',
