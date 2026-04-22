@@ -2,8 +2,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { ProductListItem } from './products.service';
-
-const API_URL = 'http://localhost:3000';
+import { API_URL } from './api.config';
 
 export interface WishlistItem {
   id: string;

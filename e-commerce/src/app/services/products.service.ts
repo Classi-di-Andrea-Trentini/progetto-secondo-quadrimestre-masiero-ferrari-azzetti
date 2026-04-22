@@ -1,7 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-
-const API_URL = 'http://localhost:3000';
+import { API_URL } from './api.config';
 
 export interface ProductImage {
   id: string;

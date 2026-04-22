@@ -21,13 +21,28 @@ import type { JwtPayload } from './jwt.strategy';
 // Durata del cookie (7 giorni in ms) — deve corrispondere alla sessione nel DB
 const COOKIE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 
-const COOKIE_OPTIONS = {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: 'strict' as const,
-  maxAge: COOKIE_MAX_AGE_MS,
-  path: '/',
-};
+// In ambienti cross-site HTTPS (es. GitHub Codespaces dove frontend e backend
+// stanno su sottodomini diversi di *.app.github.dev) il browser accetta il
+// cookie solo con SameSite=None e Secure=true. In locale su HTTP manteniamo
+// SameSite=Strict per la protezione CSRF.
+function getCookieOptions(req: Request) {
+  const origin = req.headers.origin ?? '';
+  let crossSiteHttps = false;
+  try {
+    const url = new URL(origin);
+    crossSiteHttps =
+      url.protocol === 'https:' && url.hostname.endsWith('.app.github.dev');
+  } catch {
+    // origin assente o malformato: usa default
+  }
+  return {
+    httpOnly: true,
+    secure: crossSiteHttps || process.env.NODE_ENV === 'production',
+    sameSite: crossSiteHttps ? ('none' as const) : ('strict' as const),
+    maxAge: COOKIE_MAX_AGE_MS,
+    path: '/',
+  };
+}
 
 @Controller('auth')
 export class AuthController {
@@ -65,7 +80,7 @@ export class AuthController {
     };
 
     const token = this.jwtService.sign(payload);
-    response.cookie('access_token', token, COOKIE_OPTIONS);
+    response.cookie('access_token', token, getCookieOptions(request));
 
     return { message: 'Login effettuato', user: result.user };
   }
@@ -87,7 +102,7 @@ export class AuthController {
       }
     }
 
-    response.clearCookie('access_token', { ...COOKIE_OPTIONS, maxAge: 0 });
+    response.clearCookie('access_token', { ...getCookieOptions(request), maxAge: 0 });
     return { message: 'Logout effettuato' };
   }
 

@@ -13,9 +13,23 @@ async function bootstrap() {
   // Cookie parser richiesto per leggere i cookie HttpOnly
   app.use(cookieParser());
 
-  // CORS: accetta richieste con credenziali solo dall'origine del frontend
+  // CORS: accetta richieste con credenziali dall'origine del frontend.
+  // Oltre a FRONTEND_URL supporta gli host effimeri di GitHub Codespaces
+  // (*.app.github.dev), dove frontend e backend girano su sottodomini diversi.
+  const frontendUrl = process.env.FRONTEND_URL ?? 'http://localhost:4200';
   app.enableCors({
-    origin: process.env.FRONTEND_URL ?? 'http://localhost:4200',
+    origin: (origin, cb) => {
+      if (!origin) return cb(null, true);
+      try {
+        const { hostname } = new URL(origin);
+        if (origin === frontendUrl || hostname.endsWith('.app.github.dev')) {
+          return cb(null, true);
+        }
+      } catch {
+        // origin malformato: rifiuta
+      }
+      return cb(new Error('Origin non consentito da CORS'));
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
