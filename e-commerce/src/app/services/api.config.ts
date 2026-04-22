@@ -1,47 +1,37 @@
-// URL base del backend. In locale punta a localhost:3000; su GitHub Codespaces
-// l'hostname del frontend è <codespace>-4200.app.github.dev e il backend è
-// esposto sullo stesso dominio ma sulla porta 3000, quindi deriviamo l'URL
-// dal hostname corrente per evitare il "Failed to fetch" verso localhost.
+// URL base del backend.
 //
-// Porte del backend e del frontend nei diversi ambienti: se cambiano, aggiorna
-// qui e le regex di derivazione resteranno coerenti.
-const FRONTEND_PORT = '4200';
-const BACKEND_PORT = '3000';
+// Strategia: il dev server Angular fa da proxy per il path /api/** verso
+// http://backend:3000 (configurato in proxy.conf.json). Questo permette al
+// browser di fare chiamate SAME-ORIGIN verso l'host del frontend, evitando
+// del tutto i problemi di CORS, cookie cross-site e Codespaces port
+// visibility: ogni richiesta parte e torna sullo stesso dominio del frontend.
+//
+// In SSR (Angular Universal dentro il container frontend) `window` non
+// esiste e non passiamo per il dev server, quindi andiamo direttamente al
+// backend attraverso la rete interna di Docker Compose.
+
+function isNode(): boolean {
+  return typeof window === 'undefined';
+}
 
 function computeApiUrl(): string {
-  if (typeof window === 'undefined') {
-    // SSR: le richieste attraversano la rete Docker, non il DNS pubblico.
-    return `http://localhost:${BACKEND_PORT}`;
+  if (isNode()) {
+    // SSR: dentro Docker il backend è raggiungibile come `backend:3000`
+    // (DNS di Compose). Permettiamo comunque override via env per run fuori
+    // container (test locali senza Compose).
+    const fromEnv =
+      typeof process !== 'undefined' ? process.env?.['BACKEND_URL'] : undefined;
+    return fromEnv ? `${fromEnv.replace(/\/$/, '')}/api` : 'http://backend:3000/api';
   }
-
-  const { protocol, hostname } = window.location;
-
-  // GitHub Codespaces: <name>-4200.app.github.dev  →  <name>-3000.app.github.dev
-  if (hostname.endsWith('.app.github.dev') || hostname.endsWith('.github.dev')) {
-    const rewritten = hostname.replace(
-      new RegExp(`-${FRONTEND_PORT}(\\.(app\\.)?github\\.dev)$`),
-      `-${BACKEND_PORT}$1`,
-    );
-    return `${protocol}//${rewritten}`;
-  }
-
-  // Gitpod: 4200-<workspace>.<cluster>  →  3000-<workspace>.<cluster>
-  if (hostname.endsWith('.gitpod.io')) {
-    const rewritten = hostname.replace(
-      new RegExp(`^${FRONTEND_PORT}-`),
-      `${BACKEND_PORT}-`,
-    );
-    return `${protocol}//${rewritten}`;
-  }
-
-  return `http://localhost:${BACKEND_PORT}`;
+  // Browser: URL relativo, same-origin, passa per il proxy Angular.
+  return '/api';
 }
 
 export const API_URL = computeApiUrl();
 
-// Log diagnostico: in dev aiuta a capire subito a quale backend punta il
+// Log diagnostico client-side: aiuta a capire subito verso cosa punta il
 // frontend quando si vede "Failed to fetch".
-if (typeof window !== 'undefined') {
+if (!isNode()) {
   // eslint-disable-next-line no-console
-  console.info('[api.config] API_URL =', API_URL);
+  console.info('[api.config] API_URL =', API_URL || '(relative)');
 }
