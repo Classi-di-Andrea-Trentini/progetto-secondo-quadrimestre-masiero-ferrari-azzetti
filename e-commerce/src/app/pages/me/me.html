@@ -228,55 +228,13 @@
         </section>
       }
 
-
-        @case ('orders') {
-        <section class="animate-fade-in">
-            <h2 class="text-xl font-bold border-b border-gray-100 pb-4 mb-6">Order History</h2>
-
-            <div class="flex flex-col gap-4">
-                <div
-                    class="flex flex-col md:flex-row md:items-center justify-between p-6 border border-gray-100 rounded-lg bg-white">
-                    <div class="mb-4 md:mb-0">
-                        <p class="font-bold text-gray-900">#ORD-1042</p>
-                        <p class="text-sm text-gray-400 mt-1">Placed on Feb 23, 2026</p>
-                    </div>
-
-                    <div class="mb-4 md:mb-0">
-                        <span
-                            class="px-4 py-1.5 text-xs font-bold tracking-widest uppercase rounded-full bg-teal-50 text-teal-700">
-                            Shipped
-                        </span>
-                    </div>
-                    <div class="text-left md:text-right">
-                        <p class="font-bold text-lg">€ 145,00</p>
-                        <button class="text-sm text-gray-400 hover:text-black underline mt-1 transition-colors">View
-                            Details</button>
-                    </div>
-                </div>
-                <div
-                    class="flex flex-col md:flex-row md:items-center justify-between p-6 border border-gray-100 rounded-lg bg-white">
-                    <div class="mb-4 md:mb-0">
-                        <p class="font-bold text-gray-900">#ORD-0988</p>
-                        <p class="text-sm text-gray-400 mt-1">Placed on Jan 10, 2026</p>
-                    </div>
-
-                    <div class="mb-4 md:mb-0">
-                        <span
-                            class="px-4 py-1.5 text-xs font-bold tracking-widest uppercase rounded-full bg-gray-100 text-gray-500">
-                            Delivered
-                        </span>
-                    </div>
-
-                    <div class="text-left md:text-right">
-                        <p class="font-bold text-lg">€ 89,00</p>
-                        <button class="text-sm text-gray-400 hover:text-black underline mt-1 transition-colors">View
-                            Details</button>
-                    </div>
-                </div>
-            </div>
+      @case ('orders') {
+        <section>
+          <h2 class="text-xl font-bold border-b border-gray-100 pb-4 mb-6">Order History</h2>
+          <p class="text-gray-400 text-sm">No orders yet.</p>
         </section>
-        }
-        <!-- TO DO -->
+      }
+      
         @case ('favorites') {
         <section class="animate-fade-in">
             <h2 class="text-xl font-bold border-b border-gray-100 pb-4 mb-6">Your Saved Products</h2>
