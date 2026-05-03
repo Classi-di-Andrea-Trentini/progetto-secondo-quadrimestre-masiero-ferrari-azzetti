@@ -1,0 +1,22 @@
+# ==================== LOGIN (salva il cookie) ====================
+curl -X POST http://localhost:3000/auth/login \
+  -H "Content-Type: application/json" \
+  -c cookies.txt \
+  -d '{"email":"giacomo@ecommerce.it","password":"admin123"}'
+
+# ==================== IUSER ====================
+###
+curl http://localhost:3000/auth/me \
+  -b cookies.txt
+
+# ==================== IPRODUCT + IPRODUCTVARIANT + IPRODUCTIMAGE + IDISCOUNT ====================
+###
+curl http://localhost:3000/products/t-shirt-bianca-basic
+
+# ==================== IPRODUCTS (lista paginata + meta) ====================
+###
+curl "http://localhost:3000/products?page=1&limit=5"
+
+# ==================== ICATEGORY ====================
+###
+curl http://localhost:3000/products/filters

@@ -1,0 +1,38 @@
+<!-- cart.html -->
+<div class="fixed inset-0 bg-black/40 z-50 transition-opacity duration-300"
+     [class.opacity-100]="cart.isOpen()"
+     [class.opacity-0]="!cart.isOpen()"
+     [class.pointer-events-none]="!cart.isOpen()"
+     (click)="cart.close()">
+</div>
+
+<div class="fixed top-0 right-0 h-full w-80 bg-white z-50 shadow-2xl transition-transform duration-300 ease-in-out flex flex-col"
+     [class.translate-x-0]="cart.isOpen()"
+     [class.translate-x-full]="!cart.isOpen()">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+    <h2 class="text-lg font-semibold text-gray-900">Il tuo carrello</h2>
+    <button (click)="cart.close()" class="p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="size-5">
+        <path d="M6 18 18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- Contenuto scrollabile -->
+  <div class="flex-1 overflow-y-auto px-6 py-4">
+    <p class="text-sm text-gray-500">Il carrello è vuoto.</p>
+  </div>
+
+  <!-- Footer -->
+  <div class="px-6 py-4 border-t border-gray-100 space-y-3">
+    <div class="flex justify-between text-sm font-medium text-gray-900">
+      <span>Totale</span>
+      <span>€0,00</span>
+    </div>
+    <button class="w-full bg-black text-white py-3 rounded-md text-sm font-medium hover:bg-gray-800 transition-colors">
+      Procedi al checkout
+    </button>
+  </div>
+</div>

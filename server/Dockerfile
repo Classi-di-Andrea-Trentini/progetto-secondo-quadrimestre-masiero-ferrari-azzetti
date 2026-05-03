@@ -1,4 +1,4 @@
-FROM node:18-alpine
+FROM node:20-alpine
 
 WORKDIR /app
 
@@ -9,6 +9,9 @@ RUN npm install
 RUN npm install -g @nestjs/cli
 
 COPY . .
+
+# Genera il client Prisma all'interno del container
+RUN npx prisma generate
 
 EXPOSE 3000
 

@@ -2,7 +2,8 @@
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
   "version": 1,
   "cli": {
-    "packageManager": "npm"
+    "packageManager": "npm",
+    "analytics": false
   },
   "newProjectRoot": "projects",
   "projects": {
@@ -28,7 +29,10 @@
               "src/styles.css"
             ],
             "server": "src/main.server.ts",
-            "outputMode": "server",
+            "outputMode": "static",
+            "prerender": {
+              "routesFile": "routes.txt"
+            },
             "ssr": {
               "entry": "src/server.ts"
             }
@@ -59,6 +63,15 @@
         },
         "serve": {
           "builder": "@angular/build:dev-server",
+          "options": {
+            "proxyConfig": "proxy.conf.json",
+            "allowedHosts": [
+              ".app.github.dev",
+              ".github.dev",
+              ".gitpod.io",
+              "localhost"
+            ]
+          },
           "configurations": {
             "production": {
               "buildTarget": "e-commerce:build:production"
