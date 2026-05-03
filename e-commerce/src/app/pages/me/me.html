@@ -30,49 +30,204 @@
         @switch (activeTab()) {
 
         @case ('profile') {
-        <section class="animate-fade-in">
+        <section>
+          @if (auth.currentUser(); as user) {
 
+            <!-- Personal information -->
             <div class="mb-12">
-                <div class="flex justify-between items-center border-b border-gray-100 pb-4 mb-6">
-                    <h2 class="text-xl font-bold">Personal Information</h2>
-                    <button class="text-sm text-gray-400 hover:text-black underline transition-colors">Edit</button>
-                </div>
+              <div class="flex justify-between items-center border-b border-gray-100 pb-4 mb-6">
+                <h2 class="text-xl font-bold">Personal Information</h2>
+                @if (!isEditing()) {
+                  <button (click)="startEditing()"
+                    class="text-sm text-gray-400 hover:text-black underline transition-colors">
+                    Edit
+                  </button>
+                }
+              </div>
 
+              @if (saveSuccess()) {
+                <div class="mb-6 px-4 py-3 bg-green-50 border border-green-200 text-sm text-green-700 rounded">
+                  Profile updated successfully.
+                </div>
+              }
+
+              @if (!isEditing()) {
+                <!-- Read view -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div>
-                        <p class="text-xs text-gray-400 uppercase tracking-widest mb-1">Full Name</p>
-                        <p class="font-medium">User Name</p>
-                    </div>
-                    <div>
-                        <p class="text-xs text-gray-400 uppercase tracking-widest mb-1">Email Address</p>
-                        <p class="font-medium">user.name&#64;example.com</p>
-                    </div>
-                    <div>
-                        <p class="text-xs text-gray-400 uppercase tracking-widest mb-1">Phone</p>
-                        <p class="font-medium">+39 333 1234567</p>
-                    </div>
-                    <div>
-                        <p class="text-xs text-gray-400 uppercase tracking-widest mb-1">Date of Birth</p>
-                        <p class="font-medium">May 15, 1995</p>
-                    </div>
+                  <div>
+                    <p class="text-xs text-gray-400 uppercase tracking-widest mb-1">Full name</p>
+                    <p class="font-medium">{{ user.fullName }}</p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-gray-400 uppercase tracking-widest mb-1">Phone</p>
+                    <p class="font-medium">{{ user.phone ?? '—' }}</p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-gray-400 uppercase tracking-widest mb-1">Date of birth</p>
+                    <p class="font-medium">
+                      {{ user.birthDate ? (user.birthDate | date: 'longDate') : '—' }}
+                    </p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-gray-400 uppercase tracking-widest mb-1">Gender</p>
+                    <p class="font-medium">{{ user.gender ?? '—' }}</p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-gray-400 uppercase tracking-widest mb-1">Member since</p>
+                    <p class="font-medium">{{ user.createdAt | date: 'MMMM y' }}</p>
+                  </div>
                 </div>
+
+              } @else {
+                <!-- Edit form -->
+                <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" novalidate class="space-y-5">
+
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div class="md:col-span-2">
+                      <label class="block text-xs font-semibold uppercase tracking-widest text-gray-500 mb-1.5">
+                        Full name
+                      </label>
+                      <input type="text" formControlName="fullName"
+                        class="w-full border px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-black transition"
+                        [ngClass]="fullName.invalid && fullName.touched ? 'border-red-400' : 'border-gray-300'" />
+                      @if (fullName.invalid && fullName.touched) {
+                        <p class="mt-1 text-xs text-red-500">Minimum 2 characters</p>
+                      }
+                    </div>
+
+                    <div>
+                      <label class="block text-xs font-semibold uppercase tracking-widest text-gray-500 mb-1.5">
+                        Phone
+                      </label>
+                      <input type="tel" formControlName="phone"
+                        placeholder="+39 333 1234567"
+                        class="w-full border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-black transition" />
+                    </div>
+
+                    <div>
+                      <label class="block text-xs font-semibold uppercase tracking-widest text-gray-500 mb-1.5">
+                        Date of birth
+                      </label>
+                      <input type="date" formControlName="birthDate"
+                        class="w-full border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-black transition" />
+                    </div>
+
+                    <div>
+                      <label class="block text-xs font-semibold uppercase tracking-widest text-gray-500 mb-1.5">
+                        Gender
+                      </label>
+                      <select formControlName="gender"
+                        class="w-full border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-black transition bg-white">
+                        <option value="">Not specified</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  @if (saveError()) {
+                    <div class="px-4 py-3 bg-red-50 border border-red-200 text-sm text-red-700 rounded">
+                      {{ saveError() }}
+                    </div>
+                  }
+
+                  <div class="flex gap-3 pt-2">
+                    <button type="submit" [disabled]="saveLoading()"
+                      class="px-6 py-2.5 bg-black text-white text-sm font-semibold uppercase tracking-widest hover:bg-gray-900 transition disabled:opacity-50">
+                      @if (saveLoading()) { Saving… } @else { Save }
+                    </button>
+                    <button type="button" (click)="cancelEditing()"
+                      class="px-6 py-2.5 border border-gray-300 text-sm font-semibold uppercase tracking-widest hover:border-black transition">
+                      Cancel
+                    </button>
+                  </div>
+
+                </form>
+              }
             </div>
 
-            <div>
-                <div class="flex justify-between items-center border-b border-gray-100 pb-4 mb-6">
-                    <h2 class="text-xl font-bold">Main Shipping Address</h2>
-                    <button class="text-sm text-gray-400 hover:text-black underline transition-colors">Edit</button>
+            <!-- Email -->
+            <div class="border-t border-gray-100 pt-8">
+              <div class="flex justify-between items-center mb-4">
+                <div>
+                  <p class="text-xs text-gray-400 uppercase tracking-widest mb-1">Email</p>
+                  <p class="font-medium">{{ user.email }}</p>
+                  @if (user.emailVerifiedAt) {
+                    <p class="text-xs text-green-600 mt-0.5">Verified</p>
+                  } @else {
+                    <p class="text-xs text-amber-600 mt-0.5">Not verified</p>
+                    <button (click)="sendVerification()" [disabled]="verifyLoading()"
+                      class="mt-1.5 text-xs text-black underline hover:no-underline disabled:opacity-50 transition-opacity">
+                      @if (verifyLoading()) { Sending… } @else { Send verification email }
+                    </button>
+                    @if (verifyMessage()) {
+                      <p class="mt-1 text-xs text-gray-500">{{ verifyMessage() }}</p>
+                    }
+                  }
                 </div>
-                <div class="leading-relaxed font-medium">
-                    <p>Nome del Utente</p>
-                    <p>Via del utente</p>
-                    <p>CAP e citta</p>
-                    <p>Nazione</p>
+                <button (click)="emailChangeVisible.set(!emailChangeVisible())"
+                  class="text-sm text-gray-400 hover:text-black underline transition-colors">
+                  {{ emailChangeVisible() ? 'Cancel' : 'Change email' }}
+                </button>
+              </div>
+
+              @if (emailChangeVisible()) {
+                <div class="mt-4 p-5 bg-gray-50 border border-gray-200 rounded">
+                  <p class="text-xs text-gray-500 mb-4">
+                    Changing your email requires confirmation via a link sent to the new address.
+                    Please enter your current password to proceed.
+                  </p>
+
+                  <form [formGroup]="emailForm" (ngSubmit)="submitEmailChange()" novalidate class="space-y-4">
+                    <div>
+                      <label class="block text-xs font-semibold uppercase tracking-widest text-gray-500 mb-1.5">
+                        New email
+                      </label>
+                      <input type="email" formControlName="newEmail"
+                        autocomplete="email"
+                        placeholder="new@email.com"
+                        class="w-full border px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-black transition"
+                        [ngClass]="newEmail.invalid && newEmail.touched ? 'border-red-400' : 'border-gray-300'" />
+                      @if (newEmail.invalid && newEmail.touched) {
+                        <p class="mt-1 text-xs text-red-500">Please enter a valid email address</p>
+                      }
+                    </div>
+
+                    <div>
+                      <label class="block text-xs font-semibold uppercase tracking-widest text-gray-500 mb-1.5">
+                        Current password
+                      </label>
+                      <input type="password" formControlName="currentPassword"
+                        autocomplete="current-password"
+                        placeholder="••••••••"
+                        class="w-full border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-black transition" />
+                    </div>
+
+                    @if (emailError()) {
+                      <div class="px-4 py-3 bg-red-50 border border-red-200 text-sm text-red-700 rounded">
+                        {{ emailError() }}
+                      </div>
+                    }
+                    @if (emailSuccess()) {
+                      <div class="px-4 py-3 bg-green-50 border border-green-200 text-sm text-green-700 rounded">
+                        {{ emailSuccess() }}
+                      </div>
+                    }
+
+                    <button type="submit" [disabled]="emailLoading()"
+                      class="px-6 py-2.5 bg-black text-white text-sm font-semibold uppercase tracking-widest hover:bg-gray-900 transition disabled:opacity-50">
+                      @if (emailLoading()) { Sending… } @else { Send change request }
+                    </button>
+                  </form>
                 </div>
+              }
             </div>
 
+          }
         </section>
-        }
+      }
+
 
         @case ('orders') {
         <section class="animate-fade-in">

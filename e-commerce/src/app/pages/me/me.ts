@@ -179,8 +179,23 @@ export class MeComponent {
       this.saveLoading.set(false);
     }
   }
- 
-   //  Email change 
+
+  // ── Email verification ────────────────────────────────────────────────────
+  async sendVerification(): Promise<void> {
+    this.verifyLoading.set(true);
+    this.verifyMessage.set(null);
+
+    try {
+      const msg = await this.auth.sendVerificationEmail();
+      this.verifyMessage.set(msg);
+    } catch (err) {
+      this.verifyMessage.set(this.auth.extractErrorMessage(err));
+    } finally {
+      this.verifyLoading.set(false);
+    }
+  }
+
+  //  Email change 
   async submitEmailChange(): Promise<void> {
     if (this.emailForm.invalid || this.emailLoading()) return;
  
