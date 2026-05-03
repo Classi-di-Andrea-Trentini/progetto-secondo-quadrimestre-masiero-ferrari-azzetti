@@ -279,52 +279,79 @@
         </section>
       }
 
-        @case ('settings') {
-        <section class="animate-fade-in max-w-2xl">
+       @case ('settings') {
+        <section>
+          <h2 class="text-xl font-bold border-b border-gray-100 pb-4 mb-6">Account Settings</h2>
 
-            <h2 class="text-lg font-bold border-b border-gray-200 pb-3 mb-6">Security Settings</h2>
+          <!-- Change password -->
+          <div class="mb-10">
+            <h3 class="text-sm font-semibold uppercase tracking-widest text-gray-500 mb-5">Change password</h3>
+            <form [formGroup]="passwordForm" (ngSubmit)="submitPasswordChange()" novalidate class="space-y-4 max-w-sm">
+              <div>
+                <label class="block text-xs font-semibold uppercase tracking-widest text-gray-500 mb-1.5">
+                  Current password
+                </label>
+                <input type="password" formControlName="currentPassword"
+                  autocomplete="current-password"
+                  placeholder="••••••••"
+                  class="w-full border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-black transition" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold uppercase tracking-widest text-gray-500 mb-1.5">
+                  New password
+                </label>
+                <input type="password" formControlName="newPassword"
+                  autocomplete="new-password"
+                  placeholder="••••••••"
+                  class="w-full border px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-black transition"
+                  [ngClass]="newPassword.invalid && newPassword.touched ? 'border-red-400' : 'border-gray-300'" />
+                @if (newPassword.invalid && newPassword.touched) {
+                  <p class="mt-1 text-xs text-red-500">Minimum 8 characters</p>
+                }
+              </div>
+              <div>
+                <label class="block text-xs font-semibold uppercase tracking-widest text-gray-500 mb-1.5">
+                  Confirm new password
+                </label>
+                <input type="password" formControlName="confirmPassword"
+                  autocomplete="new-password"
+                  placeholder="••••••••"
+                  class="w-full border px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-black transition"
+                  [ngClass]="passwordForm.hasError('mismatch') && confirmPassword.touched ? 'border-red-400' : 'border-gray-300'" />
+                @if (passwordForm.hasError('mismatch') && confirmPassword.touched) {
+                  <p class="mt-1 text-xs text-red-500">Passwords do not match</p>
+                }
+              </div>
 
-            <div class="flex flex-col gap-4 mb-12">
-                <input type="password" placeholder="Current Password"
-                    class="w-full border border-gray-200 rounded p-3 text-sm focus:outline-none focus:border-black transition-colors">
-
-                <input type="password" placeholder="New Password"
-                    class="w-full border border-gray-200 rounded p-3 text-sm focus:outline-none focus:border-black transition-colors">
-
-                <div class="mt-2">
-                    <button
-                        class="bg-black text-white font-bold py-3 px-8 rounded text-sm hover:bg-gray-800 transition-colors">
-                        Update Password
-                    </button>
+              @if (passwordError()) {
+                <div class="px-4 py-3 bg-red-50 border border-red-200 text-sm text-red-700 rounded">
+                  {{ passwordError() }}
                 </div>
-            </div>
+              }
+              @if (passwordSuccess()) {
+                <div class="px-4 py-3 bg-green-50 border border-green-200 text-sm text-green-700 rounded">
+                  {{ passwordSuccess() }}
+                </div>
+              }
 
-            <h2 class="text-lg font-bold border-b border-gray-200 pb-3 mb-6">Notification Preferences</h2>
+              <button type="submit" [disabled]="passwordLoading()"
+                class="px-6 py-2.5 bg-black text-white text-sm font-semibold uppercase tracking-widest hover:bg-gray-900 transition disabled:opacity-50">
+                @if (passwordLoading()) { Saving… } @else { Update password }
+              </button>
+            </form>
+          </div>
 
-            <div class="flex flex-col gap-5 mb-12">
-                <label class="flex items-center justify-between cursor-pointer group">
-                    <span class="text-sm font-medium text-gray-900 group-hover:text-black transition-colors">Newsletter
-                        Subscription (Offers and new arrivals)</span>
-                    <input type="checkbox" checked class="w-5 h-5 accent-black cursor-pointer">
-                </label>
-
-                <label class="flex items-center justify-between cursor-pointer group">
-                    <span class="text-sm font-medium text-gray-900 group-hover:text-black transition-colors">Order
-                        updates via SMS</span>
-                    <input type="checkbox" class="w-5 h-5 accent-black cursor-pointer">
-                </label>
-            </div>
-
-            <div class="border-t border-gray-200 pt-8">
-                <a class="text-red-500 text-sm font-bold underline cursor-pointer hover:text-red-600 transition-colors">
-                    Delete Account Permanently
-                </a>
-            </div>
-
+          <div class="border-t border-gray-100 pt-6">
+            <h3 class="text-sm font-semibold uppercase tracking-widest text-gray-500 mb-4">Session</h3>
+            <button (click)="logout()"
+              class="px-6 py-2.5 border border-black text-sm font-semibold uppercase tracking-widest hover:bg-black hover:text-white transition">
+              Sign out
+            </button>
+          </div>
         </section>
-        }
+      }
 
-        }
-    </div>
+    }
+  </div>
 
 </div>
