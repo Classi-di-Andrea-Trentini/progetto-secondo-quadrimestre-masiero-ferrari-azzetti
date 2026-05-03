@@ -120,7 +120,7 @@ export class MeComponent {
   wishlistPrice(item: any): string {
     const p = item.product;
     if (!p) return '';
- 
+
     const d = p.discounts?.[0];
     let price = parseFloat(String(p.basePrice));
  
