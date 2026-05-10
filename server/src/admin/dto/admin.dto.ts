@@ -133,3 +133,15 @@ export class UpdatePromoCodeDto {
   @IsDateString()
   expiresAt?: string;
 }
+
+export class AdminReviewsQueryDto extends AdminListQueryDto {
+  @IsOptional()
+  @IsString()
+  status?: string; // 'pending' | 'approved' | 'rejected' | '' (all)
+}
+
+export class UpdateReviewStatusDto {
+  @IsString()
+  @IsIn(['approved', 'rejected'])
+  status: string;
+}

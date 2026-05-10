@@ -153,9 +153,9 @@
               <p class="font-medium text-gray-900 mb-1">Indirizzo spedizione</p>
               <p class="text-gray-600 text-xs leading-relaxed">
                 {{ selectedOrder()!.address.fullName }}<br>
-                {{ selectedOrder()!.address.line1 }}<br>
-                @if (selectedOrder()!.address.line2) { {{ selectedOrder()!.address.line2 }}<br> }
-                {{ selectedOrder()!.address.zip }} {{ selectedOrder()!.address.city }}, {{ selectedOrder()!.address.country }}
+                {{ selectedOrder()!.address.street }}<br>
+                @if (selectedOrder()!.address.street2) { {{ selectedOrder()!.address.street2 }}<br> }
+                {{ selectedOrder()!.address.postalCode }} {{ selectedOrder()!.address.city }}, {{ selectedOrder()!.address.country }}
               </p>
             </div>
           </div>

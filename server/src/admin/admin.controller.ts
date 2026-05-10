@@ -24,6 +24,8 @@ import {
   UpdateProductDto,
   CreatePromoCodeDto,
   UpdatePromoCodeDto,
+  AdminReviewsQueryDto,
+  UpdateReviewStatusDto,
 } from './dto/admin.dto';
 
 @Controller('admin')
@@ -121,5 +123,23 @@ export class AdminController {
   @HttpCode(HttpStatus.OK)
   deletePromoCode(@Param('id') id: string) {
     return this.adminService.deletePromoCode(id);
+  }
+
+  // ─── Reviews ──────────────────────────────────────────────────────────────
+
+  @Get('reviews')
+  getReviews(@Query() query: AdminReviewsQueryDto) {
+    return this.adminService.getReviews(query);
+  }
+
+  @Patch('reviews/:id/status')
+  updateReviewStatus(@Param('id') id: string, @Body() dto: UpdateReviewStatusDto) {
+    return this.adminService.updateReviewStatus(id, dto);
+  }
+
+  @Delete('reviews/:id')
+  @HttpCode(HttpStatus.OK)
+  deleteReview(@Param('id') id: string) {
+    return this.adminService.deleteReview(id);
   }
 }

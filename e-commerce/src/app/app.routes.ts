@@ -14,6 +14,7 @@ import { AdminProducts } from './pages/admin/admin-products/admin-products';
 import { AdminOrders } from './pages/admin/admin-orders/admin-orders';
 import { AdminUsers } from './pages/admin/admin-users/admin-users';
 import { AdminPromo } from './pages/admin/admin-promo/admin-promo';
+import { AdminReviews } from './pages/admin/admin-reviews/admin-reviews';
 import { Checkout } from './pages/checkout/checkout';
 import { authGuardGuard } from './guards/auth-guard-guard';
 import { adminGuardGuard } from './guards/admin-guard-guard';
@@ -41,6 +42,7 @@ export const routes: Routes = [
       { path: 'orders', component: AdminOrders },
       { path: 'users', component: AdminUsers },
       { path: 'promo', component: AdminPromo },
+      { path: 'reviews', component: AdminReviews },
     ],
   },
   { path: '**', redirectTo: 'home' },

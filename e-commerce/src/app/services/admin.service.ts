@@ -58,15 +58,27 @@ export interface AdminOrderDetail extends AdminOrderSummary {
   notes: string | null;
   address: {
     fullName: string;
-    line1: string;
-    line2: string | null;
+    street: string;
+    street2: string | null;
     city: string;
-    zip: string;
+    province: string | null;
+    postalCode: string;
     country: string;
   };
   payments: { status: string; method: string; amount: string; paidAt: string | null }[];
   statusHistory: { status: string; note: string | null; createdAt: string }[];
   promoCode: { code: string } | null;
+}
+
+export interface AdminReview {
+  id: string;
+  rating: number;
+  title: string | null;
+  body: string | null;
+  status: string;
+  createdAt: string;
+  user: { fullName: string; email: string };
+  product: { name: string; slug: string };
 }
 
 export interface AdminPromoCode {
@@ -212,5 +224,22 @@ export class AdminService {
 
   deletePromoCode(id: string): Observable<{ message: string }> {
     return this.http.delete<{ message: string }>(`${this.base}/promo-codes/${id}`, { withCredentials: true });
+  }
+
+  // ─── Reviews ──────────────────────────────────────────────────────────────
+
+  getReviews(query: AdminListQuery = {}): Observable<PaginatedResponse<AdminReview>> {
+    return this.http.get<PaginatedResponse<AdminReview>>(`${this.base}/reviews`, {
+      params: this.buildParams(query),
+      withCredentials: true,
+    });
+  }
+
+  updateReviewStatus(id: string, status: 'approved' | 'rejected'): Observable<AdminReview> {
+    return this.http.patch<AdminReview>(`${this.base}/reviews/${id}/status`, { status }, { withCredentials: true });
+  }
+
+  deleteReview(id: string): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(`${this.base}/reviews/${id}`, { withCredentials: true });
   }
 }

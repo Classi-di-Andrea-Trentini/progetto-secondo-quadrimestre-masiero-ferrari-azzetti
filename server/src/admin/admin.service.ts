@@ -9,6 +9,8 @@ import {
   UpdateProductDto,
   CreatePromoCodeDto,
   UpdatePromoCodeDto,
+  AdminReviewsQueryDto,
+  UpdateReviewStatusDto,
 } from './dto/admin.dto';
 
 @Injectable()
@@ -310,5 +312,59 @@ export class AdminService {
     if (!promo) throw new NotFoundException('Codice promozionale non trovato');
     await this.prisma.promoCode.delete({ where: { id } });
     return { message: 'Codice eliminato' };
+  }
+
+  // ─── Reviews ────────────────────────────────────────────────────────────────
+
+  async getReviews(query: AdminReviewsQueryDto) {
+    const page = query.page ?? 1;
+    const limit = query.limit ?? 20;
+    const skip = (page - 1) * limit;
+
+    const where: any = {};
+    if (query.status) where.status = query.status;
+    if (query.search) {
+      where.OR = [
+        { user: { fullName: { contains: query.search, mode: 'insensitive' } } },
+        { user: { email: { contains: query.search, mode: 'insensitive' } } },
+        { product: { name: { contains: query.search, mode: 'insensitive' } } },
+      ];
+    }
+
+    const [data, total] = await Promise.all([
+      this.prisma.review.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          user: { select: { fullName: true, email: true } },
+          product: { select: { name: true, slug: true } },
+        },
+      }),
+      this.prisma.review.count({ where }),
+    ]);
+
+    return { data, meta: { total, page, limit, totalPages: Math.ceil(total / limit) } };
+  }
+
+  async updateReviewStatus(id: string, dto: UpdateReviewStatusDto) {
+    const review = await this.prisma.review.findUnique({ where: { id } });
+    if (!review) throw new NotFoundException('Recensione non trovata');
+    return this.prisma.review.update({
+      where: { id },
+      data: { status: dto.status as any },
+      include: {
+        user: { select: { fullName: true, email: true } },
+        product: { select: { name: true, slug: true } },
+      },
+    });
+  }
+
+  async deleteReview(id: string) {
+    const review = await this.prisma.review.findUnique({ where: { id } });
+    if (!review) throw new NotFoundException('Recensione non trovata');
+    await this.prisma.review.delete({ where: { id } });
+    return { message: 'Recensione eliminata' };
   }
 }
