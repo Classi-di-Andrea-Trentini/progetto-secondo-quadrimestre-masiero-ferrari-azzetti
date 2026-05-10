@@ -3,6 +3,9 @@ import { PrismaService } from '../prisma/prisma.service';
 import {
   AdminListQueryDto,
   AdminOrdersQueryDto,
+  AdminUsersQueryDto,
+  AdminProductsQueryDto,
+  AdminPromoQueryDto,
   UpdateOrderStatusDto,
   UpdateUserRoleDto,
   CreateProductDto,
@@ -71,12 +74,13 @@ export class AdminService {
 
   // ─── Users ──────────────────────────────────────────────────────────────────
 
-  async getUsers(query: AdminListQueryDto) {
+  async getUsers(query: AdminUsersQueryDto) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 20;
     const skip = (page - 1) * limit;
 
     const where: any = {};
+    if (query.role) where.role = query.role;
     if (query.search) {
       where.OR = [
         { fullName: { contains: query.search, mode: 'insensitive' } },
@@ -125,12 +129,13 @@ export class AdminService {
 
   // ─── Products ───────────────────────────────────────────────────────────────
 
-  async getProducts(query: AdminListQueryDto) {
+  async getProducts(query: AdminProductsQueryDto) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 20;
     const skip = (page - 1) * limit;
 
     const where: any = {};
+    if (query.isActive !== undefined) where.isActive = query.isActive;
     if (query.search) {
       where.OR = [
         { name: { contains: query.search, mode: 'insensitive' } },
@@ -261,12 +266,14 @@ export class AdminService {
 
   // ─── Promo Codes ────────────────────────────────────────────────────────────
 
-  async getPromoCodes(query: AdminListQueryDto) {
+  async getPromoCodes(query: AdminPromoQueryDto) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 20;
     const skip = (page - 1) * limit;
 
     const where: any = {};
+    if (query.isActive !== undefined) where.isActive = query.isActive;
+    if (query.discountType) where.type = query.discountType;
     if (query.search) {
       where.code = { contains: query.search, mode: 'insensitive' };
     }

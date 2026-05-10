@@ -25,6 +25,40 @@ export class AdminOrdersQueryDto extends AdminListQueryDto {
   status?: string;
 }
 
+export class AdminUsersQueryDto extends AdminListQueryDto {
+  @IsOptional()
+  @IsString()
+  @IsIn(['admin', 'user', ''])
+  role?: string;
+}
+
+export class AdminProductsQueryDto extends AdminListQueryDto {
+  @IsOptional()
+  @Transform(({ value }) => {
+    if (value === 'true') return true;
+    if (value === 'false') return false;
+    return undefined;
+  })
+  @IsBoolean()
+  isActive?: boolean;
+}
+
+export class AdminPromoQueryDto extends AdminListQueryDto {
+  @IsOptional()
+  @Transform(({ value }) => {
+    if (value === 'true') return true;
+    if (value === 'false') return false;
+    return undefined;
+  })
+  @IsBoolean()
+  isActive?: boolean;
+
+  @IsOptional()
+  @IsString()
+  @IsIn(['percentage', 'fixed_amount', ''])
+  discountType?: string;
+}
+
 export class UpdateOrderStatusDto {
   @IsString()
   @IsIn(['pending', 'paid', 'processing', 'shipped', 'delivered', 'completed', 'cancelled', 'refunded'])

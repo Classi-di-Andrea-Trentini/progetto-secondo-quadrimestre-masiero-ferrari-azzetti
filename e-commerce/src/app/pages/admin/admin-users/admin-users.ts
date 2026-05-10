@@ -22,6 +22,7 @@ export class AdminUsers implements OnInit {
   actionSuccess = signal<string | null>(null);
 
   search = '';
+  roleFilter = '';
   currentPage = signal(1);
   totalPages = signal(1);
   total = signal(0);
@@ -37,7 +38,7 @@ export class AdminUsers implements OnInit {
   load() {
     this.loading.set(true);
     this.error.set(null);
-    this.adminSvc.getUsers({ page: this.currentPage(), limit: this.limit, search: this.search || undefined }).subscribe({
+    this.adminSvc.getUsers({ page: this.currentPage(), limit: this.limit, search: this.search || undefined, role: this.roleFilter || undefined }).subscribe({
       next: (res) => {
         this.users.set(res.data);
         this.total.set(res.meta.total);
@@ -55,6 +56,17 @@ export class AdminUsers implements OnInit {
     this.currentPage.set(1);
     this.load();
   }
+
+  onFilter() {
+    this.currentPage.set(1);
+    this.load();
+  }
+
+  readonly allRoles = [
+    { value: '', label: 'Tutti i ruoli' },
+    { value: 'user', label: 'Utente' },
+    { value: 'admin', label: 'Admin' },
+  ];
 
   goToPage(p: number) {
     if (p < 1 || p > this.totalPages()) return;

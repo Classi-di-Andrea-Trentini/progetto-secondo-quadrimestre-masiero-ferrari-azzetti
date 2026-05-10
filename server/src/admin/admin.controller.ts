@@ -18,6 +18,9 @@ import { AdminRoleGuard } from './admin-role.guard';
 import {
   AdminListQueryDto,
   AdminOrdersQueryDto,
+  AdminUsersQueryDto,
+  AdminProductsQueryDto,
+  AdminPromoQueryDto,
   UpdateOrderStatusDto,
   UpdateUserRoleDto,
   CreateProductDto,
@@ -43,7 +46,7 @@ export class AdminController {
   // ─── Users ────────────────────────────────────────────────────────────────
 
   @Get('users')
-  getUsers(@Query() query: AdminListQueryDto) {
+  getUsers(@Query() query: AdminUsersQueryDto) {
     return this.adminService.getUsers(query);
   }
 
@@ -61,7 +64,7 @@ export class AdminController {
   // ─── Products ─────────────────────────────────────────────────────────────
 
   @Get('products')
-  getProducts(@Query() query: AdminListQueryDto) {
+  getProducts(@Query() query: AdminProductsQueryDto) {
     return this.adminService.getProducts(query);
   }
 
@@ -105,7 +108,7 @@ export class AdminController {
   // ─── Promo Codes ──────────────────────────────────────────────────────────
 
   @Get('promo-codes')
-  getPromoCodes(@Query() query: AdminListQueryDto) {
+  getPromoCodes(@Query() query: AdminPromoQueryDto) {
     return this.adminService.getPromoCodes(query);
   }
 

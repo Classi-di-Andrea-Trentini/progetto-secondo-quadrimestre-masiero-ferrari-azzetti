@@ -105,6 +105,9 @@ export interface AdminListQuery {
   limit?: number;
   search?: string;
   status?: string;
+  role?: string;
+  isActive?: boolean | string;
+  discountType?: string;
 }
 
 export interface CreateProductPayload {
@@ -137,6 +140,9 @@ export class AdminService {
     if (query.limit) params = params.set('limit', query.limit);
     if (query.search) params = params.set('search', query.search);
     if (query.status) params = params.set('status', query.status);
+    if (query.role) params = params.set('role', query.role);
+    if (query.isActive !== undefined && query.isActive !== '') params = params.set('isActive', String(query.isActive));
+    if (query.discountType) params = params.set('discountType', query.discountType);
     return params;
   }
 

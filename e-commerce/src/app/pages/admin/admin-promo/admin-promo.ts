@@ -23,6 +23,8 @@ export class AdminPromo implements OnInit {
   deleteLoading = signal<string | null>(null);
 
   search = '';
+  isActiveFilter = '';
+  discountTypeFilter = '';
   currentPage = signal(1);
   totalPages = signal(1);
   total = signal(0);
@@ -48,7 +50,8 @@ export class AdminPromo implements OnInit {
   load() {
     this.loading.set(true);
     this.error.set(null);
-    this.adminSvc.getPromoCodes({ page: this.currentPage(), limit: this.limit, search: this.search || undefined }).subscribe({
+    const isActive = this.isActiveFilter === 'true' ? true : this.isActiveFilter === 'false' ? false : undefined;
+    this.adminSvc.getPromoCodes({ page: this.currentPage(), limit: this.limit, search: this.search || undefined, isActive, discountType: this.discountTypeFilter || undefined }).subscribe({
       next: (res) => {
         this.promoCodes.set(res.data);
         this.total.set(res.meta.total);
@@ -63,6 +66,11 @@ export class AdminPromo implements OnInit {
   }
 
   onSearch() {
+    this.currentPage.set(1);
+    this.load();
+  }
+
+  onFilter() {
     this.currentPage.set(1);
     this.load();
   }

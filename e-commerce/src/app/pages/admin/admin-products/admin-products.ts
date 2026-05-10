@@ -22,6 +22,7 @@ export class AdminProducts implements OnInit {
   formLoading = signal(false);
 
   search = '';
+  isActiveFilter = '';
   currentPage = signal(1);
   totalPages = signal(1);
   total = signal(0);
@@ -48,7 +49,8 @@ export class AdminProducts implements OnInit {
   load() {
     this.loading.set(true);
     this.error.set(null);
-    this.adminSvc.getProducts({ page: this.currentPage(), limit: this.limit, search: this.search || undefined }).subscribe({
+    const isActive = this.isActiveFilter === 'true' ? true : this.isActiveFilter === 'false' ? false : undefined;
+    this.adminSvc.getProducts({ page: this.currentPage(), limit: this.limit, search: this.search || undefined, isActive }).subscribe({
       next: (res) => {
         this.products.set(res.data);
         this.total.set(res.meta.total);
@@ -63,6 +65,11 @@ export class AdminProducts implements OnInit {
   }
 
   onSearch() {
+    this.currentPage.set(1);
+    this.load();
+  }
+
+  onFilter() {
     this.currentPage.set(1);
     this.load();
   }
