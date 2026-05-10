@@ -1,5 +1,5 @@
 import { NgClass } from '@angular/common';
-import { Component, CUSTOM_ELEMENTS_SCHEMA, EventEmitter, Output, inject, computed, HostListener, signal } from '@angular/core';
+import { Component, inject, computed, HostListener, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../services/auth';
 import { CartService } from '../../services/cart-service';
@@ -9,7 +9,6 @@ import { CartService } from '../../services/cart-service';
   imports: [RouterLink, RouterLinkActive, NgClass],
   templateUrl: './nav-bar.html',
   styleUrl: './nav-bar.css',
-  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class NavBar {
   readonly auth = inject(AuthService);
@@ -27,6 +26,7 @@ export class NavBar {
   private lastScrollY = 0;
   private readonly THRESHOLD = 8;
 
+  readonly menuOpen = signal(false);
   private isHidden = signal(false);
   private isScrolled = signal(false);
 

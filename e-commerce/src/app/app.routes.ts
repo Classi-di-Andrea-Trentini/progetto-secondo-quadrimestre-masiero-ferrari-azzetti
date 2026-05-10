@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { Login } from './pages/login/login';
 import { Register } from './pages/register/register';
 import { Home } from './pages/home/home';
+import { About } from './pages/about/about';
 import { Products } from './pages/products/products';
 import { ProductDetail } from './pages/product-detail/product-detail';
 import { MeComponent } from './pages/me/me';
@@ -20,6 +21,7 @@ import { adminGuardGuard } from './guards/admin-guard-guard';
 export const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
   { path: 'home', component: Home },
+  { path: 'about', component: About },
   { path: 'login', component: Login },
   { path: 'register', component: Register },
   { path: 'products', component: Products },
