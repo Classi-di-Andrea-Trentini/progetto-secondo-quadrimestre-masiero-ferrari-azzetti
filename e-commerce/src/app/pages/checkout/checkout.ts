@@ -35,12 +35,13 @@ export class Checkout implements OnInit {
 
   readonly addressForm = this.fb.nonNullable.group({
     fullName: ['', [Validators.required, Validators.minLength(2)]],
-    line1: ['', [Validators.required]],
-    line2: [''],
-    city: ['', [Validators.required]],
-    zip: ['', [Validators.required]],
-    country: ['IT', [Validators.required]],
     phone: [''],
+    street: ['', [Validators.required]],
+    street2: [''],
+    city: ['', [Validators.required]],
+    province: [''],
+    postalCode: ['', [Validators.required]],
+    country: ['IT', [Validators.required]],
     isDefault: [false],
   });
 
@@ -114,12 +115,13 @@ export class Checkout implements OnInit {
       const v = this.addressForm.getRawValue();
       const addr = await this.cart.createAddress({
         fullName: v.fullName,
-        line1: v.line1,
-        line2: v.line2 || null,
-        city: v.city,
-        zip: v.zip,
-        country: v.country,
         phone: v.phone || null,
+        street: v.street,
+        street2: v.street2 || null,
+        city: v.city,
+        province: v.province || null,
+        postalCode: v.postalCode,
+        country: v.country,
       });
       this.addresses.update(list => [addr, ...list]);
       this.selectedAddressId.set(addr.id);

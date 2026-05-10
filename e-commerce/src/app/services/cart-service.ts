@@ -21,13 +21,15 @@ export interface CartItem {
 export interface AddressData {
   id: string;
   fullName: string;
-  line1: string;
-  line2: string | null;
-  city: string;
-  zip: string;
-  country: string;
   phone: string | null;
+  street: string;
+  street2: string | null;
+  city: string;
+  province: string | null;
+  postalCode: string;
+  country: string;
   isDefault: boolean;
+  label?: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -82,7 +84,7 @@ export class CartService {
     );
   }
 
-  createAddress(data: Omit<AddressData, 'id' | 'isDefault'>): Promise<AddressData> {
+  createAddress(data: Omit<AddressData, 'id' | 'isDefault' | 'label'>): Promise<AddressData> {
     return firstValueFrom(
       this.http.post<AddressData>(`${API_URL}/addresses`, data, { withCredentials: true })
     );

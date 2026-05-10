@@ -114,8 +114,8 @@
                           </div>
                           <div>
                             <p class="font-medium text-gray-900 text-sm">{{ addr.fullName }}</p>
-                            <p class="text-gray-500 text-xs mt-0.5">{{ addr.line1 }}{{ addr.line2 ? ', ' + addr.line2 : '' }}</p>
-                            <p class="text-gray-500 text-xs">{{ addr.zip }} {{ addr.city }}, {{ addr.country }}</p>
+                            <p class="text-gray-500 text-xs mt-0.5">{{ addr.street }}{{ addr.street2 ? ', ' + addr.street2 : '' }}</p>
+                            <p class="text-gray-500 text-xs">{{ addr.postalCode }} {{ addr.city }}{{ addr.province ? ' (' + addr.province + ')' : '' }}, {{ addr.country }}</p>
                             @if (addr.phone) { <p class="text-gray-400 text-xs">{{ addr.phone }}</p> }
                             @if (addr.isDefault) {
                               <span class="inline-block mt-1 text-xs text-green-700 bg-green-50 px-2 py-0.5 rounded-full">Predefinito</span>
@@ -144,44 +144,48 @@
                     @if (addressFormError()) {
                       <div class="bg-red-50 border border-red-200 text-red-600 px-3 py-2 rounded-lg text-xs">{{ addressFormError() }}</div>
                     }
-                    <div>
-                      <label class="block text-xs font-medium text-gray-700 mb-1">Nome completo *</label>
-                      <input formControlName="fullName" type="text" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"/>
-                    </div>
-                    <div>
-                      <label class="block text-xs font-medium text-gray-700 mb-1">Indirizzo *</label>
-                      <input formControlName="line1" type="text" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"/>
-                    </div>
-                    <div>
-                      <label class="block text-xs font-medium text-gray-700 mb-1">Interno / scala</label>
-                      <input formControlName="line2" type="text" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"/>
-                    </div>
                     <div class="grid grid-cols-2 gap-3">
                       <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1">Città *</label>
-                        <input formControlName="city" type="text" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"/>
-                      </div>
-                      <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1">CAP *</label>
-                        <input formControlName="zip" type="text" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"/>
-                      </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-3">
-                      <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1">Paese *</label>
-                        <select formControlName="country" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 bg-white">
-                          <option value="IT">Italia</option>
-                          <option value="DE">Germania</option>
-                          <option value="FR">Francia</option>
-                          <option value="ES">Spagna</option>
-                          <option value="GB">Regno Unito</option>
-                          <option value="US">Stati Uniti</option>
-                        </select>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Nome completo *</label>
+                        <input formControlName="fullName" type="text" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"/>
                       </div>
                       <div>
                         <label class="block text-xs font-medium text-gray-700 mb-1">Telefono</label>
                         <input formControlName="phone" type="tel" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"/>
                       </div>
+                    </div>
+                    <div>
+                      <label class="block text-xs font-medium text-gray-700 mb-1">Indirizzo (via e numero) *</label>
+                      <input formControlName="street" type="text" placeholder="es. Via Roma 12" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"/>
+                    </div>
+                    <div>
+                      <label class="block text-xs font-medium text-gray-700 mb-1">Interno / scala / altre info</label>
+                      <input formControlName="street2" type="text" placeholder="es. Interno 3, Scala B" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"/>
+                    </div>
+                    <div class="grid grid-cols-3 gap-3">
+                      <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">CAP *</label>
+                        <input formControlName="postalCode" type="text" placeholder="es. 00100" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"/>
+                      </div>
+                      <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Città *</label>
+                        <input formControlName="city" type="text" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"/>
+                      </div>
+                      <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Provincia</label>
+                        <input formControlName="province" type="text" placeholder="es. RM" maxlength="2" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 uppercase"/>
+                      </div>
+                    </div>
+                    <div>
+                      <label class="block text-xs font-medium text-gray-700 mb-1">Paese *</label>
+                      <select formControlName="country" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 bg-white">
+                        <option value="IT">Italia</option>
+                        <option value="DE">Germania</option>
+                        <option value="FR">Francia</option>
+                        <option value="ES">Spagna</option>
+                        <option value="GB">Regno Unito</option>
+                        <option value="US">Stati Uniti</option>
+                      </select>
                     </div>
                     <button type="submit" [disabled]="addressForm.invalid || addressFormLoading()"
                       class="w-full px-4 py-2.5 bg-gray-900 text-white text-sm rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors">
@@ -336,8 +340,8 @@
                   <p class="text-xs font-medium text-gray-500 uppercase mb-1.5">Spedizione a</p>
                   @if (selectedAddress()) {
                     <p class="text-sm text-gray-900 font-medium">{{ selectedAddress()!.fullName }}</p>
-                    <p class="text-xs text-gray-500">{{ selectedAddress()!.line1 }}</p>
-                    <p class="text-xs text-gray-500">{{ selectedAddress()!.zip }} {{ selectedAddress()!.city }}</p>
+                    <p class="text-xs text-gray-500">{{ selectedAddress()!.street }}</p>
+                    <p class="text-xs text-gray-500">{{ selectedAddress()!.postalCode }} {{ selectedAddress()!.city }}{{ selectedAddress()!.province ? ' (' + selectedAddress()!.province + ')' : '' }}</p>
                   }
                 </div>
                 <div>
