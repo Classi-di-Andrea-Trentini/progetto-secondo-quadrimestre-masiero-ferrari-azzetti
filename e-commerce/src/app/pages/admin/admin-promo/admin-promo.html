@@ -59,7 +59,7 @@
                 <td class="px-4 py-3 font-mono font-bold text-gray-900 tracking-wide">{{ promo.code }}</td>
                 <td class="px-4 py-3 font-semibold text-gray-900">{{ formatDiscount(promo) }}</td>
                 <td class="px-4 py-3 text-gray-500">
-                  {{ promo.minOrderAmount ? '€ ' + parseFloat(String(promo.minOrderAmount)).toFixed(0) : '—' }}
+                  {{ promo.minOrderAmount ? '€ ' + (+promo.minOrderAmount).toFixed(0) : '—' }}
                 </td>
                 <td class="px-4 py-3 text-gray-500">
                   {{ promo._count.uses }}{{ promo.maxUses ? ' / ' + promo.maxUses : '' }}

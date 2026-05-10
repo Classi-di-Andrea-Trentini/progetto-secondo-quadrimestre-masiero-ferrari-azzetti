@@ -297,9 +297,9 @@
                       <div class="border-t border-gray-200 pt-3 space-y-1 text-sm">
                         <div class="flex justify-between text-gray-500">
                           <span>Spedizione</span>
-                          <span>{{ parseFloat(String(order.shippingCost)) === 0 ? 'Gratuita' : formatOrderPrice(order.shippingCost) }}</span>
+                          <span>{{ formatOrderPrice(order.shippingCost) === '€ 0,00' ? 'Gratuita' : formatOrderPrice(order.shippingCost) }}</span>
                         </div>
-                        @if (parseFloat(String(order.discountTotal)) > 0) {
+                        @if (formatOrderPrice(order.discountTotal) !== '€ 0,00') {
                           <div class="flex justify-between text-green-600">
                             <span>Sconto</span>
                             <span>–{{ formatOrderPrice(order.discountTotal) }}</span>

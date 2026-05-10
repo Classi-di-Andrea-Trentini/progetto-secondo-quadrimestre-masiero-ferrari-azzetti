@@ -158,15 +158,16 @@ export class AdminService {
   async createProduct(dto: CreateProductDto) {
     const existing = await this.prisma.product.findUnique({ where: { slug: dto.slug } });
     if (existing) throw new BadRequestException('Slug già in uso');
+    const productData: any = {
+      name: dto.name,
+      slug: dto.slug,
+      description: dto.description ?? null,
+      basePrice: dto.basePrice,
+      isActive: dto.isActive ?? true,
+    };
+    if (dto.categoryId) productData.categoryId = dto.categoryId;
     return this.prisma.product.create({
-      data: {
-        name: dto.name,
-        slug: dto.slug,
-        description: dto.description,
-        categoryId: dto.categoryId ?? null,
-        basePrice: dto.basePrice,
-        isActive: dto.isActive ?? true,
-      },
+      data: productData,
     });
   }
 
@@ -249,7 +250,7 @@ export class AdminService {
     await this.prisma.$transaction([
       this.prisma.order.update({ where: { id }, data: { status: dto.status as any } }),
       this.prisma.orderStatusHistory.create({
-        data: { orderId: id, status: dto.status, changedBy: adminId, note: dto.note },
+        data: { orderId: id, status: dto.status as any, changedBy: adminId, note: dto.note },
       }),
     ]);
 
@@ -288,8 +289,8 @@ export class AdminService {
     return this.prisma.promoCode.create({
       data: {
         code: dto.code.toUpperCase(),
-        discountType: dto.discountType as any,
-        discountValue: dto.discountValue,
+        type: dto.discountType as any,
+        value: dto.discountValue,
         minOrderAmount: dto.minOrderAmount ?? null,
         maxUses: dto.maxUses ?? null,
         expiresAt: dto.expiresAt ? new Date(dto.expiresAt) : null,
