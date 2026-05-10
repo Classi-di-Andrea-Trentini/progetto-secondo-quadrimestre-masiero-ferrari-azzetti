@@ -3,7 +3,13 @@
     "target": "http://backend:3000",
     "secure": false,
     "changeOrigin": true,
-    "logLevel": "debug",
+    "logLevel": "warn",
     "ws": false
+  },
+  "/uploads": {
+    "target": "http://backend:3000",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "warn"
   }
 }

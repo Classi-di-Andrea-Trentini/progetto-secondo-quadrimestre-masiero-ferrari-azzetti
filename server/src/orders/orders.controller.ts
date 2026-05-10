@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Patch, Param, Query, Req, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
@@ -15,5 +15,11 @@ export class OrdersController {
   @Get(':id')
   findOne(@Req() req: any, @Param('id') id: string) {
     return this.svc.findOne(req.user.id, id);
+  }
+
+  @Patch(':id/cancel')
+  @HttpCode(HttpStatus.OK)
+  cancelOrder(@Req() req: any, @Param('id') id: string) {
+    return this.svc.cancelOrder(req.user.id, id);
   }
 }

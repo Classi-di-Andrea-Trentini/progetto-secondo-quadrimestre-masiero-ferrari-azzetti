@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 const ORDER_INCLUDE = {
@@ -47,5 +47,39 @@ export class OrdersService {
     if (!order) throw new NotFoundException('Order not found');
     if (order.userId !== userId) throw new ForbiddenException();
     return order;
+  }
+
+  async cancelOrder(userId: string, id: string) {
+    const order = await this.prisma.order.findUnique({ where: { id } });
+    if (!order) throw new NotFoundException('Order not found');
+    if (order.userId !== userId) throw new ForbiddenException();
+
+    const cancellableStatuses = ['pending', 'paid'];
+    if (!cancellableStatuses.includes(order.status)) {
+      throw new BadRequestException(
+        `Cannot cancel an order with status "${order.status}". Only pending or paid orders can be cancelled.`,
+      );
+    }
+
+    await this.prisma.$transaction([
+      this.prisma.order.update({
+        where: { id },
+        data: { status: 'cancelled' },
+      }),
+      this.prisma.orderStatusHistory.create({
+        data: { orderId: id, status: 'cancelled', changedBy: userId, note: 'Cancellato dall\'utente' },
+      }),
+      this.prisma.auditLog.create({
+        data: {
+          userId,
+          action: 'order_cancel',
+          entityType: 'order',
+          entityId: id,
+          newValue: { status: 'cancelled' },
+        },
+      }),
+    ]);
+
+    return { id, status: 'cancelled' };
   }
 }

@@ -1,25 +1,162 @@
 import { Component, inject, signal, effect } from '@angular/core';
 import { NgClass, DatePipe } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule, FormBuilder, Validators } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../services/auth';
 import { WishlistService } from '../../services/wishlist.service';
+import { CartService, AddressData } from '../../services/cart-service';
+import { API_URL } from '../../services/api.config';
 
-type TabSection = 'profile' | 'orders' | 'favorites' | 'settings';
+interface OrderSummary {
+  id: string;
+  status: string;
+  total: string;
+  subtotal: string;
+  shippingCost: string;
+  discountTotal: string;
+  createdAt: string;
+  items: { productName: string; quantity: number; lineTotal: string }[];
+  payments: { status: string }[];
+}
+
+type TabSection = 'profile' | 'orders' | 'favorites' | 'addresses' | 'settings';
 
 @Component({
   selector: 'app-me',
   standalone: true,
-  imports: [NgClass, DatePipe, ReactiveFormsModule, RouterModule],
+  imports: [NgClass, DatePipe, ReactiveFormsModule, FormsModule, RouterModule],
   templateUrl: './me.html',
   styleUrls: ['./me.css'],
 })
 export class MeComponent {
   readonly auth = inject(AuthService);
   readonly wishlist = inject(WishlistService);
+  private readonly cart = inject(CartService);
   private readonly fb = inject(FormBuilder);
+  private readonly http = inject(HttpClient);
 
   activeTab = signal<TabSection>('profile');
+
+  // -- Ordini --
+  orders = signal<OrderSummary[]>([]);
+  ordersLoading = signal(false);
+  ordersError = signal<string | null>(null);
+  ordersPage = signal(1);
+  ordersTotalPages = signal(1);
+  ordersTotal = signal(0);
+  expandedOrderId = signal<string | null>(null);
+  cancelOrderId = signal<string | null>(null);
+  cancelOrderLoading = signal(false);
+  cancelOrderSuccess = signal<string | null>(null);
+
+  // -- Indirizzi --
+  addresses = signal<AddressData[]>([]);
+  addressesLoading = signal(false);
+  addressesError = signal<string | null>(null);
+  addressAction = signal<string | null>(null);
+  showAddressForm = signal(false);
+  addressFormLoading = signal(false);
+  addressFormError = signal<string | null>(null);
+
+  readonly newAddressForm = this.fb.nonNullable.group({
+    fullName: ['', [Validators.required, Validators.minLength(2)]],
+    phone: [''],
+    street: ['', [Validators.required]],
+    street2: [''],
+    city: ['', [Validators.required]],
+    province: [''],
+    postalCode: ['', [Validators.required]],
+    country: ['IT', [Validators.required]],
+    isDefault: [false],
+  });
+
+  async loadAddresses() {
+    this.addressesLoading.set(true);
+    this.addressesError.set(null);
+    try {
+      this.addresses.set(await this.cart.getAddresses());
+    } catch {
+      this.addressesError.set('Impossibile caricare gli indirizzi');
+    } finally {
+      this.addressesLoading.set(false);
+    }
+  }
+
+  async saveAddress() {
+    if (this.newAddressForm.invalid || this.addressFormLoading()) return;
+    this.addressFormLoading.set(true);
+    this.addressFormError.set(null);
+    try {
+      const v = this.newAddressForm.getRawValue();
+      await this.cart.createAddress({
+        fullName: v.fullName,
+        phone: v.phone || null,
+        street: v.street,
+        street2: v.street2 || null,
+        city: v.city,
+        province: v.province || null,
+        postalCode: v.postalCode,
+        country: v.country,
+      });
+      this.newAddressForm.reset({ country: 'IT', isDefault: false });
+      this.showAddressForm.set(false);
+      this.addressAction.set('Indirizzo salvato!');
+      await this.loadAddresses();
+      setTimeout(() => this.addressAction.set(null), 3000);
+    } catch {
+      this.addressFormError.set('Impossibile salvare l\'indirizzo');
+    } finally {
+      this.addressFormLoading.set(false);
+    }
+  }
+
+  async deleteAddress(id: string) {
+    try {
+      await firstValueFrom(
+        this.http.delete(`${API_URL}/addresses/${id}`, { withCredentials: true })
+      );
+      this.addresses.update(list => list.filter(a => a.id !== id));
+      this.addressAction.set('Indirizzo eliminato');
+      setTimeout(() => this.addressAction.set(null), 3000);
+    } catch {
+      this.addressesError.set('Impossibile eliminare l\'indirizzo');
+    }
+  }
+
+  async setDefaultAddress(id: string) {
+    try {
+      await firstValueFrom(
+        this.http.patch(`${API_URL}/addresses/${id}/default`, {}, { withCredentials: true })
+      );
+      await this.loadAddresses();
+    } catch {
+      this.addressesError.set('Impossibile impostare l\'indirizzo predefinito');
+    }
+  }
+
+  readonly orderStatusLabels: Record<string, string> = {
+    pending: 'In attesa',
+    paid: 'Pagato',
+    processing: 'In lavorazione',
+    shipped: 'Spedito',
+    delivered: 'Consegnato',
+    completed: 'Completato',
+    cancelled: 'Annullato',
+    refunded: 'Rimborsato',
+  };
+
+  readonly orderStatusColors: Record<string, string> = {
+    pending: 'bg-yellow-100 text-yellow-800',
+    paid: 'bg-blue-100 text-blue-800',
+    processing: 'bg-indigo-100 text-indigo-800',
+    shipped: 'bg-purple-100 text-purple-800',
+    delivered: 'bg-green-100 text-green-800',
+    completed: 'bg-green-200 text-green-900',
+    cancelled: 'bg-red-100 text-red-800',
+    refunded: 'bg-gray-100 text-gray-700',
+  };
 
   // -- Modifica profilo --
   isEditing = signal(false);
@@ -94,6 +231,61 @@ export class MeComponent {
   setTab(tab: TabSection) {
     this.activeTab.set(tab);
     if (tab === 'favorites') this.wishlist.loadItems();
+    if (tab === 'orders' && this.orders().length === 0) this.loadOrders();
+    if (tab === 'addresses' && this.addresses().length === 0) this.loadAddresses();
+  }
+
+  async loadOrders(page = 1) {
+    this.ordersLoading.set(true);
+    this.ordersError.set(null);
+    try {
+      const res: any = await firstValueFrom(
+        this.http.get(`${API_URL}/orders`, {
+          params: { page: String(page), limit: '10' },
+          withCredentials: true,
+        })
+      );
+      this.orders.set(res.data);
+      this.ordersPage.set(res.meta.page);
+      this.ordersTotalPages.set(res.meta.totalPages);
+      this.ordersTotal.set(res.meta.total);
+    } catch {
+      this.ordersError.set('Impossibile caricare gli ordini');
+    } finally {
+      this.ordersLoading.set(false);
+    }
+  }
+
+  toggleOrderExpand(id: string) {
+    this.expandedOrderId.update(cur => cur === id ? null : id);
+  }
+
+  formatOrderPrice(v: string | number): string {
+    return '€ ' + parseFloat(String(v)).toFixed(2).replace('.', ',');
+  }
+
+  orderStatusLabel(s: string): string { return this.orderStatusLabels[s] ?? s; }
+  orderStatusColor(s: string): string { return this.orderStatusColors[s] ?? 'bg-gray-100 text-gray-700'; }
+  canCancelOrder(status: string): boolean { return status === 'pending' || status === 'paid'; }
+
+  requestCancelOrder(id: string) { this.cancelOrderId.set(id); }
+  dismissCancelOrder() { this.cancelOrderId.set(null); }
+
+  async confirmCancelOrder() {
+    const id = this.cancelOrderId();
+    if (!id || this.cancelOrderLoading()) return;
+    this.cancelOrderLoading.set(true);
+    try {
+      await firstValueFrom(this.http.patch(`${API_URL}/orders/${id}/cancel`, {}, { withCredentials: true }));
+      this.orders.update(list => list.map(o => o.id === id ? { ...o, status: 'cancelled' } : o));
+      this.cancelOrderId.set(null);
+      this.cancelOrderSuccess.set('Ordine annullato con successo.');
+      setTimeout(() => this.cancelOrderSuccess.set(null), 4000);
+    } catch {
+      this.ordersError.set('Impossibile annullare l\'ordine. Contatta il supporto.');
+    } finally {
+      this.cancelOrderLoading.set(false);
+    }
   }
 
   async removeFromWishlist(productId: string) {

@@ -3,3 +3,4 @@ TODO:
     - [x] Togliere i link social dalla home page, lasciarli solo nel footer.
     - [x] NewsLetter mail conferma.
     - [x] Cookies Policy non invasiva come banner facoltativo e personalizzabile in basso a destra.
+    - [ ] PgAdmin per gestire il database in modo più semplice.

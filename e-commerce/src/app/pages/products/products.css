@@ -484,3 +484,17 @@
   .card-info { flex-direction: column; gap: 2px; }
   .card-prices { align-items: flex-start; }
 }
+
+/* Search */
+.search-wrap { display: flex; align-items: center; flex: 1; max-width: 280px; }
+.search-input {
+  width: 100%;
+  padding: 6px 12px;
+  font-size: 13px;
+  border: 1px solid #e0e0e0;
+  background: transparent;
+  outline: none;
+  font-family: inherit;
+  color: #000;
+}
+.search-input:focus { border-color: #000; }

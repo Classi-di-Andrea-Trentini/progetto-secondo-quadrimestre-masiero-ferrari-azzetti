@@ -1,1 +1,231 @@
-<p>admin-users works!</p>
+<div class="p-6 max-w-7xl mx-auto">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Utenti</h1>
+      <p class="text-gray-500 text-sm mt-1">{{ total() }} utenti registrati</p>
+    </div>
+    <button (click)="exportCsv()"
+      class="flex items-center gap-2 px-4 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-gray-700">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+      </svg>
+      Esporta CSV
+    </button>
+  </div>
+
+  <!-- Success message -->
+  @if (actionSuccess()) {
+    <div class="mb-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm flex items-center gap-2">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+      </svg>
+      {{ actionSuccess() }}
+    </div>
+  }
+
+  <!-- Error -->
+  @if (error()) {
+    <div class="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm flex items-center gap-2">
+      <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      {{ error() }}
+    </div>
+  }
+
+  <!-- Filters -->
+  <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-4 mb-6">
+    <div class="flex flex-col sm:flex-row gap-3">
+      <div class="relative flex-1">
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        <input
+          [(ngModel)]="search"
+          (keyup.enter)="onSearch()"
+          type="text"
+          placeholder="Cerca per nome o email…"
+          class="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+        />
+      </div>
+      <select [(ngModel)]="roleFilter" (change)="onFilter()"
+        class="px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 bg-white">
+        @for (r of allRoles; track r.value) {
+          <option [value]="r.value">{{ r.label }}</option>
+        }
+      </select>
+      <button
+        (click)="onSearch()"
+        class="px-4 py-2.5 bg-gray-900 text-white text-sm rounded-lg hover:bg-gray-700 transition-colors"
+      >
+        Cerca
+      </button>
+    </div>
+  </div>
+
+  <!-- Table -->
+  @if (loading()) {
+    <div class="flex items-center justify-center h-48">
+      <div class="w-7 h-7 border-4 border-gray-300 border-t-gray-900 rounded-full animate-spin"></div>
+    </div>
+  } @else {
+    <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-gray-50 border-b border-gray-200">
+            <tr>
+              <th class="text-left px-4 py-3 font-medium text-gray-500">Utente</th>
+              <th class="text-left px-4 py-3 font-medium text-gray-500">Ruolo</th>
+              <th class="text-left px-4 py-3 font-medium text-gray-500">Email verificata</th>
+              <th class="text-left px-4 py-3 font-medium text-gray-500">Ordini</th>
+              <th class="text-left px-4 py-3 font-medium text-gray-500">Registrato</th>
+              <th class="text-right px-4 py-3 font-medium text-gray-500">Azioni</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            @for (user of users(); track user.id) {
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="px-4 py-3">
+                  <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-600 flex-shrink-0 uppercase">
+                      {{ user.fullName[0] }}
+                    </div>
+                    <div>
+                      <p class="font-medium text-gray-900">{{ user.fullName }}</p>
+                      <p class="text-xs text-gray-400">{{ user.email }}</p>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-4 py-3">
+                  <span
+                    class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
+                    [class.bg-purple-100]="user.role === 'admin'"
+                    [class.text-purple-800]="user.role === 'admin'"
+                    [class.bg-gray-100]="user.role !== 'admin'"
+                    [class.text-gray-700]="user.role !== 'admin'"
+                  >
+                    {{ user.role }}
+                  </span>
+                </td>
+                <td class="px-4 py-3">
+                  @if (user.emailVerifiedAt) {
+                    <span class="inline-flex items-center gap-1 text-green-600 text-xs">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                      </svg>
+                      Sì
+                    </span>
+                  } @else {
+                    <span class="text-gray-400 text-xs">No</span>
+                  }
+                </td>
+                <td class="px-4 py-3 text-gray-900 font-medium">{{ user._count.orders }}</td>
+                <td class="px-4 py-3 text-gray-400 text-xs">{{ user.createdAt | date: 'dd/MM/yyyy' }}</td>
+                <td class="px-4 py-3">
+                  <div class="flex items-center justify-end gap-2">
+                    @if (!isCurrentUser(user.id)) {
+                      <button
+                        (click)="toggleRole(user)"
+                        [disabled]="actionLoading() === user.id"
+                        class="px-3 py-1.5 text-xs border border-gray-200 rounded-lg hover:border-gray-900 hover:text-gray-900 transition-colors disabled:opacity-50"
+                      >
+                        @if (actionLoading() === user.id) {
+                          <span class="inline-block w-3 h-3 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin"></span>
+                        } @else {
+                          {{ user.role === 'admin' ? 'Rimuovi admin' : 'Rendi admin' }}
+                        }
+                      </button>
+                      <button
+                        (click)="requestDelete(user.id)"
+                        class="px-3 py-1.5 text-xs border border-red-200 text-red-600 rounded-lg hover:bg-red-50 transition-colors"
+                      >
+                        Elimina
+                      </button>
+                    } @else {
+                      <span class="text-xs text-gray-400 italic">Tu</span>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+            @empty {
+              <tr>
+                <td colspan="6" class="px-4 py-12 text-center text-gray-400">
+                  Nessun utente trovato
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    @if (totalPages() > 1) {
+      <div class="flex items-center justify-between mt-4">
+        <p class="text-sm text-gray-500">Pagina {{ currentPage() }} di {{ totalPages() }}</p>
+        <div class="flex gap-1">
+          <button
+            (click)="goToPage(currentPage() - 1)"
+            [disabled]="currentPage() === 1"
+            class="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            ‹
+          </button>
+          @for (p of pagesArray(); track p) {
+            <button
+              (click)="goToPage(p)"
+              class="px-3 py-1.5 text-sm border rounded-lg transition-colors"
+              [class.bg-gray-900]="p === currentPage()"
+              [class.text-white]="p === currentPage()"
+              [class.border-gray-900]="p === currentPage()"
+              [class.border-gray-200]="p !== currentPage()"
+              [class.hover:bg-gray-50]="p !== currentPage()"
+            >
+              {{ p }}
+            </button>
+          }
+          <button
+            (click)="goToPage(currentPage() + 1)"
+            [disabled]="currentPage() === totalPages()"
+            class="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            ›
+          </button>
+        </div>
+      </div>
+    }
+  }
+</div>
+
+<!-- Confirm Delete Modal -->
+@if (confirmDeleteId()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/40" (click)="cancelDelete()"></div>
+    <div class="relative bg-white rounded-xl shadow-2xl max-w-sm w-full p-6">
+      <h3 class="text-lg font-bold text-gray-900 mb-2">Elimina utente</h3>
+      <p class="text-gray-500 text-sm mb-6">Questa azione è irreversibile. Tutti i dati dell'utente verranno eliminati.</p>
+      <div class="flex gap-3">
+        <button
+          (click)="cancelDelete()"
+          class="flex-1 px-4 py-2.5 border border-gray-200 rounded-lg text-sm hover:bg-gray-50 transition-colors"
+        >
+          Annulla
+        </button>
+        <button
+          (click)="confirmDelete()"
+          [disabled]="actionLoading() !== null"
+          class="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 transition-colors disabled:opacity-50"
+        >
+          @if (actionLoading()) {
+            <span class="inline-block w-4 h-4 border-2 border-red-300 border-t-white rounded-full animate-spin mx-auto"></span>
+          } @else {
+            Elimina
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}

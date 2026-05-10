@@ -59,15 +59,26 @@
           <label for="password" class="block text-xs font-semibold uppercase tracking-widest text-gray-500 mb-1.5">
             Password
           </label>
-          <input
-            id="password"
-            type="password"
-            formControlName="password"
-            autocomplete="new-password"
-            placeholder="••••••••"
-            class="w-full border px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-black transition"
-            [ngClass]="password.invalid && password.touched ? 'border-red-400' : 'border-gray-300'"
-          />
+          <div class="relative">
+            <input
+              id="password"
+              [type]="showPassword() ? 'text' : 'password'"
+              formControlName="password"
+              autocomplete="new-password"
+              placeholder="••••••••"
+              class="w-full border px-4 py-3 pr-20 text-sm focus:outline-none focus:ring-2 focus:ring-black transition"
+              [ngClass]="password.invalid && password.touched ? 'border-red-400' : 'border-gray-300'"
+            />
+            <button
+              type="button"
+              class="absolute inset-y-0 right-0 px-3 text-xs font-semibold uppercase tracking-wider text-gray-600 hover:text-black"
+              [attr.aria-pressed]="showPassword()"
+              [attr.aria-label]="showPassword() ? 'Nascondi password' : 'Mostra password'"
+              (click)="togglePasswordVisibility()"
+            >
+              {{ showPassword() ? 'Nascondi' : 'Mostra' }}
+            </button>
+          </div>
           @if (password.touched) {
             @if (password.hasError('required') || password.hasError('minlength')) {
               <p class="mt-1 text-xs text-red-500">Minimo 8 caratteri</p>
@@ -83,15 +94,26 @@
           <label for="confirmPassword" class="block text-xs font-semibold uppercase tracking-widest text-gray-500 mb-1.5">
             Conferma password
           </label>
-          <input
-            id="confirmPassword"
-            type="password"
-            formControlName="confirmPassword"
-            autocomplete="new-password"
-            placeholder="••••••••"
-            class="w-full border px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-black transition"
-            [ngClass]="passwordMismatch ? 'border-red-400' : 'border-gray-300'"
-          />
+          <div class="relative">
+            <input
+              id="confirmPassword"
+              [type]="showConfirmPassword() ? 'text' : 'password'"
+              formControlName="confirmPassword"
+              autocomplete="new-password"
+              placeholder="••••••••"
+              class="w-full border px-4 py-3 pr-20 text-sm focus:outline-none focus:ring-2 focus:ring-black transition"
+              [ngClass]="passwordMismatch ? 'border-red-400' : 'border-gray-300'"
+            />
+            <button
+              type="button"
+              class="absolute inset-y-0 right-0 px-3 text-xs font-semibold uppercase tracking-wider text-gray-600 hover:text-black"
+              [attr.aria-pressed]="showConfirmPassword()"
+              [attr.aria-label]="showConfirmPassword() ? 'Nascondi conferma password' : 'Mostra conferma password'"
+              (click)="toggleConfirmPasswordVisibility()"
+            >
+              {{ showConfirmPassword() ? 'Nascondi' : 'Mostra' }}
+            </button>
+          </div>
           @if (passwordMismatch) {
             <p class="mt-1 text-xs text-red-500">Le password non coincidono</p>
           }

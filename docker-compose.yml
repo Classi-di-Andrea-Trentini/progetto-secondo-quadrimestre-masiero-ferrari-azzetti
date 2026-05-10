@@ -30,6 +30,7 @@ services:
     volumes:
       - ./server:/app
       - /app/node_modules
+      - uploads:/app/uploads
     depends_on:
       db:
         condition: service_healthy
@@ -53,6 +54,7 @@ services:
 
 volumes:
   pgdata:
+  uploads:
 
 
   # collegare con una network il backend e il db

@@ -3,7 +3,8 @@ import { AuthService } from '../../../services/auth';
 
 @Component({
   selector: 'app-admin-dashboard',
-  imports: [],
+  standalone: true,
+  imports: [CommonModule, DatePipe, RouterModule, SkeletonComponent],
   templateUrl: './admin-dashboard.html',
   styleUrl: './admin-dashboard.css',
 })
@@ -18,4 +19,7 @@ export class AdminDashboard {
 
   
 
+  statusColor(s: string): string {
+    return this.statusColors[s] ?? 'bg-gray-100 text-gray-700';
+  }
 }

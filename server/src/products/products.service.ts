@@ -23,7 +23,7 @@ export class ProductsService {
         const where: any = {
             // aggiorno tutti i vari campi
             isActive: true,
-            ...(search && { name: { contains: search, mode: 'insensitive' } }),
+            deletedAt: null,
             ...(categoryId && { categoryId }),
             ...(brand && { brand }),
             ...(isFeatured !== undefined && { isFeatured }),
@@ -89,7 +89,7 @@ export class ProductsService {
     async findBySlug(slug: string) {
         // sta volta find unique (1 prodotto per slug)
         const product = await this.prisma.product.findUnique({
-            where: { slug },
+            where: { slug, deletedAt: null },
             include: {
                 category: { select: { id: true, name: true, slug: true } },
                 images: { orderBy: [{ isCover: 'desc' }, { sortOrder: 'asc' }] },
@@ -112,6 +112,7 @@ export class ProductsService {
         const related = await this.prisma.product.findMany({
             where: {
                 isActive: true,
+                deletedAt: null,
                 categoryId: product.categoryId,
                 slug: { not: slug },
             },
@@ -147,7 +148,7 @@ export class ProductsService {
                 distinct: ['size'],
             }),
             this.prisma.product.aggregate({
-                where: { isActive: true },
+                where: { isActive: true, deletedAt: null },
                 _min: { basePrice: true },
                 _max: { basePrice: true },
             }),

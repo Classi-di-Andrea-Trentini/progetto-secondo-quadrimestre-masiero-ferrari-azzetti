@@ -18,6 +18,15 @@
       }
     </button>
 
+    <div class="search-wrap">
+      <input
+        type="text"
+        placeholder="Search products…"
+        [ngModel]="searchQuery()"
+        (ngModelChange)="onSearchInput($event)"
+        class="search-input" />
+    </div>
+
     <div class="sort-wrap">
       <select [ngModel]="sortBy()" (ngModelChange)="setSortBy($event)">
         @for (o of sortOptions; track o.value) {
@@ -149,16 +158,8 @@
     <main class="grid-area">
 
       @if (loading()) {
-        <div class="skeleton-grid">
-          @for (_ of [1,2,3,4,5,6,7,8]; track _) {
-            <div class="skeleton-card">
-              <div class="skeleton-img"></div>
-              <div class="skeleton-text">
-                <div class="skeleton-line w60"></div>
-                <div class="skeleton-line w40"></div>
-              </div>
-            </div>
-          }
+        <div class="product-grid">
+          <app-skeleton type="product-card" [count]="8" />
         </div>
       } @else if (products().length === 0) {
         <div class="empty-state">

@@ -62,7 +62,7 @@ export class ReturnsService {
         throw new BadRequestException(`Cannot return more than ${orderItem.quantity} units of ${orderItem.productName}`);
     }
 
-    return this.prisma.return.create({
+    const created = await this.prisma.return.create({
       data: {
         orderId: dto.orderId,
         userId,
@@ -76,5 +76,17 @@ export class ReturnsService {
       },
       include: { items: true },
     });
+
+    await this.prisma.auditLog.create({
+      data: {
+        userId,
+        action: 'return_create',
+        entityType: 'return',
+        entityId: created.id,
+        newValue: { orderId: dto.orderId, reason: dto.reason, itemCount: dto.items.length },
+      },
+    }).catch(() => {});
+
+    return created;
   }
 }

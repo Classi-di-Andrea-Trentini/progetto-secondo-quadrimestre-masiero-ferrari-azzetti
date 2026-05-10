@@ -1,6 +1,9 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, Logger } from '@nestjs/common';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import helmet from 'helmet';
+import { join } from 'path';
+import { mkdirSync } from 'fs';
 // cookie-parser è CommonJS puro (niente campo "exports"). Con `module: nodenext`
 // l'import default non si risolve in modo affidabile, quindi usiamo la sintassi
 // import-equals che mappa esattamente a `require` mantenendo i tipi.
@@ -9,7 +12,12 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  // Cartella upload persistente (montata come volume Docker)
+  const uploadsDir = join(process.cwd(), 'uploads');
+  mkdirSync(uploadsDir, { recursive: true });
+  app.useStaticAssets(uploadsDir, { prefix: '/uploads' });
 
   // Intestazioni di sicurezza HTTP
   app.use(helmet());

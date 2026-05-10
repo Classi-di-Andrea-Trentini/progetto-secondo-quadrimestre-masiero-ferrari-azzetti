@@ -16,6 +16,7 @@ import { CheckoutModule } from './checkout/checkout.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { PromoCodesModule } from './promo-codes/promo-codes.module';
 import { ReturnsModule } from './returns/returns.module';
+import { AdminModule } from './admin/admin.module';
 import { ConfigModule } from '@nestjs/config';
 
 
@@ -44,6 +45,7 @@ import { ConfigModule } from '@nestjs/config';
     ReviewsModule,
     PromoCodesModule,
     ReturnsModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [

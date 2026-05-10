@@ -1,0 +1,12 @@
+<nav class="flex items-center gap-1 text-xs text-gray-400 mb-4" aria-label="Breadcrumb">
+  @for (item of items; track $index; let i = $index) {
+    @if (i > 0) {
+      <span class="mx-1">/</span>
+    }
+    @if (!isLast(i) && item.link) {
+      <a [routerLink]="item.link" class="hover:text-gray-700 transition-colors">{{ item.label }}</a>
+    } @else {
+      <span class="text-gray-700 font-medium">{{ item.label }}</span>
+    }
+  }
+</nav>

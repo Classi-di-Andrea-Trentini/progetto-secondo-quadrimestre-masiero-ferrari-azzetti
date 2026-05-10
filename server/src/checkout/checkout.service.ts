@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { PromoCodesService } from '../promo-codes/promo-codes.service';
+import { MailService } from '../mail/mail.service';
 import { CheckoutDto, ShippingMethod } from './dto/checkout.dto';
 
 const SHIPPING_COST: Record<ShippingMethod, number> = {
@@ -19,6 +20,7 @@ export class CheckoutService {
   constructor(
     private prisma: PrismaService,
     private promoSvc: PromoCodesService,
+    private mailService: MailService,
   ) {}
 
   async placeOrder(userId: string, dto: CheckoutDto) {
@@ -176,6 +178,24 @@ export class CheckoutService {
 
       return created;
     });
+
+    // Invia email di conferma ordine (fire-and-forget)
+    this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { email: true, fullName: true },
+    }).then((user) => {
+      if (user) {
+        this.mailService.sendOrderConfirmation(user.email, user.fullName, {
+          id: order.id,
+          items: order.items.map((i) => ({
+            productName: i.productName,
+            quantity: i.quantity,
+            lineTotal: i.lineTotal,
+          })),
+          total,
+        }).catch(() => {});
+      }
+    }).catch(() => {});
 
     return { orderId: order.id, total, status: 'paid' };
   }

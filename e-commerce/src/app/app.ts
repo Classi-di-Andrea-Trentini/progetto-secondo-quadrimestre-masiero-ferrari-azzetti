@@ -4,6 +4,7 @@ import { RouterOutlet, RouterModule, Router } from '@angular/router';
 import { NavBar } from './components/nav-bar/nav-bar';
 import { Footer } from './components/footer/footer';
 import { Cart } from './components/cart/cart';
+import { ToastComponent } from './components/toast/toast';
 
 export interface CookieConsent {
   essential: true;   // always true — cannot be disabled
@@ -12,7 +13,7 @@ export interface CookieConsent {
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterModule, NavBar, Footer, Cart],
+  imports: [RouterOutlet, RouterModule, NavBar, Footer, Cart, ToastComponent],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })

@@ -1,1 +1,539 @@
-<p>admin-products works!</p>
+<div class="p-6 max-w-7xl mx-auto">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Prodotti</h1>
+      <p class="text-gray-500 text-sm mt-1">{{ total() }} prodotti nel catalogo</p>
+    </div>
+    <button (click)="openCreate()"
+      class="flex items-center gap-2 px-4 py-2.5 bg-gray-900 text-white text-sm rounded-lg hover:bg-gray-700 transition-colors">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+      </svg>
+      Nuovo prodotto
+    </button>
+  </div>
+
+  @if (actionSuccess()) {
+    <div class="mb-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">{{ actionSuccess() }}</div>
+  }
+  @if (error()) {
+    <div class="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">{{ error() }}</div>
+  }
+
+  <!-- Filters -->
+  <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-4 mb-6">
+    <div class="flex flex-col sm:flex-row gap-3">
+      <div class="relative flex-1">
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        <input [(ngModel)]="search" (keyup.enter)="onSearch()" type="text" placeholder="Cerca per nome o slug…"
+          class="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"/>
+      </div>
+      <select [(ngModel)]="isActiveFilter" (change)="onFilter()"
+        class="px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 bg-white">
+        <option value="">Tutti i prodotti</option>
+        <option value="true">Solo attivi</option>
+        <option value="false">Solo inattivi</option>
+      </select>
+      <button (click)="onSearch()" class="px-4 py-2.5 bg-gray-900 text-white text-sm rounded-lg hover:bg-gray-700 transition-colors">Cerca</button>
+    </div>
+  </div>
+
+  <!-- Table -->
+  @if (loading()) {
+    <div class="flex items-center justify-center h-48">
+      <div class="w-7 h-7 border-4 border-gray-300 border-t-gray-900 rounded-full animate-spin"></div>
+    </div>
+  } @else {
+    <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-gray-50 border-b border-gray-200">
+            <tr>
+              <th class="text-left px-4 py-3 font-medium text-gray-500">Prodotto</th>
+              <th class="text-left px-4 py-3 font-medium text-gray-500">Categoria</th>
+              <th class="text-right px-4 py-3 font-medium text-gray-500">Prezzo</th>
+              <th class="text-right px-4 py-3 font-medium text-gray-500">Varianti</th>
+              <th class="text-right px-4 py-3 font-medium text-gray-500">Vendite</th>
+              <th class="text-center px-4 py-3 font-medium text-gray-500">Stato</th>
+              <th class="text-right px-4 py-3 font-medium text-gray-500">Azioni</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            @for (product of products(); track product.id) {
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="px-4 py-3">
+                  <div class="flex items-center gap-3">
+                    @if (product.images.length > 0) {
+                      <img [src]="product.images[0].url" alt="" class="w-10 h-10 rounded-lg object-cover bg-gray-100 flex-shrink-0"/>
+                    } @else {
+                      <div class="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
+                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                      </div>
+                    }
+                    <div>
+                      <p class="font-medium text-gray-900">{{ product.name }}</p>
+                      <p class="text-xs text-gray-400 font-mono">{{ product.slug }}</p>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-4 py-3 text-gray-500 text-xs">{{ product.category?.name ?? '—' }}</td>
+                <td class="px-4 py-3 text-right font-semibold text-gray-900">{{ formatPrice(product.basePrice) }}</td>
+                <td class="px-4 py-3 text-right text-gray-700">{{ product._count.variants }}</td>
+                <td class="px-4 py-3 text-right text-gray-700">{{ product.soldCount }}</td>
+                <td class="px-4 py-3 text-center">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
+                    [class.bg-green-100]="product.isActive" [class.text-green-800]="product.isActive"
+                    [class.bg-gray-100]="!product.isActive" [class.text-gray-500]="!product.isActive">
+                    {{ product.isActive ? 'Attivo' : 'Nascosto' }}
+                  </span>
+                </td>
+                <td class="px-4 py-3">
+                  <div class="flex items-center justify-end gap-2">
+                    <button (click)="openEdit(product)"
+                      class="px-3 py-1.5 text-xs border border-gray-200 rounded-lg hover:border-gray-900 hover:text-gray-900 transition-colors">
+                      Modifica
+                    </button>
+                    <button (click)="requestDelete(product.id)"
+                      class="px-3 py-1.5 text-xs border border-red-200 text-red-600 rounded-lg hover:bg-red-50 transition-colors">
+                      Elimina
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+            @empty {
+              <tr><td colspan="7" class="px-4 py-12 text-center text-gray-400">Nessun prodotto trovato</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    @if (totalPages() > 1) {
+      <div class="flex items-center justify-between mt-4">
+        <p class="text-sm text-gray-500">Pagina {{ currentPage() }} di {{ totalPages() }}</p>
+        <div class="flex gap-1">
+          <button (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() === 1" class="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed">‹</button>
+          @for (p of pagesArray(); track p) {
+            <button (click)="goToPage(p)" class="px-3 py-1.5 text-sm border rounded-lg transition-colors"
+              [class.bg-gray-900]="p === currentPage()" [class.text-white]="p === currentPage()"
+              [class.border-gray-900]="p === currentPage()" [class.border-gray-200]="p !== currentPage()"
+              [class.hover:bg-gray-50]="p !== currentPage()">{{ p }}</button>
+          }
+          <button (click)="goToPage(currentPage() + 1)" [disabled]="currentPage() === totalPages()" class="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed">›</button>
+        </div>
+      </div>
+    }
+  }
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     PRODUCT MODAL (3 tabs: info / variants / images)
+══════════════════════════════════════════════════════════════════════════ -->
+@if (showModal()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/40" (click)="closeModal()"></div>
+    <div class="relative bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[92vh] flex flex-col">
+
+      <!-- Modal header -->
+      <div class="flex items-center justify-between px-6 pt-5 pb-4 border-b border-gray-100">
+        <h3 class="text-lg font-bold text-gray-900">
+          {{ editingProduct() ? 'Modifica prodotto' : 'Nuovo prodotto' }}
+        </h3>
+        <button (click)="closeModal()" class="p-1.5 rounded-lg hover:bg-gray-100 transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Tabs (only when editing an existing product) -->
+      @if (editingProduct()) {
+        <div class="flex border-b border-gray-100 px-6">
+          <button (click)="setTab('info')"
+            class="px-4 py-3 text-sm font-medium border-b-2 transition-colors -mb-px"
+            [class.border-gray-900]="activeTab() === 'info'"
+            [class.text-gray-900]="activeTab() === 'info'"
+            [class.border-transparent]="activeTab() !== 'info'"
+            [class.text-gray-400]="activeTab() !== 'info'">
+            Info
+          </button>
+          <button (click)="setTab('variants')"
+            class="px-4 py-3 text-sm font-medium border-b-2 transition-colors -mb-px"
+            [class.border-gray-900]="activeTab() === 'variants'"
+            [class.text-gray-900]="activeTab() === 'variants'"
+            [class.border-transparent]="activeTab() !== 'variants'"
+            [class.text-gray-400]="activeTab() !== 'variants'">
+            Varianti
+            <span class="ml-1.5 px-1.5 py-0.5 bg-gray-100 text-gray-600 text-xs rounded-full">
+              {{ editingProduct()!.variants.length }}
+            </span>
+          </button>
+          <button (click)="setTab('images')"
+            class="px-4 py-3 text-sm font-medium border-b-2 transition-colors -mb-px"
+            [class.border-gray-900]="activeTab() === 'images'"
+            [class.text-gray-900]="activeTab() === 'images'"
+            [class.border-transparent]="activeTab() !== 'images'"
+            [class.text-gray-400]="activeTab() !== 'images'">
+            Immagini
+            <span class="ml-1.5 px-1.5 py-0.5 bg-gray-100 text-gray-600 text-xs rounded-full">
+              {{ editingProduct()!.images.length }}
+            </span>
+          </button>
+        </div>
+      }
+
+      <!-- Loading overlay -->
+      @if (modalLoading()) {
+        <div class="flex items-center justify-center h-64">
+          <div class="w-7 h-7 border-4 border-gray-300 border-t-gray-900 rounded-full animate-spin"></div>
+        </div>
+      } @else {
+
+        <div class="overflow-y-auto flex-1 px-6 py-5">
+
+          @if (formError()) {
+            <div class="mb-4 bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-lg text-sm">{{ formError() }}</div>
+          }
+
+          <!-- ─── TAB: INFO ──────────────────────────────────────────────────── -->
+          @if (activeTab() === 'info') {
+            <form [formGroup]="productForm" (ngSubmit)="submitForm()" class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nome *</label>
+                <input formControlName="name" (blur)="autoSlug()" type="text"
+                  class="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+                  placeholder="Nome del prodotto"/>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  Slug * <span class="text-gray-400 font-normal">(lettere minuscole, numeri, trattini)</span>
+                </label>
+                <input formControlName="slug" type="text"
+                  class="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 font-mono"
+                  placeholder="nome-prodotto"/>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Descrizione</label>
+                <textarea formControlName="description" rows="3"
+                  class="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 resize-none"
+                  placeholder="Descrizione del prodotto…"></textarea>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Prezzo base (€) *</label>
+                <input formControlName="basePrice" type="number" step="0.01" min="0"
+                  class="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"/>
+              </div>
+              <div class="flex items-center gap-3">
+                <input formControlName="isActive" type="checkbox" id="isActive" class="w-4 h-4 accent-gray-900"/>
+                <label for="isActive" class="text-sm text-gray-700">Prodotto attivo (visibile ai clienti)</label>
+              </div>
+              <div class="flex gap-3 pt-2">
+                <button type="button" (click)="closeModal()"
+                  class="flex-1 px-4 py-2.5 border border-gray-200 rounded-lg text-sm hover:bg-gray-50 transition-colors">
+                  Annulla
+                </button>
+                <button type="submit" [disabled]="productForm.invalid || formLoading()"
+                  class="flex-1 px-4 py-2.5 bg-gray-900 text-white rounded-lg text-sm hover:bg-gray-700 transition-colors disabled:opacity-50">
+                  @if (formLoading()) {
+                    <span class="inline-block w-4 h-4 border-2 border-gray-400 border-t-white rounded-full animate-spin mx-auto"></span>
+                  } @else {
+                    {{ editingProduct() ? 'Salva modifiche' : 'Crea prodotto' }}
+                  }
+                </button>
+              </div>
+            </form>
+          }
+
+          <!-- ─── TAB: VARIANTS ──────────────────────────────────────────────── -->
+          @if (activeTab() === 'variants') {
+            <div class="space-y-3">
+
+              <!-- Variant list -->
+              @if (editingProduct()!.variants.length === 0 && !showVariantForm()) {
+                <div class="text-center py-10 text-gray-400 text-sm">
+                  Nessuna variante — aggiungi taglia, colore o materiale
+                </div>
+              }
+
+              @for (v of editingProduct()!.variants; track v.id) {
+                <div class="flex items-center justify-between bg-gray-50 rounded-lg px-4 py-3 gap-3">
+                  <div class="flex items-center gap-3 min-w-0">
+                    @if (v.colorHex) {
+                      <span class="w-4 h-4 rounded-full border border-gray-200 flex-shrink-0"
+                        [style.background-color]="v.colorHex"></span>
+                    }
+                    <div class="min-w-0">
+                      <p class="text-sm font-medium text-gray-900 font-mono">{{ v.sku }}</p>
+                      <p class="text-xs text-gray-500">{{ variantLabel(v) }}</p>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-3 flex-shrink-0">
+                    <div class="text-right">
+                      @if (v.priceOverride) {
+                        <p class="text-xs font-medium text-gray-900">{{ formatPrice(v.priceOverride) }}</p>
+                      }
+                      <p class="text-xs text-gray-500">Stock: {{ v.stockQty }}</p>
+                    </div>
+                    <span class="text-xs px-2 py-0.5 rounded-full"
+                      [class.bg-green-100]="v.isActive" [class.text-green-700]="v.isActive"
+                      [class.bg-gray-100]="!v.isActive" [class.text-gray-500]="!v.isActive">
+                      {{ v.isActive ? 'Attiva' : 'Off' }}
+                    </span>
+                    <button (click)="openEditVariant(v)"
+                      class="p-1.5 rounded-lg hover:bg-white border border-transparent hover:border-gray-200 transition-colors">
+                      <svg class="w-3.5 h-3.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                      </svg>
+                    </button>
+                    <button (click)="deleteVariant(v.id)"
+                      class="p-1.5 rounded-lg hover:bg-red-50 border border-transparent hover:border-red-200 transition-colors">
+                      <svg class="w-3.5 h-3.5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              }
+
+              <!-- Variant form -->
+              @if (showVariantForm()) {
+                <div class="border border-gray-200 rounded-xl p-4 mt-3 bg-white">
+                  <h4 class="text-sm font-semibold text-gray-900 mb-3">
+                    {{ editingVariant() ? 'Modifica variante' : 'Nuova variante' }}
+                  </h4>
+                  @if (variantFormError()) {
+                    <div class="mb-3 bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-lg text-xs">{{ variantFormError() }}</div>
+                  }
+                  <form [formGroup]="variantForm" (ngSubmit)="saveVariant()" class="space-y-3">
+                    <div class="grid grid-cols-2 gap-3">
+                      <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">SKU *</label>
+                        <input formControlName="sku" type="text" placeholder="SKU-001"
+                          class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 font-mono"/>
+                      </div>
+                      <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Taglia</label>
+                        <input formControlName="size" type="text" placeholder="S, M, L, XL…"
+                          class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"/>
+                      </div>
+                      <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Colore</label>
+                        <input formControlName="color" type="text" placeholder="Nero, Bianco…"
+                          class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"/>
+                      </div>
+                      <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Hex colore</label>
+                        <input formControlName="colorHex" type="text" placeholder="#000000"
+                          class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 font-mono"/>
+                      </div>
+                      <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Materiale</label>
+                        <input formControlName="material" type="text" placeholder="Cotone, Lana…"
+                          class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"/>
+                      </div>
+                      <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Prezzo override (€)</label>
+                        <input formControlName="priceOverride" type="number" step="0.01" min="0" placeholder="—"
+                          class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"/>
+                      </div>
+                      <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Stock</label>
+                        <input formControlName="stockQty" type="number" min="0"
+                          class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"/>
+                      </div>
+                      <div class="flex items-center gap-2 pt-5">
+                        <input formControlName="isActive" type="checkbox" id="variantActive" class="w-4 h-4 accent-gray-900"/>
+                        <label for="variantActive" class="text-xs text-gray-700">Attiva</label>
+                      </div>
+                    </div>
+                    <div class="flex gap-2 pt-1">
+                      <button type="button" (click)="cancelVariantForm()"
+                        class="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-xs hover:bg-gray-50 transition-colors">
+                        Annulla
+                      </button>
+                      <button type="submit" [disabled]="variantForm.invalid || variantFormLoading()"
+                        class="flex-1 px-3 py-2 bg-gray-900 text-white rounded-lg text-xs hover:bg-gray-700 transition-colors disabled:opacity-50">
+                        @if (variantFormLoading()) {
+                          <span class="inline-block w-3 h-3 border-2 border-gray-400 border-t-white rounded-full animate-spin mx-auto"></span>
+                        } @else {
+                          {{ editingVariant() ? 'Salva' : 'Aggiungi' }}
+                        }
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              } @else {
+                <button (click)="openAddVariant()"
+                  class="w-full py-2.5 border-2 border-dashed border-gray-200 rounded-xl text-sm text-gray-500 hover:border-gray-400 hover:text-gray-700 transition-colors flex items-center justify-center gap-2 mt-2">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                  </svg>
+                  Aggiungi variante
+                </button>
+              }
+            </div>
+          }
+
+          <!-- ─── TAB: IMAGES ────────────────────────────────────────────────── -->
+          @if (activeTab() === 'images') {
+            <div class="space-y-3">
+
+              @if (imageFormError()) {
+                <div class="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-lg text-xs">{{ imageFormError() }}</div>
+              }
+
+              <!-- Image grid -->
+              @if (editingProduct()!.images.length > 0) {
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  @for (img of editingProduct()!.images; track img.id) {
+                    <div class="relative group rounded-xl overflow-hidden border-2 aspect-square"
+                      [class.border-gray-900]="img.isCover"
+                      [class.border-transparent]="!img.isCover">
+                      <img [src]="img.url" [alt]="img.altText ?? ''" class="w-full h-full object-cover bg-gray-100"/>
+                      <!-- Overlay actions -->
+                      <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+                        @if (!img.isCover) {
+                          <button (click)="setCover(img.id)"
+                            class="px-3 py-1.5 bg-white text-gray-900 text-xs rounded-lg font-medium hover:bg-gray-100 transition-colors">
+                            Imposta cover
+                          </button>
+                        }
+                        <button (click)="deleteImage(img.id)"
+                          class="px-3 py-1.5 bg-red-600 text-white text-xs rounded-lg font-medium hover:bg-red-700 transition-colors">
+                          Elimina
+                        </button>
+                      </div>
+                      <!-- Cover badge -->
+                      @if (img.isCover) {
+                        <div class="absolute top-2 left-2 bg-gray-900 text-white text-xs px-2 py-0.5 rounded-full">
+                          Cover
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+              } @else if (!showImageForm()) {
+                <div class="text-center py-10 text-gray-400 text-sm">
+                  Nessuna immagine — aggiungi un URL per iniziare
+                </div>
+              }
+
+              <!-- Image form: upload o URL -->
+              @if (showImageForm()) {
+                <div class="border border-gray-200 rounded-xl p-4 bg-white">
+
+                  <!-- Mode toggle -->
+                  <div class="flex rounded-lg border border-gray-200 p-0.5 mb-4 w-fit">
+                    <button type="button" (click)="imageMode = 'upload'; imagePreview.set(null); imageFile = null; imageUrl = ''"
+                      class="px-3 py-1.5 text-xs rounded-md transition-colors font-medium"
+                      [class.bg-gray-900]="imageMode === 'upload'"
+                      [class.text-white]="imageMode === 'upload'"
+                      [class.text-gray-500]="imageMode !== 'upload'">
+                      Carica file
+                    </button>
+                    <button type="button" (click)="imageMode = 'url'; imagePreview.set(null); imageFile = null"
+                      class="px-3 py-1.5 text-xs rounded-md transition-colors font-medium"
+                      [class.bg-gray-900]="imageMode === 'url'"
+                      [class.text-white]="imageMode === 'url'"
+                      [class.text-gray-500]="imageMode !== 'url'">
+                      Via URL
+                    </button>
+                  </div>
+
+                  <div class="space-y-3">
+
+                    @if (imageMode === 'upload') {
+                      <!-- File upload -->
+                      <label class="block cursor-pointer">
+                        <div class="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center hover:border-gray-400 transition-colors"
+                          [class.border-gray-400]="imagePreview()">
+                          @if (imagePreview()) {
+                            <img [src]="imagePreview()" class="h-32 mx-auto object-contain rounded-lg mb-2" alt="preview"/>
+                            <p class="text-xs text-gray-500">{{ imageFile?.name }}</p>
+                          } @else {
+                            <svg class="w-8 h-8 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                            <p class="text-xs text-gray-500">Clicca o trascina un'immagine</p>
+                            <p class="text-xs text-gray-400 mt-1">JPG, PNG, WebP — max 5 MB</p>
+                          }
+                        </div>
+                        <input type="file" accept="image/*" class="hidden" (change)="onFileSelected($event)"/>
+                      </label>
+                    } @else {
+                      <!-- URL mode -->
+                      <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">URL immagine *</label>
+                        <input [(ngModel)]="imageUrl" type="url" placeholder="https://…"
+                          class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"/>
+                      </div>
+                      <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Alt text (opzionale)</label>
+                        <input [(ngModel)]="imageAlt" type="text" placeholder="Descrizione immagine…"
+                          class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"/>
+                      </div>
+                      @if (imageUrl.trim()) {
+                        <div class="rounded-lg overflow-hidden border border-gray-100 h-28 bg-gray-50">
+                          <img [src]="imageUrl" class="w-full h-full object-contain" alt="preview"
+                            (error)="imageFormError.set('URL non valido o immagine non raggiungibile')"/>
+                        </div>
+                      }
+                    }
+
+                    <div class="flex gap-2">
+                      <button type="button" (click)="cancelImageForm()"
+                        class="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-xs hover:bg-gray-50 transition-colors">
+                        Annulla
+                      </button>
+                      <button type="button" (click)="saveImage()" [disabled]="imageFormLoading()"
+                        class="flex-1 px-3 py-2 bg-gray-900 text-white rounded-lg text-xs hover:bg-gray-700 transition-colors disabled:opacity-50">
+                        @if (imageFormLoading()) {
+                          <span class="inline-block w-3 h-3 border-2 border-gray-400 border-t-white rounded-full animate-spin mx-auto"></span>
+                        } @else { Aggiungi }
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              } @else {
+                <button (click)="openAddImage()"
+                  class="w-full py-2.5 border-2 border-dashed border-gray-200 rounded-xl text-sm text-gray-500 hover:border-gray-400 hover:text-gray-700 transition-colors flex items-center justify-center gap-2 mt-2">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                  </svg>
+                  Aggiungi immagine
+                </button>
+              }
+            </div>
+          }
+
+        </div>
+      }
+    </div>
+  </div>
+}
+
+<!-- Confirm Delete -->
+@if (confirmDeleteId()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/40" (click)="cancelDelete()"></div>
+    <div class="relative bg-white rounded-xl shadow-2xl max-w-sm w-full p-6">
+      <h3 class="text-lg font-bold text-gray-900 mb-2">Elimina prodotto</h3>
+      <p class="text-gray-500 text-sm mb-6">Questa azione è irreversibile. Il prodotto e tutte le sue varianti verranno eliminati.</p>
+      <div class="flex gap-3">
+        <button (click)="cancelDelete()" class="flex-1 px-4 py-2.5 border border-gray-200 rounded-lg text-sm hover:bg-gray-50">Annulla</button>
+        <button (click)="confirmDelete()" [disabled]="deleteLoading()" class="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 disabled:opacity-50">
+          @if (deleteLoading()) {
+            <span class="inline-block w-4 h-4 border-2 border-red-300 border-t-white rounded-full animate-spin mx-auto"></span>
+          } @else { Elimina }
+        </button>
+      </div>
+    </div>
+  </div>
+}

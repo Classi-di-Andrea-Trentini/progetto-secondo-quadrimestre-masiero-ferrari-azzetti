@@ -1,22 +1,27 @@
 <div class="max-w-4xl mx-auto px-4 py-10">
 
-  <nav class="flex justify-center gap-10 border-b border-gray-200 mb-12">
-    <a (click)="activeTab.set('profile')"
+  <nav class="flex justify-center gap-6 sm:gap-10 border-b border-gray-200 mb-12 flex-wrap">
+    <a (click)="setTab('profile')"
        class="pb-4 text-sm font-semibold uppercase tracking-wider cursor-pointer transition-colors"
        [ngClass]="activeTab() === 'profile' ? 'text-black border-b-2 border-black' : 'text-gray-400 hover:text-gray-700'">
       Profile
     </a>
-    <a (click)="activeTab.set('orders')"
+    <a (click)="setTab('orders')"
        class="pb-4 text-sm font-semibold uppercase tracking-wider cursor-pointer transition-colors"
        [ngClass]="activeTab() === 'orders' ? 'text-black border-b-2 border-black' : 'text-gray-400 hover:text-gray-700'">
       Orders
+    </a>
+    <a (click)="setTab('addresses')"
+       class="pb-4 text-sm font-semibold uppercase tracking-wider cursor-pointer transition-colors"
+       [ngClass]="activeTab() === 'addresses' ? 'text-black border-b-2 border-black' : 'text-gray-400 hover:text-gray-700'">
+      Addresses
     </a>
     <a (click)="setTab('favorites')"
        class="pb-4 text-sm font-semibold uppercase tracking-wider cursor-pointer transition-colors"
        [ngClass]="activeTab() === 'favorites' ? 'text-black border-b-2 border-black' : 'text-gray-400 hover:text-gray-700'">
       Saved
     </a>
-    <a (click)="activeTab.set('settings')"
+    <a (click)="setTab('settings')"
        class="pb-4 text-sm font-semibold uppercase tracking-wider cursor-pointer transition-colors"
        [ngClass]="activeTab() === 'settings' ? 'text-black border-b-2 border-black' : 'text-gray-400 hover:text-gray-700'">
       Settings
@@ -227,8 +232,241 @@
 
       @case ('orders') {
         <section>
-          <h2 class="text-xl font-bold border-b border-gray-100 pb-4 mb-6">Order History</h2>
-          <p class="text-gray-400 text-sm">No orders yet.</p>
+          <div class="flex items-center justify-between border-b border-gray-100 pb-4 mb-6">
+            <h2 class="text-xl font-bold">Order History</h2>
+            @if (ordersTotal() > 0) {
+              <span class="text-sm text-gray-400">{{ ordersTotal() }} ordini</span>
+            }
+          </div>
+
+          @if (ordersLoading()) {
+            <div class="flex justify-center py-16">
+              <div class="w-6 h-6 border-4 border-gray-200 border-t-gray-900 rounded-full animate-spin"></div>
+            </div>
+          } @else if (ordersError()) {
+            <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">{{ ordersError() }}</div>
+          } @else if (orders().length === 0) {
+            <div class="text-center py-16 space-y-4">
+              <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto">
+                <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                </svg>
+              </div>
+              <p class="text-gray-400 text-sm">Nessun ordine ancora.</p>
+              <a routerLink="/products" class="inline-block px-5 py-2.5 bg-gray-900 text-white text-sm rounded-lg hover:bg-gray-700 transition-colors">
+                Inizia a fare shopping
+              </a>
+            </div>
+          } @else {
+            <div class="space-y-3">
+              @for (order of orders(); track order.id) {
+                <div class="border border-gray-200 rounded-xl overflow-hidden">
+                  <!-- Order header -->
+                  <button
+                    (click)="toggleOrderExpand(order.id)"
+                    class="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+                  >
+                    <div class="flex items-center gap-4 text-left">
+                      <div>
+                        <p class="font-mono text-xs text-gray-400">{{ order.id.slice(0, 8) }}…</p>
+                        <p class="text-xs text-gray-400 mt-0.5">{{ order.createdAt | date: 'dd/MM/yyyy' }}</p>
+                      </div>
+                      <div>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium" [ngClass]="orderStatusColor(order.status)">
+                          {{ orderStatusLabel(order.status) }}
+                        </span>
+                      </div>
+                      <div>
+                        <p class="text-xs text-gray-500">{{ order.items.length }} articol{{ order.items.length !== 1 ? 'i' : 'o' }}</p>
+                      </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                      <span class="font-bold text-gray-900">{{ formatOrderPrice(order.total) }}</span>
+                      @if (canCancelOrder(order.status)) {
+                        <button (click)="$event.stopPropagation(); requestCancelOrder(order.id)"
+                          class="px-2 py-1 text-xs border border-red-200 text-red-600 rounded-lg hover:bg-red-50 transition-colors">
+                          Annulla
+                        </button>
+                      }
+                      <svg class="w-4 h-4 text-gray-400 transition-transform" [class.rotate-180]="expandedOrderId() === order.id" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                      </svg>
+                    </div>
+                  </button>
+
+                  <!-- Order detail (expanded) -->
+                  @if (expandedOrderId() === order.id) {
+                    <div class="border-t border-gray-100 px-4 py-4 bg-gray-50">
+                      <div class="space-y-2 mb-4">
+                        @for (item of order.items; track $index) {
+                          <div class="flex justify-between items-center text-sm">
+                            <span class="text-gray-700">{{ item.productName }} <span class="text-gray-400">×{{ item.quantity }}</span></span>
+                            <span class="font-medium text-gray-900">{{ formatOrderPrice(item.lineTotal) }}</span>
+                          </div>
+                        }
+                      </div>
+                      <div class="border-t border-gray-200 pt-3 space-y-1 text-sm">
+                        <div class="flex justify-between text-gray-500">
+                          <span>Spedizione</span>
+                          <span>{{ formatOrderPrice(order.shippingCost) === '€ 0,00' ? 'Gratuita' : formatOrderPrice(order.shippingCost) }}</span>
+                        </div>
+                        @if (formatOrderPrice(order.discountTotal) !== '€ 0,00') {
+                          <div class="flex justify-between text-green-600">
+                            <span>Sconto</span>
+                            <span>–{{ formatOrderPrice(order.discountTotal) }}</span>
+                          </div>
+                        }
+                        <div class="flex justify-between font-bold text-gray-900 border-t border-gray-200 pt-2 mt-1">
+                          <span>Totale</span>
+                          <span>{{ formatOrderPrice(order.total) }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+
+            <!-- Pagination -->
+            @if (ordersTotalPages() > 1) {
+              <div class="flex justify-center gap-2 mt-6">
+                <button (click)="loadOrders(ordersPage() - 1)" [disabled]="ordersPage() === 1"
+                  class="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40">‹</button>
+                <span class="px-3 py-1.5 text-sm text-gray-500">{{ ordersPage() }} / {{ ordersTotalPages() }}</span>
+                <button (click)="loadOrders(ordersPage() + 1)" [disabled]="ordersPage() === ordersTotalPages()"
+                  class="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40">›</button>
+              </div>
+            }
+          }
+        </section>
+      }
+
+      @case ('addresses') {
+        <section>
+          <div class="flex items-center justify-between border-b border-gray-100 pb-4 mb-6">
+            <h2 class="text-xl font-bold">Shipping Addresses</h2>
+            <button (click)="showAddressForm.set(!showAddressForm())"
+              class="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white text-sm rounded-lg hover:bg-gray-700 transition-colors">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+              </svg>
+              {{ showAddressForm() ? 'Annulla' : 'Nuovo indirizzo' }}
+            </button>
+          </div>
+
+          @if (addressAction()) {
+            <div class="mb-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">{{ addressAction() }}</div>
+          }
+          @if (addressesError()) {
+            <div class="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">{{ addressesError() }}</div>
+          }
+
+          @if (showAddressForm()) {
+            <form [formGroup]="newAddressForm" (ngSubmit)="saveAddress()" class="border border-gray-200 rounded-xl p-5 mb-6 space-y-3 bg-gray-50">
+              <h3 class="font-semibold text-gray-900 text-sm mb-2">Nuovo indirizzo</h3>
+              @if (addressFormError()) {
+                <div class="bg-red-50 border border-red-200 text-red-600 px-3 py-2 rounded-lg text-xs">{{ addressFormError() }}</div>
+              }
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs font-medium text-gray-700 mb-1">Nome completo *</label>
+                  <input formControlName="fullName" type="text" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 bg-white"/>
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-gray-700 mb-1">Telefono</label>
+                  <input formControlName="phone" type="tel" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 bg-white"/>
+                </div>
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-700 mb-1">Via e numero civico *</label>
+                <input formControlName="street" type="text" placeholder="es. Via Roma 12" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 bg-white"/>
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-700 mb-1">Interno / scala</label>
+                <input formControlName="street2" type="text" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 bg-white"/>
+              </div>
+              <div class="grid grid-cols-3 gap-3">
+                <div>
+                  <label class="block text-xs font-medium text-gray-700 mb-1">CAP *</label>
+                  <input formControlName="postalCode" type="text" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 bg-white"/>
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-gray-700 mb-1">Città *</label>
+                  <input formControlName="city" type="text" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 bg-white"/>
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-gray-700 mb-1">Prov.</label>
+                  <input formControlName="province" type="text" maxlength="2" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 bg-white uppercase"/>
+                </div>
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-700 mb-1">Paese *</label>
+                <select formControlName="country" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 bg-white">
+                  <option value="IT">Italia</option>
+                  <option value="DE">Germania</option>
+                  <option value="FR">Francia</option>
+                  <option value="ES">Spagna</option>
+                  <option value="GB">Regno Unito</option>
+                  <option value="US">Stati Uniti</option>
+                </select>
+              </div>
+              <div class="flex items-center gap-2">
+                <input formControlName="isDefault" type="checkbox" id="addrDefault" class="w-4 h-4 accent-gray-900"/>
+                <label for="addrDefault" class="text-xs text-gray-700">Imposta come predefinito</label>
+              </div>
+              <button type="submit" [disabled]="newAddressForm.invalid || addressFormLoading()"
+                class="w-full px-4 py-2.5 bg-gray-900 text-white text-sm rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors">
+                @if (addressFormLoading()) {
+                  <span class="inline-block w-4 h-4 border-2 border-gray-400 border-t-white rounded-full animate-spin mx-auto"></span>
+                } @else { Salva indirizzo }
+              </button>
+            </form>
+          }
+
+          @if (addressesLoading()) {
+            <div class="flex justify-center py-12">
+              <div class="w-6 h-6 border-4 border-gray-200 border-t-gray-900 rounded-full animate-spin"></div>
+            </div>
+          } @else if (addresses().length === 0) {
+            <div class="text-center py-12">
+              <svg class="w-12 h-12 text-gray-200 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+              </svg>
+              <p class="text-gray-400 text-sm">Nessun indirizzo salvato.</p>
+            </div>
+          } @else {
+            <div class="space-y-3">
+              @for (addr of addresses(); track addr.id) {
+                <div class="border border-gray-200 rounded-xl p-4 flex items-start justify-between gap-4"
+                  [class.border-gray-900]="addr.isDefault" [class.bg-gray-50]="addr.isDefault">
+                  <div class="flex-1">
+                    <div class="flex items-center gap-2 mb-1">
+                      <p class="font-semibold text-gray-900 text-sm">{{ addr.fullName }}</p>
+                      @if (addr.isDefault) {
+                        <span class="text-xs bg-gray-900 text-white px-2 py-0.5 rounded-full">Predefinito</span>
+                      }
+                    </div>
+                    <p class="text-sm text-gray-600">{{ addr.street }}{{ addr.street2 ? ', ' + addr.street2 : '' }}</p>
+                    <p class="text-sm text-gray-600">{{ addr.postalCode }} {{ addr.city }}{{ addr.province ? ' (' + addr.province + ')' : '' }}, {{ addr.country }}</p>
+                    @if (addr.phone) { <p class="text-xs text-gray-400 mt-0.5">{{ addr.phone }}</p> }
+                  </div>
+                  <div class="flex flex-col gap-1.5 flex-shrink-0">
+                    @if (!addr.isDefault) {
+                      <button (click)="setDefaultAddress(addr.id)"
+                        class="text-xs px-3 py-1.5 border border-gray-200 rounded-lg hover:border-gray-900 transition-colors text-gray-600">
+                        Imposta predefinito
+                      </button>
+                    }
+                    <button (click)="deleteAddress(addr.id)"
+                      class="text-xs px-3 py-1.5 border border-red-200 text-red-600 rounded-lg hover:bg-red-50 transition-colors">
+                      Elimina
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+          }
         </section>
       }
 
@@ -352,3 +590,26 @@
   </div>
 
 </div>
+
+<!-- Cancel Order Modal -->
+@if (cancelOrderId()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/40" (click)="dismissCancelOrder()"></div>
+    <div class="relative bg-white rounded-xl shadow-2xl max-w-sm w-full p-6">
+      <h3 class="text-lg font-bold text-gray-900 mb-2">Annulla ordine</h3>
+      <p class="text-gray-500 text-sm mb-6">Sei sicuro di voler annullare questo ordine? L'azione è irreversibile.</p>
+      <div class="flex gap-3">
+        <button (click)="dismissCancelOrder()"
+          class="flex-1 px-4 py-2.5 border border-gray-200 rounded-lg text-sm hover:bg-gray-50">
+          Indietro
+        </button>
+        <button (click)="confirmCancelOrder()" [disabled]="cancelOrderLoading()"
+          class="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 disabled:opacity-50">
+          @if (cancelOrderLoading()) {
+            <span class="inline-block w-4 h-4 border-2 border-red-300 border-t-white rounded-full animate-spin mx-auto"></span>
+          } @else { Annulla ordine }
+        </button>
+      </div>
+    </div>
+  </div>
+}
