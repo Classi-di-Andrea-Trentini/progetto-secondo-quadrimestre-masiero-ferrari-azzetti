@@ -7,7 +7,15 @@ import { ProductDetail } from './pages/product-detail/product-detail';
 import { MeComponent } from './pages/me/me';
 import { Legal } from './pages/legal/legal';
 import { VerifyEmail } from './pages/verify-email/verify-email';
+import { Admin } from './pages/admin/admin';
+import { AdminDashboard } from './pages/admin/admin-dashboard/admin-dashboard';
+import { AdminProducts } from './pages/admin/admin-products/admin-products';
+import { AdminOrders } from './pages/admin/admin-orders/admin-orders';
+import { AdminUsers } from './pages/admin/admin-users/admin-users';
+import { AdminPromo } from './pages/admin/admin-promo/admin-promo';
+import { Checkout } from './pages/checkout/checkout';
 import { authGuardGuard } from './guards/auth-guard-guard';
+import { adminGuardGuard } from './guards/admin-guard-guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
@@ -17,7 +25,21 @@ export const routes: Routes = [
   { path: 'products', component: Products },
   { path: 'product/:slug', component: ProductDetail },
   { path: 'me', component: MeComponent, canActivate: [authGuardGuard] },
+  { path: 'checkout', component: Checkout, canActivate: [authGuardGuard] },
   { path: 'verify-email/:token', component: VerifyEmail },
   { path: 'legal/:pagina', component: Legal },
+  {
+    path: 'admin',
+    component: Admin,
+    canActivate: [adminGuardGuard],
+    children: [
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      { path: 'dashboard', component: AdminDashboard },
+      { path: 'products', component: AdminProducts },
+      { path: 'orders', component: AdminOrders },
+      { path: 'users', component: AdminUsers },
+      { path: 'promo', component: AdminPromo },
+    ],
+  },
   { path: '**', redirectTo: 'home' },
 ];

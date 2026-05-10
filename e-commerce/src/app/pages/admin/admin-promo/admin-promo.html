@@ -1,1 +1,202 @@
-<p>admin-promo works!</p>
+<div class="p-6 max-w-7xl mx-auto">
+
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Codici promozionali</h1>
+      <p class="text-gray-500 text-sm mt-1">{{ total() }} codici promo</p>
+    </div>
+    <button (click)="openCreate()" class="flex items-center gap-2 px-4 py-2.5 bg-gray-900 text-white text-sm rounded-lg hover:bg-gray-700 transition-colors">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+      </svg>
+      Nuovo codice
+    </button>
+  </div>
+
+  @if (actionSuccess()) {
+    <div class="mb-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">{{ actionSuccess() }}</div>
+  }
+  @if (error()) {
+    <div class="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">{{ error() }}</div>
+  }
+
+  <!-- Search -->
+  <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-4 mb-6">
+    <div class="flex gap-3">
+      <div class="relative flex-1">
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        <input [(ngModel)]="search" (keyup.enter)="onSearch()" type="text" placeholder="Cerca codice…"
+          class="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"/>
+      </div>
+      <button (click)="onSearch()" class="px-4 py-2.5 bg-gray-900 text-white text-sm rounded-lg hover:bg-gray-700 transition-colors">Cerca</button>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="flex items-center justify-center h-48">
+      <div class="w-7 h-7 border-4 border-gray-300 border-t-gray-900 rounded-full animate-spin"></div>
+    </div>
+  } @else {
+    <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-gray-50 border-b border-gray-200">
+            <tr>
+              <th class="text-left px-4 py-3 font-medium text-gray-500">Codice</th>
+              <th class="text-left px-4 py-3 font-medium text-gray-500">Sconto</th>
+              <th class="text-left px-4 py-3 font-medium text-gray-500">Min. ordine</th>
+              <th class="text-left px-4 py-3 font-medium text-gray-500">Utilizzi</th>
+              <th class="text-left px-4 py-3 font-medium text-gray-500">Scadenza</th>
+              <th class="text-center px-4 py-3 font-medium text-gray-500">Stato</th>
+              <th class="text-right px-4 py-3 font-medium text-gray-500">Azioni</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            @for (promo of promoCodes(); track promo.id) {
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="px-4 py-3 font-mono font-bold text-gray-900 tracking-wide">{{ promo.code }}</td>
+                <td class="px-4 py-3 font-semibold text-gray-900">{{ formatDiscount(promo) }}</td>
+                <td class="px-4 py-3 text-gray-500">
+                  {{ promo.minOrderAmount ? '€ ' + parseFloat(String(promo.minOrderAmount)).toFixed(0) : '—' }}
+                </td>
+                <td class="px-4 py-3 text-gray-500">
+                  {{ promo._count.uses }}{{ promo.maxUses ? ' / ' + promo.maxUses : '' }}
+                </td>
+                <td class="px-4 py-3 text-gray-500 text-xs">
+                  {{ promo.expiresAt ? (promo.expiresAt | date: 'dd/MM/yyyy') : 'Nessuna' }}
+                </td>
+                <td class="px-4 py-3 text-center">
+                  <button (click)="toggleActive(promo)"
+                    class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium transition-colors cursor-pointer"
+                    [class.bg-green-100]="promo.isActive" [class.text-green-800]="promo.isActive"
+                    [class.bg-gray-100]="!promo.isActive" [class.text-gray-500]="!promo.isActive"
+                  >
+                    {{ promo.isActive ? 'Attivo' : 'Disattivato' }}
+                  </button>
+                </td>
+                <td class="px-4 py-3 text-right">
+                  <button (click)="requestDelete(promo.id)"
+                    class="px-3 py-1.5 text-xs border border-red-200 text-red-600 rounded-lg hover:bg-red-50 transition-colors">
+                    Elimina
+                  </button>
+                </td>
+              </tr>
+            }
+            @empty {
+              <tr><td colspan="7" class="px-4 py-12 text-center text-gray-400">Nessun codice promo</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    @if (totalPages() > 1) {
+      <div class="flex items-center justify-between mt-4">
+        <p class="text-sm text-gray-500">Pagina {{ currentPage() }} di {{ totalPages() }}</p>
+        <div class="flex gap-1">
+          <button (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() === 1" class="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed">‹</button>
+          @for (p of pagesArray(); track p) {
+            <button (click)="goToPage(p)" class="px-3 py-1.5 text-sm border rounded-lg transition-colors"
+              [class.bg-gray-900]="p === currentPage()" [class.text-white]="p === currentPage()"
+              [class.border-gray-900]="p === currentPage()" [class.border-gray-200]="p !== currentPage()"
+              [class.hover:bg-gray-50]="p !== currentPage()">{{ p }}</button>
+          }
+          <button (click)="goToPage(currentPage() + 1)" [disabled]="currentPage() === totalPages()" class="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed">›</button>
+        </div>
+      </div>
+    }
+  }
+</div>
+
+<!-- Create Modal -->
+@if (showModal()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/40" (click)="closeModal()"></div>
+    <div class="relative bg-white rounded-xl shadow-2xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
+      <h3 class="text-lg font-bold text-gray-900 mb-5">Nuovo codice promozionale</h3>
+
+      @if (formError()) {
+        <div class="mb-4 bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-lg text-sm">{{ formError() }}</div>
+      }
+
+      <form [formGroup]="promoForm" (ngSubmit)="submitForm()" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Codice *</label>
+          <input formControlName="code" type="text" placeholder="es. ESTATE20"
+            class="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 font-mono uppercase"/>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Tipo sconto *</label>
+            <select formControlName="discountType" class="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 bg-white">
+              <option value="percentage">Percentuale (%)</option>
+              <option value="fixed_amount">Importo fisso (€)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Valore * {{ isPercentage ? '(%)' : '(€)' }}</label>
+            <input formControlName="discountValue" type="number" step="0.01" min="0.01"
+              class="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"/>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Ordine minimo (€)</label>
+            <input formControlName="minOrderAmount" type="number" step="0.01" min="0" placeholder="Nessun minimo"
+              class="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"/>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Utilizzi massimi</label>
+            <input formControlName="maxUses" type="number" min="1" placeholder="Illimitati"
+              class="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"/>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Data scadenza</label>
+          <input formControlName="expiresAt" type="date"
+            class="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"/>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <input formControlName="isActive" type="checkbox" id="promoActive" class="w-4 h-4 accent-gray-900"/>
+          <label for="promoActive" class="text-sm text-gray-700">Attivo subito</label>
+        </div>
+
+        <div class="flex gap-3 pt-2">
+          <button type="button" (click)="closeModal()" class="flex-1 px-4 py-2.5 border border-gray-200 rounded-lg text-sm hover:bg-gray-50 transition-colors">Annulla</button>
+          <button type="submit" [disabled]="promoForm.invalid || formLoading()"
+            class="flex-1 px-4 py-2.5 bg-gray-900 text-white rounded-lg text-sm hover:bg-gray-700 transition-colors disabled:opacity-50">
+            @if (formLoading()) {
+              <span class="inline-block w-4 h-4 border-2 border-gray-400 border-t-white rounded-full animate-spin mx-auto"></span>
+            } @else { Crea codice }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- Confirm Delete -->
+@if (confirmDeleteId()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/40" (click)="cancelDelete()"></div>
+    <div class="relative bg-white rounded-xl shadow-2xl max-w-sm w-full p-6">
+      <h3 class="text-lg font-bold text-gray-900 mb-2">Elimina codice promo</h3>
+      <p class="text-gray-500 text-sm mb-6">Questa azione è irreversibile.</p>
+      <div class="flex gap-3">
+        <button (click)="cancelDelete()" class="flex-1 px-4 py-2.5 border border-gray-200 rounded-lg text-sm hover:bg-gray-50">Annulla</button>
+        <button (click)="confirmDelete()" [disabled]="deleteLoading() !== null"
+          class="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 disabled:opacity-50">
+          @if (deleteLoading()) {
+            <span class="inline-block w-4 h-4 border-2 border-red-300 border-t-white rounded-full animate-spin mx-auto"></span>
+          } @else { Elimina }
+        </button>
+      </div>
+    </div>
+  </div>
+}
