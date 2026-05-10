@@ -23,6 +23,8 @@ export class NavBar {
     return (first + last).toUpperCase() || first.toUpperCase();
   });
 
+  readonly isAdmin = computed(() => this.auth.currentUser()?.role === 'admin');
+
   private lastScrollY = 0;
   private readonly THRESHOLD = 8;
 
