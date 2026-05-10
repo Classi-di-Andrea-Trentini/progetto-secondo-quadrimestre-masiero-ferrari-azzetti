@@ -4,6 +4,7 @@ import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { ProductsService, ProductFull, ProductListItem, ProductImage } from '../../services/products.service';
 import { WishlistService } from '../../services/wishlist.service';
 import { AuthService } from '../../services/auth';
+import { CartService } from '../../services/cart-service';
 
 @Component({
   selector: 'app-product-detail',
@@ -18,6 +19,7 @@ export class ProductDetail implements OnInit {
   private router = inject(Router);
   readonly wishlist = inject(WishlistService);
   readonly auth = inject(AuthService);
+  readonly cartSvc = inject(CartService);
 
   product = signal<ProductFull | null>(null);
   related = signal<ProductListItem[]>([]);
@@ -205,8 +207,38 @@ export class ProductDetail implements OnInit {
   }
 
   addToCart() {
-    if (!this.selectedSize()) return;
+    const product = this.product();
+    const variant = this.selectedVariant();
+    if (!variant || !product) return;
+
+    const basePrice = parseFloat(String(product.basePrice));
+    const d = product.discounts[0];
+    let unitPrice = basePrice;
+    if (d) {
+      const val = parseFloat(String(d.value));
+      unitPrice = d.type === 'percentage' ? basePrice * (1 - val / 100) : basePrice - val;
+    }
+
+    const coverImg = this.galleryImages()[0]?.url ?? product.images[0]?.url ?? '';
+    const variantLabel = [variant.color, variant.size].filter(Boolean).join(' / ');
+
+    this.cartSvc.addItem({
+      variantId: variant.id,
+      productId: product.id,
+      productName: product.name,
+      slug: product.slug,
+      variantLabel,
+      size: variant.size ?? null,
+      color: variant.color ?? null,
+      colorHex: variant.colorHex ?? null,
+      imageUrl: coverImg,
+      unitPrice: Math.round(unitPrice * 100) / 100,
+      originalPrice: basePrice,
+      quantity: 1,
+    });
+
     this.addedToCart.set(true);
+    this.cartSvc.open();
     setTimeout(() => this.addedToCart.set(false), 2000);
   }
 }
