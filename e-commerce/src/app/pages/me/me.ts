@@ -1,11 +1,12 @@
 import { Component, inject, signal, effect } from '@angular/core';
 import { NgClass, DatePipe } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule, FormBuilder, Validators } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../services/auth';
 import { WishlistService } from '../../services/wishlist.service';
+import { CartService, AddressData } from '../../services/cart-service';
 import { API_URL } from '../../services/api.config';
 
 interface OrderSummary {
@@ -20,19 +21,19 @@ interface OrderSummary {
   payments: { status: string }[];
 }
 
-type TabSection = 'profile' | 'orders' | 'favorites' | 'settings';
+type TabSection = 'profile' | 'orders' | 'favorites' | 'addresses' | 'settings';
 
 @Component({
   selector: 'app-me',
   standalone: true,
-  imports: [NgClass, DatePipe, ReactiveFormsModule, RouterModule],
-  // HttpClient è fornito da provideHttpClient() in app.config.ts
+  imports: [NgClass, DatePipe, ReactiveFormsModule, FormsModule, RouterModule],
   templateUrl: './me.html',
   styleUrls: ['./me.css'],
 })
 export class MeComponent {
   readonly auth = inject(AuthService);
   readonly wishlist = inject(WishlistService);
+  private readonly cart = inject(CartService);
   private readonly fb = inject(FormBuilder);
   private readonly http = inject(HttpClient);
 
@@ -46,6 +47,91 @@ export class MeComponent {
   ordersTotalPages = signal(1);
   ordersTotal = signal(0);
   expandedOrderId = signal<string | null>(null);
+
+  // -- Indirizzi --
+  addresses = signal<AddressData[]>([]);
+  addressesLoading = signal(false);
+  addressesError = signal<string | null>(null);
+  addressAction = signal<string | null>(null);
+  showAddressForm = signal(false);
+  addressFormLoading = signal(false);
+  addressFormError = signal<string | null>(null);
+
+  readonly newAddressForm = this.fb.nonNullable.group({
+    fullName: ['', [Validators.required, Validators.minLength(2)]],
+    phone: [''],
+    street: ['', [Validators.required]],
+    street2: [''],
+    city: ['', [Validators.required]],
+    province: [''],
+    postalCode: ['', [Validators.required]],
+    country: ['IT', [Validators.required]],
+    isDefault: [false],
+  });
+
+  async loadAddresses() {
+    this.addressesLoading.set(true);
+    this.addressesError.set(null);
+    try {
+      this.addresses.set(await this.cart.getAddresses());
+    } catch {
+      this.addressesError.set('Impossibile caricare gli indirizzi');
+    } finally {
+      this.addressesLoading.set(false);
+    }
+  }
+
+  async saveAddress() {
+    if (this.newAddressForm.invalid || this.addressFormLoading()) return;
+    this.addressFormLoading.set(true);
+    this.addressFormError.set(null);
+    try {
+      const v = this.newAddressForm.getRawValue();
+      await this.cart.createAddress({
+        fullName: v.fullName,
+        phone: v.phone || null,
+        street: v.street,
+        street2: v.street2 || null,
+        city: v.city,
+        province: v.province || null,
+        postalCode: v.postalCode,
+        country: v.country,
+      });
+      this.newAddressForm.reset({ country: 'IT', isDefault: false });
+      this.showAddressForm.set(false);
+      this.addressAction.set('Indirizzo salvato!');
+      await this.loadAddresses();
+      setTimeout(() => this.addressAction.set(null), 3000);
+    } catch {
+      this.addressFormError.set('Impossibile salvare l\'indirizzo');
+    } finally {
+      this.addressFormLoading.set(false);
+    }
+  }
+
+  async deleteAddress(id: string) {
+    try {
+      await firstValueFrom(
+        this.http.delete(`${API_URL}/addresses/${id}`, { withCredentials: true })
+      );
+      this.addresses.update(list => list.filter(a => a.id !== id));
+      this.addressAction.set('Indirizzo eliminato');
+      setTimeout(() => this.addressAction.set(null), 3000);
+    } catch {
+      this.addressesError.set('Impossibile eliminare l\'indirizzo');
+    }
+  }
+
+  async setDefaultAddress(id: string) {
+    try {
+      await firstValueFrom(
+        this.http.patch(`${API_URL}/addresses/${id}/default`, {}, { withCredentials: true })
+      );
+      await this.loadAddresses();
+    } catch {
+      this.addressesError.set('Impossibile impostare l\'indirizzo predefinito');
+    }
+  }
 
   readonly orderStatusLabels: Record<string, string> = {
     pending: 'In attesa',
@@ -143,6 +229,7 @@ export class MeComponent {
     this.activeTab.set(tab);
     if (tab === 'favorites') this.wishlist.loadItems();
     if (tab === 'orders' && this.orders().length === 0) this.loadOrders();
+    if (tab === 'addresses' && this.addresses().length === 0) this.loadAddresses();
   }
 
   async loadOrders(page = 1) {
