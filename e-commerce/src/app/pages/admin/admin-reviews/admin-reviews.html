@@ -144,9 +144,9 @@
       <p class="text-gray-500 text-sm mb-6">Questa azione è irreversibile.</p>
       <div class="flex gap-3">
         <button (click)="cancelDelete()" class="flex-1 px-4 py-2.5 border border-gray-200 rounded-lg text-sm hover:bg-gray-50">Annulla</button>
-        <button (click)="confirmDelete()" [disabled]="deleteLoading"
+        <button (click)="confirmDelete()" [disabled]="deleteLoading()"
           class="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 disabled:opacity-50">
-          @if (deleteLoading) {
+          @if (deleteLoading()) {
             <span class="inline-block w-4 h-4 border-2 border-red-300 border-t-white rounded-full animate-spin mx-auto"></span>
           } @else { Elimina }
         </button>

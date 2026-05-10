@@ -339,7 +339,7 @@
         <section>
           <div class="flex items-center justify-between border-b border-gray-100 pb-4 mb-6">
             <h2 class="text-xl font-bold">Shipping Addresses</h2>
-            <button (click)="showAddressForm.update(v => !v)"
+            <button (click)="showAddressForm.set(!showAddressForm())"
               class="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white text-sm rounded-lg hover:bg-gray-700 transition-colors">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>

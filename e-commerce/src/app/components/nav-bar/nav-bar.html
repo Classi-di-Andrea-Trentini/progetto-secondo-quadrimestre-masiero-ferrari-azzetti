@@ -6,7 +6,7 @@
       <div class="absolute inset-y-0 left-0 flex items-center sm:hidden">
         <button
           type="button"
-          (click)="menuOpen.update(v => !v)"
+          (click)="menuOpen.set(!menuOpen())"
           class="relative inline-flex items-center justify-center rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-black focus:outline-none transition-colors"
           [attr.aria-expanded]="menuOpen()"
         >
@@ -35,7 +35,7 @@
 
       <!-- Logo (center) -->
       <div class="flex items-center justify-center absolute left-1/2 -translate-x-1/2">
-        <a routerLink="/home" [routerLinkActiveOptions]="{exact: true}" class="transition-transform duration-300 hover:scale-110">
+        <a routerLink="/home" class="transition-transform duration-300 hover:scale-110">
           <img src="commonEra.png" alt="Common Era" class="-mt-1 w-32 sm:w-60 h-auto px-4" />
         </a>
       </div>
