@@ -75,8 +75,11 @@ export class AdminProducts implements OnInit {
 
   // ─── Image form ───────────────────────────────────────────────────────────
   showImageForm = signal(false);
+  imageMode: 'upload' | 'url' = 'upload';
   imageUrl = '';
   imageAlt = '';
+  imageFile: File | null = null;
+  imagePreview = signal<string | null>(null);
   imageFormLoading = signal(false);
   imageFormError = signal<string | null>(null);
 
@@ -297,35 +300,62 @@ export class AdminProducts implements OnInit {
   openAddImage() {
     this.imageUrl = '';
     this.imageAlt = '';
+    this.imageFile = null;
+    this.imageMode = 'upload';
+    this.imagePreview.set(null);
     this.imageFormError.set(null);
     this.showImageForm.set(true);
   }
 
   cancelImageForm() {
     this.showImageForm.set(false);
+    this.imagePreview.set(null);
+    this.imageFile = null;
+  }
+
+  onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      this.imageFormError.set('Solo file immagine sono consentiti (JPG, PNG, WebP…)');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      this.imageFormError.set('Il file non può superare 5 MB');
+      return;
+    }
+    this.imageFile = file;
+    this.imageFormError.set(null);
+    const reader = new FileReader();
+    reader.onload = (e) => this.imagePreview.set(e.target?.result as string);
+    reader.readAsDataURL(file);
   }
 
   async saveImage() {
     const productId = this.editingProduct()?.id;
-    if (!productId || !this.imageUrl.trim() || this.imageFormLoading()) return;
+    if (!productId || this.imageFormLoading()) return;
     this.imageFormLoading.set(true);
     this.imageFormError.set(null);
 
     try {
-      const isFirst = (this.editingProduct()?.images.length ?? 0) === 0;
-      const created = await firstValueFrom(this.adminSvc.addImage(productId, {
-        url: this.imageUrl.trim(),
-        altText: this.imageAlt.trim() || undefined,
-        isCover: isFirst,
-      }));
-      this.editingProduct.update(p => {
-        if (!p) return p;
-        const images = isFirst
-          ? [created]
-          : [...p.images, created];
-        return { ...p, images };
-      });
+      let created: any;
+      if (this.imageMode === 'upload') {
+        if (!this.imageFile) { this.imageFormError.set('Seleziona un file'); this.imageFormLoading.set(false); return; }
+        created = await firstValueFrom(this.adminSvc.uploadImage(productId, this.imageFile));
+      } else {
+        if (!this.imageUrl.trim()) { this.imageFormError.set('Inserisci un URL'); this.imageFormLoading.set(false); return; }
+        const isFirst = (this.editingProduct()?.images.length ?? 0) === 0;
+        created = await firstValueFrom(this.adminSvc.addImage(productId, {
+          url: this.imageUrl.trim(),
+          altText: this.imageAlt.trim() || undefined,
+          isCover: isFirst,
+        }));
+      }
+      this.editingProduct.update(p => p ? { ...p, images: [...p.images, created] } : p);
       this.showImageForm.set(false);
+      this.imagePreview.set(null);
+      this.imageFile = null;
     } catch (err: any) {
       this.imageFormError.set(err?.error?.message ?? 'Errore durante il salvataggio');
     } finally {

@@ -13,7 +13,14 @@ import {
   HttpCode,
   HttpStatus,
   Header,
+  UseInterceptors,
+  UploadedFile,
+  BadRequestException,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname, join } from 'path';
+import { mkdirSync } from 'fs';
 import type { Response } from 'express';
 import { AdminService } from './admin.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -133,6 +140,40 @@ export class AdminController {
   @Post('products/:id/images')
   addImage(@Param('id') id: string, @Body() dto: CreateImageDto) {
     return this.adminService.addImage(id, dto);
+  }
+
+  @Post('products/:id/images/upload')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: (_req, _file, cb) => {
+          const dir = join(process.cwd(), 'uploads', 'products');
+          mkdirSync(dir, { recursive: true });
+          cb(null, dir);
+        },
+        filename: (_req, file, cb) => {
+          const unique = `${Date.now()}-${Math.round(Math.random() * 1e6)}`;
+          cb(null, `${unique}${extname(file.originalname).toLowerCase()}`);
+        },
+      }),
+      fileFilter: (_req, file, cb) => {
+        if (!file.mimetype.startsWith('image/')) {
+          return cb(new BadRequestException('Solo file immagine sono consentiti'), false);
+        }
+        cb(null, true);
+      },
+      limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB
+    }),
+  )
+  async uploadImage(
+    @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File,
+    @Req() req: any,
+  ) {
+    if (!file) throw new BadRequestException('Nessun file ricevuto');
+    const backendUrl = process.env['BACKEND_URL'] ?? 'http://localhost:3000';
+    const url = `${backendUrl}/uploads/products/${file.filename}`;
+    return this.adminService.addImage(id, { url });
   }
 
   @Delete('products/:id/images/:imageId')

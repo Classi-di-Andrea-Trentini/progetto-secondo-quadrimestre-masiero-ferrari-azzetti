@@ -254,6 +254,12 @@ export class AdminService {
     return this.http.post<ProductImage>(`${this.base}/products/${productId}/images`, payload, { withCredentials: true });
   }
 
+  uploadImage(productId: string, file: File): Observable<ProductImage> {
+    const form = new FormData();
+    form.append('file', file);
+    return this.http.post<ProductImage>(`${this.base}/products/${productId}/images/upload`, form, { withCredentials: true });
+  }
+
   deleteImage(productId: string, imageId: string): Observable<{ message: string }> {
     return this.http.delete<{ message: string }>(`${this.base}/products/${productId}/images/${imageId}`, { withCredentials: true });
   }
