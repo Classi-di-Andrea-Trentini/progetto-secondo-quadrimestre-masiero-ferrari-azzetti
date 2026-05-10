@@ -35,15 +35,26 @@
         <label for="password" class="block text-xs font-semibold uppercase tracking-widest text-gray-500 mb-1.5">
           Password
         </label>
-        <input
-          id="password"
-          type="password"
-          formControlName="password"
-          autocomplete="current-password"
-          placeholder="••••••••"
-          class="w-full border px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-black transition"
-          [ngClass]="password.invalid && password.touched ? 'border-red-400' : 'border-gray-300'"
-        />
+        <div class="relative">
+          <input
+            id="password"
+            [type]="showPassword() ? 'text' : 'password'"
+            formControlName="password"
+            autocomplete="current-password"
+            placeholder="••••••••"
+            class="w-full border px-4 py-3 pr-20 text-sm focus:outline-none focus:ring-2 focus:ring-black transition"
+            [ngClass]="password.invalid && password.touched ? 'border-red-400' : 'border-gray-300'"
+          />
+          <button
+            type="button"
+            class="absolute inset-y-0 right-0 px-3 text-xs font-semibold uppercase tracking-wider text-gray-600 hover:text-black"
+            [attr.aria-pressed]="showPassword()"
+            [attr.aria-label]="showPassword() ? 'Nascondi password' : 'Mostra password'"
+            (click)="togglePasswordVisibility()"
+          >
+            {{ showPassword() ? 'Nascondi' : 'Mostra' }}
+          </button>
+        </div>
         @if (password.invalid && password.touched) {
           <p class="mt-1 text-xs text-red-500">La password deve essere di almeno 8 caratteri</p>
         }
@@ -54,6 +65,12 @@
           {{ error() }}
         </div>
       }
+
+      <div class="flex justify-end mb-4">
+        <a routerLink="/forgot-password" class="text-xs text-gray-400 hover:text-black transition underline underline-offset-2">
+          Password dimenticata?
+        </a>
+      </div>
 
       <button
         type="submit"

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ProductsService, ProductFull, ProductListItem, ProductImage } from '../../services/products.service';
+import { BreadcrumbComponent, BreadcrumbItem } from '../../components/breadcrumb/breadcrumb';
 import { WishlistService } from '../../services/wishlist.service';
 import { AuthService } from '../../services/auth';
 import { CartService } from '../../services/cart-service';
@@ -11,7 +12,7 @@ import { ReviewsService, Review } from '../../services/reviews.service';
 @Component({
   selector: 'app-product-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, BreadcrumbComponent],
   templateUrl: './product-detail.html',
   styleUrl: './product-detail.css',
 })
@@ -162,6 +163,15 @@ export class ProductDetail implements OnInit {
   }
 
   // ─── Computed ────────────────────────────────────────────
+  readonly breadcrumbItems = (): BreadcrumbItem[] => {
+    const p = this.product();
+    return [
+      { label: 'Home', link: '/home' },
+      { label: 'Prodotti', link: '/products' },
+      { label: p ? p.name : '' },
+    ];
+  };
+
   readonly galleryImages = computed<ProductImage[]>(() => {
     const p = this.product();
     if (!p) return [];

@@ -1,16 +1,21 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AdminService, AdminStats } from '../../../services/admin.service';
+import { SkeletonComponent } from '../../../components/skeleton/skeleton';
 
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, CurrencyPipe, DatePipe, RouterModule],
+  imports: [CommonModule, CurrencyPipe, DatePipe, RouterModule, SkeletonComponent],
   templateUrl: './admin-dashboard.html',
   styleUrl: './admin-dashboard.css',
 })
-export class AdminDashboard implements OnInit {
+declare var Chart: any;
+
+export class AdminDashboard implements OnInit, OnDestroy {
+  @ViewChild('donutCanvas') donutCanvas!: ElementRef<HTMLCanvasElement>;
+  private donutChart: any = null;
   private readonly adminSvc = inject(AdminService);
 
   stats = signal<AdminStats | null>(null);
@@ -50,12 +55,41 @@ export class AdminDashboard implements OnInit {
       next: (data) => {
         this.stats.set(data);
         this.loading.set(false);
+        setTimeout(() => this.buildChart(), 0);
       },
       error: () => {
         this.error.set('Impossibile caricare le statistiche');
         this.loading.set(false);
       },
     });
+  }
+
+  buildChart(): void {
+    const el = this.donutCanvas?.nativeElement;
+    if (!el || typeof Chart === 'undefined') return;
+    const data = this.stats()?.ordersByStatus ?? [];
+    if (this.donutChart) { this.donutChart.destroy(); }
+    this.donutChart = new Chart(el, {
+      type: 'doughnut',
+      data: {
+        labels: data.map(s => this.statusLabel(s.status)),
+        datasets: [{
+          data: data.map(s => s.count),
+          backgroundColor: ['#fef08a','#bfdbfe','#e0e7ff','#e9d5ff','#bbf7d0','#a7f3d0','#fecaca','#e5e7eb'],
+          borderWidth: 0,
+        }],
+      },
+      options: {
+        cutout: '65%',
+        plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } },
+        responsive: true,
+        maintainAspectRatio: false,
+      },
+    });
+  }
+
+  ngOnDestroy(): void {
+    if (this.donutChart) { this.donutChart.destroy(); }
   }
 
   formatPrice(v: string | number): string {

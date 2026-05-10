@@ -6,6 +6,13 @@
       <h1 class="text-2xl font-bold text-gray-900">Utenti</h1>
       <p class="text-gray-500 text-sm mt-1">{{ total() }} utenti registrati</p>
     </div>
+    <button (click)="exportCsv()"
+      class="flex items-center gap-2 px-4 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-gray-700">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+      </svg>
+      Esporta CSV
+    </button>
   </div>
 
   <!-- Success message -->

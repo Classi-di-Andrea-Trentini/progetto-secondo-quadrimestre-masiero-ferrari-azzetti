@@ -3,6 +3,7 @@ import {
   ConflictException,
   UnauthorizedException,
   InternalServerErrorException,
+  BadRequestException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { randomBytes, createHash } from 'crypto';
@@ -151,6 +152,64 @@ export class AuthService {
     await this.prisma.session.delete({ where: { id: sessionId } }).catch(() => {
       // Ignora se la sessione non esiste già
     });
+  }
+
+  async requestPasswordReset(email: string): Promise<void> {
+    const user = await this.prisma.user.findUnique({
+      where: { email: email.toLowerCase() },
+    });
+    if (!user || !user.isActive || user.deletedAt) {
+      // Ritorna silenziosamente senza rivelare se l'email esiste o meno
+      return;
+    }
+
+    const token = randomBytes(32).toString('hex');
+    const tokenHash = createHash('sha256').update(token).digest('hex');
+
+    await this.prisma.passwordReset.create({
+      data: {
+        userId: user.id,
+        tokenHash,
+        expiresAt: new Date(Date.now() + 3600000), // 1 ora
+      },
+    });
+
+    this.mail.sendPasswordResetEmail(user.email, user.fullName, token).catch(() => {});
+  }
+
+  async resetPassword(token: string, newPassword: string): Promise<void> {
+    const tokenHash = createHash('sha256').update(token).digest('hex');
+
+    const reset = await this.prisma.passwordReset.findFirst({
+      where: {
+        tokenHash,
+        usedAt: null,
+        expiresAt: { gt: new Date() },
+      },
+      include: { user: true },
+    });
+
+    if (!reset) {
+      throw new BadRequestException('Token non valido o scaduto');
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, BCRYPT_ROUNDS);
+
+    await this.prisma.$transaction([
+      this.prisma.user.update({
+        where: { id: reset.userId },
+        data: { passwordHash },
+      }),
+      this.prisma.passwordReset.update({
+        where: { id: reset.id },
+        data: { usedAt: new Date() },
+      }),
+      this.prisma.session.deleteMany({
+        where: { userId: reset.userId },
+      }),
+    ]);
+
+    this.mail.sendPasswordChangedAlert(reset.user.email, reset.user.fullName).catch(() => {});
   }
 
   async getProfile(userId: string) {

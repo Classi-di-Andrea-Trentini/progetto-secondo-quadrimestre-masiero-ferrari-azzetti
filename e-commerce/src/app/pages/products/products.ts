@@ -1,19 +1,24 @@
-import { Component, OnInit, signal, computed, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ProductsService, ProductListItem, ProductFilters, GetProductsParams } from '../../services/products.service';
+import { Subject, Subscription } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { WishlistService } from '../../services/wishlist.service';
+import { SkeletonComponent } from '../../components/skeleton/skeleton';
 import { AuthService } from '../../services/auth';
 
 @Component({
   selector: 'app-products',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, SkeletonComponent],
   templateUrl: './products.html',
   styleUrl: './products.css',
 })
-export class Products implements OnInit {
+export class Products implements OnInit, OnDestroy {
+  private searchSubject = new Subject<string>();
+  private searchSub!: Subscription;
   private svc = inject(ProductsService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
@@ -57,6 +62,22 @@ export class Products implements OnInit {
       if (params['category']) this.selectedCategory.set(params['category']);
       this.loadProducts();
     });
+
+    this.searchSub = this.searchSubject
+      .pipe(debounceTime(400), distinctUntilChanged())
+      .subscribe(q => {
+        this.searchQuery.set(q);
+        this.currentPage.set(1);
+        this.loadProducts();
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.searchSub?.unsubscribe();
+  }
+
+  onSearchInput(value: string): void {
+    this.searchSubject.next(value);
   }
 
   loadProducts() {

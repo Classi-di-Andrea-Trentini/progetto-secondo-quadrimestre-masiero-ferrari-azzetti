@@ -1,0 +1,22 @@
+<div class="fixed bottom-6 right-6 z-50 flex flex-col gap-3 pointer-events-none">
+  @for (t of toastSvc.toasts(); track trackById($index, t)) {
+    <div
+      class="pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-full border shadow-lg text-sm font-medium max-w-xs animate-slide-in"
+      [class]="containerClass(t.type)"
+    >
+      <svg class="w-4 h-4 flex-shrink-0" [class]="iconClass(t.type)" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" [attr.d]="iconFor(t.type)"/>
+      </svg>
+      <span class="flex-1">{{ t.message }}</span>
+      <button
+        (click)="remove(t.id)"
+        class="ml-1 opacity-60 hover:opacity-100 transition-opacity flex-shrink-0"
+        aria-label="Chiudi"
+      >
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+  }
+</div>

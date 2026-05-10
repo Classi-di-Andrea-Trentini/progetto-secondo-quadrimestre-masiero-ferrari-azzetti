@@ -152,6 +152,11 @@ export class AdminOrders implements OnInit {
     return this.statusColors[s] ?? 'bg-gray-100 text-gray-700';
   }
 
+  exportCsv() {
+    const url = this.adminSvc.exportOrders({ status: this.statusFilter || undefined });
+    window.open(url, '_blank');
+  }
+
   formatPrice(v: string | number): string {
     return '€ ' + parseFloat(String(v)).toFixed(2).replace('.', ',');
   }

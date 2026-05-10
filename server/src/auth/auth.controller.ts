@@ -15,6 +15,7 @@ import type { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { ForgotPasswordDto, ResetPasswordDto } from './dto/forgot-password.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import type { JwtPayload } from './jwt.strategy';
 
@@ -57,6 +58,22 @@ export class AuthController {
   async register(@Body() dto: RegisterDto) {
     const user = await this.authService.register(dto);
     return { message: 'Registrazione completata', user };
+  }
+
+  // Massimo 5 tentativi di reset password per IP al minuto
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @HttpCode(HttpStatus.OK)
+  @Post('forgot-password')
+  async forgotPassword(@Body() dto: ForgotPasswordDto) {
+    await this.authService.requestPasswordReset(dto.email);
+    return { message: 'Se l\'email esiste, riceverai le istruzioni per reimpostare la password' };
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('reset-password')
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    await this.authService.resetPassword(dto.token, dto.password);
+    return { message: 'Password reimpostata con successo' };
   }
 
   // Massimo 10 tentativi di login per IP ogni 15 minuti

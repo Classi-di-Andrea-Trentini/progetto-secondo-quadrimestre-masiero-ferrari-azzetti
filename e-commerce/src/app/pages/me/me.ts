@@ -47,6 +47,9 @@ export class MeComponent {
   ordersTotalPages = signal(1);
   ordersTotal = signal(0);
   expandedOrderId = signal<string | null>(null);
+  cancelOrderId = signal<string | null>(null);
+  cancelOrderLoading = signal(false);
+  cancelOrderSuccess = signal<string | null>(null);
 
   // -- Indirizzi --
   addresses = signal<AddressData[]>([]);
@@ -263,6 +266,27 @@ export class MeComponent {
 
   orderStatusLabel(s: string): string { return this.orderStatusLabels[s] ?? s; }
   orderStatusColor(s: string): string { return this.orderStatusColors[s] ?? 'bg-gray-100 text-gray-700'; }
+  canCancelOrder(status: string): boolean { return status === 'pending' || status === 'paid'; }
+
+  requestCancelOrder(id: string) { this.cancelOrderId.set(id); }
+  dismissCancelOrder() { this.cancelOrderId.set(null); }
+
+  async confirmCancelOrder() {
+    const id = this.cancelOrderId();
+    if (!id || this.cancelOrderLoading()) return;
+    this.cancelOrderLoading.set(true);
+    try {
+      await firstValueFrom(this.http.patch(`${API_URL}/orders/${id}/cancel`, {}, { withCredentials: true }));
+      this.orders.update(list => list.map(o => o.id === id ? { ...o, status: 'cancelled' } : o));
+      this.cancelOrderId.set(null);
+      this.cancelOrderSuccess.set('Ordine annullato con successo.');
+      setTimeout(() => this.cancelOrderSuccess.set(null), 4000);
+    } catch {
+      this.ordersError.set('Impossibile annullare l\'ordine. Contatta il supporto.');
+    } finally {
+      this.cancelOrderLoading.set(false);
+    }
+  }
 
   async removeFromWishlist(productId: string) {
     await this.wishlist.toggle(productId);

@@ -6,6 +6,10 @@ import {
   emailChangedAlert,
   passwordChangedAlert,
   newsletterConfirmation,
+  passwordResetEmail,
+  orderConfirmationEmail,
+  shippingNotificationEmail,
+  returnStatusUpdateEmail,
 } from './templates';
 
 @Injectable()
@@ -94,6 +98,55 @@ export class MailService {
       email,
       'You\'re subscribed to Common Era',
       newsletterConfirmation(name),
+    );
+  }
+
+  async sendPasswordResetEmail(to: string, fullName: string, token: string): Promise<void> {
+    const frontendUrl = process.env.FRONTEND_URL ?? 'http://localhost:4200';
+    const resetUrl = `${frontendUrl}/reset-password?token=${token}`;
+    await this.send(
+      to,
+      'Reimposta la tua password — Common Era',
+      passwordResetEmail(fullName, resetUrl),
+    );
+  }
+
+  async sendOrderConfirmation(
+    to: string,
+    fullName: string,
+    order: { id: string; items: Array<{ productName: string; quantity: number; lineTotal: any }>; total: any; trackingNumber?: string },
+  ): Promise<void> {
+    const orderId = order.id.slice(0, 8).toUpperCase();
+    await this.send(
+      to,
+      `Ordine confermato #${orderId} — Common Era`,
+      orderConfirmationEmail(fullName, order),
+    );
+  }
+
+  async sendShippingNotification(
+    to: string,
+    fullName: string,
+    order: { id: string; trackingNumber?: string; trackingUrl?: string },
+  ): Promise<void> {
+    await this.send(
+      to,
+      'Il tuo ordine è in spedizione — Common Era',
+      shippingNotificationEmail(fullName, order),
+    );
+  }
+
+  async sendReturnStatusUpdate(
+    to: string,
+    fullName: string,
+    returnId: string,
+    status: string,
+    adminNote?: string,
+  ): Promise<void> {
+    await this.send(
+      to,
+      'Aggiornamento reso — Common Era',
+      returnStatusUpdateEmail(fullName, returnId, status, adminNote),
     );
   }
 }

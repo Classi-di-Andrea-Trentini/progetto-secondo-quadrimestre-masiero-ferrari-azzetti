@@ -22,6 +22,7 @@ export class Login {
 
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
+  readonly showPassword = signal(false);
 
   async onSubmit() {
     if (this.form.invalid || this.loading()) return;
@@ -45,5 +46,9 @@ export class Login {
 
   get password() {
     return this.form.controls.password;
+  }
+
+  togglePasswordVisibility() {
+    this.showPassword.update((value) => !value);
   }
 }

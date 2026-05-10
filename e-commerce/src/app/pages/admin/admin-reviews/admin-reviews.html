@@ -7,6 +7,30 @@
     </div>
   </div>
 
+  <!-- Bulk action bar -->
+  @if (hasSelection()) {
+    <div class="mb-4 bg-gray-900 text-white px-4 py-3 rounded-xl flex items-center justify-between gap-4">
+      <span class="text-sm font-medium">{{ selectedIds().size }} selezionate</span>
+      <div class="flex gap-2">
+        <button (click)="bulkApprove()" [disabled]="bulkLoading()"
+          class="px-3 py-1.5 text-xs bg-green-600 hover:bg-green-500 rounded-lg disabled:opacity-50 transition-colors">
+          Approva tutte
+        </button>
+        <button (click)="bulkReject()" [disabled]="bulkLoading()"
+          class="px-3 py-1.5 text-xs bg-orange-600 hover:bg-orange-500 rounded-lg disabled:opacity-50 transition-colors">
+          Rifiuta tutte
+        </button>
+        <button (click)="bulkDelete()" [disabled]="bulkLoading()"
+          class="px-3 py-1.5 text-xs bg-red-600 hover:bg-red-500 rounded-lg disabled:opacity-50 transition-colors">
+          Elimina tutte
+        </button>
+        <button (click)="clearSelection()" class="px-3 py-1.5 text-xs bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors">
+          Deseleziona
+        </button>
+      </div>
+    </div>
+  }
+
   @if (actionSuccess()) {
     <div class="mb-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">{{ actionSuccess() }}</div>
   }
@@ -44,6 +68,11 @@
         <table class="w-full text-sm">
           <thead class="bg-gray-50 border-b border-gray-200">
             <tr>
+              <th class="px-4 py-3">
+                <input type="checkbox" (change)="$any($event.target).checked ? selectAll() : clearSelection()"
+                  [checked]="hasSelection() && selectedIds().size === reviews().length"
+                  class="w-4 h-4 accent-gray-900 cursor-pointer"/>
+              </th>
               <th class="text-left px-4 py-3 font-medium text-gray-500">Prodotto</th>
               <th class="text-left px-4 py-3 font-medium text-gray-500">Utente</th>
               <th class="text-left px-4 py-3 font-medium text-gray-500">Voto</th>
@@ -55,7 +84,11 @@
           </thead>
           <tbody class="divide-y divide-gray-100">
             @for (review of reviews(); track review.id) {
-              <tr class="hover:bg-gray-50 transition-colors">
+              <tr class="hover:bg-gray-50 transition-colors" [class.bg-blue-50]="isSelected(review.id)">
+                <td class="px-4 py-3">
+                  <input type="checkbox" [checked]="isSelected(review.id)" (change)="toggleSelect(review.id)"
+                    class="w-4 h-4 accent-gray-900 cursor-pointer"/>
+                </td>
                 <td class="px-4 py-3">
                   <p class="font-medium text-gray-900 text-xs">{{ review.product.name }}</p>
                 </td>

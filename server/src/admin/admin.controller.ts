@@ -8,10 +8,13 @@ import {
   Param,
   Query,
   Req,
+  Res,
   UseGuards,
   HttpCode,
   HttpStatus,
+  Header,
 } from '@nestjs/common';
+import type { Response } from 'express';
 import { AdminService } from './admin.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { AdminRoleGuard } from './admin-role.guard';
@@ -29,6 +32,9 @@ import {
   UpdatePromoCodeDto,
   AdminReviewsQueryDto,
   UpdateReviewStatusDto,
+  AdminReturnsQueryDto,
+  UpdateReturnStatusDto,
+  AdminExportOrdersQueryDto,
 } from './dto/admin.dto';
 
 @Controller('admin')
@@ -50,15 +56,23 @@ export class AdminController {
     return this.adminService.getUsers(query);
   }
 
+  @Get('users/export')
+  async exportUsers(@Res() res: Response) {
+    const csv = await this.adminService.exportUsers();
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename="users.csv"');
+    res.send(csv);
+  }
+
   @Patch('users/:id/role')
-  updateUserRole(@Param('id') id: string, @Body() dto: UpdateUserRoleDto) {
-    return this.adminService.updateUserRole(id, dto);
+  updateUserRole(@Param('id') id: string, @Body() dto: UpdateUserRoleDto, @Req() req: any) {
+    return this.adminService.updateUserRole(id, dto, req.user.id);
   }
 
   @Delete('users/:id')
   @HttpCode(HttpStatus.OK)
-  deleteUser(@Param('id') id: string) {
-    return this.adminService.deleteUser(id);
+  deleteUser(@Param('id') id: string, @Req() req: any) {
+    return this.adminService.deleteUser(id, req.user.id);
   }
 
   // ─── Products ─────────────────────────────────────────────────────────────
@@ -80,8 +94,8 @@ export class AdminController {
 
   @Delete('products/:id')
   @HttpCode(HttpStatus.OK)
-  deleteProduct(@Param('id') id: string) {
-    return this.adminService.deleteProduct(id);
+  deleteProduct(@Param('id') id: string, @Req() req: any) {
+    return this.adminService.deleteProduct(id, req.user.id);
   }
 
   // ─── Orders ───────────────────────────────────────────────────────────────
@@ -89,6 +103,14 @@ export class AdminController {
   @Get('orders')
   getOrders(@Query() query: AdminOrdersQueryDto) {
     return this.adminService.getOrders(query);
+  }
+
+  @Get('orders/export')
+  async exportOrders(@Query() query: AdminExportOrdersQueryDto, @Res() res: Response) {
+    const csv = await this.adminService.exportOrders(query);
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename="orders.csv"');
+    res.send(csv);
   }
 
   @Get('orders/:id')
@@ -124,8 +146,8 @@ export class AdminController {
 
   @Delete('promo-codes/:id')
   @HttpCode(HttpStatus.OK)
-  deletePromoCode(@Param('id') id: string) {
-    return this.adminService.deletePromoCode(id);
+  deletePromoCode(@Param('id') id: string, @Req() req: any) {
+    return this.adminService.deletePromoCode(id, req.user.id);
   }
 
   // ─── Reviews ──────────────────────────────────────────────────────────────
@@ -136,13 +158,25 @@ export class AdminController {
   }
 
   @Patch('reviews/:id/status')
-  updateReviewStatus(@Param('id') id: string, @Body() dto: UpdateReviewStatusDto) {
-    return this.adminService.updateReviewStatus(id, dto);
+  updateReviewStatus(@Param('id') id: string, @Body() dto: UpdateReviewStatusDto, @Req() req: any) {
+    return this.adminService.updateReviewStatus(id, dto, req.user.id);
   }
 
   @Delete('reviews/:id')
   @HttpCode(HttpStatus.OK)
-  deleteReview(@Param('id') id: string) {
-    return this.adminService.deleteReview(id);
+  deleteReview(@Param('id') id: string, @Req() req: any) {
+    return this.adminService.deleteReview(id, req.user.id);
+  }
+
+  // ─── Returns ──────────────────────────────────────────────────────────────
+
+  @Get('returns')
+  getReturns(@Query() query: AdminReturnsQueryDto) {
+    return this.adminService.getReturns(query);
+  }
+
+  @Patch('returns/:id/status')
+  updateReturnStatus(@Param('id') id: string, @Body() dto: UpdateReturnStatusDto, @Req() req: any) {
+    return this.adminService.updateReturnStatus(id, dto, req.user.id);
   }
 }

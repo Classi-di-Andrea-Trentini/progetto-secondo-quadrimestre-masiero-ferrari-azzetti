@@ -54,6 +54,8 @@ export class Register {
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
   readonly success = signal(false);
+  readonly showPassword = signal(false);
+  readonly showConfirmPassword = signal(false);
 
   async onSubmit() {
     if (this.form.invalid || this.loading()) return;
@@ -94,5 +96,13 @@ export class Register {
       this.form.hasError('mismatch') &&
       this.confirmPassword.touched
     );
+  }
+
+  togglePasswordVisibility() {
+    this.showPassword.update((value) => !value);
+  }
+
+  toggleConfirmPasswordVisibility() {
+    this.showConfirmPassword.update((value) => !value);
   }
 }

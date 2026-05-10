@@ -11,15 +11,7 @@
   <div class="detail-page">
 
     <!-- ── BREADCRUMB ─────────────────────────────────────── -->
-    <nav class="breadcrumb">
-      <a routerLink="/products">Collection</a>
-      <span>/</span>
-      <a [routerLink]="['/products']" [queryParams]="{category: product()!.category.id}">
-        {{ product()!.category.name }}
-      </a>
-      <span>/</span>
-      <span>{{ product()!.name }}</span>
-    </nav>
+    <app-breadcrumb [items]="breadcrumbItems()" />
 
     <!-- ── MAIN LAYOUT ────────────────────────────────────── -->
     <div class="detail-layout">

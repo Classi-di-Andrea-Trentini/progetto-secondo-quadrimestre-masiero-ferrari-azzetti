@@ -3,6 +3,19 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API_URL } from './api.config';
 
+export interface AdminReturn {
+  id: string;
+  status: string;
+  reason: string;
+  adminNote: string | null;
+  refundAmount: string | null;
+  createdAt: string;
+  resolvedAt: string | null;
+  order: { id: string; total: string };
+  user: { fullName: string; email: string };
+  items: { id: string; quantity: number; orderItem: { productName: string; unitPrice: string } }[];
+}
+
 export interface AdminStats {
   totalUsers: number;
   totalOrders: number;
@@ -247,5 +260,30 @@ export class AdminService {
 
   deleteReview(id: string): Observable<{ message: string }> {
     return this.http.delete<{ message: string }>(`${this.base}/reviews/${id}`, { withCredentials: true });
+  }
+
+  // ─── Returns ──────────────────────────────────────────────────────────────
+
+  getReturns(query: AdminListQuery = {}): Observable<PaginatedResponse<AdminReturn>> {
+    return this.http.get<PaginatedResponse<AdminReturn>>(`${this.base}/returns`, {
+      params: this.buildParams(query),
+      withCredentials: true,
+    });
+  }
+
+  updateReturnStatus(id: string, payload: { status: string; adminNote?: string; refundAmount?: number }): Observable<AdminReturn> {
+    return this.http.patch<AdminReturn>(`${this.base}/returns/${id}/status`, payload, { withCredentials: true });
+  }
+
+  exportOrders(query: { status?: string; dateFrom?: string; dateTo?: string } = {}): string {
+    let params = new HttpParams();
+    if (query.status) params = params.set('status', query.status);
+    if (query.dateFrom) params = params.set('dateFrom', query.dateFrom);
+    if (query.dateTo) params = params.set('dateTo', query.dateTo);
+    return `${this.base}/orders/export?${params.toString()}`;
+  }
+
+  exportUsers(): string {
+    return `${this.base}/users/export`;
   }
 }

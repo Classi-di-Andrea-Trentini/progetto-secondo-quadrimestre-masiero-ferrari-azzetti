@@ -179,3 +179,38 @@ export class UpdateReviewStatusDto {
   @IsIn(['approved', 'rejected'])
   status: string;
 }
+
+export class AdminReturnsQueryDto extends AdminListQueryDto {
+  @IsOptional()
+  @IsString()
+  status?: string;
+}
+
+export class UpdateReturnStatusDto {
+  @IsString()
+  @IsIn(['approved', 'rejected', 'received', 'refunded'])
+  status: string;
+
+  @IsOptional()
+  @IsString()
+  adminNote?: string;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  refundAmount?: number;
+}
+
+export class AdminExportOrdersQueryDto {
+  @IsOptional()
+  @IsString()
+  status?: string;
+
+  @IsOptional()
+  @IsString()
+  dateFrom?: string;
+
+  @IsOptional()
+  @IsString()
+  dateTo?: string;
+}

@@ -15,7 +15,10 @@ import { AdminOrders } from './pages/admin/admin-orders/admin-orders';
 import { AdminUsers } from './pages/admin/admin-users/admin-users';
 import { AdminPromo } from './pages/admin/admin-promo/admin-promo';
 import { AdminReviews } from './pages/admin/admin-reviews/admin-reviews';
+import { AdminReturns } from './pages/admin/admin-returns/admin-returns';
 import { Checkout } from './pages/checkout/checkout';
+import { ForgotPassword } from './pages/forgot-password/forgot-password';
+import { ResetPassword } from './pages/reset-password/reset-password';
 import { authGuardGuard } from './guards/auth-guard-guard';
 import { adminGuardGuard } from './guards/admin-guard-guard';
 
@@ -29,6 +32,8 @@ export const routes: Routes = [
   { path: 'product/:slug', component: ProductDetail },
   { path: 'me', component: MeComponent, canActivate: [authGuardGuard] },
   { path: 'checkout', component: Checkout, canActivate: [authGuardGuard] },
+  { path: 'forgot-password', component: ForgotPassword },
+  { path: 'reset-password', component: ResetPassword },
   { path: 'verify-email/:token', component: VerifyEmail },
   { path: 'legal/:pagina', component: Legal },
   {
@@ -43,6 +48,7 @@ export const routes: Routes = [
       { path: 'users', component: AdminUsers },
       { path: 'promo', component: AdminPromo },
       { path: 'reviews', component: AdminReviews },
+      { path: 'returns', component: AdminReturns },
     ],
   },
   { path: '**', redirectTo: 'home' },

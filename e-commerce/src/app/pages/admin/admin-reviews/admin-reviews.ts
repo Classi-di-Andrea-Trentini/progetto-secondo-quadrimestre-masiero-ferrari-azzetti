@@ -1,6 +1,7 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { forkJoin } from 'rxjs';
 import { AdminService, AdminReview } from '../../../services/admin.service';
 
 @Component({
@@ -27,6 +28,71 @@ export class AdminReviews implements OnInit {
 
   confirmDeleteId = signal<string | null>(null);
   deleteLoading = signal(false);
+
+  // Bulk
+  selectedIds = signal<Set<string>>(new Set());
+  bulkLoading = signal(false);
+  readonly hasSelection = computed(() => this.selectedIds().size > 0);
+
+  toggleSelect(id: string) {
+    const s = new Set(this.selectedIds());
+    if (s.has(id)) s.delete(id); else s.add(id);
+    this.selectedIds.set(s);
+  }
+
+  isSelected(id: string): boolean { return this.selectedIds().has(id); }
+
+  selectAll() {
+    this.selectedIds.set(new Set(this.reviews().map(r => r.id)));
+  }
+
+  clearSelection() { this.selectedIds.set(new Set()); }
+
+  bulkApprove() {
+    const ids = Array.from(this.selectedIds());
+    if (!ids.length) return;
+    this.bulkLoading.set(true);
+    forkJoin(ids.map(id => this.adminSvc.updateReviewStatus(id, 'approved'))).subscribe({
+      next: (updated) => {
+        this.reviews.update(list => list.map(r => { const u = updated.find(x => x.id === r.id); return u ?? r; }));
+        this.clearSelection();
+        this.bulkLoading.set(false);
+        this.showSuccess(`${ids.length} recensioni approvate`);
+      },
+      error: () => { this.bulkLoading.set(false); this.error.set('Errore nell\'operazione bulk'); },
+    });
+  }
+
+  bulkReject() {
+    const ids = Array.from(this.selectedIds());
+    if (!ids.length) return;
+    this.bulkLoading.set(true);
+    forkJoin(ids.map(id => this.adminSvc.updateReviewStatus(id, 'rejected'))).subscribe({
+      next: (updated) => {
+        this.reviews.update(list => list.map(r => { const u = updated.find(x => x.id === r.id); return u ?? r; }));
+        this.clearSelection();
+        this.bulkLoading.set(false);
+        this.showSuccess(`${ids.length} recensioni rifiutate`);
+      },
+      error: () => { this.bulkLoading.set(false); this.error.set('Errore nell\'operazione bulk'); },
+    });
+  }
+
+  bulkDelete() {
+    const ids = Array.from(this.selectedIds());
+    if (!ids.length) return;
+    this.bulkLoading.set(true);
+    forkJoin(ids.map(id => this.adminSvc.deleteReview(id))).subscribe({
+      next: () => {
+        this.reviews.update(list => list.filter(r => !ids.includes(r.id)));
+        this.total.update(n => n - ids.length);
+        this.clearSelection();
+        this.bulkLoading.set(false);
+        this.showSuccess(`${ids.length} recensioni eliminate`);
+      },
+      error: () => { this.bulkLoading.set(false); this.error.set('Errore nell\'operazione bulk'); },
+    });
+  }
 
   readonly allStatuses = [
     { value: '', label: 'Tutti' },

@@ -125,6 +125,10 @@ export class AdminUsers implements OnInit {
     return this.auth.currentUser()?.id === id;
   }
 
+  exportCsv() {
+    window.open(this.adminSvc.exportUsers(), '_blank');
+  }
+
   pagesArray(): number[] {
     const total = this.totalPages();
     const current = this.currentPage();

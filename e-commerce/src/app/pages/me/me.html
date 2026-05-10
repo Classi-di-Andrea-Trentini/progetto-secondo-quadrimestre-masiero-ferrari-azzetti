@@ -282,6 +282,12 @@
                     </div>
                     <div class="flex items-center gap-3">
                       <span class="font-bold text-gray-900">{{ formatOrderPrice(order.total) }}</span>
+                      @if (canCancelOrder(order.status)) {
+                        <button (click)="$event.stopPropagation(); requestCancelOrder(order.id)"
+                          class="px-2 py-1 text-xs border border-red-200 text-red-600 rounded-lg hover:bg-red-50 transition-colors">
+                          Annulla
+                        </button>
+                      }
                       <svg class="w-4 h-4 text-gray-400 transition-transform" [class.rotate-180]="expandedOrderId() === order.id" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                       </svg>
@@ -584,3 +590,26 @@
   </div>
 
 </div>
+
+<!-- Cancel Order Modal -->
+@if (cancelOrderId()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/40" (click)="dismissCancelOrder()"></div>
+    <div class="relative bg-white rounded-xl shadow-2xl max-w-sm w-full p-6">
+      <h3 class="text-lg font-bold text-gray-900 mb-2">Annulla ordine</h3>
+      <p class="text-gray-500 text-sm mb-6">Sei sicuro di voler annullare questo ordine? L'azione è irreversibile.</p>
+      <div class="flex gap-3">
+        <button (click)="dismissCancelOrder()"
+          class="flex-1 px-4 py-2.5 border border-gray-200 rounded-lg text-sm hover:bg-gray-50">
+          Indietro
+        </button>
+        <button (click)="confirmCancelOrder()" [disabled]="cancelOrderLoading()"
+          class="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 disabled:opacity-50">
+          @if (cancelOrderLoading()) {
+            <span class="inline-block w-4 h-4 border-2 border-red-300 border-t-white rounded-full animate-spin mx-auto"></span>
+          } @else { Annulla ordine }
+        </button>
+      </div>
+    </div>
+  </div>
+}

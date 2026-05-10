@@ -114,6 +114,114 @@ export function newsletterConfirmation(name: string): string {
   );
 }
 
+export function passwordResetEmail(fullName: string, resetUrl: string): string {
+  const firstName = fullName.split(' ')[0];
+  return base(
+    'Reimposta la tua password',
+    `<h1>Reimposta la tua password.</h1>
+    <hr class="divider" />
+    <p>Ciao <strong>${firstName}</strong>, hai richiesto di reimpostare la password del tuo account Common Era.</p>
+    <p>Clicca il pulsante qui sotto per procedere. Il link è valido per <strong>1 ora</strong>.</p>
+    <a class="btn" href="${resetUrl}">Reimposta password</a>
+    <div class="url-box">${resetUrl}</div>
+    <hr class="divider" />
+    <div class="alert-bar"><p>Se non hai richiesto questa operazione, ignora questa email. La tua password rimane invariata.</p></div>`,
+  );
+}
+
+export function orderConfirmationEmail(
+  fullName: string,
+  order: { id: string; items: Array<{ productName: string; quantity: number; lineTotal: any }>; total: any; trackingNumber?: string },
+): string {
+  const firstName = fullName.split(' ')[0];
+  const orderId = order.id.slice(0, 8).toUpperCase();
+  const itemRows = order.items
+    .map(
+      (i) =>
+        `<tr>
+          <td style="padding:10px 0; border-bottom:1px solid #F0F0F0; font-size:13px; color:#000;">${i.productName}</td>
+          <td style="padding:10px 0; border-bottom:1px solid #F0F0F0; font-size:13px; color:#8F8F8F; text-align:center;">×${i.quantity}</td>
+          <td style="padding:10px 0; border-bottom:1px solid #F0F0F0; font-size:13px; color:#000; text-align:right;">€${parseFloat(String(i.lineTotal)).toFixed(2)}</td>
+        </tr>`,
+    )
+    .join('');
+
+  return base(
+    `Ordine confermato #${orderId}`,
+    `<h1>Ordine confermato.</h1>
+    <hr class="divider" />
+    <p>Grazie <strong>${firstName}</strong>, il tuo ordine <strong>#${orderId}</strong> è stato ricevuto ed è in elaborazione.</p>
+    <table style="width:100%; border-collapse:collapse; margin: 24px 0;">
+      <thead>
+        <tr>
+          <th style="text-align:left; font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:#8F8F8F; padding-bottom:8px; border-bottom:1px solid #000;">Prodotto</th>
+          <th style="text-align:center; font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:#8F8F8F; padding-bottom:8px; border-bottom:1px solid #000;">Qtà</th>
+          <th style="text-align:right; font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:#8F8F8F; padding-bottom:8px; border-bottom:1px solid #000;">Importo</th>
+        </tr>
+      </thead>
+      <tbody>${itemRows}</tbody>
+      <tfoot>
+        <tr>
+          <td colspan="2" style="padding-top:12px; font-size:13px; font-weight:600; color:#000;">Totale</td>
+          <td style="padding-top:12px; font-size:14px; font-weight:700; color:#000; text-align:right;">€${parseFloat(String(order.total)).toFixed(2)}</td>
+        </tr>
+      </tfoot>
+    </table>
+    <hr class="divider" />
+    <p style="font-size:12px; color:#8F8F8F;">Ti invieremo una notifica quando il tuo ordine verrà spedito.</p>`,
+  );
+}
+
+export function shippingNotificationEmail(
+  fullName: string,
+  order: { id: string; trackingNumber?: string; trackingUrl?: string },
+): string {
+  const firstName = fullName.split(' ')[0];
+  const orderId = order.id.slice(0, 8).toUpperCase();
+  const trackingSection = order.trackingNumber
+    ? `<p>Il tuo numero di tracciamento è: <strong>${order.trackingNumber}</strong></p>
+       ${order.trackingUrl ? `<a class="btn" href="${order.trackingUrl}" style="margin-top:16px;">Traccia il tuo ordine</a>` : ''}`
+    : '';
+
+  return base(
+    `Il tuo ordine è in spedizione`,
+    `<h1>In viaggio verso di te.</h1>
+    <hr class="divider" />
+    <p>Ciao <strong>${firstName}</strong>, il tuo ordine <strong>#${orderId}</strong> è stato affidato al corriere.</p>
+    ${trackingSection}
+    <hr class="divider" />
+    <p style="font-size:12px; color:#8F8F8F;">I tempi di consegna possono variare in base alla tua zona.</p>`,
+  );
+}
+
+export function returnStatusUpdateEmail(
+  fullName: string,
+  returnId: string,
+  status: string,
+  adminNote?: string,
+): string {
+  const firstName = fullName.split(' ')[0];
+  const statusLabels: Record<string, string> = {
+    approved: 'Approvato',
+    rejected: 'Rifiutato',
+    received: 'Ricevuto',
+    refunded: 'Rimborsato',
+    requested: 'In attesa',
+  };
+  const statusLabel = statusLabels[status] ?? status;
+
+  return base(
+    'Aggiornamento reso',
+    `<h1>Aggiornamento sul tuo reso.</h1>
+    <hr class="divider" />
+    <p>Ciao <strong>${firstName}</strong>, lo stato del tuo reso (<code style="font-family:monospace;">${returnId.slice(0, 8).toUpperCase()}</code>) è stato aggiornato:</p>
+    <p style="font-size:18px; font-weight:700; color:#000;">${statusLabel}</p>
+    ${adminNote ? `<div class="alert-bar"><p>${adminNote}</p></div>` : ''}
+    <hr class="divider" />
+    <p style="font-size:12px; color:#8F8F8F;">Per qualsiasi domanda contatta il nostro supporto: <a href="mailto:support@commonera.it" style="color:#C3A88D;">support@commonera.it</a></p>`,
+  );
+}
+
 export function passwordChangedAlert(fullName: string): string {
   const firstName = fullName.split(' ')[0];
   return base(
