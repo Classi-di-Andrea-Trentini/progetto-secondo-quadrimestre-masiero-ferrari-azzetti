@@ -214,3 +214,96 @@ export class AdminExportOrdersQueryDto {
   @IsString()
   dateTo?: string;
 }
+
+// ─── Variants ──────────────────────────────────────────────────────────────
+
+export class CreateVariantDto {
+  @IsString()
+  sku: string;
+
+  @IsOptional()
+  @IsString()
+  size?: string;
+
+  @IsOptional()
+  @IsString()
+  color?: string;
+
+  @IsOptional()
+  @IsString()
+  colorHex?: string;
+
+  @IsOptional()
+  @IsString()
+  material?: string;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  priceOverride?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  stockQty?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean;
+}
+
+export class UpdateVariantDto {
+  @IsOptional()
+  @IsString()
+  sku?: string;
+
+  @IsOptional()
+  @IsString()
+  size?: string;
+
+  @IsOptional()
+  @IsString()
+  color?: string;
+
+  @IsOptional()
+  @IsString()
+  colorHex?: string;
+
+  @IsOptional()
+  @IsString()
+  material?: string;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  priceOverride?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  stockQty?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean;
+}
+
+// ─── Images ────────────────────────────────────────────────────────────────
+
+export class CreateImageDto {
+  @IsString()
+  url: string;
+
+  @IsOptional()
+  @IsString()
+  altText?: string;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  sortOrder?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  isCover?: boolean;
+}

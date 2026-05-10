@@ -53,6 +53,33 @@ export interface AdminProduct {
   _count: { variants: number };
 }
 
+export interface ProductVariant {
+  id: string;
+  sku: string;
+  size: string | null;
+  color: string | null;
+  colorHex: string | null;
+  material: string | null;
+  priceOverride: string | null;
+  stockQty: number;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface ProductImage {
+  id: string;
+  url: string;
+  altText: string | null;
+  sortOrder: number;
+  isCover: boolean;
+}
+
+export interface AdminProductDetail extends AdminProduct {
+  variants: ProductVariant[];
+  images: ProductImage[];
+  category: { id: string; name: string } | null;
+}
+
 export interface AdminOrderSummary {
   id: string;
   status: string;
@@ -191,6 +218,10 @@ export class AdminService {
     });
   }
 
+  getProductDetail(id: string): Observable<AdminProductDetail> {
+    return this.http.get<AdminProductDetail>(`${this.base}/products/${id}`, { withCredentials: true });
+  }
+
   createProduct(payload: CreateProductPayload): Observable<AdminProduct> {
     return this.http.post<AdminProduct>(`${this.base}/products`, payload, { withCredentials: true });
   }
@@ -201,6 +232,34 @@ export class AdminService {
 
   deleteProduct(id: string): Observable<{ message: string }> {
     return this.http.delete<{ message: string }>(`${this.base}/products/${id}`, { withCredentials: true });
+  }
+
+  // ─── Variants ─────────────────────────────────────────────────────────────
+
+  createVariant(productId: string, payload: Partial<ProductVariant>): Observable<ProductVariant> {
+    return this.http.post<ProductVariant>(`${this.base}/products/${productId}/variants`, payload, { withCredentials: true });
+  }
+
+  updateVariant(productId: string, variantId: string, payload: Partial<ProductVariant>): Observable<ProductVariant> {
+    return this.http.patch<ProductVariant>(`${this.base}/products/${productId}/variants/${variantId}`, payload, { withCredentials: true });
+  }
+
+  deleteVariant(productId: string, variantId: string): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(`${this.base}/products/${productId}/variants/${variantId}`, { withCredentials: true });
+  }
+
+  // ─── Images ───────────────────────────────────────────────────────────────
+
+  addImage(productId: string, payload: { url: string; altText?: string; isCover?: boolean }): Observable<ProductImage> {
+    return this.http.post<ProductImage>(`${this.base}/products/${productId}/images`, payload, { withCredentials: true });
+  }
+
+  deleteImage(productId: string, imageId: string): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(`${this.base}/products/${productId}/images/${imageId}`, { withCredentials: true });
+  }
+
+  setCoverImage(productId: string, imageId: string): Observable<{ message: string }> {
+    return this.http.patch<{ message: string }>(`${this.base}/products/${productId}/images/${imageId}/cover`, {}, { withCredentials: true });
   }
 
   // ─── Orders ───────────────────────────────────────────────────────────────

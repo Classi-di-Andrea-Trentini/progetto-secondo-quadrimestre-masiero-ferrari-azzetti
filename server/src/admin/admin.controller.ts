@@ -35,6 +35,9 @@ import {
   AdminReturnsQueryDto,
   UpdateReturnStatusDto,
   AdminExportOrdersQueryDto,
+  CreateVariantDto,
+  UpdateVariantDto,
+  CreateImageDto,
 } from './dto/admin.dto';
 
 @Controller('admin')
@@ -87,6 +90,11 @@ export class AdminController {
     return this.adminService.createProduct(dto);
   }
 
+  @Get('products/:id')
+  getProductDetail(@Param('id') id: string) {
+    return this.adminService.getProductDetail(id);
+  }
+
   @Patch('products/:id')
   updateProduct(@Param('id') id: string, @Body() dto: UpdateProductDto) {
     return this.adminService.updateProduct(id, dto);
@@ -96,6 +104,46 @@ export class AdminController {
   @HttpCode(HttpStatus.OK)
   deleteProduct(@Param('id') id: string, @Req() req: any) {
     return this.adminService.deleteProduct(id, req.user.id);
+  }
+
+  // ─── Variants ─────────────────────────────────────────────────────────────
+
+  @Post('products/:id/variants')
+  createVariant(@Param('id') id: string, @Body() dto: CreateVariantDto) {
+    return this.adminService.createVariant(id, dto);
+  }
+
+  @Patch('products/:id/variants/:variantId')
+  updateVariant(
+    @Param('id') id: string,
+    @Param('variantId') variantId: string,
+    @Body() dto: UpdateVariantDto,
+  ) {
+    return this.adminService.updateVariant(id, variantId, dto);
+  }
+
+  @Delete('products/:id/variants/:variantId')
+  @HttpCode(HttpStatus.OK)
+  deleteVariant(@Param('id') id: string, @Param('variantId') variantId: string) {
+    return this.adminService.deleteVariant(id, variantId);
+  }
+
+  // ─── Images ───────────────────────────────────────────────────────────────
+
+  @Post('products/:id/images')
+  addImage(@Param('id') id: string, @Body() dto: CreateImageDto) {
+    return this.adminService.addImage(id, dto);
+  }
+
+  @Delete('products/:id/images/:imageId')
+  @HttpCode(HttpStatus.OK)
+  deleteImage(@Param('id') id: string, @Param('imageId') imageId: string) {
+    return this.adminService.deleteImage(id, imageId);
+  }
+
+  @Patch('products/:id/images/:imageId/cover')
+  setCoverImage(@Param('id') id: string, @Param('imageId') imageId: string) {
+    return this.adminService.setCoverImage(id, imageId);
   }
 
   // ─── Orders ───────────────────────────────────────────────────────────────

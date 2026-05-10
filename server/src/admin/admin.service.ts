@@ -18,6 +18,9 @@ import {
   AdminReturnsQueryDto,
   UpdateReturnStatusDto,
   AdminExportOrdersQueryDto,
+  CreateVariantDto,
+  UpdateVariantDto,
+  CreateImageDto,
 } from './dto/admin.dto';
 
 @Injectable()
@@ -225,6 +228,110 @@ export class AdminService {
       },
     }).catch(() => {});
     return { message: 'Prodotto eliminato' };
+  }
+
+  async getProductDetail(id: string) {
+    const product = await this.prisma.product.findUnique({
+      where: { id },
+      include: {
+        category: { select: { id: true, name: true } },
+        images: { orderBy: [{ isCover: 'desc' }, { sortOrder: 'asc' }] },
+        variants: { orderBy: { createdAt: 'asc' } },
+        _count: { select: { variants: true } },
+      },
+    });
+    if (!product) throw new NotFoundException('Prodotto non trovato');
+    return product;
+  }
+
+  // ─── Variants ────────────────────────────────────────────────────────────────
+
+  async createVariant(productId: string, dto: CreateVariantDto) {
+    const product = await this.prisma.product.findUnique({ where: { id: productId } });
+    if (!product) throw new NotFoundException('Prodotto non trovato');
+    const existing = await this.prisma.productVariant.findUnique({ where: { sku: dto.sku } });
+    if (existing) throw new BadRequestException('SKU già in uso');
+    return this.prisma.productVariant.create({
+      data: {
+        productId,
+        sku: dto.sku,
+        size: dto.size ?? null,
+        color: dto.color ?? null,
+        colorHex: dto.colorHex ?? null,
+        material: dto.material ?? null,
+        priceOverride: dto.priceOverride ?? null,
+        stockQty: dto.stockQty ?? 0,
+        isActive: dto.isActive ?? true,
+      },
+    });
+  }
+
+  async updateVariant(productId: string, variantId: string, dto: UpdateVariantDto) {
+    const variant = await this.prisma.productVariant.findFirst({ where: { id: variantId, productId } });
+    if (!variant) throw new NotFoundException('Variante non trovata');
+    if (dto.sku && dto.sku !== variant.sku) {
+      const existing = await this.prisma.productVariant.findUnique({ where: { sku: dto.sku } });
+      if (existing) throw new BadRequestException('SKU già in uso');
+    }
+    const data: any = {};
+    if (dto.sku !== undefined) data.sku = dto.sku;
+    if (dto.size !== undefined) data.size = dto.size || null;
+    if (dto.color !== undefined) data.color = dto.color || null;
+    if (dto.colorHex !== undefined) data.colorHex = dto.colorHex || null;
+    if (dto.material !== undefined) data.material = dto.material || null;
+    if (dto.priceOverride !== undefined) data.priceOverride = dto.priceOverride || null;
+    if (dto.stockQty !== undefined) data.stockQty = dto.stockQty;
+    if (dto.isActive !== undefined) data.isActive = dto.isActive;
+    return this.prisma.productVariant.update({ where: { id: variantId }, data });
+  }
+
+  async deleteVariant(productId: string, variantId: string) {
+    const variant = await this.prisma.productVariant.findFirst({ where: { id: variantId, productId } });
+    if (!variant) throw new NotFoundException('Variante non trovata');
+    await this.prisma.productVariant.delete({ where: { id: variantId } });
+    return { message: 'Variante eliminata' };
+  }
+
+  // ─── Images ──────────────────────────────────────────────────────────────────
+
+  async addImage(productId: string, dto: CreateImageDto) {
+    const product = await this.prisma.product.findUnique({ where: { id: productId } });
+    if (!product) throw new NotFoundException('Prodotto non trovato');
+    // If this is the first image or isCover is requested, set as cover and reset others
+    const imageCount = await this.prisma.productImage.count({ where: { productId } });
+    const shouldBeCover = dto.isCover || imageCount === 0;
+    if (shouldBeCover) {
+      await this.prisma.productImage.updateMany({ where: { productId }, data: { isCover: false } });
+    }
+    return this.prisma.productImage.create({
+      data: {
+        productId,
+        url: dto.url,
+        altText: dto.altText ?? null,
+        sortOrder: dto.sortOrder ?? imageCount,
+        isCover: shouldBeCover,
+      },
+    });
+  }
+
+  async deleteImage(productId: string, imageId: string) {
+    const image = await this.prisma.productImage.findFirst({ where: { id: imageId, productId } });
+    if (!image) throw new NotFoundException('Immagine non trovata');
+    await this.prisma.productImage.delete({ where: { id: imageId } });
+    // If it was the cover, set the next image as cover
+    if (image.isCover) {
+      const next = await this.prisma.productImage.findFirst({ where: { productId }, orderBy: { sortOrder: 'asc' } });
+      if (next) await this.prisma.productImage.update({ where: { id: next.id }, data: { isCover: true } });
+    }
+    return { message: 'Immagine eliminata' };
+  }
+
+  async setCoverImage(productId: string, imageId: string) {
+    const image = await this.prisma.productImage.findFirst({ where: { id: imageId, productId } });
+    if (!image) throw new NotFoundException('Immagine non trovata');
+    await this.prisma.productImage.updateMany({ where: { productId }, data: { isCover: false } });
+    await this.prisma.productImage.update({ where: { id: imageId }, data: { isCover: true } });
+    return { message: 'Cover aggiornata' };
   }
 
   // ─── Orders ─────────────────────────────────────────────────────────────────

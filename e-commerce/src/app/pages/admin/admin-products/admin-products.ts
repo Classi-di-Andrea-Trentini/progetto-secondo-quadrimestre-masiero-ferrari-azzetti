@@ -1,7 +1,17 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { AdminService, AdminProduct, CreateProductPayload } from '../../../services/admin.service';
+import {
+  AdminService,
+  AdminProduct,
+  AdminProductDetail,
+  ProductVariant,
+  ProductImage,
+  CreateProductPayload,
+} from '../../../services/admin.service';
+import { firstValueFrom } from 'rxjs';
+
+type ModalTab = 'info' | 'variants' | 'images';
 
 @Component({
   selector: 'app-admin-products',
@@ -30,10 +40,14 @@ export class AdminProducts implements OnInit {
 
   // Modal state
   showModal = signal(false);
-  editingProduct = signal<AdminProduct | null>(null);
+  editingProduct = signal<AdminProductDetail | null>(null);
+  activeTab = signal<ModalTab>('info');
+  modalLoading = signal(false);
+
   confirmDeleteId = signal<string | null>(null);
   deleteLoading = signal(false);
 
+  // ─── Info form ────────────────────────────────────────────────────────────
   readonly productForm = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.minLength(2)]],
     slug: ['', [Validators.required, Validators.pattern(/^[a-z0-9-]+$/)]],
@@ -41,6 +55,30 @@ export class AdminProducts implements OnInit {
     basePrice: [0, [Validators.required, Validators.min(0.01)]],
     isActive: [true],
   });
+
+  // ─── Variant form ─────────────────────────────────────────────────────────
+  showVariantForm = signal(false);
+  editingVariant = signal<ProductVariant | null>(null);
+  variantFormLoading = signal(false);
+  variantFormError = signal<string | null>(null);
+
+  readonly variantForm = this.fb.nonNullable.group({
+    sku: ['', Validators.required],
+    size: [''],
+    color: [''],
+    colorHex: [''],
+    material: [''],
+    priceOverride: [null as number | null],
+    stockQty: [0, [Validators.min(0)]],
+    isActive: [true],
+  });
+
+  // ─── Image form ───────────────────────────────────────────────────────────
+  showImageForm = signal(false);
+  imageUrl = '';
+  imageAlt = '';
+  imageFormLoading = signal(false);
+  imageFormError = signal<string | null>(null);
 
   ngOnInit() {
     this.load();
@@ -64,15 +102,8 @@ export class AdminProducts implements OnInit {
     });
   }
 
-  onSearch() {
-    this.currentPage.set(1);
-    this.load();
-  }
-
-  onFilter() {
-    this.currentPage.set(1);
-    this.load();
-  }
+  onSearch() { this.currentPage.set(1); this.load(); }
+  onFilter() { this.currentPage.set(1); this.load(); }
 
   goToPage(p: number) {
     if (p < 1 || p > this.totalPages()) return;
@@ -80,30 +111,51 @@ export class AdminProducts implements OnInit {
     this.load();
   }
 
+  // ─── Modal open/close ─────────────────────────────────────────────────────
+
   openCreate() {
     this.editingProduct.set(null);
     this.formError.set(null);
+    this.activeTab.set('info');
     this.productForm.reset({ name: '', slug: '', description: '', basePrice: 0, isActive: true });
     this.showModal.set(true);
   }
 
-  openEdit(product: AdminProduct) {
-    this.editingProduct.set(product);
+  async openEdit(product: AdminProduct) {
     this.formError.set(null);
-    this.productForm.patchValue({
-      name: product.name,
-      slug: product.slug,
-      description: product.description ?? '',
-      basePrice: parseFloat(String(product.basePrice)),
-      isActive: product.isActive,
-    });
+    this.activeTab.set('info');
+    this.modalLoading.set(true);
     this.showModal.set(true);
+
+    try {
+      const detail = await firstValueFrom(this.adminSvc.getProductDetail(product.id));
+      this.editingProduct.set(detail);
+      this.productForm.patchValue({
+        name: detail.name,
+        slug: detail.slug,
+        description: detail.description ?? '',
+        basePrice: parseFloat(String(detail.basePrice)),
+        isActive: detail.isActive,
+      });
+    } catch {
+      this.formError.set('Impossibile caricare il prodotto');
+    } finally {
+      this.modalLoading.set(false);
+    }
   }
 
   closeModal() {
     this.showModal.set(false);
     this.editingProduct.set(null);
     this.formError.set(null);
+    this.showVariantForm.set(false);
+    this.showImageForm.set(false);
+  }
+
+  setTab(tab: ModalTab) {
+    this.activeTab.set(tab);
+    this.showVariantForm.set(false);
+    this.showImageForm.set(false);
   }
 
   autoSlug() {
@@ -113,6 +165,8 @@ export class AdminProducts implements OnInit {
       this.productForm.controls.slug.setValue(slug);
     }
   }
+
+  // ─── Info tab: save basic info ─────────────────────────────────────────────
 
   submitForm() {
     if (this.productForm.invalid || this.formLoading()) return;
@@ -128,17 +182,22 @@ export class AdminProducts implements OnInit {
       : this.adminSvc.createProduct(payload);
 
     obs.subscribe({
-      next: (saved) => {
+      next: async (saved) => {
         if (editing) {
+          // Refresh detail for variants/images tabs
+          const detail = await firstValueFrom(this.adminSvc.getProductDetail(saved.id));
+          this.editingProduct.set(detail);
           this.products.update(list => list.map(p => p.id === saved.id ? { ...p, ...saved } : p));
           this.actionSuccess.set('Prodotto aggiornato');
         } else {
+          // After create, switch to edit mode so user can add variants/images
+          const detail = await firstValueFrom(this.adminSvc.getProductDetail(saved.id));
+          this.editingProduct.set(detail);
           this.load();
-          this.actionSuccess.set('Prodotto creato');
+          this.actionSuccess.set('Prodotto creato — ora puoi aggiungere varianti e immagini');
         }
         this.formLoading.set(false);
-        this.closeModal();
-        setTimeout(() => this.actionSuccess.set(null), 3000);
+        setTimeout(() => this.actionSuccess.set(null), 4000);
       },
       error: (err) => {
         this.formError.set(err?.error?.message ?? 'Errore durante il salvataggio');
@@ -147,13 +206,170 @@ export class AdminProducts implements OnInit {
     });
   }
 
-  requestDelete(id: string) {
-    this.confirmDeleteId.set(id);
+  // ─── Variants ─────────────────────────────────────────────────────────────
+
+  openAddVariant() {
+    this.editingVariant.set(null);
+    this.variantFormError.set(null);
+    this.variantForm.reset({ sku: '', size: '', color: '', colorHex: '', material: '', priceOverride: null, stockQty: 0, isActive: true });
+    this.showVariantForm.set(true);
   }
 
-  cancelDelete() {
-    this.confirmDeleteId.set(null);
+  openEditVariant(v: ProductVariant) {
+    this.editingVariant.set(v);
+    this.variantFormError.set(null);
+    this.variantForm.patchValue({
+      sku: v.sku,
+      size: v.size ?? '',
+      color: v.color ?? '',
+      colorHex: v.colorHex ?? '',
+      material: v.material ?? '',
+      priceOverride: v.priceOverride ? parseFloat(String(v.priceOverride)) : null,
+      stockQty: v.stockQty,
+      isActive: v.isActive,
+    });
+    this.showVariantForm.set(true);
   }
+
+  cancelVariantForm() {
+    this.showVariantForm.set(false);
+    this.editingVariant.set(null);
+  }
+
+  async saveVariant() {
+    if (this.variantForm.invalid || this.variantFormLoading()) return;
+    const productId = this.editingProduct()?.id;
+    if (!productId) return;
+
+    this.variantFormLoading.set(true);
+    this.variantFormError.set(null);
+
+    const v = this.variantForm.getRawValue();
+    const payload: any = {
+      sku: v.sku,
+      size: v.size || undefined,
+      color: v.color || undefined,
+      colorHex: v.colorHex || undefined,
+      material: v.material || undefined,
+      priceOverride: v.priceOverride ?? undefined,
+      stockQty: v.stockQty,
+      isActive: v.isActive,
+    };
+
+    try {
+      const editing = this.editingVariant();
+      if (editing) {
+        const updated = await firstValueFrom(this.adminSvc.updateVariant(productId, editing.id, payload));
+        this.editingProduct.update(p => p ? {
+          ...p,
+          variants: p.variants.map(vr => vr.id === updated.id ? updated : vr),
+        } : p);
+      } else {
+        const created = await firstValueFrom(this.adminSvc.createVariant(productId, payload));
+        this.editingProduct.update(p => p ? { ...p, variants: [...p.variants, created] } : p);
+        this.products.update(list => list.map(p => p.id === productId
+          ? { ...p, _count: { variants: p._count.variants + 1 } } : p));
+      }
+      this.showVariantForm.set(false);
+      this.editingVariant.set(null);
+    } catch (err: any) {
+      this.variantFormError.set(err?.error?.message ?? 'Errore durante il salvataggio');
+    } finally {
+      this.variantFormLoading.set(false);
+    }
+  }
+
+  async deleteVariant(variantId: string) {
+    const productId = this.editingProduct()?.id;
+    if (!productId) return;
+    try {
+      await firstValueFrom(this.adminSvc.deleteVariant(productId, variantId));
+      this.editingProduct.update(p => p ? { ...p, variants: p.variants.filter(v => v.id !== variantId) } : p);
+      this.products.update(list => list.map(p => p.id === productId
+        ? { ...p, _count: { variants: Math.max(0, p._count.variants - 1) } } : p));
+    } catch {
+      this.variantFormError.set('Impossibile eliminare la variante');
+    }
+  }
+
+  // ─── Images ───────────────────────────────────────────────────────────────
+
+  openAddImage() {
+    this.imageUrl = '';
+    this.imageAlt = '';
+    this.imageFormError.set(null);
+    this.showImageForm.set(true);
+  }
+
+  cancelImageForm() {
+    this.showImageForm.set(false);
+  }
+
+  async saveImage() {
+    const productId = this.editingProduct()?.id;
+    if (!productId || !this.imageUrl.trim() || this.imageFormLoading()) return;
+    this.imageFormLoading.set(true);
+    this.imageFormError.set(null);
+
+    try {
+      const isFirst = (this.editingProduct()?.images.length ?? 0) === 0;
+      const created = await firstValueFrom(this.adminSvc.addImage(productId, {
+        url: this.imageUrl.trim(),
+        altText: this.imageAlt.trim() || undefined,
+        isCover: isFirst,
+      }));
+      this.editingProduct.update(p => {
+        if (!p) return p;
+        const images = isFirst
+          ? [created]
+          : [...p.images, created];
+        return { ...p, images };
+      });
+      this.showImageForm.set(false);
+    } catch (err: any) {
+      this.imageFormError.set(err?.error?.message ?? 'Errore durante il salvataggio');
+    } finally {
+      this.imageFormLoading.set(false);
+    }
+  }
+
+  async deleteImage(imageId: string) {
+    const productId = this.editingProduct()?.id;
+    if (!productId) return;
+    try {
+      await firstValueFrom(this.adminSvc.deleteImage(productId, imageId));
+      this.editingProduct.update(p => {
+        if (!p) return p;
+        const images = p.images.filter(i => i.id !== imageId);
+        // If first image exists and none is cover, set it
+        if (images.length > 0 && !images.some(i => i.isCover)) {
+          images[0] = { ...images[0], isCover: true };
+        }
+        return { ...p, images };
+      });
+    } catch {
+      this.imageFormError.set('Impossibile eliminare l\'immagine');
+    }
+  }
+
+  async setCover(imageId: string) {
+    const productId = this.editingProduct()?.id;
+    if (!productId) return;
+    try {
+      await firstValueFrom(this.adminSvc.setCoverImage(productId, imageId));
+      this.editingProduct.update(p => p ? {
+        ...p,
+        images: p.images.map(i => ({ ...i, isCover: i.id === imageId })),
+      } : p);
+    } catch {
+      this.imageFormError.set('Impossibile impostare la cover');
+    }
+  }
+
+  // ─── Delete product ────────────────────────────────────────────────────────
+
+  requestDelete(id: string) { this.confirmDeleteId.set(id); }
+  cancelDelete() { this.confirmDeleteId.set(null); }
 
   confirmDelete() {
     const id = this.confirmDeleteId();
@@ -176,8 +392,15 @@ export class AdminProducts implements OnInit {
     });
   }
 
+  // ─── Helpers ──────────────────────────────────────────────────────────────
+
   formatPrice(v: string | number): string {
     return '€ ' + parseFloat(String(v)).toFixed(2).replace('.', ',');
+  }
+
+  variantLabel(v: ProductVariant): string {
+    const parts = [v.size, v.color, v.material].filter(Boolean);
+    return parts.length ? parts.join(' / ') : v.sku;
   }
 
   pagesArray(): number[] {
