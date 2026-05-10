@@ -1,15 +1,17 @@
 import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { ProductsService, ProductFull, ProductListItem, ProductImage } from '../../services/products.service';
 import { WishlistService } from '../../services/wishlist.service';
 import { AuthService } from '../../services/auth';
 import { CartService } from '../../services/cart-service';
+import { ReviewsService, Review } from '../../services/reviews.service';
 
 @Component({
   selector: 'app-product-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './product-detail.html',
   styleUrl: './product-detail.css',
 })
@@ -20,9 +22,26 @@ export class ProductDetail implements OnInit {
   readonly wishlist = inject(WishlistService);
   readonly auth = inject(AuthService);
   readonly cartSvc = inject(CartService);
+  private readonly reviewsSvc = inject(ReviewsService);
 
   product = signal<ProductFull | null>(null);
   related = signal<ProductListItem[]>([]);
+
+  // ─── Reviews ─────────────────────────────────────────────
+  reviews = signal<Review[]>([]);
+  reviewsLoading = signal(false);
+  reviewsTotal = signal(0);
+  reviewsPage = signal(1);
+  reviewsTotalPages = signal(1);
+
+  // Write review
+  showReviewForm = signal(false);
+  reviewRating = signal(5);
+  reviewTitle = '';
+  reviewBody = '';
+  reviewLoading = signal(false);
+  reviewError = signal<string | null>(null);
+  reviewSuccess = signal<string | null>(null);
   loading = signal(true);
   error = signal('');
 
@@ -63,6 +82,8 @@ export class ProductDetail implements OnInit {
     this.selectedColor.set('');
     this.selectedSize.set('');
     this.openAccordion.set('details');
+    this.reviews.set([]);
+    this.reviewsPage.set(1);
 
     this.svc.getProductBySlug(slug).subscribe({
       next: res => {
@@ -71,12 +92,73 @@ export class ProductDetail implements OnInit {
         const firstColor = this.uniqueColors()[0];
         if (firstColor) this.selectedColor.set(firstColor.colorHex!);
         this.loading.set(false);
+        this.loadReviews(res.product.id, 1);
       },
       error: () => {
         this.error.set('Product not found.');
         this.loading.set(false);
       },
     });
+  }
+
+  loadReviews(productId: string, page: number) {
+    this.reviewsLoading.set(true);
+    this.reviewsSvc.getByProduct(productId, page).subscribe({
+      next: (res) => {
+        this.reviews.set(res.data);
+        this.reviewsTotal.set(res.meta.total);
+        this.reviewsPage.set(res.meta.page);
+        this.reviewsTotalPages.set(res.meta.totalPages);
+        this.reviewsLoading.set(false);
+      },
+      error: () => this.reviewsLoading.set(false),
+    });
+  }
+
+  goToReviewPage(p: number) {
+    const product = this.product();
+    if (!product) return;
+    this.loadReviews(product.id, p);
+  }
+
+  toggleReviewForm() {
+    if (!this.auth.isAuthenticated()) {
+      this.router.navigate(['/login']);
+      return;
+    }
+    this.showReviewForm.update(v => !v);
+    this.reviewError.set(null);
+  }
+
+  submitReview() {
+    const product = this.product();
+    if (!product || this.reviewLoading()) return;
+    this.reviewLoading.set(true);
+    this.reviewError.set(null);
+    this.reviewsSvc.create({
+      productId: product.id,
+      rating: this.reviewRating(),
+      title: this.reviewTitle || undefined,
+      body: this.reviewBody || undefined,
+    }).subscribe({
+      next: () => {
+        this.reviewLoading.set(false);
+        this.reviewSuccess.set('Recensione inviata! È in attesa di approvazione.');
+        this.showReviewForm.set(false);
+        this.reviewTitle = '';
+        this.reviewBody = '';
+        this.reviewRating.set(5);
+        setTimeout(() => this.reviewSuccess.set(null), 4000);
+      },
+      error: (err) => {
+        this.reviewLoading.set(false);
+        this.reviewError.set(err?.error?.message ?? 'Impossibile inviare la recensione');
+      },
+    });
+  }
+
+  starsArray(n: number): number[] {
+    return Array.from({ length: Math.min(5, Math.max(0, Math.round(n))) }, (_, i) => i);
   }
 
   // ─── Computed ────────────────────────────────────────────

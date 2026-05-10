@@ -2,8 +2,23 @@ import { Component, inject, signal, effect } from '@angular/core';
 import { NgClass, DatePipe } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../services/auth';
 import { WishlistService } from '../../services/wishlist.service';
+import { API_URL } from '../../services/api.config';
+
+interface OrderSummary {
+  id: string;
+  status: string;
+  total: string;
+  subtotal: string;
+  shippingCost: string;
+  discountTotal: string;
+  createdAt: string;
+  items: { productName: string; quantity: number; lineTotal: string }[];
+  payments: { status: string }[];
+}
 
 type TabSection = 'profile' | 'orders' | 'favorites' | 'settings';
 
@@ -11,6 +26,7 @@ type TabSection = 'profile' | 'orders' | 'favorites' | 'settings';
   selector: 'app-me',
   standalone: true,
   imports: [NgClass, DatePipe, ReactiveFormsModule, RouterModule],
+  // HttpClient è fornito da provideHttpClient() in app.config.ts
   templateUrl: './me.html',
   styleUrls: ['./me.css'],
 })
@@ -18,8 +34,40 @@ export class MeComponent {
   readonly auth = inject(AuthService);
   readonly wishlist = inject(WishlistService);
   private readonly fb = inject(FormBuilder);
+  private readonly http = inject(HttpClient);
 
   activeTab = signal<TabSection>('profile');
+
+  // -- Ordini --
+  orders = signal<OrderSummary[]>([]);
+  ordersLoading = signal(false);
+  ordersError = signal<string | null>(null);
+  ordersPage = signal(1);
+  ordersTotalPages = signal(1);
+  ordersTotal = signal(0);
+  expandedOrderId = signal<string | null>(null);
+
+  readonly orderStatusLabels: Record<string, string> = {
+    pending: 'In attesa',
+    paid: 'Pagato',
+    processing: 'In lavorazione',
+    shipped: 'Spedito',
+    delivered: 'Consegnato',
+    completed: 'Completato',
+    cancelled: 'Annullato',
+    refunded: 'Rimborsato',
+  };
+
+  readonly orderStatusColors: Record<string, string> = {
+    pending: 'bg-yellow-100 text-yellow-800',
+    paid: 'bg-blue-100 text-blue-800',
+    processing: 'bg-indigo-100 text-indigo-800',
+    shipped: 'bg-purple-100 text-purple-800',
+    delivered: 'bg-green-100 text-green-800',
+    completed: 'bg-green-200 text-green-900',
+    cancelled: 'bg-red-100 text-red-800',
+    refunded: 'bg-gray-100 text-gray-700',
+  };
 
   // -- Modifica profilo --
   isEditing = signal(false);
@@ -94,7 +142,40 @@ export class MeComponent {
   setTab(tab: TabSection) {
     this.activeTab.set(tab);
     if (tab === 'favorites') this.wishlist.loadItems();
+    if (tab === 'orders' && this.orders().length === 0) this.loadOrders();
   }
+
+  async loadOrders(page = 1) {
+    this.ordersLoading.set(true);
+    this.ordersError.set(null);
+    try {
+      const res: any = await firstValueFrom(
+        this.http.get(`${API_URL}/orders`, {
+          params: { page: String(page), limit: '10' },
+          withCredentials: true,
+        })
+      );
+      this.orders.set(res.data);
+      this.ordersPage.set(res.meta.page);
+      this.ordersTotalPages.set(res.meta.totalPages);
+      this.ordersTotal.set(res.meta.total);
+    } catch {
+      this.ordersError.set('Impossibile caricare gli ordini');
+    } finally {
+      this.ordersLoading.set(false);
+    }
+  }
+
+  toggleOrderExpand(id: string) {
+    this.expandedOrderId.update(cur => cur === id ? null : id);
+  }
+
+  formatOrderPrice(v: string | number): string {
+    return '€ ' + parseFloat(String(v)).toFixed(2).replace('.', ',');
+  }
+
+  orderStatusLabel(s: string): string { return this.orderStatusLabels[s] ?? s; }
+  orderStatusColor(s: string): string { return this.orderStatusColors[s] ?? 'bg-gray-100 text-gray-700'; }
 
   async removeFromWishlist(productId: string) {
     await this.wishlist.toggle(productId);

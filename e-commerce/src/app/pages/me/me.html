@@ -6,7 +6,7 @@
        [ngClass]="activeTab() === 'profile' ? 'text-black border-b-2 border-black' : 'text-gray-400 hover:text-gray-700'">
       Profile
     </a>
-    <a (click)="activeTab.set('orders')"
+    <a (click)="setTab('orders')"
        class="pb-4 text-sm font-semibold uppercase tracking-wider cursor-pointer transition-colors"
        [ngClass]="activeTab() === 'orders' ? 'text-black border-b-2 border-black' : 'text-gray-400 hover:text-gray-700'">
       Orders
@@ -227,8 +227,106 @@
 
       @case ('orders') {
         <section>
-          <h2 class="text-xl font-bold border-b border-gray-100 pb-4 mb-6">Order History</h2>
-          <p class="text-gray-400 text-sm">No orders yet.</p>
+          <div class="flex items-center justify-between border-b border-gray-100 pb-4 mb-6">
+            <h2 class="text-xl font-bold">Order History</h2>
+            @if (ordersTotal() > 0) {
+              <span class="text-sm text-gray-400">{{ ordersTotal() }} ordini</span>
+            }
+          </div>
+
+          @if (ordersLoading()) {
+            <div class="flex justify-center py-16">
+              <div class="w-6 h-6 border-4 border-gray-200 border-t-gray-900 rounded-full animate-spin"></div>
+            </div>
+          } @else if (ordersError()) {
+            <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">{{ ordersError() }}</div>
+          } @else if (orders().length === 0) {
+            <div class="text-center py-16 space-y-4">
+              <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto">
+                <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                </svg>
+              </div>
+              <p class="text-gray-400 text-sm">Nessun ordine ancora.</p>
+              <a routerLink="/products" class="inline-block px-5 py-2.5 bg-gray-900 text-white text-sm rounded-lg hover:bg-gray-700 transition-colors">
+                Inizia a fare shopping
+              </a>
+            </div>
+          } @else {
+            <div class="space-y-3">
+              @for (order of orders(); track order.id) {
+                <div class="border border-gray-200 rounded-xl overflow-hidden">
+                  <!-- Order header -->
+                  <button
+                    (click)="toggleOrderExpand(order.id)"
+                    class="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+                  >
+                    <div class="flex items-center gap-4 text-left">
+                      <div>
+                        <p class="font-mono text-xs text-gray-400">{{ order.id.slice(0, 8) }}…</p>
+                        <p class="text-xs text-gray-400 mt-0.5">{{ order.createdAt | date: 'dd/MM/yyyy' }}</p>
+                      </div>
+                      <div>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium" [ngClass]="orderStatusColor(order.status)">
+                          {{ orderStatusLabel(order.status) }}
+                        </span>
+                      </div>
+                      <div>
+                        <p class="text-xs text-gray-500">{{ order.items.length }} articol{{ order.items.length !== 1 ? 'i' : 'o' }}</p>
+                      </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                      <span class="font-bold text-gray-900">{{ formatOrderPrice(order.total) }}</span>
+                      <svg class="w-4 h-4 text-gray-400 transition-transform" [class.rotate-180]="expandedOrderId() === order.id" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                      </svg>
+                    </div>
+                  </button>
+
+                  <!-- Order detail (expanded) -->
+                  @if (expandedOrderId() === order.id) {
+                    <div class="border-t border-gray-100 px-4 py-4 bg-gray-50">
+                      <div class="space-y-2 mb-4">
+                        @for (item of order.items; track $index) {
+                          <div class="flex justify-between items-center text-sm">
+                            <span class="text-gray-700">{{ item.productName }} <span class="text-gray-400">×{{ item.quantity }}</span></span>
+                            <span class="font-medium text-gray-900">{{ formatOrderPrice(item.lineTotal) }}</span>
+                          </div>
+                        }
+                      </div>
+                      <div class="border-t border-gray-200 pt-3 space-y-1 text-sm">
+                        <div class="flex justify-between text-gray-500">
+                          <span>Spedizione</span>
+                          <span>{{ parseFloat(String(order.shippingCost)) === 0 ? 'Gratuita' : formatOrderPrice(order.shippingCost) }}</span>
+                        </div>
+                        @if (parseFloat(String(order.discountTotal)) > 0) {
+                          <div class="flex justify-between text-green-600">
+                            <span>Sconto</span>
+                            <span>–{{ formatOrderPrice(order.discountTotal) }}</span>
+                          </div>
+                        }
+                        <div class="flex justify-between font-bold text-gray-900 border-t border-gray-200 pt-2 mt-1">
+                          <span>Totale</span>
+                          <span>{{ formatOrderPrice(order.total) }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+
+            <!-- Pagination -->
+            @if (ordersTotalPages() > 1) {
+              <div class="flex justify-center gap-2 mt-6">
+                <button (click)="loadOrders(ordersPage() - 1)" [disabled]="ordersPage() === 1"
+                  class="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40">‹</button>
+                <span class="px-3 py-1.5 text-sm text-gray-500">{{ ordersPage() }} / {{ ordersTotalPages() }}</span>
+                <button (click)="loadOrders(ordersPage() + 1)" [disabled]="ordersPage() === ordersTotalPages()"
+                  class="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40">›</button>
+              </div>
+            }
+          }
         </section>
       }
 
