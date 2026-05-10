@@ -20,12 +20,12 @@ import { Checkout } from './pages/checkout/checkout';
 import { ForgotPassword } from './pages/forgot-password/forgot-password';
 import { ResetPassword } from './pages/reset-password/reset-password';
 import { authGuardGuard } from './guards/auth-guard-guard';
-import { adminGuardGuard } from './guards/admin-guard-guard';
+import { Admin } from './pages/admin/admin';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
   { path: 'home', component: Home },
-  { path: 'about', component: About },
+  { path: 'admin', component: Admin },
   { path: 'login', component: Login },
   { path: 'register', component: Register },
   { path: 'products', component: Products },

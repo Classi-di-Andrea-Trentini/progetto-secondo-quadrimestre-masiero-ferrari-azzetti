@@ -2,21 +2,26 @@ import { IsOptional, IsString, IsNumber, IsBoolean, IsArray, IsIn, Min, Max } fr
 import { Transform, Type } from 'class-transformer';
 
 export class GetProductsDto {
+    // ricerca testuale nome
     @IsOptional() @IsString()
     search?: string;
 
+    // per categoria
     @IsOptional() @IsString()
     categoryId?: string;
 
+    // per "brand"
     @IsOptional() @IsString()
     brand?: string;
 
+    // prezzi MINIMO e MASSIMO
     @IsOptional() @Type(() => Number) @IsNumber() @Min(0)
     minPrice?: number;
 
     @IsOptional() @Type(() => Number) @IsNumber() @Min(0)
     maxPrice?: number;
 
+    // per "featured" e "new arrival"
     @IsOptional() @Transform(({ value }) => value === 'true') @IsBoolean()
     isFeatured?: boolean;
 
@@ -35,13 +40,16 @@ export class GetProductsDto {
     @IsArray()
     sizes?: string[];
 
+    // ordinamento: newest, popular, price_asc, price_desc, rating
     @IsOptional() @IsString()
     @IsIn(['newest', 'popular', 'price_asc', 'price_desc', 'rating'])
     sortBy?: string = 'newest';
 
+    // paginazione
     @IsOptional() @Type(() => Number) @IsNumber() @Min(1)
     page?: number = 1;
 
+    // LIMITE
     @IsOptional() @Type(() => Number) @IsNumber() @Min(1) @Max(100)
     limit?: number = 24;
 }
