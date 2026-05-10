@@ -1,18 +1,18 @@
-import { Component, inject, signal, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
-import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
+import { Component, inject, signal, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
+import { CommonModule, DatePipe } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AdminService, AdminStats } from '../../../services/admin.service';
 import { SkeletonComponent } from '../../../components/skeleton/skeleton';
 
+declare var Chart: any;
+
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, CurrencyPipe, DatePipe, RouterModule, SkeletonComponent],
+  imports: [CommonModule, DatePipe, RouterModule, SkeletonComponent],
   templateUrl: './admin-dashboard.html',
   styleUrl: './admin-dashboard.css',
 })
-declare var Chart: any;
-
 export class AdminDashboard implements OnInit, OnDestroy {
   @ViewChild('donutCanvas') donutCanvas!: ElementRef<HTMLCanvasElement>;
   private donutChart: any = null;

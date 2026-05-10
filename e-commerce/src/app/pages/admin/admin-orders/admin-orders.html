@@ -211,7 +211,7 @@
           </div>
 
           <!-- Status history -->
-          @if (selectedOrder()!.statusHistory?.length) {
+          @if ((selectedOrder()!.statusHistory || []).length > 0) {
             <div>
               <p class="font-medium text-gray-900 mb-2 text-sm">Cronologia stato</p>
               <div class="space-y-1.5">
