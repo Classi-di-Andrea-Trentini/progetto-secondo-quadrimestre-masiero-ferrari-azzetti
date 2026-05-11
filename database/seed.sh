@@ -84,9 +84,9 @@ echo "   ✓ Categorie inserite"
 echo "👤  Inserimento utenti..."
 run_sql <<'SQL'
 -- Hash bcrypt di "Admin1234!"
-\set ADMIN_HASH '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi'
+\set ADMIN_HASH '$2b$10$rd2Nb/KopmXo.QM1kAokT.XVF03LpfvVPasP2h9NfhOpADIdt1YOy'
 -- Hash bcrypt di "User1234!"
-\set USER_HASH  '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi'
+\set USER_HASH  '$2b$10$rd2Nb/KopmXo.QM1kAokT.XVF03LpfvVPasP2h9NfhOpADIdt1YOy'
 
 -- ── AMMINISTRATORI ────────────────────────────────────────────────────────────
 INSERT INTO users (id, email, password_hash, full_name, role, email_verified_at, created_at) VALUES
