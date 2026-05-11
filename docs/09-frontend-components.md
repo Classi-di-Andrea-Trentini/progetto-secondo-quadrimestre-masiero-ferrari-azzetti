@@ -36,22 +36,21 @@ Uses `RouterLink` and `RouterLinkActive` for navigation links, `NgClass` for the
 
 ## Cart — components/cart/
 
-The sliding cart drawer. Currently a placeholder — renders a static empty state in the template.
+Il drawer carrello laterale. Si apre/chiude tramite `CartService.isOpen`.
 
-The component only injects `CartService` and exposes it as `readonly cart`. The template reads from `cart.isOpen` to toggle the drawer visibility.
-
-Full implementation would add:
-- Item list rendered from `cart.items()`
-- Quantity controls calling `cart.updateQuantity()` and `cart.removeItem()`
-- Subtotal display using `cart.subtotal()`
-- Close button calling `cart.close()`
-- A backdrop element that calls `cart.close()` on click
+Il template include:
+- Overlay scuro con click-to-close
+- Lista item renderizzata da `cart.items()` con immagine, nome variante, prezzo unitario
+- Controlli quantità (+ / −) che chiamano `cart.updateQuantity()` e `cart.removeItem()`
+- Subtotale da `cart.subtotal()`
+- Pulsante "Vai al checkout" che naviga a `/checkout`
+- Stato vuoto con link a `/products`
 
 ---
 
 ## SearchBar — components/search-bar/
 
-Currently an empty component. Placeholder for a future search overlay or inline search input.
+Barra di ricerca che naviga a `/products?q=<query>`. Legge il parametro `q` dall'URL all'inizializzazione per pre-popolare il campo se l'utente è già nella pagina prodotti.
 
 ---
 

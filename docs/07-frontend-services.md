@@ -85,14 +85,31 @@ Manages the user's saved items. Has a small amount of client-side state.
 
 ## CartService — cart-service.ts
 
-Currently a minimal placeholder. Only manages the open/closed state of the cart drawer.
+Gestisce il carrello lato client (nessun endpoint carrello sul backend — il carrello viene inviato al backend solo al momento del checkout).
+
+### Interfacce
+
+`CartItem` — `{ variantId, productId, productName, slug, variantLabel, size, color, colorHex, imageUrl, unitPrice, originalPrice, quantity }`.
+
+`AddressData` — struttura degli indirizzi di spedizione, condivisa con il Checkout.
 
 ### State
 
+- `items` — `Signal<CartItem[]>`.
 - `isOpen` — `Signal<boolean>`.
+- `itemCount` — `computed` che somma le quantità.
+- `subtotal` — `computed` che somma `unitPrice * quantity`.
 
 ### Methods
 
-`open()`, `close()`, `toggle()` — set the signal.
+`open()`, `close()`, `toggle()` — gestiscono il drawer.
 
-The cart is intentionally client-side only (no backend cart API is called). A full implementation would add `CartItem` interface, localStorage persistence, `addItem`, `removeItem`, `updateQuantity`, `itemCount` computed signal, and `subtotal` computed signal. This work has been started in a previous session but is currently pending.
+`addItem(item)` — se il variantId esiste già incrementa la quantità, altrimenti aggiunge.
+
+`removeItem(variantId)`, `updateQuantity(variantId, qty)`, `clear()`.
+
+`getAddresses()` — chiama `GET /addresses` e restituisce una Promise.
+
+`placeOrder(payload)` — chiama `POST /checkout` e svuota il carrello al successo.
+
+**Nota:** il carrello è in-memory. Non viene persistito in localStorage — si azzera al ricaricamento della pagina.

@@ -13,4 +13,4 @@
 | [08-frontend-pages.md](./08-frontend-pages.md) | Home, Products, ProductDetail, MeComponent, Login, Register, VerifyEmail, Legal |
 | [09-frontend-components.md](./09-frontend-components.md) | NavBar (scroll hide/show, auth, cart badge), Cart, SearchBar, Footer |
 | [10-database-schema.md](./10-database-schema.md) | All tables, enums, relationships, FK delete rules |
-| [11-what-is-missing.md](./11-what-is-missing.md) | Incomplete features: cart, checkout page, order history, reviews, admin, password reset |
+| [11-what-is-missing.md](./11-what-is-missing.md) | Stato del progetto: funzionalità completate e limitazioni note |
