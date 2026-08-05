@@ -8,6 +8,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { PromoCodesService } from '../promo-codes/promo-codes.service';
 import { MailService } from '../mail/mail.service';
 import { CheckoutDto, ShippingMethod } from './dto/checkout.dto';
+import { priceOf } from '../common/pricing';
 
 const SHIPPING_COST: Record<ShippingMethod, number> = {
   [ShippingMethod.STANDARD]: 4.9,
@@ -54,13 +55,9 @@ export class CheckoutService {
 
     // 3. Calculate subtotal using DB prices (never trust client)
     const lineItems = variants.map(({ variant, quantity }) => {
-      const basePrice = parseFloat(String(variant.priceOverride ?? variant.product.basePrice));
-      const discount = variant.product.discounts[0];
-      let unitPrice = basePrice;
-      if (discount) {
-        const val = parseFloat(String(discount.value));
-        unitPrice = discount.type === 'percentage' ? basePrice * (1 - val / 100) : basePrice - val;
-      }
+      // Stessa funzione che usa il carrello: se le due formule divergessero, il
+      // totale mostrato prima di pagare non combacerebbe con quello addebitato.
+      const { originalPrice: basePrice, unitPrice } = priceOf(variant);
       const discountApplied = (basePrice - unitPrice) * quantity;
       const variantLabel = [variant.color, variant.size].filter(Boolean).join(' / ');
       return {

@@ -2,7 +2,7 @@ import { IsArray, IsString, IsNumber, IsOptional, IsEnum, ValidateNested, Min, I
 import { Type } from 'class-transformer';
 
 export class CheckoutItemDto {
-  @IsUUID()
+  @IsUUID('loose')
   variantId: string;
 
   @IsNumber()
@@ -21,7 +21,7 @@ export class CheckoutDto {
   @Type(() => CheckoutItemDto)
   items: CheckoutItemDto[];
 
-  @IsUUID()
+  @IsUUID('loose')
   addressId: string;
 
   @IsOptional()

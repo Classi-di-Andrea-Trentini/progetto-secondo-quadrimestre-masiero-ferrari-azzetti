@@ -1,7 +1,7 @@
 import { IsInt, IsOptional, IsString, IsUUID, Max, Min, MaxLength } from 'class-validator';
 
 export class CreateReviewDto {
-  @IsUUID()
+  @IsUUID('loose')
   productId: string;
 
   @IsInt()
