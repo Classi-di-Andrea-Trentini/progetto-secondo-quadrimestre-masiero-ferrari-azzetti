@@ -85,7 +85,10 @@ echo "👤  Inserimento utenti..."
 run_sql <<'SQL'
 -- Hash bcrypt di "Admin1234!"
 \set ADMIN_HASH '$2b$10$rd2Nb/KopmXo.QM1kAokT.XVF03LpfvVPasP2h9NfhOpADIdt1YOy'
--- Hash bcrypt di "User1234!"
+-- ATTENZIONE: e' lo STESSO hash di ADMIN_HASH, quindi anche gli utenti normali di seed
+-- entrano con "Admin1234!". Il commento qui diceva "User1234!" e non era vero: chi provava
+-- quella password si vedeva rifiutare le credenziali senza capire il perche'. Gli hash sono
+-- lasciati uguali di proposito (sono dati finti di sviluppo), e' il commento a essere corretto.
 \set USER_HASH  '$2b$10$rd2Nb/KopmXo.QM1kAokT.XVF03LpfvVPasP2h9NfhOpADIdt1YOy'
 
 -- ── AMMINISTRATORI ────────────────────────────────────────────────────────────
