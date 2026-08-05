@@ -18,9 +18,12 @@ import { LoginDto } from './dto/login.dto';
 import { ForgotPasswordDto, ResetPasswordDto } from './dto/forgot-password.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import type { JwtPayload } from './jwt.strategy';
+import { SESSION_TTL_MS } from './session.constants';
 
-// Durata del cookie (7 giorni in ms) — deve corrispondere alla sessione nel DB
-const COOKIE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+// Durata del cookie: la stessa della sessione nel DB e del JWT, presa dalla costante condivisa
+// invece di essere riscritta a mano (era l'unico dei tre valori che non si poteva sbagliare
+// senza accorgersene).
+const COOKIE_MAX_AGE_MS = SESSION_TTL_MS;
 
 // In ambienti cross-site HTTPS (es. GitHub Codespaces dove frontend e backend
 // stanno su sottodomini diversi di *.app.github.dev) il browser accetta il
@@ -31,8 +34,12 @@ function getCookieOptions(req: Request) {
   let crossSiteHttps = false;
   try {
     const url = new URL(origin);
+    // Solo fuori da produzione: `SameSite=None` disattiva la protezione CSRF del browser,
+    // e i sottodomini di app.github.dev sono pubblici (vedi la stessa scelta in main.ts).
     crossSiteHttps =
-      url.protocol === 'https:' && url.hostname.endsWith('.app.github.dev');
+      process.env.NODE_ENV !== 'production' &&
+      url.protocol === 'https:' &&
+      url.hostname.endsWith('.app.github.dev');
   } catch {
     // origin assente o malformato: usa default
   }
@@ -84,8 +91,11 @@ export class AuthController {
     const request = req as Request;
     const response = res as Response;
 
-    const ipAddress =
-      (request.headers['x-forwarded-for'] as string)?.split(',')[0] ?? request.ip;
+    // `request.ip` e non l'header grezzo: `X-Forwarded-For` lo scrive il client, quindi
+    // leggerlo direttamente voleva dire salvare in `sessions.ipAddress` qualunque cosa gli
+    // pare. Express lo considera solo se `trust proxy` e' configurato (vedi main.ts), che e'
+    // il posto giusto dove decidere di chi fidarsi.
+    const ipAddress = request.ip;
     const userAgent = request.headers['user-agent'];
 
     const result = await this.authService.login(dto, ipAddress, userAgent);
