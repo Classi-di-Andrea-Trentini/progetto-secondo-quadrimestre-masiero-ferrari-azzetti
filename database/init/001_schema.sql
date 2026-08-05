@@ -196,13 +196,20 @@ CREATE TABLE IF NOT EXISTS products (
   sold_count INT NOT NULL DEFAULT 0,
   avg_rating NUMERIC(3, 2),
   created_at TIMESTAMP NOT NULL DEFAULT now(),
-  updated_at TIMESTAMP NOT NULL DEFAULT now()
+  updated_at TIMESTAMP NOT NULL DEFAULT now(),
+  -- Il backend fa soft delete sui prodotti (products.service.ts e admin.service.ts filtrano
+  -- tutti su deleted_at), ma questa colonna mancava qui: su un volume pulito
+  -- (`docker compose down -v && up -d`) il primo GET /products moriva con
+  -- "column products.deleted_at does not exist". Non si vedeva perche' sul volume di sviluppo
+  -- la colonna era stata aggiunta a mano, fuori dal repo.
+  deleted_at TIMESTAMP
 );
 
 CREATE INDEX IF NOT EXISTS idx_products_category_id ON products (category_id);
 CREATE INDEX IF NOT EXISTS idx_products_is_active ON products (is_active);
 CREATE INDEX IF NOT EXISTS idx_products_is_featured ON products (is_featured);
 CREATE INDEX IF NOT EXISTS idx_products_slug ON products (slug);
+CREATE INDEX IF NOT EXISTS idx_products_deleted_at ON products (deleted_at);
 
 CREATE TABLE IF NOT EXISTS product_tags (
   product_id UUID NOT NULL REFERENCES products (id) ON DELETE CASCADE,
@@ -219,7 +226,10 @@ CREATE TABLE IF NOT EXISTS product_variants (
   color_hex VARCHAR(7),
   material VARCHAR(100),
   price_override NUMERIC(10, 2),
-  stock_qty INT NOT NULL DEFAULT 0,
+  -- Rete di sicurezza contro l'overselling: il decremento in checkout e' gia' condizionale
+  -- (vedi checkout.service.ts), ma se un giorno qualcuno scrive un altro percorso che
+  -- scala la giacenza senza controllare, qui il DB si rifiuta invece di andare sotto zero.
+  stock_qty INT NOT NULL DEFAULT 0 CHECK (stock_qty >= 0),
   low_stock_alert INT DEFAULT 5,
   weight_grams INT,
   barcode VARCHAR(100),
