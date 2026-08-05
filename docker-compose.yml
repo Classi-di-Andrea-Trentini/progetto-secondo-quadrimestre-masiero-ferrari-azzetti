@@ -24,7 +24,10 @@ services:
       DB_USER: user
       DB_PASSWORD: password
       DB_NAME: mydb
-      JWT_SECRET: changeme_in_production_use_a_long_random_string
+      # Prende il valore dal file .env (vedi .env.example). Il `:?` fa fallire subito
+      # `docker compose up` con un messaggio chiaro se manca, invece di far partire l'app
+      # con un segreto che sta scritto in chiaro in un file versionato — come era prima.
+      JWT_SECRET: "${JWT_SECRET:?manca JWT_SECRET nel file .env, generala con openssl rand -base64 64}"
       FRONTEND_URL: http://localhost:4200
       BACKEND_URL: http://localhost:3000
     volumes:
