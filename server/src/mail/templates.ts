@@ -1,3 +1,37 @@
+/**
+ * Rende innocuo un valore prima di infilarlo nell'HTML di un'email.
+ *
+ * Serve perche' i nomi arrivano dalla registrazione, dove `fullName` e' validato solo in
+ * lunghezza: uno che si registra come `<a href="http://evil.example">Servizio clienti</a>`
+ * si vedeva quel link renderizzato dentro un'email inviata dal dominio vero del progetto.
+ * I client webmail buttano via gli <script>, ma link e immagini li disegnano — che e'
+ * esattamente quello che serve per un phishing credibile.
+ */
+export function escapeHtml(value: string | null | undefined): string {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+/**
+ * Come sopra, ma per gli URL che finiscono in un `href`. Oltre all'escape, scarta gli schemi
+ * che non siano http/https: un `trackingUrl` lo scrive un admin dal pannello, e
+ * `javascript:...` in un href e' un click dall'esito spiacevole.
+ */
+export function escapeUrl(value: string | null | undefined): string {
+  const raw = String(value ?? '').trim();
+  try {
+    const { protocol } = new URL(raw);
+    if (protocol !== 'http:' && protocol !== 'https:') return '';
+  } catch {
+    return '';
+  }
+  return escapeHtml(raw);
+}
+
 const year = new Date().getFullYear();
 
 const base = (title: string, content: string) => `<!DOCTYPE html>
@@ -42,7 +76,7 @@ const base = (title: string, content: string) => `<!DOCTYPE html>
 </html>`;
 
 export function welcomeEmail(fullName: string): string {
-  const firstName = fullName.split(' ')[0];
+  const firstName = escapeHtml(fullName.split(' ')[0]);
   return base(
     'Welcome to Common Era',
     `<h1>Welcome,<br>${firstName}.</h1>
@@ -59,29 +93,29 @@ export function emailChangeConfirmation(
   newEmail: string,
   confirmationUrl: string,
 ): string {
-  const firstName = fullName.split(' ')[0];
+  const firstName = escapeHtml(fullName.split(' ')[0]);
   return base(
     'Confirm your new email address',
     `<h1>Confirm your new email.</h1>
     <hr class="divider" />
     <p>Hi <strong>${firstName}</strong>, you requested to change your email address to:</p>
-    <p><strong>${newEmail}</strong></p>
+    <p><strong>${escapeHtml(newEmail)}</strong></p>
     <p>Click the button below to confirm the change. The link is valid for <strong>24 hours</strong>.</p>
-    <a class="btn" href="${confirmationUrl}">Confirm email</a>
-    <div class="url-box">${confirmationUrl}</div>
+    <a class="btn" href="${escapeUrl(confirmationUrl)}">Confirm email</a>
+    <div class="url-box">${escapeHtml(confirmationUrl)}</div>
     <hr class="divider" />
     <div class="alert-bar"><p>If you did not request this change, your current email address remains unchanged. You can safely ignore this email.</p></div>`,
   );
 }
 
 export function emailChangedAlert(oldEmail: string, fullName: string, newEmail: string): string {
-  const firstName = fullName.split(' ')[0];
+  const firstName = escapeHtml(fullName.split(' ')[0]);
   return base(
     'Your email address has been updated',
     `<h1>Email updated.</h1>
     <hr class="divider" />
     <p>Hi <strong>${firstName}</strong>, your email address has been successfully updated.</p>
-    <p>Your new address is: <strong>${newEmail}</strong></p>
+    <p>Your new address is: <strong>${escapeHtml(newEmail)}</strong></p>
     <p>Please use this address to sign in from now on.</p>
     <hr class="divider" />
     <div class="alert-bar"><p>If you did not authorise this change, please contact our support team immediately at <a href="mailto:support@commonera.it" style="color:#C3A88D;">support@commonera.it</a>.</p></div>`,
@@ -89,14 +123,14 @@ export function emailChangedAlert(oldEmail: string, fullName: string, newEmail: 
 }
 
 export function emailVerification(fullName: string, verificationUrl: string): string {
-  const firstName = fullName.split(' ')[0];
+  const firstName = escapeHtml(fullName.split(' ')[0]);
   return base(
     'Verify your email address',
     `<h1>Verify your email.</h1>
     <hr class="divider" />
     <p>Hi <strong>${firstName}</strong>, click the button below to verify your email address. The link is valid for <strong>24 hours</strong>.</p>
-    <a class="btn" href="${verificationUrl}">Verify email</a>
-    <div class="url-box">${verificationUrl}</div>
+    <a class="btn" href="${escapeUrl(verificationUrl)}">Verify email</a>
+    <div class="url-box">${escapeHtml(verificationUrl)}</div>
     <hr class="divider" />
     <div class="alert-bar"><p>If you did not request this verification, you can safely ignore this email.</p></div>`,
   );
@@ -107,7 +141,7 @@ export function newsletterConfirmation(name: string): string {
     'You\'re subscribed to Common Era',
     `<h1>Welcome to the<br>Common Era circle.</h1>
     <hr class="divider" />
-    <p>Hi <strong>${name}</strong>, your newsletter subscription is confirmed.</p>
+    <p>Hi <strong>${escapeHtml(name)}</strong>, your newsletter subscription is confirmed.</p>
     <p>You'll receive updates on new collections, exclusive drops, and offers reserved for subscribers.</p>
     <hr class="divider" />
     <p style="font-size:12px; color:#8F8F8F;">If you did not request this subscription, you can safely ignore this email. We will not send further messages without your consent.</p>`,
@@ -115,15 +149,15 @@ export function newsletterConfirmation(name: string): string {
 }
 
 export function passwordResetEmail(fullName: string, resetUrl: string): string {
-  const firstName = fullName.split(' ')[0];
+  const firstName = escapeHtml(fullName.split(' ')[0]);
   return base(
     'Reimposta la tua password',
     `<h1>Reimposta la tua password.</h1>
     <hr class="divider" />
     <p>Ciao <strong>${firstName}</strong>, hai richiesto di reimpostare la password del tuo account Common Era.</p>
     <p>Clicca il pulsante qui sotto per procedere. Il link è valido per <strong>1 ora</strong>.</p>
-    <a class="btn" href="${resetUrl}">Reimposta password</a>
-    <div class="url-box">${resetUrl}</div>
+    <a class="btn" href="${escapeUrl(resetUrl)}">Reimposta password</a>
+    <div class="url-box">${escapeHtml(resetUrl)}</div>
     <hr class="divider" />
     <div class="alert-bar"><p>Se non hai richiesto questa operazione, ignora questa email. La tua password rimane invariata.</p></div>`,
   );
@@ -133,13 +167,13 @@ export function orderConfirmationEmail(
   fullName: string,
   order: { id: string; items: Array<{ productName: string; quantity: number; lineTotal: any }>; total: any; trackingNumber?: string },
 ): string {
-  const firstName = fullName.split(' ')[0];
+  const firstName = escapeHtml(fullName.split(' ')[0]);
   const orderId = order.id.slice(0, 8).toUpperCase();
   const itemRows = order.items
     .map(
       (i) =>
         `<tr>
-          <td style="padding:10px 0; border-bottom:1px solid #F0F0F0; font-size:13px; color:#000;">${i.productName}</td>
+          <td style="padding:10px 0; border-bottom:1px solid #F0F0F0; font-size:13px; color:#000;">${escapeHtml(i.productName)}</td>
           <td style="padding:10px 0; border-bottom:1px solid #F0F0F0; font-size:13px; color:#8F8F8F; text-align:center;">×${i.quantity}</td>
           <td style="padding:10px 0; border-bottom:1px solid #F0F0F0; font-size:13px; color:#000; text-align:right;">€${parseFloat(String(i.lineTotal)).toFixed(2)}</td>
         </tr>`,
@@ -176,11 +210,11 @@ export function shippingNotificationEmail(
   fullName: string,
   order: { id: string; trackingNumber?: string; trackingUrl?: string },
 ): string {
-  const firstName = fullName.split(' ')[0];
+  const firstName = escapeHtml(fullName.split(' ')[0]);
   const orderId = order.id.slice(0, 8).toUpperCase();
   const trackingSection = order.trackingNumber
-    ? `<p>Il tuo numero di tracciamento è: <strong>${order.trackingNumber}</strong></p>
-       ${order.trackingUrl ? `<a class="btn" href="${order.trackingUrl}" style="margin-top:16px;">Traccia il tuo ordine</a>` : ''}`
+    ? `<p>Il tuo numero di tracciamento è: <strong>${escapeHtml(order.trackingNumber)}</strong></p>
+       ${order.trackingUrl ? `<a class="btn" href="${escapeUrl(order.trackingUrl)}" style="margin-top:16px;">Traccia il tuo ordine</a>` : ''}`
     : '';
 
   return base(
@@ -200,7 +234,7 @@ export function returnStatusUpdateEmail(
   status: string,
   adminNote?: string,
 ): string {
-  const firstName = fullName.split(' ')[0];
+  const firstName = escapeHtml(fullName.split(' ')[0]);
   const statusLabels: Record<string, string> = {
     approved: 'Approvato',
     rejected: 'Rifiutato',
@@ -215,15 +249,15 @@ export function returnStatusUpdateEmail(
     `<h1>Aggiornamento sul tuo reso.</h1>
     <hr class="divider" />
     <p>Ciao <strong>${firstName}</strong>, lo stato del tuo reso (<code style="font-family:monospace;">${returnId.slice(0, 8).toUpperCase()}</code>) è stato aggiornato:</p>
-    <p style="font-size:18px; font-weight:700; color:#000;">${statusLabel}</p>
-    ${adminNote ? `<div class="alert-bar"><p>${adminNote}</p></div>` : ''}
+    <p style="font-size:18px; font-weight:700; color:#000;">${escapeHtml(statusLabel)}</p>
+    ${adminNote ? `<div class="alert-bar"><p>${escapeHtml(adminNote)}</p></div>` : ''}
     <hr class="divider" />
     <p style="font-size:12px; color:#8F8F8F;">Per qualsiasi domanda contatta il nostro supporto: <a href="mailto:support@commonera.it" style="color:#C3A88D;">support@commonera.it</a></p>`,
   );
 }
 
 export function passwordChangedAlert(fullName: string): string {
-  const firstName = fullName.split(' ')[0];
+  const firstName = escapeHtml(fullName.split(' ')[0]);
   return base(
     'Your password has been changed',
     `<h1>Password updated.</h1>
