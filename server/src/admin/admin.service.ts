@@ -23,6 +23,12 @@ import {
   CreateImageDto,
 } from './dto/admin.dto';
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function isUuid(value: string): boolean {
+  return UUID_RE.test(value.trim());
+}
+
 @Injectable()
 export class AdminService {
   constructor(
@@ -120,9 +126,34 @@ export class AdminService {
     return { data, meta: { total, page, limit, totalPages: Math.ceil(total / limit) } };
   }
 
+  /**
+   * Impedisce di restare senza amministratori.
+   *
+   * Prima non c'era nessun controllo: un admin poteva declassare o cancellare se stesso, o
+   * cancellare tutti gli altri admin. Con zero admin non esiste piu' un modo per rientrare
+   * dall'API — si recupera solo entrando a mano nel database.
+   */
+  private async assertNotLastAdmin(targetUserId: string, adminId: string, action: string) {
+    if (targetUserId === adminId) {
+      throw new BadRequestException(`Non puoi ${action} il tuo stesso account`);
+    }
+    const target = await this.prisma.user.findUnique({ where: { id: targetUserId } });
+    if (target?.role !== 'admin') return;
+
+    const admins = await this.prisma.user.count({
+      where: { role: 'admin', deletedAt: null, isActive: true },
+    });
+    if (admins <= 1) {
+      throw new BadRequestException(`Non puoi ${action} l'ultimo amministratore rimasto`);
+    }
+  }
+
   async updateUserRole(id: string, dto: UpdateUserRoleDto, adminId: string) {
     const user = await this.prisma.user.findUnique({ where: { id } });
     if (!user) throw new NotFoundException('Utente non trovato');
+    if (dto.role !== 'admin') {
+      await this.assertNotLastAdmin(id, adminId, 'declassare');
+    }
     const updated = await this.prisma.user.update({
       where: { id },
       data: { role: dto.role as any },
@@ -144,6 +175,7 @@ export class AdminService {
   async deleteUser(id: string, adminId: string) {
     const user = await this.prisma.user.findUnique({ where: { id } });
     if (!user) throw new NotFoundException('Utente non trovato');
+    await this.assertNotLastAdmin(id, adminId, 'cancellare');
     await this.prisma.user.delete({ where: { id } });
     await this.prisma.auditLog.create({
       data: {
@@ -347,8 +379,14 @@ export class AdminService {
       where.OR = [
         { user: { email: { contains: query.search, mode: 'insensitive' } } },
         { user: { fullName: { contains: query.search, mode: 'insensitive' } } },
-        { id: { contains: query.search, mode: 'insensitive' } },
       ];
+      // `Order.id` e' una colonna `uuid`: Postgres non sa fare ILIKE su quel tipo senza cast,
+      // quindi cercare un id parziale (cosa che un admin fa per istinto) faceva esplodere la
+      // query con un 500. Se la stringa e' un UUID intero la si cerca per uguaglianza, che e'
+      // l'unica ricerca per id che il DB puo' davvero fare.
+      if (isUuid(query.search)) {
+        where.OR.push({ id: query.search });
+      }
     }
 
     const [data, total] = await Promise.all([
@@ -582,10 +620,11 @@ export class AdminService {
     const where: any = {};
     if (query.status) where.status = query.status;
     if (query.search) {
-      where.OR = [
-        { orderId: { contains: query.search, mode: 'insensitive' } },
-        { user: { email: { contains: query.search, mode: 'insensitive' } } },
-      ];
+      where.OR = [{ user: { email: { contains: query.search, mode: 'insensitive' } } }];
+      // Stesso motivo di `getOrders`: `Return.orderId` e' `uuid`, niente ILIKE parziale.
+      if (isUuid(query.search)) {
+        where.OR.push({ orderId: query.search });
+      }
     }
 
     const [data, total] = await Promise.all([
@@ -655,6 +694,21 @@ export class AdminService {
 
   // ─── CSV Export ──────────────────────────────────────────────────────────────
 
+  /**
+   * Prepara un valore per una cella CSV.
+   *
+   * Oltre al raddoppio delle virgolette (che c'era gia'), mette un apice davanti alle celle
+   * che iniziano con `=`, `+`, `-` o `@`: Excel e Google Sheets trattano quelle celle come
+   * formule, e `fullName` e' un campo che l'utente sceglie in fase di registrazione. Con
+   * `fullName = "=1+1"` l'export diventa un foglio che esegue roba scritta da un estraneo
+   * (formula injection, linea guida OWASP).
+   */
+  private csvCell(value: unknown): string {
+    const raw = String(value ?? '');
+    const safe = /^[=+\-@\t\r]/.test(raw) ? `'${raw}` : raw;
+    return `"${safe.replace(/"/g, '""')}"`;
+  }
+
   async exportOrders(query: AdminExportOrdersQueryDto): Promise<string> {
     const where: any = {};
     if (query.status) where.status = query.status;
@@ -678,8 +732,8 @@ export class AdminService {
         o.id,
         o.createdAt.toISOString(),
         o.status,
-        `"${(o.user?.email ?? '').replace(/"/g, '""')}"`,
-        `"${(o.user?.fullName ?? '').replace(/"/g, '""')}"`,
+        this.csvCell(o.user?.email),
+        this.csvCell(o.user?.fullName),
         parseFloat(String(o.total)).toFixed(2),
       ].join(','),
     );
@@ -705,8 +759,8 @@ export class AdminService {
     const rows = users.map((u) =>
       [
         u.id,
-        `"${u.email.replace(/"/g, '""')}"`,
-        `"${u.fullName.replace(/"/g, '""')}"`,
+        this.csvCell(u.email),
+        this.csvCell(u.fullName),
         u.role,
         u.createdAt.toISOString(),
         u.emailVerifiedAt ? u.emailVerifiedAt.toISOString() : '',
