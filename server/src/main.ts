@@ -22,6 +22,19 @@ async function bootstrap() {
   // Intestazioni di sicurezza HTTP
   app.use(helmet());
 
+  // `X-Forwarded-For` va creduto solo se davanti c'e' davvero un proxy nostro. Senza questa
+  // riga Express ignora l'header (giusto: chiunque puo' scriverlo), ma il codice lo leggeva
+  // comunque a mano. Con TRUST_PROXY impostata (es. "1" dietro un nginx) `req.ip` diventa
+  // l'IP reale del client; senza, resta quello della connessione.
+  // Attenzione a non metterla a caso: dichiarare un proxy che non c'e' rende di nuovo
+  // falsificabile l'IP, e con esso i bucket del rate limiter.
+  const trustProxy = process.env.TRUST_PROXY;
+  if (trustProxy) {
+    const hops = Number(trustProxy);
+    app.set('trust proxy', Number.isFinite(hops) ? hops : trustProxy);
+    logger.log(`trust proxy attivo: ${trustProxy}`);
+  }
+
   // Cookie parser richiesto per leggere i cookie HttpOnly
   app.use(cookieParser());
 
@@ -42,19 +55,28 @@ async function bootstrap() {
     .map((s) => s.trim())
     .filter(Boolean);
 
+  // I domini jolly (*.app.github.dev, *.gitpod.io) sono spazi pubblici e condivisi: qualunque
+  // persona con un Codespace ottiene un sottodominio che passava questa allowlist, e insieme
+  // al cookie SameSite=None impostato apposta per quella classe di origin poteva montare un
+  // session riding contro chi avesse l'app aperta. Restano accettati solo fuori da produzione,
+  // che e' il caso per cui erano stati messi.
+  const isProduction = process.env.NODE_ENV === 'production';
+
   app.enableCors({
     origin: (origin, cb) => {
       if (!origin) return cb(null, true);
       try {
         const { hostname } = new URL(origin);
+        const isEphemeralDevHost =
+          !isProduction &&
+          (hostname.endsWith('.app.github.dev') ||
+            hostname.endsWith('.gitpod.io') ||
+            hostname.endsWith('.github.dev'));
         const allowed =
           origin === frontendUrl ||
           extraOrigins.includes(origin) ||
-          hostname === 'localhost' ||
-          hostname === '127.0.0.1' ||
-          hostname.endsWith('.app.github.dev') ||
-          hostname.endsWith('.gitpod.io') ||
-          hostname.endsWith('.github.dev');
+          (!isProduction && (hostname === 'localhost' || hostname === '127.0.0.1')) ||
+          isEphemeralDevHost;
         if (allowed) return cb(null, true);
       } catch {
         // origin malformato: cade in rifiuto
