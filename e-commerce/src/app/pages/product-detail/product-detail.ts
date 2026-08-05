@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { ProductsService, ProductFull, ProductListItem, ProductImage } from '../../services/products.service';
 import { BreadcrumbComponent, BreadcrumbItem } from '../../components/breadcrumb/breadcrumb';
 import { WishlistService } from '../../services/wishlist.service';
+import { ToastService } from '../../services/toast.service';
 import { AuthService } from '../../services/auth';
 import { CartService } from '../../services/cart-service';
 import { ReviewsService, Review } from '../../services/reviews.service';
@@ -22,6 +23,7 @@ export class ProductDetail implements OnInit {
   private router = inject(Router);
   readonly wishlist = inject(WishlistService);
   readonly auth = inject(AuthService);
+  private toast = inject(ToastService);
   readonly cartSvc = inject(CartService);
   private readonly reviewsSvc = inject(ReviewsService);
 
@@ -314,7 +316,12 @@ export class ProductDetail implements OnInit {
     const coverImg = this.galleryImages()[0]?.url ?? product.images[0]?.url ?? '';
     const variantLabel = [variant.color, variant.size].filter(Boolean).join(' / ');
 
-    this.cartSvc.addItem({
+    // `addItem` ora puo' fallire: con il carrello sul server la disponibilita' la
+    // decide il magazzino, non il browser. Prima era sincrono e non poteva
+    // sbagliare, quindi senza questo `catch` un "esaurito" sarebbe finito in una
+    // promise rifiutata e l'utente avrebbe visto la conferma di aggiunta.
+    this.cartSvc
+      .addItem({
       variantId: variant.id,
       productId: product.id,
       productName: product.name,
@@ -327,10 +334,14 @@ export class ProductDetail implements OnInit {
       unitPrice: Math.round(unitPrice * 100) / 100,
       originalPrice: basePrice,
       quantity: 1,
-    });
-
-    this.addedToCart.set(true);
-    this.cartSvc.open();
-    setTimeout(() => this.addedToCart.set(false), 2000);
+      })
+      .then(() => {
+        this.addedToCart.set(true);
+        this.cartSvc.open();
+        setTimeout(() => this.addedToCart.set(false), 2000);
+      })
+      .catch((err) => {
+        this.toast.error(err?.error?.message ?? 'Impossibile aggiungere il prodotto al carrello.');
+      });
   }
 }
