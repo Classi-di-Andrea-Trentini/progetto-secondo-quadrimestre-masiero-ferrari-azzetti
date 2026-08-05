@@ -141,15 +141,25 @@ export class CheckoutService {
         data: { orderId: created.id, status: 'paid', changedBy: userId, note: 'Mock payment succeeded' },
       });
 
-      // Decrement stock
-      await Promise.all(
-        variants.map(({ variant, quantity }) =>
-          tx.productVariant.update({
-            where: { id: variant.id },
-            data: { stockQty: { decrement: quantity } },
-          }),
-        ),
-      );
+      // Decrement stock.
+      //
+      // Il controllo fatto al punto 2 non basta: due checkout concorrenti sull'ultimo pezzo
+      // leggono entrambi stockQty=1, entrano entrambi nella propria transazione e decrementano
+      // entrambi, lasciando la giacenza a -1 (venduto piu' di quanto c'era). Qui il decremento
+      // e' condizionale: `updateMany` con `stockQty: { gte: quantity }` tocca la riga solo se
+      // la giacenza c'e' ancora nel momento della scrittura, e `count === 0` vuol dire che
+      // qualcun altro e' arrivato prima — si lancia e la transazione fa rollback di tutto.
+      for (const { variant, quantity } of variants) {
+        const { count } = await tx.productVariant.updateMany({
+          where: { id: variant.id, stockQty: { gte: quantity } },
+          data: { stockQty: { decrement: quantity } },
+        });
+        if (count === 0) {
+          throw new BadRequestException(
+            `Insufficient stock for ${variant.product.name} (${variant.size ?? ''} ${variant.color ?? ''})`.trim(),
+          );
+        }
+      }
 
       // Increment soldCount on each product
       const productQtyMap = new Map<string, number>();
