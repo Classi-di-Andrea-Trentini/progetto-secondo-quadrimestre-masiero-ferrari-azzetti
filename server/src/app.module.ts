@@ -12,6 +12,7 @@ import { WishlistModule } from './wishlist/wishlist.module';
 import { CartModule } from './cart/cart.module';
 import { StockAlertsModule } from './stock-alerts/stock-alerts.module';
 import { GiftCardsModule } from './gift-cards/gift-cards.module';
+import { LoyaltyModule } from './loyalty/loyalty.module';
 import { NewsletterModule } from './newsletter/newsletter.module';
 import { AddressesModule } from './addresses/addresses.module';
 import { OrdersModule } from './orders/orders.module';
@@ -43,6 +44,7 @@ import { ConfigModule } from '@nestjs/config';
     CartModule,
     StockAlertsModule,
     GiftCardsModule,
+    LoyaltyModule,
     WishlistModule,
     NewsletterModule,
     AddressesModule,

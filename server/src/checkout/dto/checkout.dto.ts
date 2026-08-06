@@ -37,6 +37,13 @@ export class CheckoutDto {
   @IsString()
   giftCardCode?: string;
 
+  /** Punti fedelta' da convertire in sconto su questo ordine. */
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  loyaltyPoints?: number;
+
   @IsOptional()
   @IsString()
   notes?: string;

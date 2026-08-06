@@ -9,6 +9,7 @@ import { PromoCodesService } from '../promo-codes/promo-codes.service';
 import { MailService } from '../mail/mail.service';
 import { CheckoutDto, ShippingMethod } from './dto/checkout.dto';
 import { GiftCardsService } from '../gift-cards/gift-cards.service';
+import { LoyaltyService } from '../loyalty/loyalty.service';
 import { priceOf } from '../common/pricing';
 
 const SHIPPING_COST: Record<ShippingMethod, number> = {
@@ -24,6 +25,7 @@ export class CheckoutService {
     private promoSvc: PromoCodesService,
     private mailService: MailService,
     private giftCards: GiftCardsService,
+    private loyalty: LoyaltyService,
   ) {}
 
   async placeOrder(userId: string, dto: CheckoutDto) {
@@ -138,8 +140,41 @@ export class CheckoutService {
         });
       }
 
+      // Punti fedelta': si convertono in sconto prima della gift card, cosi' il buono
+      // copre solo cio' che resta e non viene consumato al posto dei punti.
+      let loyaltyDiscount = 0;
+      if (dto.loyaltyPoints && dto.loyaltyPoints > 0) {
+        const redeemed = await this.loyalty.redeemWithin(
+          tx,
+          userId,
+          created.id,
+          dto.loyaltyPoints,
+          total,
+        );
+        loyaltyDiscount = redeemed.discount;
+      }
+
+      const payable = Math.max(0, Math.round((total - loyaltyDiscount) * 100) / 100);
+      if (loyaltyDiscount > 0) {
+        await tx.order.update({
+          where: { id: created.id },
+          data: {
+            discountTotal: { increment: loyaltyDiscount },
+            total: payable,
+          },
+        });
+      }
+
       // Quello che resta da incassare col metodo di pagamento vero.
-      const amountToCharge = Math.round((total - giftCardApplied) * 100) / 100;
+      const amountToCharge = Math.round((payable - giftCardApplied) * 100) / 100;
+
+      // Punti guadagnati: sull'imponibile scontato, senza spedizione.
+      await this.loyalty.awardForOrder(
+        tx,
+        userId,
+        created.id,
+        Math.max(0, subtotal - discountTotal - loyaltyDiscount),
+      );
 
       // Mock payment (immediately succeeded — real Stripe hook would update this)
       await tx.payment.create({
@@ -231,7 +266,10 @@ export class CheckoutService {
         });
       }
 
-      return created;
+      // Si restituisce il totale **effettivo**: `total` qui sopra e' quello calcolato
+      // prima dello sconto punti, e restituirlo farebbe vedere al cliente un importo
+      // diverso da quello addebitato e scritto a database.
+      return { ...created, finalTotal: payable, loyaltyDiscount, giftCardApplied };
     });
 
     // Invia email di conferma ordine (fire-and-forget)
@@ -247,11 +285,17 @@ export class CheckoutService {
             quantity: i.quantity,
             lineTotal: i.lineTotal,
           })),
-          total,
+          total: order.finalTotal,
         }).catch(() => {});
       }
     }).catch(() => {});
 
-    return { orderId: order.id, total, status: 'paid' };
+    return {
+      orderId: order.id,
+      total: order.finalTotal,
+      loyaltyDiscount: order.loyaltyDiscount,
+      giftCardApplied: order.giftCardApplied,
+      status: 'paid',
+    };
   }
 }

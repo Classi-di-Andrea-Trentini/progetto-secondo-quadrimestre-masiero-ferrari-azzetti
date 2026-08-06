@@ -118,6 +118,7 @@ model User {
   @@index([deletedAt])
   @@map("users")
   stockAlerts StockAlert[]
+  loyaltyEntries LoyaltyEntry[]
 }
 
 model UserAddress {
@@ -481,6 +482,7 @@ model Order {
   @@index([status])
   @@index([createdAt])
   @@map("orders")
+  loyaltyEntries LoyaltyEntry[]
 }
 
 model OrderItem {
@@ -723,4 +725,24 @@ model StockAlert {
   @@unique([userId, variantId])
   @@index([variantId, notifiedAt])
   @@map("stock_alerts")
+}
+
+/// Movimento di punti fedelta'. Il saldo e' la somma dei movimenti, non un contatore
+/// a parte: un contatore puo' scollarsi dalla storia, una somma no.
+model LoyaltyEntry {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  orderId   String?  @map("order_id") @db.Uuid
+  /// Positivo quando si guadagnano punti, negativo quando si spendono.
+  points    Int
+  reason    String   @db.VarChar(120)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  order Order? @relation(fields: [orderId], references: [id])
+
+  /// Un ordine accredita punti una volta sola.
+  @@unique([orderId, reason])
+  @@index([userId, createdAt])
+  @@map("loyalty_entries")
 }

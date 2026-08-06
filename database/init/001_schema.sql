@@ -526,3 +526,16 @@ CREATE TABLE IF NOT EXISTS stock_alerts (
     UNIQUE (user_id, variant_id)
 );
 CREATE INDEX IF NOT EXISTS idx_stock_alerts_variant ON stock_alerts (variant_id, notified_at);
+
+-- Punti fedelta': il saldo si ricava sommando i movimenti, cosi' non puo' divergere
+-- dalla storia come farebbe un contatore tenuto a parte.
+CREATE TABLE IF NOT EXISTS loyalty_entries (
+    id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id    UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    order_id   UUID REFERENCES orders(id),
+    points     INTEGER NOT NULL,
+    reason     VARCHAR(120) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    UNIQUE (order_id, reason)
+);
+CREATE INDEX IF NOT EXISTS idx_loyalty_entries_user ON loyalty_entries (user_id, created_at);
