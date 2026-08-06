@@ -25,6 +25,7 @@ import type { Response } from 'express';
 import { AdminService } from './admin.service';
 import { InventoryService } from './inventory.service';
 import { GiftCardsService } from '../gift-cards/gift-cards.service';
+import { AbandonedCartService } from '../cart/abandoned-cart.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { AdminRoleGuard } from './admin-role.guard';
 import {
@@ -55,6 +56,7 @@ export class AdminController {
   constructor(private readonly adminService: AdminService,
     private readonly inventoryService: InventoryService,
     private readonly giftCardsService: GiftCardsService,
+    private readonly abandonedCarts: AbandonedCartService,
   ) {}
 
   // ─── Dashboard ────────────────────────────────────────────────────────────
@@ -127,6 +129,19 @@ export class AdminController {
     @Body() body: { amount: number; issuedTo?: string; expiresAt?: string; note?: string },
   ) {
     return this.giftCardsService.issue(req.user.id, body);
+  }
+
+  // ─── Carrelli abbandonati ───────────────────────────────────────────────────
+
+  @Get('abandoned-carts')
+  listAbandonedCarts() {
+    return this.abandonedCarts.list();
+  }
+
+  /** Lancia i promemoria adesso, senza aspettare il giro giornaliero. */
+  @Post('abandoned-carts/remind')
+  async remindAbandoned() {
+    return { sent: await this.abandonedCarts.sendReminders() };
   }
 
   @Patch('users/:id/role')

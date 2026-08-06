@@ -289,3 +289,18 @@ export function backInStockEmail(
     <div class="alert-bar"><p>Ricevi questa email perché avevi chiesto di essere avvisato per questo articolo. È un avviso singolo: non te ne arriveranno altri.</p></div>`,
   );
 }
+
+export function abandonedCartEmail(fullName: string, units: number, value: number, url: string): string {
+  const firstName = escapeHtml((fullName || '').split(' ')[0]);
+  const pezzi = units === 1 ? '1 articolo' : `${units} articoli`;
+  return base(
+    'Hai lasciato qualcosa nel carrello',
+    `<h1>Il tuo carrello ti aspetta.</h1>
+    <hr class="divider" />
+    <p>Ciao <strong>${firstName}</strong>, hai ancora <strong>${pezzi}</strong> nel carrello, per un totale di <strong>&euro;${value.toFixed(2)}</strong>.</p>
+    <p>Li teniamo da parte, ma la disponibilit&agrave; non &egrave; garantita.</p>
+    <a class="btn" href="${escapeUrl(url)}">Riprendi da dove eri</a>
+    <hr class="divider" />
+    <div class="alert-bar"><p>Ti scriviamo una volta sola per questo carrello. Se hai cambiato idea, ignora pure.</p></div>`,
+  );
+}

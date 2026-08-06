@@ -618,6 +618,9 @@ model Review {
   status       ReviewStatus @default(pending)
   isVerified   Boolean      @default(false) @map("is_verified")
   helpfulCount Int          @default(0) @map("helpful_count")
+  /// URL delle foto allegate. Colonna array invece di una tabella a parte: una
+  /// recensione ne ha al massimo una manciata e non servono metadati per foto.
+  photos       String[]     @default([])
   createdAt    DateTime     @default(now()) @map("created_at")
   updatedAt    DateTime     @updatedAt @map("updated_at")
 

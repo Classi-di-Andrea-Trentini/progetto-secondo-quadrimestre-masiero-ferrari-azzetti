@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { ScheduleModule } from '@nestjs/schedule';
 import { APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -36,6 +37,8 @@ import { ConfigModule } from '@nestjs/config';
         limit: 100,
       },
     ]),
+    // Serve al promemoria dei carrelli abbandonati, che gira una volta al giorno.
+    ScheduleModule.forRoot(),
     PrismaModule,
     AuthModule,
     UsersModule,

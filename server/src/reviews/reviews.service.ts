@@ -8,6 +8,9 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateReviewDto } from './dto/create-review.dto';
 
+/** Tetto per recensione: sopra e' spazio disco regalato a chi vuole abusarne. */
+const MAX_REVIEW_PHOTOS = 4;
+
 @Injectable()
 export class ReviewsService {
   constructor(private prisma: PrismaService) {}
@@ -110,6 +113,48 @@ export class ReviewsService {
     await this.prisma.product.update({
       where: { id: productId },
       data: { avgRating: agg._avg.rating ?? 0 },
+    });
+  }
+
+  /**
+   * Allega una foto a una recensione.
+   *
+   * Solo l'autore puo' farlo, e solo entro un tetto: le foto degli altri clienti
+   * sono il motivo per cui si legge una recensione, ma una galleria illimitata su
+   * ogni voto e' spazio disco regalato a chi vuole abusarne.
+   */
+  async addPhoto(userId: string, reviewId: string, url: string) {
+    const review = await this.prisma.review.findUnique({
+      where: { id: reviewId },
+      select: { id: true, userId: true, photos: true },
+    });
+
+    if (!review) throw new NotFoundException('Review not found');
+    if (review.userId !== userId) throw new ForbiddenException();
+    if (review.photos.length >= MAX_REVIEW_PHOTOS) {
+      throw new BadRequestException(`At most ${MAX_REVIEW_PHOTOS} photos per review`);
+    }
+
+    return this.prisma.review.update({
+      where: { id: reviewId },
+      data: { photos: { push: url } },
+      select: { id: true, photos: true },
+    });
+  }
+
+  async removePhoto(userId: string, reviewId: string, url: string) {
+    const review = await this.prisma.review.findUnique({
+      where: { id: reviewId },
+      select: { id: true, userId: true, photos: true },
+    });
+
+    if (!review) throw new NotFoundException('Review not found');
+    if (review.userId !== userId) throw new ForbiddenException();
+
+    return this.prisma.review.update({
+      where: { id: reviewId },
+      data: { photos: review.photos.filter((photo) => photo !== url) },
+      select: { id: true, photos: true },
     });
   }
 }

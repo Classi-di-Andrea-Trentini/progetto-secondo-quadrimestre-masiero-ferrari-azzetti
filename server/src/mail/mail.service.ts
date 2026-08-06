@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import {
+  abandonedCartEmail,
   backInStockEmail,
   emailChangeConfirmation,
   emailChangedAlert,
@@ -136,6 +137,14 @@ export class MailService {
       email,
       `${productName} è tornato disponibile`,
       backInStockEmail(fullName, productName, variantLabel, url),
+    );
+  }
+
+  async sendAbandonedCart(email: string, fullName: string, units: number, value: number) {
+    await this.send(
+      email,
+      'Hai lasciato qualcosa nel carrello',
+      abandonedCartEmail(fullName, units, value, `${process.env.FRONTEND_URL ?? ''}/products`),
     );
   }
 

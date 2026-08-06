@@ -539,3 +539,6 @@ CREATE TABLE IF NOT EXISTS loyalty_entries (
     UNIQUE (order_id, reason)
 );
 CREATE INDEX IF NOT EXISTS idx_loyalty_entries_user ON loyalty_entries (user_id, created_at);
+
+-- Foto allegate alle recensioni.
+ALTER TABLE reviews ADD COLUMN IF NOT EXISTS photos TEXT[] NOT NULL DEFAULT '{}';
