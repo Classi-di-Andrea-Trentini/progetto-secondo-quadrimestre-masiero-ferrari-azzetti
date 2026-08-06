@@ -23,6 +23,7 @@ import { extname, join } from 'path';
 import { mkdirSync } from 'fs';
 import type { Response } from 'express';
 import { AdminService } from './admin.service';
+import { InventoryService } from './inventory.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { AdminRoleGuard } from './admin-role.guard';
 import {
@@ -50,7 +51,9 @@ import {
 @Controller('admin')
 @UseGuards(JwtAuthGuard, AdminRoleGuard)
 export class AdminController {
-  constructor(private readonly adminService: AdminService) {}
+  constructor(private readonly adminService: AdminService,
+    private readonly inventoryService: InventoryService,
+  ) {}
 
   // ─── Dashboard ────────────────────────────────────────────────────────────
 
@@ -71,6 +74,41 @@ export class AdminController {
     const csv = await this.adminService.exportUsers();
     res.setHeader('Content-Type', 'text/csv');
     res.setHeader('Content-Disposition', 'attachment; filename="users.csv"');
+    res.send(csv);
+  }
+
+  // ─── Magazzino ──────────────────────────────────────────────────────────────
+
+  /** Varianti esaurite o sotto la soglia impostata sul prodotto. */
+  @Get('inventory')
+  inventory(@Query('threshold') threshold?: string) {
+    const parsed = threshold === undefined ? undefined : Number(threshold);
+    return this.inventoryService.lowStock(
+      Number.isFinite(parsed as number) ? (parsed as number) : undefined,
+    );
+  }
+
+  /** Ultime rettifiche di giacenza, con autore e motivo. */
+  @Get('inventory/movements')
+  stockMovements(@Query('limit') limit?: string) {
+    return this.inventoryService.movements(Number(limit) || 50);
+  }
+
+  /** `delta` per caricare o scaricare, `set` per fissare il valore contato. */
+  @Patch('inventory/:variantId/stock')
+  adjustStock(
+    @Req() req: any,
+    @Param('variantId') variantId: string,
+    @Body() body: { delta?: number; set?: number; reason?: string },
+  ) {
+    return this.inventoryService.adjustStock(req.user.id, variantId, body);
+  }
+
+  @Get('products/export')
+  async exportProducts(@Res() res: Response) {
+    const csv = await this.adminService.exportProducts();
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename="products.csv"');
     res.send(csv);
   }
 

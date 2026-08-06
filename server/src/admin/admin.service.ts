@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { InventoryService } from './inventory.service';
 import { MailService } from '../mail/mail.service';
 import {
   AdminListQueryDto,
@@ -34,6 +35,7 @@ export class AdminService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly mail: MailService,
+    private readonly inventory: InventoryService,
   ) {}
 
   // ─── Dashboard ──────────────────────────────────────────────────────────────
@@ -76,16 +78,91 @@ export class AdminService {
       }),
     ]);
 
+    const paidStatuses = ['paid', 'processing', 'shipped', 'delivered', 'completed'];
+    const totalRevenue = parseFloat(String(revenueAgg._sum.total ?? 0));
+
+    // Incassi giorno per giorno negli ultimi 30: un totale complessivo non dice se
+    // le vendite stanno salendo o si sono fermate la settimana scorsa.
+    const since = new Date();
+    since.setDate(since.getDate() - 29);
+    since.setHours(0, 0, 0, 0);
+
+    const revenueByDay = await this.prisma.$queryRaw<{ day: Date; revenue: string; orders: bigint }[]>`
+      SELECT date_trunc('day', created_at) AS day,
+             COALESCE(SUM(total), 0)      AS revenue,
+             COUNT(*)                     AS orders
+      FROM orders
+      WHERE created_at >= ${since}
+        AND status = ANY(${paidStatuses}::text[]::"OrderStatus"[])
+      GROUP BY 1
+      ORDER BY 1
+    `;
+
+    const paidOrders = ordersByStatus
+      .filter((s) => paidStatuses.includes(s.status))
+      .reduce((sum, s) => sum + s._count.status, 0);
+
+    const lowStock = await this.inventory.lowStock();
+
     return {
       totalUsers,
       totalOrders,
       totalProducts,
-      totalRevenue: parseFloat(String(revenueAgg._sum.total ?? 0)),
+      totalRevenue,
       pendingOrders,
       recentOrders,
       topProducts,
       ordersByStatus: ordersByStatus.map((s) => ({ status: s.status, count: s._count.status })),
+      // Scontrino medio sugli ordini incassati, non su tutti: gli annullati e i
+      // pendenti abbasserebbero un numero che serve a leggere le vendite vere.
+      averageOrderValue: paidOrders === 0 ? 0 : totalRevenue / paidOrders,
+      revenueByDay: revenueByDay.map((row) => ({
+        day: row.day,
+        revenue: parseFloat(String(row.revenue)),
+        orders: Number(row.orders),
+      })),
+      inventory: { outOfStock: lowStock.outOfStock, lowStock: lowStock.lowStock },
     };
+  }
+
+  /** Catalogo in CSV: mancava, mentre ordini e utenti si esportavano gia'. */
+  async exportProducts(): Promise<string> {
+    const products = await this.prisma.product.findMany({
+      where: { deletedAt: null },
+      include: {
+        category: { select: { name: true } },
+        variants: { select: { sku: true, size: true, color: true, stockQty: true, priceOverride: true } },
+      },
+      orderBy: { name: 'asc' },
+    });
+
+    const header = 'product_id,name,slug,category,brand,base_price,active,sku,size,color,stock,price_override';
+    const rows: string[] = [];
+
+    for (const product of products) {
+      // Una riga per variante: e' il livello a cui si conta la merce.
+      const variants = product.variants.length ? product.variants : [null];
+      for (const variant of variants) {
+        rows.push(
+          [
+            this.csvCell(product.id),
+            this.csvCell(product.name),
+            this.csvCell(product.slug),
+            this.csvCell(product.category?.name),
+            this.csvCell(product.brand),
+            this.csvCell(String(product.basePrice)),
+            this.csvCell(product.isActive ? 'yes' : 'no'),
+            this.csvCell(variant?.sku),
+            this.csvCell(variant?.size),
+            this.csvCell(variant?.color),
+            this.csvCell(variant ? String(variant.stockQty) : ''),
+            this.csvCell(variant?.priceOverride ? String(variant.priceOverride) : ''),
+          ].join(','),
+        );
+      }
+    }
+
+    return [header, ...rows].join('\n');
   }
 
   // ─── Users ──────────────────────────────────────────────────────────────────
