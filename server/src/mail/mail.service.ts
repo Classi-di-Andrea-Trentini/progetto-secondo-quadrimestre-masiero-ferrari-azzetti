@@ -13,14 +13,16 @@ import {
   shippingNotificationEmail,
   welcomeEmail,
 } from './templates';
+import { buildTransport } from './mail-transport';
 
 @Injectable()
 export class MailService {
   private readonly logger = new Logger(MailService.name);
-  private readonly apiKey = process.env.RESEND_API_KEY ?? '';
-  private readonly senderEmail = process.env.RESEND_SENDER_EMAIL ?? 'noreply@commonera.it';
+  private readonly senderEmail =
+    process.env.MAIL_FROM ?? process.env.RESEND_SENDER_EMAIL ?? 'noreply@commonera.it';
   private readonly senderName = process.env.RESEND_SENDER_NAME ?? 'Common Era';
   private readonly isDev = process.env.NODE_ENV !== 'production';
+  private readonly transport = buildTransport(process.env, this.logger);
 
   private async send(to: string, subject: string, html: string): Promise<void> {
     if (this.isDev) {
@@ -28,34 +30,25 @@ export class MailService {
       this.logger.debug(`\n${sep}\nEMAIL → ${to}\nOGGETTO: ${subject}\n${sep}\n${html}\n${sep}\n`);
     }
 
-    if (!this.apiKey) {
-      this.logger.warn('RESEND_API_KEY non configurata. Email non inviata.');
+    if (!this.transport) {
+      this.logger.warn(`Nessun trasporto email: "${subject}" non inviata a ${to}.`);
       return;
     }
 
     try {
-      const res = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${this.apiKey}`,
-        },
-        body: JSON.stringify({
-          from: `${this.senderName} <${this.senderEmail}>`,
-          to,
-          subject,
-          html,
-        }),
+      await this.transport.send({
+        // Il mittente deve coincidere con la mailbox autenticata, altrimenti il
+        // server SMTP rifiuta o l'email finisce dritta nello spam.
+        from: `${this.senderName} <${this.senderEmail}>`,
+        to,
+        subject,
+        html,
       });
-
-      if (!res.ok) {
-        const text = await res.text();
-        this.logger.error(`Resend API error [${res.status}]: ${text}`);
-      } else {
-        this.logger.log(`Email "${subject}" inviata a ${to}`);
-      }
     } catch (err) {
-      this.logger.error('Errore nella chiamata a Resend:', err);
+      // Un'email che non parte non deve far fallire l'operazione che l'ha
+      // innescata: nessuno vuole un ordine annullato perche' il server di posta
+      // non rispondeva.
+      this.logger.error(`Invio "${subject}" a ${to} fallito: ${err}`);
     }
   }
 
