@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { StockAlertsService } from '../stock-alerts/stock-alerts.service';
 
 /**
  * Magazzino: cosa sta finendo, cosa è finito, e la rettifica delle giacenze.
@@ -17,7 +18,10 @@ export type StockLevel = 'out' | 'low' | 'ok';
 
 @Injectable()
 export class InventoryService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private stockAlerts: StockAlertsService,
+  ) {}
 
   /**
    * Varianti esaurite o sotto soglia, le esaurite per prime.
@@ -116,7 +120,19 @@ export class InventoryService {
       }),
     ]);
 
-    return { variantId: updated.id, stockQty: updated.stockQty, previous: variant.stockQty };
+    // Se la variante era esaurita e ora c'e', partono gli avvisi. Va fatto **dopo**
+    // la scrittura, altrimenti si invita a comprare qualcosa che non c'e' ancora.
+    let notified = 0;
+    if (variant.stockQty <= 0 && next > 0) {
+      notified = await this.stockAlerts.notifyBackInStock(variantId);
+    }
+
+    return {
+      variantId: updated.id,
+      stockQty: updated.stockQty,
+      previous: variant.stockQty,
+      notified,
+    };
   }
 
   /** Ultimi movimenti registrati, per capire chi ha toccato cosa. */

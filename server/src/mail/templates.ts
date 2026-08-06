@@ -268,3 +268,24 @@ export function passwordChangedAlert(fullName: string): string {
     <div class="alert-bar"><p>If you did not make this change, please contact support immediately: <a href="mailto:support@commonera.it" style="color:#C3A88D;">support@commonera.it</a></p></div>`,
   );
 }
+
+export function backInStockEmail(
+  fullName: string,
+  productName: string,
+  variantLabel: string,
+  url: string,
+): string {
+  const firstName = escapeHtml((fullName || '').split(' ')[0]);
+  const variant = variantLabel ? ` (${escapeHtml(variantLabel)})` : '';
+  return base(
+    `${productName} è tornato disponibile`,
+    `<h1>È tornato disponibile.</h1>
+    <hr class="divider" />
+    <p>Ciao <strong>${firstName}</strong>, <strong>${escapeHtml(productName)}</strong>${variant} che stavi aspettando è di nuovo in magazzino.</p>
+    <p>Le scorte possono finire in fretta: se lo vuoi, conviene non aspettare.</p>
+    <a class="btn" href="${escapeUrl(url)}">Vai al prodotto</a>
+    <div class="url-box">${escapeHtml(url)}</div>
+    <hr class="divider" />
+    <div class="alert-bar"><p>Ricevi questa email perché avevi chiesto di essere avvisato per questo articolo. È un avviso singolo: non te ne arriveranno altri.</p></div>`,
+  );
+}

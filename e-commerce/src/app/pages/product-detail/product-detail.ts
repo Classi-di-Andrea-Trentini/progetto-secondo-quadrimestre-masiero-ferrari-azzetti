@@ -5,6 +5,9 @@ import { FormsModule } from '@angular/forms';
 import { ProductsService, ProductFull, ProductListItem, ProductImage } from '../../services/products.service';
 import { BreadcrumbComponent, BreadcrumbItem } from '../../components/breadcrumb/breadcrumb';
 import { WishlistService } from '../../services/wishlist.service';
+import { firstValueFrom } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { API_URL } from '../../services/api.config';
 import { ToastService } from '../../services/toast.service';
 import { RecentlyViewedService } from '../../services/recently-viewed';
 import { AuthService } from '../../services/auth';
@@ -25,6 +28,7 @@ export class ProductDetail implements OnInit {
   readonly wishlist = inject(WishlistService);
   readonly auth = inject(AuthService);
   private toast = inject(ToastService);
+  private http = inject(HttpClient);
   readonly recent = inject(RecentlyViewedService);
   readonly cartSvc = inject(CartService);
   private readonly reviewsSvc = inject(ReviewsService);
@@ -247,6 +251,45 @@ export class ProductDetail implements OnInit {
     const v = this.selectedVariant();
     return v ? v.stockQty > 0 : true;
   });
+
+  // ─── Avviso "torna disponibile" ──────────────────────────
+
+  readonly alertSubscribed = signal(false);
+  readonly alertBusy = signal(false);
+
+  /**
+   * Si puo' chiedere l'avviso solo su una variante scelta ed esaurita: senza taglia
+   * selezionata non si saprebbe di cosa avvisare, e su una disponibile non serve.
+   */
+  readonly canRequestAlert = computed(
+    () => Boolean(this.selectedVariant()) && !this.inStock() && this.auth.isAuthenticated(),
+  );
+
+  async toggleStockAlert(): Promise<void> {
+    const variant = this.selectedVariant();
+    if (!variant) return;
+
+    this.alertBusy.set(true);
+    try {
+      const subscribed = this.alertSubscribed();
+      await firstValueFrom(
+        subscribed
+          ? this.http.request('delete', `${API_URL}/stock-alerts`, {
+              body: { variantId: variant.id },
+              withCredentials: true,
+            })
+          : this.http.post(`${API_URL}/stock-alerts`, { variantId: variant.id }, { withCredentials: true }),
+      );
+      this.alertSubscribed.set(!subscribed);
+      this.toast.success(
+        subscribed ? 'Avviso annullato.' : 'Ti avviseremo quando torna disponibile.',
+      );
+    } catch (err: any) {
+      this.toast.error(err?.error?.message ?? 'Non e\' stato possibile registrare l\'avviso.');
+    } finally {
+      this.alertBusy.set(false);
+    }
+  }
 
   // ─── Helpers ─────────────────────────────────────────────
   formatPrice(v: number | string) {

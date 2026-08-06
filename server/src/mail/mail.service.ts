@@ -1,15 +1,16 @@
 import { Injectable, Logger } from '@nestjs/common';
 import {
-  welcomeEmail,
-  emailVerification,
+  backInStockEmail,
   emailChangeConfirmation,
   emailChangedAlert,
-  passwordChangedAlert,
+  emailVerification,
   newsletterConfirmation,
-  passwordResetEmail,
   orderConfirmationEmail,
-  shippingNotificationEmail,
+  passwordChangedAlert,
+  passwordResetEmail,
   returnStatusUpdateEmail,
+  shippingNotificationEmail,
+  welcomeEmail,
 } from './templates';
 
 @Injectable()
@@ -121,6 +122,20 @@ export class MailService {
       to,
       `Ordine confermato #${orderId} — Common Era`,
       orderConfirmationEmail(fullName, order),
+    );
+  }
+
+  async sendBackInStock(
+    email: string,
+    fullName: string,
+    productName: string,
+    variantLabel: string,
+    url: string,
+  ) {
+    await this.send(
+      email,
+      `${productName} è tornato disponibile`,
+      backInStockEmail(fullName, productName, variantLabel, url),
     );
   }
 

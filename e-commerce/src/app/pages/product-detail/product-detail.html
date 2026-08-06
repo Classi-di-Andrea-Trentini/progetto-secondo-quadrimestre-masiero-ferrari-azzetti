@@ -108,11 +108,18 @@
             <p class="selector-label">SELECT SIZE</p>
             <div class="size-grid">
               @for (v of availableSizes(); track v.id) {
+                <!--
+                  Le taglie esaurite restano selezionabili: e' l'unico modo per
+                  chiedere l'avviso di ritorno disponibilita'. Disabilitandole, il
+                  cliente vedeva solo una taglia barrata e se ne andava. L'acquisto
+                  resta bloccato dal bottone "OUT OF STOCK" qui sotto.
+                -->
                 <button
                   class="size-btn"
                   [class.selected]="selectedSize() === v.size"
                   [class.out-of-stock]="v.stockQty === 0"
-                  [disabled]="v.stockQty === 0"
+                  [attr.aria-disabled]="v.stockQty === 0 ? 'true' : null"
+                  [title]="v.stockQty === 0 ? 'Esaurita — puoi farti avvisare' : null"
                   (click)="selectSize(v.size!)">
                   {{ v.size }}
                 </button>
@@ -137,6 +144,26 @@
             ADD TO CART
           }
         </button>
+
+        <!-- Avviso "torna disponibile": e' il momento in cui la visita si perderebbe -->
+        @if (canRequestAlert()) {
+          <button
+            type="button"
+            class="mt-3 w-full border border-gray-900 py-3 text-sm font-medium tracking-wide disabled:opacity-40"
+            [disabled]="alertBusy()"
+            (click)="toggleStockAlert()">
+            @if (alertSubscribed()) {
+              ✓ TI AVVISEREMO
+            } @else {
+              AVVISAMI QUANDO TORNA DISPONIBILE
+            }
+          </button>
+        } @else if (selectedVariant() && !inStock() && !auth.isAuthenticated()) {
+          <p class="mt-3 text-sm text-gray-500">
+            <a routerLink="/login" class="underline">Accedi</a> per farti avvisare quando torna
+            disponibile.
+          </p>
+        }
 
         <!-- Accordions -->
         <div class="accordions">
