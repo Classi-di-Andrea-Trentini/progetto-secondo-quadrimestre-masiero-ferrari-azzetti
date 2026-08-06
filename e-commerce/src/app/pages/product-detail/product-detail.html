@@ -305,5 +305,28 @@
       </div>
     }
 
+    <!-- Visti di recente -->
+    @if (recent.products().length) {
+      <div class="mt-16">
+        <h2 class="text-2xl font-semibold mb-6">Visti di recente</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+          @for (item of recent.products(); track item.id) {
+            <a [routerLink]="['/product', item.slug]" class="group block">
+              <div class="aspect-square overflow-hidden bg-gray-100 rounded-lg">
+                <img
+                  [src]="item.images[0]?.url"
+                  [alt]="item.name"
+                  loading="lazy"
+                  class="h-full w-full object-cover transition-transform group-hover:scale-105"
+                />
+              </div>
+              <p class="mt-2 text-sm font-medium truncate">{{ item.name }}</p>
+              <span class="text-sm text-gray-600">{{ formatPrice(item.basePrice) }}</span>
+            </a>
+          }
+        </div>
+      </div>
+    }
+
   </div>
 }

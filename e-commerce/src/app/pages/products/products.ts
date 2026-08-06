@@ -60,6 +60,15 @@ export class Products implements OnInit, OnDestroy {
     // Read query params
     this.route.queryParams.subscribe(params => {
       if (params['category']) this.selectedCategory.set(params['category']);
+      // La barra di ricerca in cima al sito naviga qui con `?q=`, ma il termine non
+      // veniva letto: la pagina si apriva col catalogo intero come se non avessi
+      // cercato niente. E' l'altra meta' del difetto della ricerca — il backend
+      // ignorava il parametro, e il frontend non glielo mandava nemmeno.
+      const term = params['q'] ?? '';
+      if (term !== this.searchQuery()) {
+        this.searchQuery.set(term);
+        this.currentPage.set(1);
+      }
       this.loadProducts();
     });
 

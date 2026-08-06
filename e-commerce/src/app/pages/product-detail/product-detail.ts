@@ -6,6 +6,7 @@ import { ProductsService, ProductFull, ProductListItem, ProductImage } from '../
 import { BreadcrumbComponent, BreadcrumbItem } from '../../components/breadcrumb/breadcrumb';
 import { WishlistService } from '../../services/wishlist.service';
 import { ToastService } from '../../services/toast.service';
+import { RecentlyViewedService } from '../../services/recently-viewed';
 import { AuthService } from '../../services/auth';
 import { CartService } from '../../services/cart-service';
 import { ReviewsService, Review } from '../../services/reviews.service';
@@ -24,6 +25,7 @@ export class ProductDetail implements OnInit {
   readonly wishlist = inject(WishlistService);
   readonly auth = inject(AuthService);
   private toast = inject(ToastService);
+  readonly recent = inject(RecentlyViewedService);
   readonly cartSvc = inject(CartService);
   private readonly reviewsSvc = inject(ReviewsService);
 
@@ -96,6 +98,9 @@ export class ProductDetail implements OnInit {
         if (firstColor) this.selectedColor.set(firstColor.colorHex!);
         this.loading.set(false);
         this.loadReviews(res.product.id, 1);
+        // Prima si carica la lista dei visti (escludendo questo), poi si registra la
+        // visita: al contrario il prodotto aperto comparirebbe fra i "visti prima".
+        void this.recent.load(res.product.id).then(() => this.recent.remember(res.product.id));
       },
       error: () => {
         this.error.set('Product not found.');
