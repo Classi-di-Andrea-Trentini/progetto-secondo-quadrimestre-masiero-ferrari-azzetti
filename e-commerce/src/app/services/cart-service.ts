@@ -58,6 +58,15 @@ export class CartService {
   /** Righe che il magazzino non copre piu': il checkout va bloccato finche' ci sono. */
   readonly hasIssues = signal(false);
   readonly isSyncing = signal(false);
+  /**
+   * Falso finche' il carrello non e' stato caricato almeno una volta.
+   *
+   * Serve a chi deve decidere qualcosa in base al contenuto: da quando il carrello
+   * vive sul server arriva **dopo** il primo render, e il checkout che controllava
+   * subito `items().length === 0` rimbalzava sul catalogo anche con il carrello
+   * pieno.
+   */
+  readonly ready = signal(false);
 
   readonly itemCount = computed(() => this.items().reduce((s, i) => s + i.quantity, 0));
   readonly subtotal = computed(() => this.items().reduce((s, i) => s + i.unitPrice * i.quantity, 0));
@@ -79,6 +88,9 @@ export class CartService {
     if (!isPlatformBrowser(this.platformId)) return;
 
     this.restoreLocal();
+    // Se l'autenticazione e' ancora in corso il carrello non e' definitivo: lo
+    // diventa quando l'effetto qui sotto ha fatto il suo giro.
+    if (!this.auth.isLoading()) this.ready.set(true);
 
     // `isAuthenticated` diventa vero solo dopo la chiamata a /auth/me, quindi la
     // fusione non puo' avvenire nel costruttore: serve reagire al cambiamento.
@@ -87,8 +99,11 @@ export class CartService {
       const authenticated = this.auth.isAuthenticated();
       if (authenticated === wasAuthenticated) return;
       wasAuthenticated = authenticated;
-      if (authenticated) void this.adoptLocalCart();
-      else this.restoreLocal();
+      if (authenticated) void this.adoptLocalCart().finally(() => this.ready.set(true));
+      else {
+        this.restoreLocal();
+        this.ready.set(true);
+      }
     });
   }
 
@@ -268,11 +283,26 @@ export class CartService {
 
   // ─── Checkout ──────────────────────────────────────────────
 
+  /** Saldo e validita' di un buono, prima di confermare l'ordine. */
+  checkGiftCard(code: string): Promise<{ code: string; balance: number; expiresAt: string | null }> {
+    return firstValueFrom(
+      this.http.get<any>(`${API_URL}/gift-cards/${encodeURIComponent(code)}`, { withCredentials: true }),
+    );
+  }
+
+  loyaltySummary(): Promise<{ balance: number; value: number; minRedeemable: number; redeemable: boolean }> {
+    return firstValueFrom(
+      this.http.get<any>(`${API_URL}/loyalty`, { withCredentials: true }),
+    );
+  }
+
   placeOrder(payload: {
     items: { variantId: string; quantity: number }[];
     addressId: string;
     shippingMethod?: 'standard' | 'express';
     promoCode?: string;
+    giftCardCode?: string;
+    loyaltyPoints?: number;
     notes?: string;
   }): Promise<{ orderId: string; total: number; status: string }> {
     return firstValueFrom(

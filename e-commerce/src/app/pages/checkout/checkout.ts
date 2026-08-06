@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { Component, Injector, effect, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
@@ -18,6 +18,7 @@ export class Checkout implements OnInit {
   readonly cart = inject(CartService);
   readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly injector = inject(Injector);
   private readonly fb = inject(FormBuilder);
 
   step = signal<CheckoutStep>('address');
@@ -59,6 +60,18 @@ export class Checkout implements OnInit {
   promoDiscount = signal(0);
   appliedPromoCode = signal<string | null>(null);
 
+  // ─── Gift card ────────────────────────────────────────────
+  giftCardCode = signal('');
+  giftCardLoading = signal(false);
+  giftCardError = signal<string | null>(null);
+  /** Saldo verificato del buono: non e' ancora quanto verra' scalato. */
+  giftCardBalance = signal(0);
+  appliedGiftCard = signal<string | null>(null);
+
+  // ─── Punti fedelta' ───────────────────────────────────────
+  loyalty = signal<{ balance: number; value: number; minRedeemable: number; redeemable: boolean } | null>(null);
+  useLoyalty = signal(false);
+
   // ─── Notes ────────────────────────────────────────────────
   notes = signal('');
 
@@ -72,12 +85,49 @@ export class Checkout implements OnInit {
     return Math.max(0, this.cart.subtotal() - this.promoDiscount() + this.shippingCost());
   });
 
+  /**
+   * Punti che verranno effettivamente spesi.
+   *
+   * Non si spende piu' di quanto valga l'ordine e si arrotonda per difetto al
+   * centinaio: e' la stessa regola del backend, e mostrarne una diversa qui
+   * significherebbe promettere uno sconto che poi non arriva.
+   */
+  readonly loyaltyPointsToUse = computed(() => {
+    const info = this.loyalty();
+    if (!this.useLoyalty() || !info?.redeemable) return 0;
+    const cap = Math.floor(this.total() * 100);
+    return Math.floor(Math.min(info.balance, cap) / 100) * 100;
+  });
+
+  readonly loyaltyDiscount = computed(() => this.loyaltyPointsToUse() / 100);
+
+  /** Quanto copre il buono: al massimo il dovuto dopo i punti. */
+  readonly giftCardApplied = computed(() =>
+    this.appliedGiftCard()
+      ? Math.min(this.giftCardBalance(), Math.max(0, this.total() - this.loyaltyDiscount()))
+      : 0,
+  );
+
+  readonly amountToPay = computed(() =>
+    Math.max(0, this.total() - this.loyaltyDiscount() - this.giftCardApplied()),
+  );
+
   ngOnInit() {
-    if (this.cart.items().length === 0) {
-      this.router.navigate(['/products']);
-      return;
-    }
+    // Si aspetta che il carrello sia stato caricato prima di decidere: da quando
+    // vive sul server arriva dopo il primo render, e controllarlo subito mandava
+    // sul catalogo anche chi aveva il carrello pieno.
+    effect(
+      () => {
+        if (!this.cart.ready()) return;
+        if (this.cart.items().length === 0 && !this.success()) {
+          this.router.navigate(['/products']);
+        }
+      },
+      { injector: this.injector },
+    );
+
     this.loadAddresses();
+    void this.cart.loyaltySummary().then((info) => this.loyalty.set(info)).catch(() => {});
   }
 
   async loadAddresses() {
@@ -186,6 +236,8 @@ export class Checkout implements OnInit {
         addressId: this.selectedAddressId()!,
         shippingMethod: this.shippingMethod(),
         promoCode: this.appliedPromoCode() ?? undefined,
+        giftCardCode: this.appliedGiftCard() ?? undefined,
+        loyaltyPoints: this.loyaltyPointsToUse() || undefined,
         notes: this.notes() || undefined,
       });
       this.cart.clear();
@@ -195,6 +247,33 @@ export class Checkout implements OnInit {
     } finally {
       this.loading.set(false);
     }
+  }
+
+  /** Verifica il buono e ne mostra il saldo, senza ancora scalarlo. */
+  async applyGiftCard(): Promise<void> {
+    const code = this.giftCardCode().trim();
+    if (!code || this.giftCardLoading()) return;
+
+    this.giftCardLoading.set(true);
+    this.giftCardError.set(null);
+    try {
+      const res = await this.cart.checkGiftCard(code);
+      this.giftCardBalance.set(res.balance);
+      this.appliedGiftCard.set(res.code);
+    } catch (err: any) {
+      this.appliedGiftCard.set(null);
+      this.giftCardBalance.set(0);
+      this.giftCardError.set(err?.error?.message ?? 'Buono non valido.');
+    } finally {
+      this.giftCardLoading.set(false);
+    }
+  }
+
+  removeGiftCard(): void {
+    this.appliedGiftCard.set(null);
+    this.giftCardBalance.set(0);
+    this.giftCardCode.set('');
+    this.giftCardError.set(null);
   }
 
   selectedAddress(): AddressData | undefined {

@@ -297,6 +297,69 @@
               }
             </div>
 
+            <!-- Gift card -->
+            <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
+              <h2 class="font-bold text-gray-900 mb-3">Gift card</h2>
+              @if (appliedGiftCard()) {
+                <div class="flex items-center justify-between bg-green-50 border border-green-200 px-4 py-3 rounded-xl">
+                  <div>
+                    <p class="text-sm font-bold text-green-900 font-mono">{{ appliedGiftCard() }}</p>
+                    <p class="text-xs text-green-700">
+                      Saldo {{ formatPrice(giftCardBalance()) }} — su quest'ordine se ne usano
+                      {{ formatPrice(giftCardApplied()) }}
+                    </p>
+                  </div>
+                  <button (click)="removeGiftCard()" class="text-green-700 hover:text-red-600 transition-colors text-xs underline">Rimuovi</button>
+                </div>
+              } @else {
+                <div class="flex gap-2">
+                  <input
+                    [ngModel]="giftCardCode()"
+                    (ngModelChange)="giftCardCode.set($event)"
+                    (keyup.enter)="applyGiftCard()"
+                    type="text"
+                    placeholder="GC-XXXX-XXXX-XXXX"
+                    class="flex-1 px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 uppercase font-mono"
+                  />
+                  <button (click)="applyGiftCard()" [disabled]="giftCardLoading() || !giftCardCode().trim()"
+                    class="px-4 py-2.5 bg-gray-900 text-white text-sm rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors">
+                    @if (giftCardLoading()) {
+                      <span class="inline-block w-4 h-4 border-2 border-gray-400 border-t-white rounded-full animate-spin"></span>
+                    } @else { Verifica }
+                  </button>
+                </div>
+                @if (giftCardError()) {
+                  <p class="mt-1.5 text-xs text-red-600">{{ giftCardError() }}</p>
+                }
+              }
+            </div>
+
+            <!-- Punti fedelta' -->
+            @if (loyalty(); as points) {
+              <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
+                <h2 class="font-bold text-gray-900 mb-3">Punti fedeltà</h2>
+                <p class="text-sm text-gray-600">
+                  Hai <strong>{{ points.balance }}</strong> punti, pari a
+                  <strong>{{ formatPrice(points.value) }}</strong>.
+                </p>
+                @if (points.redeemable) {
+                  <label class="mt-3 flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" class="w-4 h-4"
+                           [checked]="useLoyalty()"
+                           (change)="useLoyalty.set(!useLoyalty())" />
+                    <span class="text-sm text-gray-900">
+                      Usa {{ loyaltyPointsToUse() }} punti su quest'ordine
+                      ({{ formatPrice(loyaltyDiscount()) }})
+                    </span>
+                  </label>
+                } @else {
+                  <p class="mt-2 text-xs text-gray-500">
+                    Servono almeno {{ points.minRedeemable }} punti per usarli.
+                  </p>
+                }
+              </div>
+            }
+
             <!-- Notes -->
             <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
               <h2 class="font-bold text-gray-900 mb-3">Note per l'ordine</h2>
@@ -443,10 +506,29 @@
                 <span>Spedizione</span>
                 <span>{{ shippingCost() === 0 ? 'Gratuita' : formatPrice(shippingCost()) }}</span>
               </div>
+              @if (loyaltyDiscount() > 0) {
+                <div class="flex justify-between text-green-600">
+                  <span>Punti fedeltà</span>
+                  <span>–{{ formatPrice(loyaltyDiscount()) }}</span>
+                </div>
+              }
+              @if (giftCardApplied() > 0) {
+                <div class="flex justify-between text-green-600">
+                  <span>Gift card</span>
+                  <span>–{{ formatPrice(giftCardApplied()) }}</span>
+                </div>
+              }
               <div class="flex justify-between font-bold text-gray-900 pt-2 border-t border-gray-100 text-base">
                 <span>Totale</span>
                 <span>{{ formatPrice(total()) }}</span>
               </div>
+              <!-- Da pagare davvero: se punti e buono coprono tutto, e' zero -->
+              @if (amountToPay() !== total()) {
+                <div class="flex justify-between font-bold text-gray-900 text-base">
+                  <span>Da pagare</span>
+                  <span>{{ formatPrice(amountToPay()) }}</span>
+                </div>
+              }
             </div>
 
             <div class="mt-4 flex items-center gap-2 text-xs text-gray-400">
