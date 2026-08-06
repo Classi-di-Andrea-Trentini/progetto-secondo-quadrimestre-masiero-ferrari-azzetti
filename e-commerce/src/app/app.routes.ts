@@ -25,6 +25,9 @@ import { adminGuardGuard } from './guards/admin-guard-guard';
 export const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
   { path: 'home', component: Home },
+  // `About` era importato ma la rotta non era mai stata registrata: il link "About us"
+  // nella barra in alto cadeva nel jolly e riportava alla home.
+  { path: 'about', component: About },
   { path: 'login', component: Login },
   { path: 'register', component: Register },
   { path: 'products', component: Products },
