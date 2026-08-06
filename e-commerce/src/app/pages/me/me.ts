@@ -19,6 +19,11 @@ interface OrderSummary {
   createdAt: string;
   items: { productName: string; quantity: number; lineTotal: string }[];
   payments: { status: string }[];
+  /** Cronologia degli stati: il backend la restituisce gia', non veniva mostrata. */
+  statusHistory?: { status: string; note: string | null; createdAt: string }[];
+  trackingNumber?: string | null;
+  trackingUrl?: string | null;
+  invoiceNumber?: string | null;
 }
 
 type TabSection = 'profile' | 'orders' | 'favorites' | 'addresses' | 'settings';
@@ -47,6 +52,7 @@ export class MeComponent {
   ordersTotalPages = signal(1);
   ordersTotal = signal(0);
   expandedOrderId = signal<string | null>(null);
+  invoiceLoadingId = signal<string | null>(null);
   cancelOrderId = signal<string | null>(null);
   cancelOrderLoading = signal(false);
   cancelOrderSuccess = signal<string | null>(null);
@@ -253,6 +259,35 @@ export class MeComponent {
       this.ordersError.set('Impossibile caricare gli ordini');
     } finally {
       this.ordersLoading.set(false);
+    }
+  }
+
+  /**
+   * Scarica la fattura in PDF.
+   *
+   * Passa da `fetch` e non da un link diretto perche' l'endpoint richiede il cookie
+   * di sessione e risponde con un allegato: un `<a href>` in SSR non porterebbe le
+   * credenziali e mostrerebbe una pagina di errore al posto del file.
+   */
+  async downloadInvoice(orderId: string, event: Event): Promise<void> {
+    event.stopPropagation();
+    this.invoiceLoadingId.set(orderId);
+    try {
+      const res = await fetch(`${API_URL}/orders/${orderId}/invoice`, { credentials: 'include' });
+      if (!res.ok) throw new Error('Fattura non disponibile');
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = res.headers.get('Content-Disposition')?.match(/filename="(.+?)"/)?.[1]
+        ?? `fattura-${orderId}.pdf`;
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      this.ordersError.set('Non è stato possibile scaricare la fattura.');
+    } finally {
+      this.invoiceLoadingId.set(null);
     }
   }
 

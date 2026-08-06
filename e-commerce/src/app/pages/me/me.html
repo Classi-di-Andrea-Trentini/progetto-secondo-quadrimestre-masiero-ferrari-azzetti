@@ -321,6 +321,62 @@
                           <span>{{ formatOrderPrice(order.total) }}</span>
                         </div>
                       </div>
+
+                      <!-- Cronologia degli stati: il backend la restituiva gia', non si vedeva -->
+                      @if (order.statusHistory?.length) {
+                        <div class="border-t border-gray-200 mt-4 pt-4">
+                          <p class="text-sm font-semibold text-gray-900 mb-3">Stato dell'ordine</p>
+                          <ol class="space-y-3">
+                            @for (step of order.statusHistory; track $index; let last = $last) {
+                              <li class="flex gap-3">
+                                <div class="flex flex-col items-center">
+                                  <span class="w-2.5 h-2.5 rounded-full mt-1.5"
+                                        [class.bg-gray-900]="last"
+                                        [class.bg-gray-300]="!last"></span>
+                                  @if (!last) {
+                                    <span class="w-px flex-1 bg-gray-200"></span>
+                                  }
+                                </div>
+                                <div class="pb-1">
+                                  <p class="text-sm text-gray-900">
+                                    {{ orderStatusLabels[step.status] ?? step.status }}
+                                  </p>
+                                  <p class="text-xs text-gray-500">
+                                    {{ step.createdAt | date: 'd MMM y, HH:mm' }}
+                                    @if (step.note) {
+                                      — {{ step.note }}
+                                    }
+                                  </p>
+                                </div>
+                              </li>
+                            }
+                          </ol>
+                        </div>
+                      }
+
+                      @if (order.trackingNumber) {
+                        <div class="border-t border-gray-200 mt-4 pt-4 text-sm">
+                          <span class="text-gray-500">Spedizione:</span>
+                          @if (order.trackingUrl) {
+                            <a [href]="order.trackingUrl" target="_blank" rel="noopener"
+                               class="ml-1 font-medium text-gray-900 underline">{{ order.trackingNumber }}</a>
+                          } @else {
+                            <span class="ml-1 font-medium text-gray-900">{{ order.trackingNumber }}</span>
+                          }
+                        </div>
+                      }
+
+                      <div class="border-t border-gray-200 mt-4 pt-4">
+                        <button (click)="downloadInvoice(order.id, $event)"
+                                [disabled]="invoiceLoadingId() === order.id"
+                                class="text-sm font-medium text-gray-900 underline disabled:opacity-40">
+                          @if (invoiceLoadingId() === order.id) {
+                            Preparazione…
+                          } @else {
+                            Scarica la fattura (PDF)
+                          }
+                        </button>
+                      </div>
                     </div>
                   }
                 </div>

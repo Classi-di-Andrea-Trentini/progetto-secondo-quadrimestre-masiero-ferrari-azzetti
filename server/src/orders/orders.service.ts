@@ -32,6 +32,10 @@ export class OrdersService {
         include: {
           items: { select: { productName: true, quantity: true, lineTotal: true } },
           payments: { orderBy: { createdAt: 'desc' }, take: 1, select: { status: true } },
+          // La cronologia serve anche in elenco: la pagina account espande l'ordine
+          // li' dentro e non chiama il dettaglio, quindi senza questo il percorso
+          // dell'ordine non si vedeva mai.
+          statusHistory: { orderBy: { createdAt: 'asc' }, select: { status: true, note: true, createdAt: true } },
         },
       }),
       this.prisma.order.count({ where: { userId } }),
