@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, computed, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -8,6 +8,8 @@ import { WishlistService } from '../../services/wishlist.service';
 import { firstValueFrom } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { API_URL } from '../../services/api.config';
+import { DOCUMENT } from '@angular/core';
+import { SeoService } from '../../services/seo';
 import { ToastService } from '../../services/toast.service';
 import { RecentlyViewedService } from '../../services/recently-viewed';
 import { AuthService } from '../../services/auth';
@@ -21,7 +23,7 @@ import { ReviewsService, Review } from '../../services/reviews.service';
   templateUrl: './product-detail.html',
   styleUrl: './product-detail.css',
 })
-export class ProductDetail implements OnInit {
+export class ProductDetail implements OnInit, OnDestroy {
   private svc = inject(ProductsService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
@@ -29,6 +31,8 @@ export class ProductDetail implements OnInit {
   readonly auth = inject(AuthService);
   private toast = inject(ToastService);
   private http = inject(HttpClient);
+  private seo = inject(SeoService);
+  private document = inject(DOCUMENT);
   readonly recent = inject(RecentlyViewedService);
   readonly cartSvc = inject(CartService);
   private readonly reviewsSvc = inject(ReviewsService);
@@ -105,6 +109,7 @@ export class ProductDetail implements OnInit {
         // Prima si carica la lista dei visti (escludendo questo), poi si registra la
         // visita: al contrario il prodotto aperto comparirebbe fra i "visti prima".
         void this.recent.load(res.product.id).then(() => this.recent.remember(res.product.id));
+        this.publishSeo(res.product);
       },
       error: () => {
         this.error.set('Product not found.');
@@ -251,6 +256,41 @@ export class ProductDetail implements OnInit {
     const v = this.selectedVariant();
     return v ? v.stockQty > 0 : true;
   });
+
+  /**
+   * Titolo, meta e dati strutturati della scheda. Si chiama a prodotto caricato:
+   * col rendering lato server finiscono nell'HTML che ricevono i motori di ricerca
+   * e le anteprime dei link.
+   */
+  private publishSeo(product: any): void {
+    const variants = product.variants ?? [];
+    const cheapest = variants.reduce(
+      (min: number, v: any) =>
+        Math.min(min, parseFloat(String(v.priceOverride ?? product.basePrice))),
+      parseFloat(String(product.basePrice)),
+    );
+
+    this.seo.setProduct({
+      name: product.name,
+      description: product.shortDesc ?? product.description ?? null,
+      image: product.images?.[0]?.url ?? null,
+      brand: product.brand ?? null,
+      sku: variants[0]?.sku ?? null,
+      price: cheapest,
+      currency: 'EUR',
+      inStock: variants.some((v: any) => v.stockQty > 0),
+      url: `${this.document.location?.origin ?? ''}/product/${product.slug}`,
+      rating: product.avgRating
+        ? { value: parseFloat(String(product.avgRating)), count: this.reviewsTotal() }
+        : null,
+    });
+  }
+
+  ngOnDestroy(): void {
+    // Senza, il blocco resterebbe attaccato anche navigando su pagine che non sono
+    // schede prodotto.
+    this.seo.clearJsonLd();
+  }
 
   // ─── Avviso "torna disponibile" ──────────────────────────
 

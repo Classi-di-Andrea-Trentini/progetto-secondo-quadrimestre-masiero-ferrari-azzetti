@@ -42,7 +42,9 @@ async function bootstrap() {
   // Questo permette al dev server Angular di fare proxy di /api/** verso il
   // backend lasciando che tutto il resto venga servito dalla SPA, ed evita
   // collisioni fra rotte frontend e backend (es. /products esiste in entrambi).
-  app.setGlobalPrefix('api');
+  // `sitemap.xml` e `robots.txt` restano in radice: i motori di ricerca li cercano
+  // li' e non sotto `/api`, e un file servito altrove semplicemente non viene letto.
+  app.setGlobalPrefix('api', { exclude: ['sitemap.xml', 'robots.txt'] });
 
   // CORS: accetta richieste con credenziali dall'origine del frontend.
   // Oltre a FRONTEND_URL supporta gli host effimeri di GitHub Codespaces

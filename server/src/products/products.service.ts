@@ -139,7 +139,8 @@ export class ProductsService {
                 images: { orderBy: [{ isCover: 'desc' }, { sortOrder: 'asc' }] },
                 variants: {
                     where: { isActive: true },
-                    select: { id: true, size: true, color: true, colorHex: true, priceOverride: true, stockQty: true },
+                    // `sku` serve ai dati strutturati della scheda prodotto.
+                    select: { id: true, sku: true, size: true, color: true, colorHex: true, priceOverride: true, stockQty: true },
                 },
                 discounts: {
                     where: { isActive: true },

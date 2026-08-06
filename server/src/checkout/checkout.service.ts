@@ -181,6 +181,31 @@ export class CheckoutService {
         }
       }
 
+      // Il carrello si svuota qui dentro, non dal client dopo la risposta: se la
+      // chiamata di svuotamento fallisse, il cliente resterebbe con l'ordine gia'
+      // fatto e il carrello ancora pieno, pronto a comprare due volte.
+      const cart = await tx.cart.findUnique({ where: { userId }, select: { id: true } });
+      if (cart) {
+        for (const { variant, quantity } of variants) {
+          const line = await tx.cartItem.findUnique({
+            where: { cartId_variantId: { cartId: cart.id, variantId: variant.id } },
+            select: { id: true, quantity: true },
+          });
+          if (!line) continue;
+
+          // Si scala la quantita' ordinata, non si cancella la riga: chi ne aveva tre
+          // nel carrello e ne ordina uno deve ritrovarsi gli altri due.
+          if (line.quantity > quantity) {
+            await tx.cartItem.update({
+              where: { id: line.id },
+              data: { quantity: line.quantity - quantity },
+            });
+          } else {
+            await tx.cartItem.delete({ where: { id: line.id } });
+          }
+        }
+      }
+
       // Increment soldCount on each product
       const productQtyMap = new Map<string, number>();
       variants.forEach(({ variant, quantity }) => {
