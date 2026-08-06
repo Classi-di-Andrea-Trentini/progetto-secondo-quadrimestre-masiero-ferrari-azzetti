@@ -13,14 +13,20 @@ Il nucleo è portato e provato dal vivo contro il database vero.
 |---|---|
 | Autenticazione (registrazione, login, logout, `/auth/me`) | fatto |
 | Sessioni con JWT in cookie HttpOnly | fatto |
-| Catalogo: lista con filtri, ricerca, ordinamenti, scheda prodotto, correlati | fatto |
-| Carrello: lettura, aggiunta, modifica, rimozione, svuotamento, fusione al login | fatto |
-| Prezzi e sconti condivisi fra carrello e ordine | fatto |
-| Ordini, checkout, pagamenti | **da portare** |
-| Recensioni, wishlist, indirizzi, resi, newsletter | **da portare** |
-| Codici promo, gift card, punti fedeltà | **da portare** |
-| Area amministrativa, magazzino, avvisi disponibilità | **da portare** |
-| Invio email | **da portare** (la configurazione SMTP è già nelle properties) |
+| Catalogo: lista con filtri, ricerca, ordinamenti, scheda, correlati | fatto |
+| Carrello: lettura, modifica, svuotamento, fusione al login | fatto |
+| **Checkout**: giacenza condizionale, punti, gift card, svuotamento carrello | fatto |
+| **Ordini**: elenco, dettaglio, cronologia stati, annullamento con ripristino giacenza | fatto |
+| **Fattura PDF** con numerazione progressiva per anno | fatto |
+| **Recensioni** (pubbliche, creazione, foto, moderazione) | fatto |
+| **Wishlist, indirizzi** | fatto |
+| **Gift card** (emissione, saldo, utilizzo) | fatto |
+| **Punti fedeltà** (saldo, storico, accredito, sconto) | fatto |
+| **Avvisi "torna disponibile"** | fatto |
+| **Area amministrativa**: statistiche, magazzino, rettifiche, moderazione, stati ordine | fatto |
+| **Invio email** via SMTP (stesso trasporto del backend Node) | fatto |
+| Codici promo, resi, newsletter | **da portare** |
+| Carrello abbandonato, sitemap | **da portare** |
 
 ## Avvio
 
@@ -80,4 +86,13 @@ Contro il database del compose, con il backend Node acceso in parallelo:
   numeri del backend Node**;
 - login con un utente esistente (stesso hash BCrypt), `/auth/me`, password errata → 401;
 - carrello: aggiunta, somma delle quantità, rifiuto oltre la giacenza, e **lo stesso
-  carrello riletto dal backend Node** (3 pezzi, 89,97 su entrambi).
+  carrello riletto dal backend Node** (3 pezzi, 89,97 su entrambi);
+- ordine: totale 74,88, **giacenza scalata da 45 a 43**, cronologia a 2 passi;
+- annullamento: stato `cancelled`, 3 passi, **giacenza ripristinata a 45**;
+- fattura PDF vera, numero `2026-0002` — **continua la numerazione** delle fatture
+  generate dal backend Node, perché la tabella è la stessa;
+- **una gift card emessa dal Node**, letta e scalata **dal Java**: ordine da 29,89 con
+  5 € di punti e 15 € di buono → totale 24,89 e carta addebitata per 9,89, con i
+  movimenti scritti sulla stessa tabella;
+- amministrazione: incasso, scontrino medio sui soli ordini incassati, magazzino sotto
+  soglia, rettifica `delta` contro `set`, rifiuto della giacenza negativa.

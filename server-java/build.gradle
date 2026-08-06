@@ -25,6 +25,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-webmvc'
     // La posta: stesso trasporto SMTP scelto per il backend Node.
     implementation 'org.springframework.boot:spring-boot-starter-mail'
+    // Fattura in PDF. OpenPDF e' il ramo mantenuto di iText 4, con licenza LGPL/MPL:
+    // iText 5+ e' AGPL e non si puo' usare senza pubblicare tutto o pagare.
+    implementation 'com.github.librepdf:openpdf:2.0.3'
 
     // JWT nel cookie HttpOnly, come fa il backend Node: stesso schema di sessione.
     implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
