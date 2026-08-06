@@ -32,6 +32,11 @@ export class CheckoutDto {
   @IsString()
   promoCode?: string;
 
+  /** Codice della gift card da scalare su questo ordine. */
+  @IsOptional()
+  @IsString()
+  giftCardCode?: string;
+
   @IsOptional()
   @IsString()
   notes?: string;

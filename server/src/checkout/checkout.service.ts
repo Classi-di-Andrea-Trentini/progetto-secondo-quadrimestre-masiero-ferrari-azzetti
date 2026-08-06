@@ -8,6 +8,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { PromoCodesService } from '../promo-codes/promo-codes.service';
 import { MailService } from '../mail/mail.service';
 import { CheckoutDto, ShippingMethod } from './dto/checkout.dto';
+import { GiftCardsService } from '../gift-cards/gift-cards.service';
 import { priceOf } from '../common/pricing';
 
 const SHIPPING_COST: Record<ShippingMethod, number> = {
@@ -22,6 +23,7 @@ export class CheckoutService {
     private prisma: PrismaService,
     private promoSvc: PromoCodesService,
     private mailService: MailService,
+    private giftCards: GiftCardsService,
   ) {}
 
   async placeOrder(userId: string, dto: CheckoutDto) {
@@ -93,6 +95,11 @@ export class CheckoutService {
     // 6. Total
     const total = Math.max(0, subtotal - discountTotal + shippingCost);
 
+    // La gift card si scala **dopo** sconti e spedizione, sul dovuto reale: scalarla
+    // prima farebbe pagare al cliente una spedizione che il buono avrebbe coperto.
+    // Il saldo si tocca solo dentro la transazione, cosi' un ordine che fallisce piu'
+    // avanti non brucia il credito.
+
     // 7. Create order in a transaction
     const order = await this.prisma.$transaction(async (tx) => {
       const created = await tx.order.create({
@@ -120,14 +127,30 @@ export class CheckoutService {
         data: { orderId: created.id, status: 'pending', changedBy: userId },
       });
 
+      // Gift card: scala quanto serve e annota l'utilizzo sull'ordine.
+      let giftCardApplied = 0;
+      if (dto.giftCardCode) {
+        const redeemed = await this.giftCards.redeemWithin(tx, dto.giftCardCode, total, created.id);
+        giftCardApplied = redeemed.applied;
+        await tx.order.update({
+          where: { id: created.id },
+          data: { giftCardId: redeemed.giftCardId, giftCardAmount: redeemed.applied },
+        });
+      }
+
+      // Quello che resta da incassare col metodo di pagamento vero.
+      const amountToCharge = Math.round((total - giftCardApplied) * 100) / 100;
+
       // Mock payment (immediately succeeded — real Stripe hook would update this)
       await tx.payment.create({
         data: {
           orderId: created.id,
           userId,
           status: 'succeeded',
-          method: 'credit_card',
-          amount: total,
+          // Coperto interamente dal buono: il metodo lo dice, invece di far figurare
+          // una carta che non e' stata usata.
+          method: amountToCharge > 0 ? 'credit_card' : 'gift_card',
+          amount: amountToCharge,
           paidAt: new Date(),
         },
       });

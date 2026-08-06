@@ -24,6 +24,7 @@ import { mkdirSync } from 'fs';
 import type { Response } from 'express';
 import { AdminService } from './admin.service';
 import { InventoryService } from './inventory.service';
+import { GiftCardsService } from '../gift-cards/gift-cards.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { AdminRoleGuard } from './admin-role.guard';
 import {
@@ -53,6 +54,7 @@ import {
 export class AdminController {
   constructor(private readonly adminService: AdminService,
     private readonly inventoryService: InventoryService,
+    private readonly giftCardsService: GiftCardsService,
   ) {}
 
   // ─── Dashboard ────────────────────────────────────────────────────────────
@@ -110,6 +112,21 @@ export class AdminController {
     res.setHeader('Content-Type', 'text/csv');
     res.setHeader('Content-Disposition', 'attachment; filename="products.csv"');
     res.send(csv);
+  }
+
+  // ─── Gift card ──────────────────────────────────────────────────────────────
+
+  @Get('gift-cards')
+  giftCards() {
+    return this.giftCardsService.list();
+  }
+
+  @Post('gift-cards')
+  issueGiftCard(
+    @Req() req: any,
+    @Body() body: { amount: number; issuedTo?: string; expiresAt?: string; note?: string },
+  ) {
+    return this.giftCardsService.issue(req.user.id, body);
   }
 
   @Patch('users/:id/role')
