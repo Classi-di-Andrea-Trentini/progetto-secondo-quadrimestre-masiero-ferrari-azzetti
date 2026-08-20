@@ -70,6 +70,33 @@ public class GiftCardService {
         return new Redeemed(card.getId(), applied, after);
     }
 
+    /**
+     * Restituisce sul buono quanto era stato scalato al checkout, es. quando
+     * l'ordine viene annullato. Nessun controllo di attivo/scaduto qui: e' un
+     * rimborso di un importo gia' preso, non una nuova spesa, e deve tornare sul
+     * saldo anche se il buono nel frattempo e' scaduto o e' stato disattivato.
+     */
+    @Transactional
+    public void refund(UUID giftCardId, BigDecimal amount, UUID orderId) {
+        if (giftCardId == null || amount == null || amount.signum() <= 0) return;
+
+        var card = cards.findById(giftCardId)
+                .orElseThrow(() -> ApiException.notFound("Gift card not found"));
+
+        BigDecimal rounded = amount.setScale(2, RoundingMode.HALF_UP);
+        cards.refund(giftCardId, rounded);
+        BigDecimal after = card.getCurrentBalance().add(rounded).setScale(2, RoundingMode.HALF_UP);
+
+        var tx = new GiftCardTransaction();
+        tx.setGiftCardId(giftCardId);
+        tx.setOrderId(orderId);
+        // Positivo, come una ricarica: il segno distingue lo scalo dal rimborso.
+        tx.setAmount(rounded);
+        tx.setBalanceAfter(after);
+        tx.setNote("Rimborso per annullamento ordine");
+        transactions.save(tx);
+    }
+
     @Transactional
     public GiftCard issue(UUID adminId, BigDecimal amount, String note, LocalDateTime expiresAt) {
         if (amount == null || amount.signum() <= 0) throw ApiException.badRequest("Amount must be positive");

@@ -22,4 +22,13 @@ public interface GiftCardRepository extends JpaRepository<GiftCard, UUID> {
     @Query("update GiftCard g set g.currentBalance = g.currentBalance - :amount " +
            "where g.id = :id and g.currentBalance >= :amount")
     int redeem(@Param("id") UUID id, @Param("amount") BigDecimal amount);
+
+    /**
+     * Ricredito, es. per annullamento ordine: nessuna condizione sul saldo attuale,
+     * a differenza di {@link #redeem}, perche' qui si sta restituendo un importo
+     * gia' scalato, non spendendone uno nuovo.
+     */
+    @Modifying
+    @Query("update GiftCard g set g.currentBalance = g.currentBalance + :amount where g.id = :id")
+    int refund(@Param("id") UUID id, @Param("amount") BigDecimal amount);
 }

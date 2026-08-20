@@ -103,5 +103,26 @@ public class LoyaltyService {
         return new Redeemed(usable, BigDecimal.valueOf(usable / POINTS_PER_EURO_DISCOUNT));
     }
 
+    /**
+     * Annulla l'effetto netto sui punti di un ordine — accredito da acquisto e/o
+     * spesa in sconto, insieme — con **un solo movimento**: coerente con "il saldo
+     * e' la somma dei movimenti", basta scrivere l'opposto della somma gia' scritta
+     * per non lasciare punti guadagnati da un ordine annullato, ne' punti spesi che
+     * non tornano al cliente.
+     */
+    @Transactional
+    public int reverseForOrder(UUID userId, UUID orderId) {
+        int net = entries.netPointsForOrder(orderId);
+        if (net == 0) return 0;
+
+        var entry = new LoyaltyEntry();
+        entry.setUserId(userId);
+        entry.setOrderId(orderId);
+        entry.setPoints(-net);
+        entry.setReason("Annullamento ordine");
+        entries.save(entry);
+        return -net;
+    }
+
     public record Redeemed(int points, BigDecimal discount) {}
 }

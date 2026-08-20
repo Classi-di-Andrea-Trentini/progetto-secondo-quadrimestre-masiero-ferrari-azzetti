@@ -14,5 +14,9 @@ public interface LoyaltyEntryRepository extends JpaRepository<LoyaltyEntry, UUID
     @Query("select coalesce(sum(e.points), 0) from LoyaltyEntry e where e.userId = :userId")
     int balanceOf(@Param("userId") UUID userId);
 
+    /** Somma dei movimenti gia' scritti per un ordine: accredito e/o spesa punti insieme. */
+    @Query("select coalesce(sum(e.points), 0) from LoyaltyEntry e where e.orderId = :orderId")
+    int netPointsForOrder(@Param("orderId") UUID orderId);
+
     List<LoyaltyEntry> findTop50ByUserIdOrderByCreatedAtDesc(UUID userId);
 }

@@ -27,11 +27,16 @@ public class OrderService {
     private final OrderRepository orders;
     private final PaymentRepository payments;
     private final ProductVariantRepository variants;
+    private final GiftCardService giftCards;
+    private final LoyaltyService loyalty;
 
-    public OrderService(OrderRepository orders, PaymentRepository payments, ProductVariantRepository variants) {
+    public OrderService(OrderRepository orders, PaymentRepository payments, ProductVariantRepository variants,
+                        GiftCardService giftCards, LoyaltyService loyalty) {
         this.orders = orders;
         this.payments = payments;
         this.variants = variants;
+        this.giftCards = giftCards;
+        this.loyalty = loyalty;
     }
 
     @Transactional(readOnly = true)
@@ -69,6 +74,16 @@ public class OrderService {
                 variants.save(variant);
             });
         }
+
+        // Stesso principio per buono e punti: quello che il checkout ha scalato o
+        // accreditato per questo ordine deve tornare indietro, nella stessa
+        // transazione dello scalo di magazzino qui sopra — se una delle due cose
+        // fallisse, l'annullamento non deve restare a meta'.
+        if (order.getGiftCardId() != null && order.getGiftCardAmount() != null
+                && order.getGiftCardAmount().signum() > 0) {
+            giftCards.refund(order.getGiftCardId(), order.getGiftCardAmount(), order.getId());
+        }
+        loyalty.reverseForOrder(order.getUserId(), order.getId());
 
         order.setStatus(OrderStatus.cancelled);
         var entry = new OrderStatusHistory();
