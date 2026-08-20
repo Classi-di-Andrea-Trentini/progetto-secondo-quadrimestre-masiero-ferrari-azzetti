@@ -158,7 +158,7 @@ public class AdminService {
     public Map<String, Object> moderateReview(UUID reviewId, String status) {
         var review = reviews.findById(reviewId)
                 .orElseThrow(() -> ApiException.notFound("Review not found"));
-        review.setStatus(Review.ReviewStatus.valueOf(status));
+        review.setStatus(parseReviewStatus(status));
         reviews.save(review);
         return Map.of("id", review.getId(), "status", review.getStatus().name());
     }
@@ -168,7 +168,7 @@ public class AdminService {
         var order = orders.findById(orderId)
                 .orElseThrow(() -> ApiException.notFound("Order not found"));
 
-        var next = OrderStatus.valueOf(status);
+        var next = parseOrderStatus(status);
         order.setStatus(next);
         if (trackingNumber != null) order.setTrackingNumber(trackingNumber);
 
@@ -181,5 +181,21 @@ public class AdminService {
 
         orders.save(order);
         return Map.of("id", order.getId(), "status", next.name());
+    }
+
+    private Review.ReviewStatus parseReviewStatus(String status) {
+        try {
+            return Review.ReviewStatus.valueOf(status);
+        } catch (IllegalArgumentException e) {
+            throw ApiException.badRequest("Invalid review status: " + status);
+        }
+    }
+
+    private OrderStatus parseOrderStatus(String status) {
+        try {
+            return OrderStatus.valueOf(status);
+        } catch (IllegalArgumentException e) {
+            throw ApiException.badRequest("Invalid order status: " + status);
+        }
     }
 }

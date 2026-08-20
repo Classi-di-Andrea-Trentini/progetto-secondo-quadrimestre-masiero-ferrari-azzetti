@@ -48,8 +48,7 @@ public class SecurityConfig {
                         // Catalogo e recensioni sono pubblici: sono le pagine che devono
                         // essere indicizzate.
                         .requestMatchers(HttpMethod.GET, "/products/**", "/reviews/product/**").permitAll()
-                        .requestMatchers("/auth/register", "/auth/login", "/auth/forgot-password",
-                                "/auth/reset-password", "/newsletter/**").permitAll()
+                        .requestMatchers("/auth/register", "/auth/login").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .exceptionHandling(ex -> ex

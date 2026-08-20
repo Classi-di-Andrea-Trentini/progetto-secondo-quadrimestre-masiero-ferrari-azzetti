@@ -120,8 +120,4 @@ public class OrderService {
                 .toList());
         return map;
     }
-
-    List<Order> raw(UUID userId) {
-        return orders.findAll();
-    }
 }
