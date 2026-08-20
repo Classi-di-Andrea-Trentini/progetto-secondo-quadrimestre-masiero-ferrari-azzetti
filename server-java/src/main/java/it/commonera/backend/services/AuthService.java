@@ -37,6 +37,13 @@ public class AuthService {
         user.setEmail(email.trim().toLowerCase());
         user.setPasswordHash(encoder.encode(password));
         user.setFullName(fullName.trim());
+        // Non esiste ancora un vero invio email di verifica in questo ambiente (nessuna
+        // credenziale SMTP/Resend garantita), quindi l'account viene marcato verificato
+        // subito alla registrazione: senza questo, isEmailVerified() resta sempre false
+        // e login() rifiuta ogni utente registrato tramite l'API pubblica. Il meccanismo
+        // di gate (colonna + controllo in isEmailVerified()) resta: quando arrivera' un
+        // vero flusso di verifica via email, questa e' l'unica riga da cambiare.
+        user.setEmailVerifiedAt(LocalDateTime.now());
         return users.save(user);
     }
 
