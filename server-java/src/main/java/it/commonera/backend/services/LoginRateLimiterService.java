@@ -45,11 +45,23 @@ public class LoginRateLimiterService {
             }
             return new Attempts(record.count() + 1, record.windowStart());
         });
+        // Sfoltimento opportunistico: un fallimento contro un indirizzo che non
+        // esiste occupa comunque una voce nella mappa, e nessuno la rimuove mai
+        // (recordSuccess() pulisce solo la propria chiave). Senza questo, un
+        // attaccante che prova N indirizzi a caso alloca N voci per sempre —
+        // crescita illimitata della memoria. Basta controllare le voci la cui
+        // finestra e' gia' scaduta a ogni scrittura: non serve un thread
+        // schedulato dedicato per tenere la mappa limitata nella pratica.
+        pruneExpired();
     }
 
     /** Login riuscito: la lavagna dei tentativi falliti si pulisce. */
     public void recordSuccess(String identifier) {
         attempts.remove(key(identifier));
+    }
+
+    private void pruneExpired() {
+        attempts.entrySet().removeIf(e -> windowExpired(e.getValue()));
     }
 
     private boolean windowExpired(Attempts record) {
@@ -58,6 +70,21 @@ public class LoginRateLimiterService {
 
     private String key(String identifier) {
         return identifier == null ? "" : identifier.trim().toLowerCase();
+    }
+
+    /** Solo per i test: quante voci sono attualmente tracciate in mappa. */
+    int size() {
+        return attempts.size();
+    }
+
+    /**
+     * Solo per i test: forza la scadenza della finestra di un identificativo
+     * gia' presente, per verificare lo sfoltimento senza dover aspettare
+     * {@link #WINDOW} per davvero.
+     */
+    void forceExpiry(String identifier) {
+        attempts.computeIfPresent(key(identifier),
+                (k, record) -> new Attempts(record.count(), Instant.now().minus(WINDOW).minusSeconds(1)));
     }
 
     private record Attempts(int count, Instant windowStart) {}
