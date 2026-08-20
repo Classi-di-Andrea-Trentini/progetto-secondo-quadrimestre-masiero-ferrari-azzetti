@@ -281,4 +281,71 @@ class OrderServiceTest extends AbstractIntegrationTest {
                 .isEqualByComparingTo("30.00");
         assertThat(loyaltyEntries.balanceOf(buyer.getId())).isEqualTo(1000);
     }
+
+    /**
+     * Fix C (1): buono regalo con saldo maggiore del totale dell'ordine.
+     * Corretto per ispezione del codice ({@link GiftCardService#redeem} scala
+     * solo {@code min(saldo, dovuto)}, e l'annullamento rimborsa esattamente
+     * {@code order.getGiftCardAmount()}, cioe' quanto scalato per
+     * quell'ordine e non il saldo residuo della carta) ma senza copertura di
+     * test: e' il caso in cui un bug darebbe via soldi in silenzio, quindi
+     * vale la pena verificarlo esplicitamente. Prodotto a 90,10, spedizione
+     * standard 4,90 (sotto la soglia di spedizione gratuita a 100): totale
+     * ordine 95,00 contro un buono da 200,00.
+     */
+    @Test
+    void cancellingOrderRefundsExactlyWhatWasAppliedWhenGiftCardExceedsOrderTotal() {
+        // Categoria e prodotto dedicati, con un prezzo scelto apposta (non i 50.00
+        // del fixture condiviso) per ottenere un totale ordine di 95.00 esatti.
+        var category = new Category();
+        category.setName("Categoria Buono Grande");
+        category.setSlug("categoria-buono-grande-" + UUID.randomUUID());
+        em.persist(category);
+
+        var expensiveProduct = new Product();
+        expensiveProduct.setCategory(category);
+        expensiveProduct.setName("Prodotto Sotto Soglia Spedizione");
+        expensiveProduct.setSlug("prodotto-sotto-soglia-" + UUID.randomUUID());
+        expensiveProduct.setBasePrice(new BigDecimal("90.10"));
+        em.persist(expensiveProduct);
+
+        var expensiveVariant = new ProductVariant();
+        expensiveVariant.setProduct(expensiveProduct);
+        expensiveVariant.setSku("SKU-" + UUID.randomUUID());
+        expensiveVariant.setStockQty(5);
+        em.persist(expensiveVariant);
+        em.flush();
+
+        var card = giftCardService.issue(null, new BigDecimal("200.00"), "Test", null);
+        em.flush();
+        em.clear();
+
+        var request = new CheckoutService.Request(
+                address.getId(),
+                List.of(new CheckoutService.Line(expensiveVariant.getId(), 1)),
+                "standard",
+                null,
+                card.getCode(),
+                null,
+                null);
+
+        var result = checkout.placeOrder(buyer.getId(), request);
+        UUID orderId = (UUID) result.get("orderId");
+        em.flush();
+        em.clear();
+
+        // 90.10 di subtotale + 4.90 di spedizione standard = 95.00 dovuti; il buono
+        // da 200 copre tutto e scala esattamente 95.00, non l'intero saldo.
+        assertThat(giftCardRepo.findById(card.getId()).orElseThrow().getCurrentBalance())
+                .isEqualByComparingTo("105.00");
+
+        orderService.cancel(buyer.getId(), orderId);
+        em.flush();
+        em.clear();
+
+        // Il saldo torna esattamente a 200.00: non di piu' (rimborso raddoppiato),
+        // non di meno (rimborso parziale).
+        assertThat(giftCardRepo.findById(card.getId()).orElseThrow().getCurrentBalance())
+                .isEqualByComparingTo("200.00");
+    }
 }
