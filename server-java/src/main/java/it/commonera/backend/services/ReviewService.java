@@ -70,8 +70,23 @@ public class ReviewService {
         if (review.getPhotos().size() >= MAX_PHOTOS) {
             throw ApiException.badRequest("At most " + MAX_PHOTOS + " photos per review");
         }
-        review.getPhotos().add(url);
+        review.getPhotos().add(requireHttpUrl(url));
         return view(reviews.save(review));
+    }
+
+    /**
+     * L'URL torna cosi' com'e' in ogni pagina che mostra la recensione: senza
+     * limitare lo schema a http/https, un `javascript:` o `data:` salvato qui
+     * diventerebbe uno XSS memorizzato la prima volta che qualcuno apre la foto.
+     */
+    private String requireHttpUrl(String url) {
+        if (url == null) throw ApiException.badRequest("Photo URL is required");
+        String trimmed = url.trim();
+        String lower = trimmed.toLowerCase();
+        if (!lower.startsWith("http://") && !lower.startsWith("https://")) {
+            throw ApiException.badRequest("Photo URL must start with http:// or https://");
+        }
+        return trimmed;
     }
 
     @Transactional
