@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -347,5 +348,163 @@ class OrderServiceTest extends AbstractIntegrationTest {
         // non di meno (rimborso parziale).
         assertThat(giftCardRepo.findById(card.getId()).orElseThrow().getCurrentBalance())
                 .isEqualByComparingTo("200.00");
+    }
+
+    /**
+     * Fix D: la guardia atomica dentro {@link OrderService#cancel} (l'`UPDATE ...
+     * WHERE status IN (...)` di {@link OrderRepository#updateStatusIfCurrentIn},
+     * letta per righe toccate) non aveva un test che la esercitasse per davvero
+     * passando da {@code cancel()}. I due test sopra non ci arrivano: uno chiama
+     * il repository direttamente (bypassa {@code cancel()} del tutto), l'altro
+     * viene respinto prima, dal controllo di stato in memoria a inizio metodo
+     * (l'ordine e' gia' "cancelled" quando lo si ricarica dopo un {@code em.clear()}).
+     *
+     * Per riprodurre in modo deterministico, senza thread veri in corsa, il caso
+     * in cui il controllo in memoria vede uno stato annullabile ma la riga vera
+     * nel database non lo e' piu': si carica l'ordine in un'entita' gestita
+     * ({@code orderRepository.findById}) mentre lo stato e' ancora "paid", POI si
+     * sposta la riga reale con la stessa query di update condizionale usata da
+     * {@code cancel()} (una bulk update bypassa la persistence context, quindi
+     * non tocca il campo Java dell'entita' gia' gestita). A quel punto
+     * {@code cancel()} rilegge l'ordine: la persistence context Hibernate
+     * restituisce l'istanza gia' gestita (stessa identita', stesso stato "paid"
+     * ancora in memoria) invece di rileggere la riga fresca, quindi il controllo
+     * iniziale passa — ma l'update atomica sulla riga vera (ormai "shipped")
+     * tocca zero righe, ed e' quel percorso, non il controllo in memoria, che
+     * deve far fallire l'annullamento qui.
+     */
+    @Test
+    void cancelThrowsWhenAtomicGuardAffectsZeroRowsEvenIfInMemoryCheckStillSeesCancellable() {
+        loyaltyService.award(buyer.getId(), null, new BigDecimal("1000"));
+        em.flush();
+        em.clear();
+
+        var card = giftCardService.issue(null, new BigDecimal("30.00"), "Test", null);
+        em.flush();
+        em.clear();
+
+        var request = new CheckoutService.Request(
+                address.getId(),
+                List.of(new CheckoutService.Line(variant.getId(), 2)),
+                "standard",
+                null,
+                card.getCode(),
+                500,
+                null);
+
+        var result = checkout.placeOrder(buyer.getId(), request);
+        UUID orderId = (UUID) result.get("orderId");
+        em.flush();
+        em.clear();
+
+        int stockAfterCheckout = variants.findById(variant.getId()).orElseThrow().getStockQty();
+        BigDecimal giftCardAfterCheckout = giftCardRepo.findById(card.getId()).orElseThrow().getCurrentBalance();
+        int loyaltyAfterCheckout = loyaltyEntries.balanceOf(buyer.getId());
+
+        // Pin: carica l'ordine (stato "paid", annullabile) nella persistence
+        // context di questa transazione, PRIMA di spostare la riga reale.
+        var pinned = orderRepository.findById(orderId).orElseThrow();
+        assertThat(OrderService.CANCELLABLE).contains(pinned.getStatus());
+
+        // La riga vera passa a uno stato non annullabile con la stessa query
+        // atomica usata da cancel(): bulk update, bypassa la persistence context,
+        // "pinned" resta con lo stato vecchio in memoria.
+        int moved = orderRepository.updateStatusIfCurrentIn(orderId, OrderStatus.shipped, Set.of(pinned.getStatus()));
+        assertThat(moved).isEqualTo(1);
+
+        // Prova diretta che il pin ha funzionato come previsto, non solo per
+        // ispezione del codice: una query nativa (non passa dall'identity map
+        // delle entita', restituisce una stringa scalare) vede la riga vera gia'
+        // "shipped", mentre l'oggetto Java gia' gestito e' rimasto "paid".
+        String realStatus = (String) em.createNativeQuery("select status::text from orders where id = ?1")
+                .setParameter(1, orderId)
+                .getSingleResult();
+        assertThat(realStatus).isEqualTo("shipped");
+        assertThat(pinned.getStatus()).isEqualTo(OrderStatus.paid);
+
+        // cancel() rilegge l'ordine: trova l'istanza gia' gestita (stato ancora
+        // "paid" in memoria, come appena verificato sopra), supera il controllo
+        // iniziale, ma l'update atomica sulla riga vera (ormai "shipped") tocca
+        // zero righe — e' quel percorso, non il controllo in memoria, a far
+        // fallire l'annullamento qui.
+        assertThatThrownBy(() -> orderService.cancel(buyer.getId(), orderId))
+                .isInstanceOf(ApiException.class)
+                .hasMessageContaining("no longer be cancelled");
+
+        em.flush();
+        em.clear();
+
+        // Nessun effetto collaterale: ne' giacenza, ne' buono, ne' punti si sono
+        // mossi rispetto a subito dopo il checkout.
+        assertThat(variants.findById(variant.getId()).orElseThrow().getStockQty()).isEqualTo(stockAfterCheckout);
+        assertThat(giftCardRepo.findById(card.getId()).orElseThrow().getCurrentBalance())
+                .isEqualByComparingTo(giftCardAfterCheckout);
+        assertThat(loyaltyEntries.balanceOf(buyer.getId())).isEqualTo(loyaltyAfterCheckout);
+    }
+
+    /**
+     * Nota del reviewer sul bug originale: il caso specifico che faceva sparire
+     * la protezione "per caso" del vecchio vincolo UNIQUE(order_id, reason) e'
+     * quello in cui i punti guadagnati da un ordine sono esattamente uguali a
+     * quelli spesi — delta netto zero. Con il movimento netto singolo di
+     * {@link LoyaltyService#reverseForOrder} un delta zero non scrive nessun
+     * movimento (early return su {@code net == 0}); qui si verifica esplicitamente
+     * questo caso limite invece di fidarsi solo dell'ispezione del codice.
+     *
+     * Prodotto a 505.00: con 500 punti spesi (5.00 di sconto) l'imponibile
+     * scontato e' 500.00 esatti, quindi vengono accreditati esattamente 500
+     * punti — stesso numero di quelli spesi per questo ordine, delta netto zero.
+     */
+    @Test
+    void cancellingOrderWithNetZeroLoyaltyDeltaLeavesBalanceUnchanged() {
+        var category = new Category();
+        category.setName("Categoria Punti Netti Zero");
+        category.setSlug("categoria-punti-netti-zero-" + UUID.randomUUID());
+        em.persist(category);
+
+        var product = new Product();
+        product.setCategory(category);
+        product.setName("Prodotto Punti Netti Zero");
+        product.setSlug("prodotto-punti-netti-zero-" + UUID.randomUUID());
+        product.setBasePrice(new BigDecimal("505.00"));
+        em.persist(product);
+
+        var pricedVariant = new ProductVariant();
+        pricedVariant.setProduct(product);
+        pricedVariant.setSku("SKU-" + UUID.randomUUID());
+        pricedVariant.setStockQty(5);
+        em.persist(pricedVariant);
+        em.flush();
+
+        loyaltyService.award(buyer.getId(), null, new BigDecimal("1000"));
+        em.flush();
+        em.clear();
+        int balanceBeforeOrder = loyaltyEntries.balanceOf(buyer.getId());
+
+        var request = new CheckoutService.Request(
+                address.getId(),
+                List.of(new CheckoutService.Line(pricedVariant.getId(), 1)),
+                "standard",
+                null,
+                null,
+                500,
+                null);
+
+        var result = checkout.placeOrder(buyer.getId(), request);
+        UUID orderId = (UUID) result.get("orderId");
+        em.flush();
+        em.clear();
+
+        // 500 punti spesi (-5.00) e 500 punti accreditati sull'imponibile scontato
+        // (505.00 - 5.00 = 500.00): il saldo non si e' mosso, il delta per questo
+        // ordine e' gia' zero prima ancora di annullare.
+        assertThat(loyaltyEntries.balanceOf(buyer.getId())).isEqualTo(balanceBeforeOrder);
+
+        orderService.cancel(buyer.getId(), orderId);
+        em.flush();
+        em.clear();
+
+        assertThat(loyaltyEntries.balanceOf(buyer.getId())).isEqualTo(balanceBeforeOrder);
+        assertThat(variants.findById(pricedVariant.getId()).orElseThrow().getStockQty()).isEqualTo(5);
     }
 }
