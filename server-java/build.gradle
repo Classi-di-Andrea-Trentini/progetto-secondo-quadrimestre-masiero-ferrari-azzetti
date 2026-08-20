@@ -46,9 +46,12 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     // Il BOM di Spring Boot 4 non gestisce piu' le versioni di Testcontainers.
+    // Testcontainers 2.x ha rinominato gli artifact dei moduli con il prefisso
+    // "testcontainers-" (prima erano "junit-jupiter"/"postgresql" senza prefisso):
+    // le coordinate della 1.x non risolvono piu' contro questo BOM.
     testImplementation platform('org.testcontainers:testcontainers-bom:2.0.5')
-    testImplementation 'org.testcontainers:junit-jupiter'
-    testImplementation 'org.testcontainers:postgresql'
+    testImplementation 'org.testcontainers:testcontainers-junit-jupiter'
+    testImplementation 'org.testcontainers:testcontainers-postgresql'
 }
 
 tasks.named('test') {
