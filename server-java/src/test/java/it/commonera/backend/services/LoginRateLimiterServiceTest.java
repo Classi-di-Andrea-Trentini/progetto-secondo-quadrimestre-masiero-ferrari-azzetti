@@ -72,6 +72,11 @@ class LoginRateLimiterServiceTest {
      * senza limite. Qui si forza la scadenza della finestra di una voce (senza
      * aspettare i 15 minuti veri) e si verifica che una scrittura successiva
      * la faccia sparire dalla mappa.
+     *
+     * {@code forceSweepDue()} bypassa il debounce fra due sfoltimenti pieni
+     * (Fix E, vedi sotto): senza, questo test dipenderebbe dai millisecondi
+     * veri trascorsi fra le due chiamate, ben sotto i 30 secondi di
+     * {@code SWEEP_INTERVAL}.
      */
     @Test
     void prunesExpiredEntriesOpportunisticallyOnWrite() {
@@ -82,9 +87,11 @@ class LoginRateLimiterServiceTest {
         assertThat(limiter.size()).isEqualTo(1);
 
         limiter.forceExpiry(stale);
+        limiter.forceSweepDue();
 
-        // Qualunque scrittura successiva (anche per un altro indirizzo) sfoltisce
-        // le voci scadute: non serve un thread schedulato dedicato.
+        // Una scrittura successiva (anche per un altro indirizzo), con lo
+        // sfoltimento forzato a essere dovuto, sfoltisce le voci scadute: non
+        // serve un thread schedulato dedicato.
         limiter.recordFailure("another-never-registered@example.com");
 
         assertThat(limiter.size()).isEqualTo(1);
@@ -92,5 +99,48 @@ class LoginRateLimiterServiceTest {
         // forzata l'indirizzo stale torna a comportarsi come se non fosse mai
         // stato visto.
         assertThatCode(() -> limiter.checkAllowed(stale)).doesNotThrowAnyException();
+    }
+
+    /**
+     * Fix E: {@code recordFailure} leggeva {@code Instant.now()} e allocava una
+     * {@code Duration} per ogni voce ripassata dallo sfoltimento pieno, a ogni
+     * singola chiamata — durante una raffica di N identificativi tutti diversi
+     * (esattamente l'attacco per cui esiste lo sfoltimento) il colpo k-esimo
+     * ripassava k-1 voci: O(N^2) sull'intera raffica, un DoS sulla CPU al posto
+     * di quello sulla memoria che lo sfoltimento doveva chiudere.
+     *
+     * Non e' pratico misurare la CPU qui dentro; quello che si puo' verificare
+     * senza dipendere dai tempi reali e' la proprieta' che lo sfoltimento deve
+     * comunque garantire: una volta che le voci scadono per davvero, la
+     * scrittura successiva le fa sparire, a prescindere da quante fossero.
+     * Durante una raffica ancora dentro la finestra dei 15 minuti nessuna voce
+     * puo' scadere per davvero (ne' questa implementazione ne' una piu' ingenua
+     * lo farebbe correttamente) — la mappa cresce finche' la raffica dura, e va
+     * bene cosi': il fix riguarda la CPU spesa per arrivarci, non un limite
+     * istantaneo di memoria a meta' raffica.
+     */
+    @Test
+    void mapSizeStaysBoundedAfterEntriesExpireEvenAfterALargeBurstOfDistinctIdentifiers() {
+        var limiter = new LoginRateLimiterService();
+        int burstSize = 5_000;
+
+        for (int i = 0; i < burstSize; i++) {
+            limiter.recordFailure("attacker-" + i + "@example.com");
+        }
+        // Nessuna di queste voci e' scaduta per davvero: la mappa cresce con la
+        // raffica, com'e' corretto che sia.
+        assertThat(limiter.size()).isEqualTo(burstSize);
+
+        for (int i = 0; i < burstSize; i++) {
+            limiter.forceExpiry("attacker-" + i + "@example.com");
+        }
+        limiter.forceSweepDue();
+
+        // Una sola scrittura successiva, con lo sfoltimento dovuto, riporta la
+        // mappa a contenere solo la voce nuova: l'intera raffica scaduta sparisce
+        // in un colpo solo, la proprieta' di sfoltimento resta garantita.
+        limiter.recordFailure("attacker-" + burstSize + "@example.com");
+
+        assertThat(limiter.size()).isEqualTo(1);
     }
 }
