@@ -9,31 +9,30 @@ services:
     depends_on:
       - backend
 
+  # Backend di produzione: la riscrittura Java (server-java/). Il backend Node
+  # (server/) resta nel repo come riferimento e si puo' ancora far girare a mano
+  # con `./server/...` o `npm run start:dev`, ma non e' piu' agganciato al compose.
   backend:
-    build: ./server
+    build: ./server-java
     ports:
       - "3000:3000"
     env_file:
       - ./.env
     environment:
+      # Stessa porta che il frontend si aspetta gia' su http://backend:3000: si
+      # cambia questa variabile, non il proxy del frontend.
       PORT: 3000
-      NODE_ENV: development
-      DATABASE_URL: postgresql://user:password@db:5432/mydb
-      DB_HOST: db
-      DB_PORT: 5432
+      DATABASE_URL_JDBC: jdbc:postgresql://db:5432/mydb
       DB_USER: user
-      DB_PASSWORD: password
-      DB_NAME: mydb
+      # Stesso trattamento "nessun default" di JWT_SECRET qui sotto: vedi il
+      # commento su DB_PASSWORD nel servizio `db`.
+      DB_PASSWORD: "${DB_PASSWORD:?manca DB_PASSWORD nel file .env, generala con openssl rand -base64 32}"
       # Prende il valore dal file .env (vedi .env.example). Il `:?` fa fallire subito
       # `docker compose up` con un messaggio chiaro se manca, invece di far partire l'app
       # con un segreto che sta scritto in chiaro in un file versionato — come era prima.
       JWT_SECRET: "${JWT_SECRET:?manca JWT_SECRET nel file .env, generala con openssl rand -base64 64}"
       FRONTEND_URL: http://localhost:4200
       BACKEND_URL: http://localhost:3000
-    volumes:
-      - ./server:/app
-      - /app/node_modules
-      - uploads:/app/uploads
     depends_on:
       db:
         condition: service_healthy
@@ -42,7 +41,10 @@ services:
     image: postgres:16-alpine
     environment:
       POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
+      # Nessun default (prima era "password" in chiaro nel file). Stessa variabile
+      # DB_PASSWORD usata dal backend, cosi' i due restano sincronizzati: cambiarla
+      # richiede di toccare solo il file .env.
+      POSTGRES_PASSWORD: "${DB_PASSWORD:?manca DB_PASSWORD nel file .env, generala con openssl rand -base64 32}"
       POSTGRES_DB: mydb
     volumes:
       - pgdata:/var/lib/postgresql/data
