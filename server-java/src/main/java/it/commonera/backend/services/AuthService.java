@@ -19,12 +19,15 @@ public class AuthService {
     private final SessionRepository sessions;
     private final PasswordEncoder encoder;
     private final JwtService jwt;
+    private final LoginRateLimiterService rateLimiter;
 
-    public AuthService(UserRepository users, SessionRepository sessions, PasswordEncoder encoder, JwtService jwt) {
+    public AuthService(UserRepository users, SessionRepository sessions, PasswordEncoder encoder, JwtService jwt,
+                       LoginRateLimiterService rateLimiter) {
         this.users = users;
         this.sessions = sessions;
         this.encoder = encoder;
         this.jwt = jwt;
+        this.rateLimiter = rateLimiter;
     }
 
     @Transactional
@@ -56,6 +59,10 @@ public class AuthService {
      */
     @Transactional
     public Issued login(String email, String password, String userAgent) {
+        // Bloccato prima ancora di leggere l'utente: un identificativo in cooldown
+        // non deve regalare un altro confronto BCrypt a chi sta indovinando password.
+        rateLimiter.checkAllowed(email);
+
         var found = users.findByEmailIgnoreCase(email)
                 .filter(u -> u.getDeletedAt() == null && Boolean.TRUE.equals(u.getIsActive()));
 
@@ -63,6 +70,7 @@ public class AuthService {
         boolean ok = encoder.matches(password, hash);
 
         if (found.isEmpty() || !ok) {
+            rateLimiter.recordFailure(email);
             throw ApiException.unauthorized("Credenziali non valide");
         }
 
@@ -86,6 +94,7 @@ public class AuthService {
         sessions.save(saved);
 
         user.setLastLoginAt(LocalDateTime.now());
+        rateLimiter.recordSuccess(email);
         return new Issued(user, token);
     }
 
