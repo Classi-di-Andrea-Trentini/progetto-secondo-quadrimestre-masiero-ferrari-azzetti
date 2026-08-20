@@ -20,8 +20,13 @@ import java.util.UUID;
 @Service
 public class OrderService {
 
-    /** Oltre questi stati la merce e' gia' partita: annullare non ha piu' senso. */
-    private static final Set<OrderStatus> CANCELLABLE =
+    /**
+     * Oltre questi stati la merce e' gia' partita: annullare non ha piu' senso.
+     * Non {@code private}: riusata dal test che esercita direttamente
+     * {@link OrderRepository#updateStatusIfCurrentIn} per provare che la
+     * seconda transizione concorrente su uno stesso ordine tocca zero righe.
+     */
+    static final Set<OrderStatus> CANCELLABLE =
             Set.of(OrderStatus.pending, OrderStatus.paid, OrderStatus.processing);
 
     private final OrderRepository orders;
@@ -66,6 +71,17 @@ public class OrderService {
             throw ApiException.badRequest("Order can no longer be cancelled");
         }
 
+        // Transizione atomica **come primo scalo**, prima di toccare buono e punti:
+        // senza `@Version` sull'ordine, due `cancel()` concorrenti leggerebbero
+        // entrambi lo stato annullabile controllato qui sopra e rimborserebbero
+        // entrambi. Se qui non viene toccata nessuna riga, l'altra richiesta e'
+        // arrivata prima — niente rimborso doppio, a prescindere da cos'altro
+        // protegga (o non protegga) la parte punti/buono piu' sotto.
+        if (orders.updateStatusIfCurrentIn(order.getId(), OrderStatus.cancelled, CANCELLABLE) == 0) {
+            throw ApiException.badRequest("Order can no longer be cancelled");
+        }
+        order.setStatus(OrderStatus.cancelled);
+
         // La merce torna a magazzino: annullare senza ripristinare la giacenza
         // significa perdere pezzi che nessuno ha mai comprato.
         for (var item : order.getItems()) {
@@ -85,7 +101,6 @@ public class OrderService {
         }
         loyalty.reverseForOrder(order.getUserId(), order.getId());
 
-        order.setStatus(OrderStatus.cancelled);
         var entry = new OrderStatusHistory();
         entry.setOrder(order);
         entry.setStatus(OrderStatus.cancelled);

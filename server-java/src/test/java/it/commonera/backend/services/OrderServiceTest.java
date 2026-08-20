@@ -2,12 +2,15 @@ package it.commonera.backend.services;
 
 import it.commonera.backend.AbstractIntegrationTest;
 import it.commonera.backend.entities.Category;
+import it.commonera.backend.entities.OrderStatus;
 import it.commonera.backend.entities.Product;
 import it.commonera.backend.entities.ProductVariant;
 import it.commonera.backend.entities.User;
 import it.commonera.backend.entities.UserAddress;
+import it.commonera.backend.exceptions.ApiException;
 import it.commonera.backend.repositories.GiftCardRepository;
 import it.commonera.backend.repositories.LoyaltyEntryRepository;
+import it.commonera.backend.repositories.OrderRepository;
 import it.commonera.backend.repositories.ProductVariantRepository;
 import it.commonera.backend.repositories.UserAddressRepository;
 import it.commonera.backend.repositories.UserRepository;
@@ -23,6 +26,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Fix 2: annullare un ordine ripristinava la giacenza ma non toccava buono
@@ -62,6 +66,8 @@ class OrderServiceTest extends AbstractIntegrationTest {
     private CheckoutService checkout;
     @Autowired
     private OrderService orderService;
+    @Autowired
+    private OrderRepository orderRepository;
     @PersistenceContext
     private EntityManager em;
 
@@ -182,5 +188,97 @@ class OrderServiceTest extends AbstractIntegrationTest {
         assertThat(variants.findById(variant.getId()).orElseThrow().getStockQty()).isEqualTo(10);
         // Nessun buono/punti coinvolti in questo ordine: nessun movimento da annullare.
         assertThat(loyaltyEntries.balanceOf(buyer.getId())).isZero();
+    }
+
+    /**
+     * Fix B: senza `@Version` sull'ordine, due {@link OrderService#cancel}
+     * concorrenti sullo stesso ordine potevano leggere entrambi uno stato
+     * annullabile e rimborsare entrambi buono regalo e punti — la protezione
+     * "accidentale" del vincolo unico su {@code loyalty_entries} spariva
+     * proprio quando {@link LoyaltyService#reverseForOrder} non scriveva
+     * nessuna riga (delta punti netto zero). Qui si esercita direttamente
+     * {@link OrderRepository#updateStatusIfCurrentIn}, la transizione atomica
+     * che chiude la corsa, due volte in sequenza sullo stesso ordine: e'
+     * esattamente cio' che succederebbe se due richieste concorrenti
+     * superassero entrambe il controllo di stato in memoria e arrivassero qui
+     * una dopo l'altra. La seconda deve toccare zero righe, a prescindere da
+     * cosa succeda al saldo punti.
+     */
+    @Test
+    void secondConditionalCancelTransitionOnSameOrderAffectsNoRows() {
+        var request = new CheckoutService.Request(
+                address.getId(),
+                List.of(new CheckoutService.Line(variant.getId(), 1)),
+                "standard",
+                null,
+                null,
+                null,
+                null);
+
+        var result = checkout.placeOrder(buyer.getId(), request);
+        UUID orderId = (UUID) result.get("orderId");
+        em.flush();
+        em.clear();
+
+        int first = orderRepository.updateStatusIfCurrentIn(orderId, OrderStatus.cancelled, OrderService.CANCELLABLE);
+        assertThat(first).isEqualTo(1);
+        em.flush();
+        em.clear();
+
+        int second = orderRepository.updateStatusIfCurrentIn(orderId, OrderStatus.cancelled, OrderService.CANCELLABLE);
+        assertThat(second).isZero();
+    }
+
+    /**
+     * Fix C (2): un secondo {@link OrderService#cancel} sullo stesso ordine,
+     * gia' annullato dal primo, deve essere rifiutato e non deve toccare di
+     * nuovo ne' il saldo del buono ne' i punti fedelta'. Diversamente dal test
+     * sopra, qui si chiama {@code cancel()} due volte per davvero (in
+     * sequenza, non in corse concorrenti): il rifiuto arriva gia' dal
+     * controllo di stato in memoria a inizio metodo, ma il risultato
+     * finanziario e' lo stesso che deve garantire la guardia atomica.
+     */
+    @Test
+    void cancellingAlreadyCancelledOrderIsRejectedAndDoesNotDoubleRefund() {
+        loyaltyService.award(buyer.getId(), null, new BigDecimal("1000"));
+        em.flush();
+        em.clear();
+
+        var card = giftCardService.issue(null, new BigDecimal("30.00"), "Test", null);
+        em.flush();
+        em.clear();
+
+        var request = new CheckoutService.Request(
+                address.getId(),
+                List.of(new CheckoutService.Line(variant.getId(), 2)),
+                "standard",
+                null,
+                card.getCode(),
+                500,
+                null);
+
+        var result = checkout.placeOrder(buyer.getId(), request);
+        UUID orderId = (UUID) result.get("orderId");
+        em.flush();
+        em.clear();
+
+        orderService.cancel(buyer.getId(), orderId);
+        em.flush();
+        em.clear();
+
+        assertThat(giftCardRepo.findById(card.getId()).orElseThrow().getCurrentBalance())
+                .isEqualByComparingTo("30.00");
+        assertThat(loyaltyEntries.balanceOf(buyer.getId())).isEqualTo(1000);
+
+        assertThatThrownBy(() -> orderService.cancel(buyer.getId(), orderId))
+                .isInstanceOf(ApiException.class)
+                .hasMessageContaining("no longer be cancelled");
+        em.flush();
+        em.clear();
+
+        // Il tentativo respinto non deve aver toccato di nuovo buono o punti.
+        assertThat(giftCardRepo.findById(card.getId()).orElseThrow().getCurrentBalance())
+                .isEqualByComparingTo("30.00");
+        assertThat(loyaltyEntries.balanceOf(buyer.getId())).isEqualTo(1000);
     }
 }

@@ -1,10 +1,15 @@
 package it.commonera.backend.repositories;
 
 import it.commonera.backend.entities.Order;
+import it.commonera.backend.entities.OrderStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -12,4 +17,17 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
     Page<Order> findByUserIdOrderByCreatedAtDesc(UUID userId, Pageable pageable);
     Optional<Order> findByIdAndUserId(UUID id, UUID userId);
     long countByInvoiceNumberStartingWith(String prefix);
+
+    /**
+     * Transizione di stato **condizionale**: senza `@Version` sull'ordine, due
+     * `cancel()` concorrenti sullo stesso ordine leggerebbero entrambi uno
+     * stato annullabile e rimborserebbero entrambi buono regalo e punti. Se
+     * qui non viene toccata nessuna riga, qualcun altro e' arrivato prima (o
+     * l'ordine non era piu' annullabile), e chi chiama non deve procedere col
+     * rimborso.
+     */
+    @Modifying
+    @Query("update Order o set o.status = :newStatus where o.id = :id and o.status in :from")
+    int updateStatusIfCurrentIn(@Param("id") UUID id, @Param("newStatus") OrderStatus newStatus,
+                                 @Param("from") Collection<OrderStatus> from);
 }
