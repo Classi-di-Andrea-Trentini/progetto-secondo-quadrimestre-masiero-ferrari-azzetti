@@ -1,10 +1,17 @@
 package it.commonera.backend.controllers;
 
 import it.commonera.backend.dtos.AdminDtos;
+import it.commonera.backend.dtos.PromoCodeDtos;
+import it.commonera.backend.dtos.ReturnDtos;
 import it.commonera.backend.entities.GiftCard;
+import it.commonera.backend.entities.OrderReturn;
+import it.commonera.backend.entities.PromoCode;
+import it.commonera.backend.exceptions.ApiException;
 import it.commonera.backend.security.CurrentUser;
 import it.commonera.backend.services.AdminService;
 import it.commonera.backend.services.GiftCardService;
+import it.commonera.backend.services.PromoCodeService;
+import it.commonera.backend.services.ReturnService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -27,10 +34,15 @@ public class AdminController {
 
     private final AdminService admin;
     private final GiftCardService giftCards;
+    private final PromoCodeService promoCodes;
+    private final ReturnService returns;
 
-    public AdminController(AdminService admin, GiftCardService giftCards) {
+    public AdminController(AdminService admin, GiftCardService giftCards,
+                           PromoCodeService promoCodes, ReturnService returns) {
         this.admin = admin;
         this.giftCards = giftCards;
+        this.promoCodes = promoCodes;
+        this.returns = returns;
     }
 
     @GetMapping("/dashboard/stats")
@@ -145,13 +157,16 @@ public class AdminController {
     }
 
     // ─── Immagini ───────────────────────────────────────────────────────────
-    // Solo per URL: niente upload multipart (niente storage su disco/servizio
-    // esterno configurato in questo backend). Un amministratore incolla l'URL
-    // dell'immagine gia' ospitata altrove.
 
     @PostMapping("/products/{id}/images")
     public Map<String, Object> addImage(@PathVariable UUID id, @RequestBody AdminDtos.CreateImageRequest body) {
         return admin.addImage(id, body.url(), body.altText(), body.sortOrder(), body.isCover());
+    }
+
+    @PostMapping(value = "/products/{id}/images/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Map<String, Object> uploadImage(@PathVariable UUID id,
+                                           @RequestParam("file") org.springframework.web.multipart.MultipartFile file) {
+        return admin.uploadImage(id, file);
     }
 
     @DeleteMapping("/products/{id}/images/{imageId}")
@@ -205,6 +220,69 @@ public class AdminController {
     @DeleteMapping("/reviews/{id}")
     public Map<String, String> deleteReview(@PathVariable UUID id) {
         return admin.deleteReview(id);
+    }
+
+    // ─── Codici promo ───────────────────────────────────────────────────────
+    // Endpoint dimenticati nella prima passata: il servizio esisteva già
+    // (validate/CRUD), ma non era mai stato agganciato a un controller admin —
+    // la pagina "Promo" del frontend chiamava un URL che non rispondeva.
+
+    @GetMapping("/promo-codes")
+    public Map<String, Object> getPromoCodes(@RequestParam(required = false) Boolean isActive,
+                                             @RequestParam(required = false) String discountType,
+                                             @RequestParam(required = false) String search,
+                                             @RequestParam(defaultValue = "1") int page,
+                                             @RequestParam(defaultValue = "20") int limit) {
+        return promoCodes.adminList(isActive, parseDiscountType(discountType), search, page, limit);
+    }
+
+    @PostMapping("/promo-codes")
+    public PromoCodeDtos.View createPromoCode(@RequestBody PromoCodeDtos.CreateRequest body) {
+        return promoCodes.create(body);
+    }
+
+    @PatchMapping("/promo-codes/{id}")
+    public PromoCodeDtos.View updatePromoCode(@PathVariable UUID id, @RequestBody PromoCodeDtos.UpdateRequest body) {
+        return promoCodes.update(id, body);
+    }
+
+    @DeleteMapping("/promo-codes/{id}")
+    public Map<String, String> deletePromoCode(@PathVariable UUID id) {
+        return promoCodes.delete(id);
+    }
+
+    private PromoCode.DiscountType parseDiscountType(String value) {
+        if (value == null || value.isBlank()) return null;
+        try {
+            return PromoCode.DiscountType.valueOf(value);
+        } catch (IllegalArgumentException e) {
+            throw ApiException.badRequest("Invalid discount type: " + value);
+        }
+    }
+
+    // ─── Resi (admin) ───────────────────────────────────────────────────────
+    // Stesso buco dei codici promo: il servizio c'era, il controller no.
+
+    @GetMapping("/returns")
+    public Map<String, Object> getReturns(@RequestParam(required = false) String status,
+                                          @RequestParam(required = false) String search,
+                                          @RequestParam(defaultValue = "1") int page,
+                                          @RequestParam(defaultValue = "20") int limit) {
+        return returns.adminList(parseReturnStatus(status), search, page, limit);
+    }
+
+    @PatchMapping("/returns/{id}/status")
+    public ReturnDtos.View updateReturnStatus(@PathVariable UUID id, @RequestBody ReturnDtos.UpdateStatusRequest body) {
+        return returns.updateStatus(id, body);
+    }
+
+    private OrderReturn.ReturnStatus parseReturnStatus(String value) {
+        if (value == null || value.isBlank()) return null;
+        try {
+            return OrderReturn.ReturnStatus.valueOf(value);
+        } catch (IllegalArgumentException e) {
+            throw ApiException.badRequest("Invalid return status: " + value);
+        }
     }
 
     private void writeCsv(HttpServletResponse response, String filename, String csv) throws IOException {

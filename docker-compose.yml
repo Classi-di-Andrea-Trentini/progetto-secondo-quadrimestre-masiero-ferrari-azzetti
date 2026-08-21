@@ -33,6 +33,10 @@ services:
       JWT_SECRET: "${JWT_SECRET:?manca JWT_SECRET nel file .env, generala con openssl rand -base64 64}"
       FRONTEND_URL: http://localhost:4200
       BACKEND_URL: http://localhost:3000
+    volumes:
+      # Foto prodotto caricate dagli admin (vedi AdminService#uploadImage):
+      # senza un volume nominato, un rebuild dell'immagine le perderebbe tutte.
+      - uploads:/app/uploads
     depends_on:
       db:
         condition: service_healthy

@@ -3,9 +3,13 @@ package it.commonera.backend.services;
 import it.commonera.backend.AbstractIntegrationTest;
 import it.commonera.backend.dtos.AdminDtos;
 import it.commonera.backend.entities.Category;
+import it.commonera.backend.entities.Product;
+import it.commonera.backend.entities.ProductVariant;
 import it.commonera.backend.entities.User;
+import it.commonera.backend.entities.UserAddress;
 import it.commonera.backend.exceptions.ApiException;
 import it.commonera.backend.repositories.CategoryRepository;
+import it.commonera.backend.repositories.UserAddressRepository;
 import it.commonera.backend.repositories.UserRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -14,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -36,6 +41,10 @@ class AdminServiceTest extends AbstractIntegrationTest {
     private CategoryRepository categories;
     @Autowired
     private AdminService admin;
+    @Autowired
+    private UserAddressRepository addresses;
+    @Autowired
+    private CheckoutService checkout;
     @PersistenceContext
     private EntityManager em;
 
@@ -178,5 +187,68 @@ class AdminServiceTest extends AbstractIntegrationTest {
                 "Secondo", slug, null, category.getId(), new BigDecimal("20.00"), true)))
                 .isInstanceOf(ApiException.class)
                 .hasMessageContaining("Slug");
+    }
+
+    /**
+     * `getOrderDetail` costruiva le sotto-mappe (indirizzo, pagamenti, storico
+     * stato) con `Map.of(...)`, che lancia `NullPointerException` sul primo valore
+     * null — e capita davvero: `street2` non compilato, e la voce "pending" dello
+     * storico stato che il checkout scrive **sempre** con nota null. In produzione
+     * usciva come un 401 fuorviante (l'eccezione non gestita veniva tradotta dal
+     * filtro di sicurezza), non un errore che indicasse il vero problema.
+     */
+    @Test
+    void orderDetailDoesNotBlowUpOnNullNoteAndNullAddressFields() {
+        var buyerToSave = new User();
+        buyerToSave.setEmail("buyer." + UUID.randomUUID() + "@example.com");
+        buyerToSave.setPasswordHash("unused-in-this-test");
+        buyerToSave.setFullName("Compratore Prova");
+        var buyer = users.save(buyerToSave);
+
+        var addressToSave = new UserAddress();
+        addressToSave.setUserId(buyer.getId());
+        addressToSave.setFullName("Compratore Prova");
+        addressToSave.setStreet("Via Roma 1");
+        addressToSave.setCity("Trento");
+        addressToSave.setPostalCode("38100");
+        // `street2` lasciato null di proposito: e' un campo opzionale del form.
+        var address = addresses.save(addressToSave);
+
+        var category = new Category();
+        category.setName("Categoria Prova");
+        category.setSlug("categoria-prova-" + UUID.randomUUID());
+        em.persist(category);
+
+        var product = new Product();
+        product.setCategory(category);
+        product.setName("Prodotto Prova");
+        product.setSlug("prodotto-prova-" + UUID.randomUUID());
+        product.setBasePrice(new BigDecimal("50.00"));
+        em.persist(product);
+
+        var variant = new ProductVariant();
+        variant.setProduct(product);
+        variant.setSku("SKU-" + UUID.randomUUID());
+        variant.setStockQty(10);
+        em.persist(variant);
+        em.flush();
+
+        var request = new CheckoutService.Request(
+                address.getId(), List.of(new CheckoutService.Line(variant.getId(), 1)),
+                "standard", null, null, null, null);
+        var result = checkout.placeOrder(buyer.getId(), request);
+        em.flush();
+        em.clear();
+
+        var detail = admin.getOrderDetail((UUID) result.get("orderId"));
+
+        @SuppressWarnings("unchecked")
+        var addressView = (Map<String, Object>) detail.get("address");
+        assertThat(addressView.get("street2")).isNull();
+
+        @SuppressWarnings("unchecked")
+        var statusHistory = (List<Map<String, Object>>) detail.get("statusHistory");
+        assertThat(statusHistory).isNotEmpty();
+        assertThat(statusHistory.get(0).get("note")).isNull();
     }
 }

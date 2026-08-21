@@ -41,12 +41,16 @@ public class AdminService {
     private final PaymentRepository payments;
     private final PromoCodeRepository promoCodeRepo;
     private final MailService mail;
+    private final String backendUrl;
+    private final String uploadsDir;
 
     public AdminService(OrderRepository orders, UserRepository users, ProductRepository products,
                         ProductVariantRepository variants, ProductImageRepository images,
                         CategoryRepository categories, ReviewRepository reviews,
                         StockAlertRepository stockAlerts, UserAddressRepository addresses,
-                        PaymentRepository payments, PromoCodeRepository promoCodeRepo, MailService mail) {
+                        PaymentRepository payments, PromoCodeRepository promoCodeRepo, MailService mail,
+                        @org.springframework.beans.factory.annotation.Value("${app.backend-url}") String backendUrl,
+                        @org.springframework.beans.factory.annotation.Value("${app.uploads-dir:uploads}") String uploadsDir) {
         this.orders = orders;
         this.users = users;
         this.products = products;
@@ -59,6 +63,8 @@ public class AdminService {
         this.payments = payments;
         this.promoCodeRepo = promoCodeRepo;
         this.mail = mail;
+        this.backendUrl = backendUrl;
+        this.uploadsDir = uploadsDir;
     }
 
     @Transactional(readOnly = true)
@@ -77,6 +83,27 @@ public class AdminService {
         for (var order : all) {
             byStatus.merge(order.getStatus().name(), 1L, Long::sum);
         }
+        // Il frontend legge un array di {status, count}, non l'oggetto: cosi' com'era
+        // prima, `ordersByStatus.length` su un oggetto era sempre `undefined`, e la
+        // sezione "Ordini per stato" della dashboard mostrava sempre "Nessun ordine
+        // ancora" anche con ordini veri.
+        var ordersByStatusList = byStatus.entrySet().stream()
+                .map(e -> Map.of("status", e.getKey(), "count", e.getValue()))
+                .toList();
+
+        long pendingOrders = all.stream().filter(o -> o.getStatus() == OrderStatus.pending).count();
+
+        var recentOrders = all.stream()
+                .sorted(Comparator.comparing(Order::getCreatedAt).reversed())
+                .limit(5)
+                .map(this::orderSummaryView)
+                .toList();
+
+        var topProducts = products.findAll(Sort.by("soldCount").descending()).stream()
+                .limit(5)
+                .map(p -> Map.of("id", p.getId(), "name", p.getName(), "slug", p.getSlug(),
+                        "soldCount", p.getSoldCount(), "basePrice", p.getBasePrice()))
+                .toList();
 
         var low = lowStock(null);
 
@@ -85,12 +112,15 @@ public class AdminService {
                 "totalOrders", all.size(),
                 "totalProducts", products.count(),
                 "totalRevenue", revenue,
+                "pendingOrders", pendingOrders,
+                "recentOrders", recentOrders,
+                "topProducts", topProducts,
                 // Scontrino medio sui **soli ordini incassati**: annullati e pendenti
                 // abbasserebbero un numero che serve a leggere le vendite vere.
                 "averageOrderValue", paid.isEmpty()
                         ? BigDecimal.ZERO
                         : revenue.divide(BigDecimal.valueOf(paid.size()), 2, RoundingMode.HALF_UP),
-                "ordersByStatus", byStatus,
+                "ordersByStatus", ordersByStatusList,
                 "inventory", Map.of(
                         "outOfStock", low.get("outOfStock"),
                         "lowStock", low.get("lowStock")));
@@ -524,6 +554,51 @@ public class AdminService {
         return imageView(saved);
     }
 
+    private static final Set<String> ALLOWED_IMAGE_TYPES = Set.of(
+            "image/jpeg", "image/png", "image/gif", "image/webp");
+
+    /**
+     * Salva il file su disco e crea l'immagine come {@link #addImage}.
+     *
+     * L'estensione viene decisa **dal content-type dichiarato**, non dal nome
+     * originale del file: un nome come {@code foto.jpg.php} con un content-type
+     * `image/jpeg` genuino verrebbe comunque salvato come `.jpg`, non `.php` —
+     * l'estensione del file scritto su disco non e' mai scelta dal client.
+     */
+    @Transactional
+    public Map<String, Object> uploadImage(UUID productId, org.springframework.web.multipart.MultipartFile file) {
+        if (file == null || file.isEmpty()) throw ApiException.badRequest("Nessun file ricevuto");
+        String contentType = file.getContentType();
+        if (contentType == null || !ALLOWED_IMAGE_TYPES.contains(contentType)) {
+            throw ApiException.badRequest("Solo file immagine sono consentiti (jpeg, png, gif, webp)");
+        }
+
+        String extension = switch (contentType) {
+            case "image/jpeg" -> ".jpg";
+            case "image/png" -> ".png";
+            case "image/gif" -> ".gif";
+            default -> ".webp";
+        };
+        String filename = System.currentTimeMillis() + "-" + (int) (Math.random() * 1_000_000) + extension;
+
+        try {
+            var dir = java.nio.file.Path.of(uploadsDir, "products");
+            java.nio.file.Files.createDirectories(dir);
+            // Sempre e solo `filename` (generato qui sopra, mai dall'utente):
+            // e' quello che tiene questo path dentro `dir` a prescindere da cosa
+            // contenesse il nome originale del file caricato.
+            var target = dir.resolve(filename);
+            file.transferTo(target);
+        } catch (java.io.IOException e) {
+            throw ApiException.badRequest("Impossibile salvare il file: " + e.getMessage());
+        }
+
+        // `/uploads/**` e' servito da WebConfig; il prefisso `/api` arriva dal
+        // context-path del backend, come per ogni altra rotta.
+        String url = backendUrl + "/api/uploads/products/" + filename;
+        return addImage(productId, url, null, null, null);
+    }
+
     @Transactional
     public Map<String, String> deleteImage(UUID productId, UUID imageId) {
         var image = images.findByIdAndProductId(imageId, productId)
@@ -596,21 +671,45 @@ public class AdminService {
         view.put("shippingMethod", order.getShippingMethod());
         view.put("notes", order.getNotes());
 
+        // `Map.of(...)` non ammette valori null e lancia NullPointerException appena
+        // ne incontra uno — qui sotto capita davvero (`street2`, `paidAt` prima del
+        // pagamento, `note` sullo storico stato): serve `LinkedHashMap`, che i null
+        // li accetta senza drammi.
         var address = order.getAddressId() == null ? null : addresses.findById(order.getAddressId()).orElse(null);
-        view.put("address", address == null ? null : Map.of(
-                "fullName", address.getFullName(), "street", address.getStreet(),
-                "street2", address.getStreet2(), "city", address.getCity(),
-                "province", address.getProvince(), "postalCode", address.getPostalCode(),
-                "country", address.getCountry()));
+        if (address == null) {
+            view.put("address", null);
+        } else {
+            var addressView = new LinkedHashMap<String, Object>();
+            addressView.put("fullName", address.getFullName());
+            addressView.put("street", address.getStreet());
+            addressView.put("street2", address.getStreet2());
+            addressView.put("city", address.getCity());
+            addressView.put("province", address.getProvince());
+            addressView.put("postalCode", address.getPostalCode());
+            addressView.put("country", address.getCountry());
+            view.put("address", addressView);
+        }
 
         view.put("payments", payments.findByOrderIdOrderByCreatedAtDesc(id).stream()
-                .map(p -> Map.of("status", p.getStatus().name(), "method", p.getMethod().name(),
-                        "amount", p.getAmount(), "paidAt", (Object) p.getPaidAt()))
+                .map(p -> {
+                    var paymentView = new LinkedHashMap<String, Object>();
+                    paymentView.put("status", p.getStatus().name());
+                    paymentView.put("method", p.getMethod().name());
+                    paymentView.put("amount", p.getAmount());
+                    paymentView.put("paidAt", p.getPaidAt());
+                    return paymentView;
+                })
                 .toList());
 
         view.put("statusHistory", order.getStatusHistory().stream()
                 .sorted(Comparator.comparing(OrderStatusHistory::getCreatedAt))
-                .map(h -> Map.of("status", h.getStatus().name(), "note", (Object) h.getNote(), "createdAt", h.getCreatedAt()))
+                .map(h -> {
+                    var stepView = new LinkedHashMap<String, Object>();
+                    stepView.put("status", h.getStatus().name());
+                    stepView.put("note", h.getNote());
+                    stepView.put("createdAt", h.getCreatedAt());
+                    return stepView;
+                })
                 .toList());
 
         if (order.getPromoCodeId() != null) {
