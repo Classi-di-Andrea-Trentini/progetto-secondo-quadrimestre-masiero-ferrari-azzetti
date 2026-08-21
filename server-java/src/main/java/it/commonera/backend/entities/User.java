@@ -55,6 +55,9 @@ public class User {
 
     private String phone;
 
+    @Column(name = "newsletter_opt_in", nullable = false)
+    private Boolean newsletterOptIn = false;
+
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
 

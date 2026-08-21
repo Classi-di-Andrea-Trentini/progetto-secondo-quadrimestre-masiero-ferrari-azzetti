@@ -49,6 +49,9 @@ public class SecurityConfig {
                         // essere indicizzate.
                         .requestMatchers(HttpMethod.GET, "/products/**", "/reviews/product/**").permitAll()
                         .requestMatchers("/auth/register", "/auth/login").permitAll()
+                        // Chiunque puo' iscriversi, anche senza account: stesso comportamento
+                        // pubblico del backend Node (nessun JwtAuthGuard su questa rotta).
+                        .requestMatchers("/newsletter/subscribe").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .exceptionHandling(ex -> ex
