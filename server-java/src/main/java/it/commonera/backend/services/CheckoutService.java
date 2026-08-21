@@ -38,11 +38,13 @@ public class CheckoutService {
     private final PricingService pricing;
     private final GiftCardService giftCards;
     private final LoyaltyService loyalty;
+    private final PromoCodeService promoCodes;
 
     public CheckoutService(OrderRepository orders, PaymentRepository payments,
                            ProductVariantRepository variants, UserAddressRepository addresses,
                            CartRepository carts, PricingService pricing,
-                           GiftCardService giftCards, LoyaltyService loyalty) {
+                           GiftCardService giftCards, LoyaltyService loyalty,
+                           PromoCodeService promoCodes) {
         this.orders = orders;
         this.payments = payments;
         this.variants = variants;
@@ -51,6 +53,7 @@ public class CheckoutService {
         this.pricing = pricing;
         this.giftCards = giftCards;
         this.loyalty = loyalty;
+        this.promoCodes = promoCodes;
     }
 
     @Transactional
@@ -102,18 +105,41 @@ public class CheckoutService {
             subtotal = subtotal.add(lineTotal);
         }
 
-        BigDecimal shipping = subtotal.compareTo(FREE_SHIPPING_THRESHOLD) >= 0
+        // 2b. Codice promo: si convalida su un totale gia' scontato dalle offerte di
+        //     prodotto (`subtotal`, che le righe sopra calcolano dal prezzo scontato di
+        //     ciascuna variante), non sul prezzo di listino. L'uso si registra solo dopo
+        //     che l'ordine esiste davvero — vedi punto 7.
+        BigDecimal promoDiscount = BigDecimal.ZERO;
+        UUID promoCodeId = null;
+        if (request.promoCode() != null && !request.promoCode().isBlank()) {
+            var promo = promoCodes.validate(request.promoCode(), subtotal, userId);
+            promoDiscount = promo.discountValue();
+            promoCodeId = promo.promoCodeId();
+        }
+
+        // La spedizione gratuita si guarda sull'importo **al netto del promo**: uno
+        // sconto che fa scendere sotto soglia deve far ricomparire il costo di
+        // spedizione, non farlo sparire due volte.
+        BigDecimal afterPromo = subtotal.subtract(promoDiscount);
+        BigDecimal shipping = afterPromo.compareTo(FREE_SHIPPING_THRESHOLD) >= 0
                 ? BigDecimal.ZERO
                 : ("express".equals(order.getShippingMethod()) ? SHIPPING_EXPRESS : SHIPPING_STANDARD);
 
         order.setSubtotal(subtotal.setScale(2, RoundingMode.HALF_UP));
         order.setShippingCost(shipping);
-        order.setDiscountTotal(BigDecimal.ZERO);
-        order.setTotal(subtotal.add(shipping).setScale(2, RoundingMode.HALF_UP));
+        order.setDiscountTotal(promoDiscount.setScale(2, RoundingMode.HALF_UP));
+        order.setPromoCodeId(promoCodeId);
+        order.setTotal(afterPromo.add(shipping).max(BigDecimal.ZERO).setScale(2, RoundingMode.HALF_UP));
         order.setNotes(request.notes());
         var saved = orders.save(order);
 
         addHistory(saved, OrderStatus.pending, userId, null);
+
+        // 2c. Uso del codice registrato ora che l'ordine ha un id reale: se il resto del
+        //     checkout fallisse dopo, il rollback della transazione annulla anche questo.
+        if (promoCodeId != null) {
+            promoCodes.recordUse(promoCodeId, userId, saved.getId(), promoDiscount.setScale(2, RoundingMode.HALF_UP));
+        }
 
         // 3. Punti prima del buono: il buono copre solo cio' che resta, e non viene
         //    consumato al posto dei punti.
