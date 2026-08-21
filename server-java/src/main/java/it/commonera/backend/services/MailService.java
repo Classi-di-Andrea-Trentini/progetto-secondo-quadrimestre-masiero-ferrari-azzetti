@@ -50,6 +50,23 @@ public class MailService {
                         + "<p><a href=\"" + frontendUrl + "/product/" + slug + "\">Vai al prodotto</a></p>");
     }
 
+    public void sendReturnStatusUpdate(String to, String fullName, String returnId, String status, String adminNote) {
+        String firstName = fullName == null ? "" : fullName.split(" ")[0];
+        String note = adminNote == null || adminNote.isBlank() ? "" : "<p>" + escape(adminNote) + "</p>";
+        send(to, "Aggiornamento sul tuo reso",
+                "<h1>Il tuo reso e' stato aggiornato.</h1>"
+                        + "<p>Ciao <strong>" + escape(firstName) + "</strong>, il reso <strong>"
+                        + escape(returnId) + "</strong> e' ora: <strong>" + escape(status) + "</strong>.</p>"
+                        + note);
+    }
+
+    public void sendNewsletterConfirmation(String to, String name) {
+        String firstName = name == null ? "" : name.split(" ")[0];
+        send(to, "Iscrizione confermata",
+                "<h1>Sei dentro.</h1>"
+                        + "<p>Ciao <strong>" + escape(firstName) + "</strong>, la tua iscrizione alla newsletter e' confermata.</p>");
+    }
+
     public void send(String to, String subject, String html) {
         var sender = senderProvider.getIfAvailable();
         if (!"smtp".equals(provider) || sender == null) {
