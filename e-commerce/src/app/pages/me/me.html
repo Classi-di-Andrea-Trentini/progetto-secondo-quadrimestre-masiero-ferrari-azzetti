@@ -239,6 +239,13 @@
             }
           </div>
 
+          @if (returnSuccess()) {
+            <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm mb-4">{{ returnSuccess() }}</div>
+          }
+          @if (cancelOrderSuccess()) {
+            <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm mb-4">{{ cancelOrderSuccess() }}</div>
+          }
+
           @if (ordersLoading()) {
             <div class="flex justify-center py-16">
               <div class="w-6 h-6 border-4 border-gray-200 border-t-gray-900 rounded-full animate-spin"></div>
@@ -287,6 +294,16 @@
                           class="px-2 py-1 text-xs border border-red-200 text-red-600 rounded-lg hover:bg-red-50 transition-colors">
                           Annulla
                         </button>
+                      }
+                      @if (canRequestReturn(order)) {
+                        <button (click)="openReturnModal(order, $event)"
+                          class="px-2 py-1 text-xs border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
+                          Richiedi reso
+                        </button>
+                      } @else if (returnStatusByOrderId()[order.id]) {
+                        <span class="px-2 py-1 text-xs rounded-lg bg-blue-50 text-blue-700 border border-blue-100">
+                          Reso: {{ returnStatusLabels[returnStatusByOrderId()[order.id]] ?? returnStatusByOrderId()[order.id] }}
+                        </span>
                       }
                       <svg class="w-4 h-4 text-gray-400 transition-transform" [class.rotate-180]="expandedOrderId() === order.id" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
@@ -664,6 +681,57 @@
           @if (cancelOrderLoading()) {
             <span class="inline-block w-4 h-4 border-2 border-red-300 border-t-white rounded-full animate-spin mx-auto"></span>
           } @else { Annulla ordine }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Return Request Modal -->
+@if (returnModalOrder(); as order) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/40" (click)="closeReturnModal()"></div>
+    <div class="relative bg-white rounded-xl shadow-2xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto">
+      <h3 class="text-lg font-bold text-gray-900 mb-2">Richiedi reso</h3>
+      <p class="text-gray-500 text-sm mb-4">Scegli quali articoli restituire e quanti.</p>
+
+      <div class="space-y-3 mb-4">
+        @for (item of order.items; track item.id) {
+          <div class="flex items-center justify-between gap-3 border border-gray-200 rounded-lg px-3 py-2">
+            <div class="text-sm">
+              <p class="text-gray-900">{{ item.productName }}</p>
+              <p class="text-gray-400 text-xs">Acquistati: {{ item.quantity }}</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button type="button" (click)="setReturnQuantity(item.id, (returnQuantities()[item.id] ?? 0) - 1, item.quantity)"
+                class="w-7 h-7 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50">−</button>
+              <span class="w-6 text-center text-sm">{{ returnQuantities()[item.id] ?? 0 }}</span>
+              <button type="button" (click)="setReturnQuantity(item.id, (returnQuantities()[item.id] ?? 0) + 1, item.quantity)"
+                class="w-7 h-7 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50">+</button>
+            </div>
+          </div>
+        }
+      </div>
+
+      <label class="block text-sm text-gray-700 mb-1">Motivo del reso</label>
+      <textarea [ngModel]="returnReason()" (ngModelChange)="returnReason.set($event)" rows="3"
+        placeholder="Descrivi il motivo (almeno 10 caratteri)…"
+        class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mb-2 resize-none"></textarea>
+
+      @if (returnError()) {
+        <div class="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-lg text-sm mb-3">{{ returnError() }}</div>
+      }
+
+      <div class="flex gap-3 mt-2">
+        <button (click)="closeReturnModal()"
+          class="flex-1 px-4 py-2.5 border border-gray-200 rounded-lg text-sm hover:bg-gray-50">
+          Indietro
+        </button>
+        <button (click)="submitReturn()" [disabled]="returnLoading() || !returnHasSelection"
+          class="flex-1 px-4 py-2.5 bg-gray-900 text-white rounded-lg text-sm hover:bg-gray-800 disabled:opacity-50">
+          @if (returnLoading()) {
+            <span class="inline-block w-4 h-4 border-2 border-gray-500 border-t-white rounded-full animate-spin mx-auto"></span>
+          } @else { Invia richiesta }
         </button>
       </div>
     </div>

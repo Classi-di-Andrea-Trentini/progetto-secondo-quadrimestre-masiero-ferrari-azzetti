@@ -17,7 +17,7 @@ interface OrderSummary {
   shippingCost: string;
   discountTotal: string;
   createdAt: string;
-  items: { productName: string; quantity: number; lineTotal: string }[];
+  items: { id: string; productName: string; quantity: number; lineTotal: string }[];
   payments: { status: string }[];
   /** Cronologia degli stati: il backend la restituisce gia', non veniva mostrata. */
   statusHistory?: { status: string; note: string | null; createdAt: string }[];
@@ -56,6 +56,21 @@ export class MeComponent {
   cancelOrderId = signal<string | null>(null);
   cancelOrderLoading = signal(false);
   cancelOrderSuccess = signal<string | null>(null);
+
+  // -- Resi --
+  /** orderId -> stato del reso già aperto per quell'ordine, se c'è. */
+  returnStatusByOrderId = signal<Record<string, string>>({});
+  returnModalOrder = signal<OrderSummary | null>(null);
+  returnQuantities = signal<Record<string, number>>({});
+  returnReason = signal('');
+  returnLoading = signal(false);
+  returnError = signal<string | null>(null);
+  returnSuccess = signal<string | null>(null);
+
+  readonly returnStatusLabels: Record<string, string> = {
+    requested: 'Richiesto', approved: 'Approvato', rejected: 'Rifiutato',
+    received: 'Ricevuto', refunded: 'Rimborsato',
+  };
 
   // -- Indirizzi --
   addresses = signal<AddressData[]>([]);
@@ -237,7 +252,7 @@ export class MeComponent {
   setTab(tab: TabSection) {
     this.activeTab.set(tab);
     if (tab === 'favorites') this.wishlist.loadItems();
-    if (tab === 'orders' && this.orders().length === 0) this.loadOrders();
+    if (tab === 'orders' && this.orders().length === 0) { this.loadOrders(); this.loadMyReturns(); }
     if (tab === 'addresses' && this.addresses().length === 0) this.loadAddresses();
   }
 
@@ -320,6 +335,84 @@ export class MeComponent {
       this.ordersError.set('Impossibile annullare l\'ordine. Contatta il supporto.');
     } finally {
       this.cancelOrderLoading.set(false);
+    }
+  }
+
+  /** Un reso attivo per ordine (stessa regola del backend): mostra il badge invece del bottone. */
+  async loadMyReturns() {
+    try {
+      const res: any = await firstValueFrom(this.http.get(`${API_URL}/returns`, { withCredentials: true }));
+      const map: Record<string, string> = {};
+      for (const r of res) {
+        if (r.status !== 'rejected') map[r.order.id] = r.status;
+      }
+      this.returnStatusByOrderId.set(map);
+    } catch {
+      // Non bloccante: senza questa mappa si vede solo il bottone "Richiedi reso"
+      // anche per ordini che già ne hanno uno, il backend rifiuterebbe comunque.
+    }
+  }
+
+  canRequestReturn(order: OrderSummary): boolean {
+    return (order.status === 'delivered' || order.status === 'completed')
+      && !this.returnStatusByOrderId()[order.id];
+  }
+
+  openReturnModal(order: OrderSummary, event: Event) {
+    event.stopPropagation();
+    const initial: Record<string, number> = {};
+    for (const item of order.items) initial[item.id] = 0;
+    this.returnQuantities.set(initial);
+    this.returnReason.set('');
+    this.returnError.set(null);
+    this.returnModalOrder.set(order);
+  }
+
+  closeReturnModal() {
+    if (this.returnLoading()) return;
+    this.returnModalOrder.set(null);
+  }
+
+  setReturnQuantity(itemId: string, qty: number, maxQty: number) {
+    const clamped = Math.max(0, Math.min(qty, maxQty));
+    this.returnQuantities.update(map => ({ ...map, [itemId]: clamped }));
+  }
+
+  get returnHasSelection(): boolean {
+    return Object.values(this.returnQuantities()).some(q => q > 0);
+  }
+
+  async submitReturn() {
+    const order = this.returnModalOrder();
+    if (!order || this.returnLoading()) return;
+
+    const reason = this.returnReason().trim();
+    if (reason.length < 10) {
+      this.returnError.set('Descrivi il motivo del reso in almeno 10 caratteri.');
+      return;
+    }
+    const items = Object.entries(this.returnQuantities())
+      .filter(([, qty]) => qty > 0)
+      .map(([orderItemId, quantity]) => ({ orderItemId, quantity }));
+    if (items.length === 0) {
+      this.returnError.set('Seleziona almeno un articolo da restituire.');
+      return;
+    }
+
+    this.returnLoading.set(true);
+    this.returnError.set(null);
+    try {
+      const created: any = await firstValueFrom(
+        this.http.post(`${API_URL}/returns`, { orderId: order.id, reason, items }, { withCredentials: true }),
+      );
+      this.returnStatusByOrderId.update(map => ({ ...map, [order.id]: created.status }));
+      this.returnModalOrder.set(null);
+      this.returnSuccess.set('Richiesta di reso inviata.');
+      setTimeout(() => this.returnSuccess.set(null), 4000);
+    } catch (err: any) {
+      this.returnError.set(err?.error?.message ?? 'Impossibile inviare la richiesta di reso.');
+    } finally {
+      this.returnLoading.set(false);
     }
   }
 

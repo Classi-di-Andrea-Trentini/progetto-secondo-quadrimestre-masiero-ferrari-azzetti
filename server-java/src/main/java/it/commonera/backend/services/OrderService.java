@@ -131,6 +131,10 @@ public class OrderService {
         map.put("invoiceNumber", order.getInvoiceNumber());
         map.put("createdAt", order.getCreatedAt());
         map.put("items", order.getItems().stream().map(item -> Map.of(
+                // Serve al cliente per richiedere un reso su questa riga precisa
+                // (vedi ReturnsController): senza l'id, "restituisci questo articolo"
+                // non ha un bersaglio univoco quando l'ordine ha piu' righe uguali.
+                "id", item.getId(),
                 "productName", item.getProductName(),
                 "variantLabel", String.valueOf(item.getVariantLabel()),
                 "quantity", item.getQuantity(),
