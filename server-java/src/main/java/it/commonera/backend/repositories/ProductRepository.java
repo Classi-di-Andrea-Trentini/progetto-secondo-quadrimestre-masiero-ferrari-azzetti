@@ -14,4 +14,6 @@ import java.util.UUID;
  */
 public interface ProductRepository extends JpaRepository<Product, UUID>, JpaSpecificationExecutor<Product> {
     Optional<Product> findBySlugAndDeletedAtIsNull(String slug);
+    Optional<Product> findBySlug(String slug);
+    boolean existsBySlug(String slug);
 }

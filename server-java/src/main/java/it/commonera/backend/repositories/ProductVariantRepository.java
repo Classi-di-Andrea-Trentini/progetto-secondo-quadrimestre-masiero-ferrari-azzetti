@@ -6,9 +6,16 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface ProductVariantRepository extends JpaRepository<ProductVariant, UUID> {
+
+    List<ProductVariant> findByProductId(UUID productId);
+    Optional<ProductVariant> findByIdAndProductId(UUID id, UUID productId);
+    Optional<ProductVariant> findBySkuIgnoreCase(String sku);
+    boolean existsBySkuIgnoreCase(String sku);
 
     /**
      * Decremento **condizionale** della giacenza.

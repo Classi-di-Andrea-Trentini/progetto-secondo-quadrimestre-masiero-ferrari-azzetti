@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -46,6 +47,9 @@ public class ProductVariant {
 
     @Column(name = "is_active")
     private Boolean isActive = true;
+
+    @Column(name = "created_at", insertable = false, updatable = false)
+    private LocalDateTime createdAt;
 
     /** Etichetta leggibile: "Nero / M". */
     public String label() {
