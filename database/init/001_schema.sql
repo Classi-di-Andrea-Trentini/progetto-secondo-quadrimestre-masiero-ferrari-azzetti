@@ -398,7 +398,12 @@ CREATE TABLE IF NOT EXISTS return_items (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   return_id UUID NOT NULL REFERENCES returns (id) ON DELETE CASCADE,
   order_item_id UUID NOT NULL REFERENCES order_items (id) ON DELETE RESTRICT,
-  quantity INT NOT NULL CHECK (quantity > 0)
+  quantity INT NOT NULL CHECK (quantity > 0),
+  -- Una riga d'ordine compare una volta sola per reso. Senza questo vincolo lo
+  -- stesso order_item_id ripetuto nella richiesta produce piu' righe e gonfia la
+  -- quantita' resa oltre quella acquistata: il controllo applicativo sta in
+  -- ReturnService#create, questa e' la rete sotto.
+  UNIQUE (return_id, order_item_id)
 );
 
 CREATE TABLE IF NOT EXISTS payments (

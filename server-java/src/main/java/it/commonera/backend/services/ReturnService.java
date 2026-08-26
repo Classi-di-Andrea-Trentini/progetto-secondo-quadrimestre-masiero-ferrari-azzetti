@@ -78,21 +78,31 @@ public class ReturnService {
         ret.setUserId(userId);
         ret.setReason(dto.reason().trim());
 
+        // Le quantita' si sommano per riga d'ordine PRIMA di controllarle: validare
+        // riga per riga lascia passare lo stesso orderItemId ripetuto N volte, e ogni
+        // ripetizione supera il controllo da sola. Chi ha comprato 1 pezzo aprirebbe
+        // un reso da 5. Non c'e' rete sotto: return_items non ha un vincolo di
+        // unicita' su (return_id, order_item_id).
+        var requested = new LinkedHashMap<UUID, Integer>();
         for (var line : dto.items()) {
-            var orderItem = orderItemsById.get(line.orderItemId());
+            if (line.quantity() <= 0) throw ApiException.badRequest("Quantity must be positive");
+            requested.merge(line.orderItemId(), line.quantity(), Integer::sum);
+        }
+
+        for (var entry : requested.entrySet()) {
+            var orderItem = orderItemsById.get(entry.getKey());
             if (orderItem == null) {
-                throw ApiException.badRequest("Order item " + line.orderItemId() + " not found in this order");
+                throw ApiException.badRequest("Order item " + entry.getKey() + " not found in this order");
             }
-            if (line.quantity() > orderItem.getQuantity()) {
+            if (entry.getValue() > orderItem.getQuantity()) {
                 throw ApiException.badRequest("Cannot return more than " + orderItem.getQuantity()
                         + " units of " + orderItem.getProductName());
             }
-            if (line.quantity() <= 0) throw ApiException.badRequest("Quantity must be positive");
 
             var returnItem = new ReturnItem();
             returnItem.setOrderReturn(ret);
             returnItem.setOrderItem(orderItem);
-            returnItem.setQuantity(line.quantity());
+            returnItem.setQuantity(entry.getValue());
             ret.getItems().add(returnItem);
         }
 

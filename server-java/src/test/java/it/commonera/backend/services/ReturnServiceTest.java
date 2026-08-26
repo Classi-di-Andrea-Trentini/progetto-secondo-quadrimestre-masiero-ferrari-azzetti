@@ -133,6 +133,37 @@ class ReturnServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    void repeatingTheSameOrderItemCannotSmuggleInMoreUnitsThanWerePurchased() {
+        markDelivered();
+        // Ne sono stati comprati 2. Tre righe da 1 passavano il controllo una per
+        // una — il confronto era per riga e non sulla somma — e finivano a
+        // database come tre righe di reso separate sullo stesso articolo.
+        var dto = new ReturnDtos.CreateRequest(orderId, "Provo a gonfiare il reso",
+                List.of(new ReturnDtos.ItemRequest(orderItemId, 1),
+                        new ReturnDtos.ItemRequest(orderItemId, 1),
+                        new ReturnDtos.ItemRequest(orderItemId, 1)));
+
+        assertThatThrownBy(() -> returnService.create(buyer.getId(), dto))
+                .isInstanceOf(ApiException.class)
+                .hasMessageContaining("Cannot return more than");
+    }
+
+    @Test
+    void duplicateLinesWithinTheAvailableQuantityAreMergedIntoOne() {
+        markDelivered();
+        // Due righe da 1 su 2 pezzi comprati sono legittime: vanno accettate, ma
+        // fuse in una sola riga da 2 — non due righe da 1.
+        var dto = new ReturnDtos.CreateRequest(orderId, "Restituisco entrambi i pezzi",
+                List.of(new ReturnDtos.ItemRequest(orderItemId, 1),
+                        new ReturnDtos.ItemRequest(orderItemId, 1)));
+
+        var view = returnService.create(buyer.getId(), dto);
+
+        assertThat(view.items()).hasSize(1);
+        assertThat(view.items().get(0).quantity()).isEqualTo(2);
+    }
+
+    @Test
     void aSecondReturnRequestOnTheSameOrderIsRejectedWhileOneIsAlreadyPending() {
         markDelivered();
         var dto = new ReturnDtos.CreateRequest(orderId, "Prima richiesta di reso",
