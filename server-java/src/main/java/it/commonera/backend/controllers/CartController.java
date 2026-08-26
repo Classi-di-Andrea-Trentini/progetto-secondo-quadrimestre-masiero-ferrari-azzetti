@@ -2,6 +2,7 @@ package it.commonera.backend.controllers;
 
 import it.commonera.backend.security.CurrentUser;
 import it.commonera.backend.services.CartService;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -28,14 +29,14 @@ public class CartController {
     }
 
     @PostMapping("/items")
-    public Map<String, Object> add(@AuthenticationPrincipal CurrentUser user, @RequestBody AddItem body) {
+    public Map<String, Object> add(@AuthenticationPrincipal CurrentUser user, @Valid @RequestBody AddItem body) {
         return cart.addItem(user.id(), body.variantId(), body.quantity());
     }
 
     @PatchMapping("/items/{variantId}")
     public Map<String, Object> update(@AuthenticationPrincipal CurrentUser user,
                                       @PathVariable UUID variantId,
-                                      @RequestBody UpdateItem body) {
+                                      @Valid @RequestBody UpdateItem body) {
         return cart.updateItem(user.id(), variantId, body.quantity());
     }
 
@@ -51,7 +52,7 @@ public class CartController {
 
     /** Chiamata subito dopo il login, col carrello che l'utente aveva da sloggato. */
     @PostMapping("/merge")
-    public Map<String, Object> merge(@AuthenticationPrincipal CurrentUser user, @RequestBody MergeRequest body) {
+    public Map<String, Object> merge(@AuthenticationPrincipal CurrentUser user, @Valid @RequestBody MergeRequest body) {
         return cart.merge(user.id(), body.items());
     }
 
