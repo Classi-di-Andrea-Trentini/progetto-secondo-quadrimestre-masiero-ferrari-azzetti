@@ -45,6 +45,8 @@ class PromoCodeServiceTest extends AbstractIntegrationTest {
     @Autowired
     private PromoCodeUseRepository promoCodeUses;
     @Autowired
+    private it.commonera.backend.repositories.LoyaltyEntryRepository loyaltyEntries;
+    @Autowired
     private PromoCodeService promoCodeService;
     @Autowired
     private CheckoutService checkout;
@@ -240,6 +242,33 @@ class PromoCodeServiceTest extends AbstractIntegrationTest {
         var updated = promoCodes.findById(promo.getId()).orElseThrow();
         assertThat(updated.getCurrentUses()).isEqualTo(1);
         assertThat(promoCodeUses.countByPromoCodeId(promo.getId())).isEqualTo(1);
+    }
+
+    @Test
+    void loyaltyPointsAreAwardedOnTheSubtotalNetOfThePromoDiscount() {
+        var promo = promo("POINTS10", PromoCode.DiscountType.fixed_amount, "10.00");
+        promoCodes.save(promo);
+        em.flush();
+        em.clear();
+
+        // 2 x 50.00 = 100.00 di subtotale, 10.00 di sconto promo.
+        var request = new CheckoutService.Request(
+                address.getId(),
+                List.of(new CheckoutService.Line(variant.getId(), 2)),
+                "standard",
+                "points10",
+                null,
+                null,
+                null);
+
+        checkout.placeOrder(buyer.getId(), request);
+        em.flush();
+        em.clear();
+
+        // I punti maturano su 90.00, non su 100.00: sottraendo solo lo sconto dei
+        // punti e non quello del promo, il cliente incassava credito su 10 euro
+        // che non ha mai pagato.
+        assertThat(loyaltyEntries.balanceOf(buyer.getId())).isEqualTo(90);
     }
 
     @Test

@@ -212,7 +212,11 @@ public class CheckoutService {
             carts.save(cart);
         });
 
-        loyalty.award(userId, saved.getId(), subtotal.subtract(loyaltyDiscount));
+        // I punti maturano sull'imponibile **davvero** scontato: vanno tolti sia lo
+        // sconto del codice promo sia quello dei punti riscattati. Sottraendo solo il
+        // secondo, un codice promo regalava punti su denaro mai incassato — credito
+        // creato dal nulla a ogni ordine scontato.
+        loyalty.award(userId, saved.getId(), subtotal.subtract(promoDiscount).subtract(loyaltyDiscount));
 
         var response = new LinkedHashMap<String, Object>();
         response.put("orderId", saved.getId());
