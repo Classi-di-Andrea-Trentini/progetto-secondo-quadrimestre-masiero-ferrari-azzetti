@@ -325,6 +325,12 @@
     outline-color: var(--color-danger);
   }
 
+  /* I filtri in barra stanno su una riga flex: .field li porterebbe al 100% e
+     schiaccerebbe il campo di ricerca accanto. */
+  .field-auto {
+    width: auto;
+  }
+
   select.field {
     appearance: none;
     background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),

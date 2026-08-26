@@ -31,13 +31,13 @@
           class="field pl-9"/>
       </div>
       <select [(ngModel)]="discountTypeFilter" (change)="onFilter()"
-        class="field">
+        class="field field-auto">
         <option value="">Tutti i tipi</option>
         <option value="percentage">Percentuale</option>
         <option value="fixed_amount">Importo fisso</option>
       </select>
       <select [(ngModel)]="isActiveFilter" (change)="onFilter()"
-        class="field">
+        class="field field-auto">
         <option value="">Tutti gli stati</option>
         <option value="true">Attivi</option>
         <option value="false">Disattivati</option>

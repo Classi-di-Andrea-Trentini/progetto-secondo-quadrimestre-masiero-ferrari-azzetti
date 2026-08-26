@@ -49,7 +49,7 @@
           class="field pl-9"/>
       </div>
       <select [(ngModel)]="statusFilter" (change)="onFilter()"
-        class="field">
+        class="field field-auto">
         @for (s of allStatuses; track s.value) {
           <option [value]="s.value">{{ s.label }}</option>
         }

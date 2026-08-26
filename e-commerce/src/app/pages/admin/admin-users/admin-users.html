@@ -51,7 +51,7 @@
         />
       </div>
       <select [(ngModel)]="roleFilter" (change)="onFilter()"
-        class="field">
+        class="field field-auto">
         @for (r of allRoles; track r.value) {
           <option [value]="r.value">{{ r.label }}</option>
         }
