@@ -1,9 +1,9 @@
-<div class="min-h-screen flex items-center justify-center px-4 py-16 bg-white">
+<div class="min-h-screen flex items-center justify-center px-4 py-16 bg-surface">
   <div class="w-full max-w-sm">
 
     <div class="mb-10 text-center">
-      <h1 class="text-2xl font-bold tracking-tight text-gray-900">Crea un account</h1>
-      <p class="mt-2 text-sm text-gray-500">
+      <h1 class="text-2xl font-bold tracking-tight text-ink">Crea un account</h1>
+      <p class="mt-2 text-sm text-ink-muted">
         Hai già un account?
         <a routerLink="/login" class="font-medium text-black underline underline-offset-2">
           Accedi
@@ -12,7 +12,7 @@
     </div>
 
     @if (success()) {
-      <div class="px-4 py-4 bg-green-50 border border-green-200 text-sm text-green-700 rounded text-center">
+      <div class="px-4 py-4 bg-success-wash border border-transparent text-sm text-success rounded text-center">
         Account creato. Verrai reindirizzato al login...
       </div>
     } @else {
@@ -20,7 +20,7 @@
       <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate class="space-y-5">
 
         <div>
-          <label for="fullName" class="block text-xs font-semibold uppercase tracking-widest text-gray-500 mb-1.5">
+          <label for="fullName" class="block text-xs font-semibold uppercase tracking-widest text-ink-muted mb-1.5">
             Nome completo
           </label>
           <input
@@ -29,16 +29,16 @@
             formControlName="fullName"
             autocomplete="name"
             placeholder="Mario Rossi"
-            class="w-full border px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-black transition"
-            [ngClass]="fullName.invalid && fullName.touched ? 'border-red-400' : 'border-gray-300'"
+            class="field"
+            [ngClass]="fullName.invalid && fullName.touched ? 'border-danger' : 'border-line-strong'"
           />
           @if (fullName.invalid && fullName.touched) {
-            <p class="mt-1 text-xs text-red-500">Inserisci il tuo nome completo (min. 2 caratteri)</p>
+            <p class="mt-1 text-xs text-danger">Inserisci il tuo nome completo (min. 2 caratteri)</p>
           }
         </div>
 
         <div>
-          <label for="email" class="block text-xs font-semibold uppercase tracking-widest text-gray-500 mb-1.5">
+          <label for="email" class="block text-xs font-semibold uppercase tracking-widest text-ink-muted mb-1.5">
             Email
           </label>
           <input
@@ -47,16 +47,16 @@
             formControlName="email"
             autocomplete="email"
             placeholder="nome@esempio.it"
-            class="w-full border px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-black transition"
-            [ngClass]="email.invalid && email.touched ? 'border-red-400' : 'border-gray-300'"
+            class="field"
+            [ngClass]="email.invalid && email.touched ? 'border-danger' : 'border-line-strong'"
           />
           @if (email.invalid && email.touched) {
-            <p class="mt-1 text-xs text-red-500">Inserisci un indirizzo email valido</p>
+            <p class="mt-1 text-xs text-danger">Inserisci un indirizzo email valido</p>
           }
         </div>
 
         <div>
-          <label for="password" class="block text-xs font-semibold uppercase tracking-widest text-gray-500 mb-1.5">
+          <label for="password" class="block text-xs font-semibold uppercase tracking-widest text-ink-muted mb-1.5">
             Password
           </label>
           <div class="relative">
@@ -67,11 +67,11 @@
               autocomplete="new-password"
               placeholder="••••••••"
               class="w-full border px-4 py-3 pr-20 text-sm focus:outline-none focus:ring-2 focus:ring-black transition"
-              [ngClass]="password.invalid && password.touched ? 'border-red-400' : 'border-gray-300'"
+              [ngClass]="password.invalid && password.touched ? 'border-danger' : 'border-line-strong'"
             />
             <button
               type="button"
-              class="absolute inset-y-0 right-0 px-3 text-xs font-semibold uppercase tracking-wider text-gray-600 hover:text-black"
+              class="absolute inset-y-0 right-0 px-3 text-xs font-semibold uppercase tracking-wider text-ink-2 hover:text-black"
               [attr.aria-pressed]="showPassword()"
               [attr.aria-label]="showPassword() ? 'Nascondi password' : 'Mostra password'"
               (click)="togglePasswordVisibility()"
@@ -81,9 +81,9 @@
           </div>
           @if (password.touched) {
             @if (password.hasError('required') || password.hasError('minlength')) {
-              <p class="mt-1 text-xs text-red-500">Minimo 8 caratteri</p>
+              <p class="mt-1 text-xs text-danger">Minimo 8 caratteri</p>
             } @else if (password.hasError('complexity')) {
-              <p class="mt-1 text-xs text-red-500">
+              <p class="mt-1 text-xs text-danger">
                 Deve contenere almeno una maiuscola, una minuscola e un numero
               </p>
             }
@@ -91,7 +91,7 @@
         </div>
 
         <div>
-          <label for="confirmPassword" class="block text-xs font-semibold uppercase tracking-widest text-gray-500 mb-1.5">
+          <label for="confirmPassword" class="block text-xs font-semibold uppercase tracking-widest text-ink-muted mb-1.5">
             Conferma password
           </label>
           <div class="relative">
@@ -102,11 +102,11 @@
               autocomplete="new-password"
               placeholder="••••••••"
               class="w-full border px-4 py-3 pr-20 text-sm focus:outline-none focus:ring-2 focus:ring-black transition"
-              [ngClass]="passwordMismatch ? 'border-red-400' : 'border-gray-300'"
+              [ngClass]="passwordMismatch ? 'border-danger' : 'border-line-strong'"
             />
             <button
               type="button"
-              class="absolute inset-y-0 right-0 px-3 text-xs font-semibold uppercase tracking-wider text-gray-600 hover:text-black"
+              class="absolute inset-y-0 right-0 px-3 text-xs font-semibold uppercase tracking-wider text-ink-2 hover:text-black"
               [attr.aria-pressed]="showConfirmPassword()"
               [attr.aria-label]="showConfirmPassword() ? 'Nascondi conferma password' : 'Mostra conferma password'"
               (click)="toggleConfirmPasswordVisibility()"
@@ -115,12 +115,12 @@
             </button>
           </div>
           @if (passwordMismatch) {
-            <p class="mt-1 text-xs text-red-500">Le password non coincidono</p>
+            <p class="mt-1 text-xs text-danger">Le password non coincidono</p>
           }
         </div>
 
         @if (error()) {
-          <div class="px-4 py-3 bg-red-50 border border-red-200 text-sm text-red-700 rounded">
+          <div class="px-4 py-3 bg-danger-wash text-sm text-danger rounded-sm">
             {{ error() }}
           </div>
         }
@@ -128,7 +128,7 @@
         <button
           type="submit"
           [disabled]="loading()"
-          class="w-full bg-black text-white text-sm font-semibold uppercase tracking-widest py-3.5 hover:bg-gray-900 transition disabled:opacity-50 disabled:cursor-not-allowed"
+          class="w-full bg-black text-white text-sm font-semibold uppercase tracking-widest py-3.5 hover:bg-ink transition disabled:opacity-50 disabled:cursor-not-allowed"
         >
           @if (loading()) {
             Registrazione in corso...

@@ -102,9 +102,9 @@ export class AdminReviews implements OnInit {
   ];
 
   readonly statusColors: Record<string, string> = {
-    pending: 'bg-yellow-100 text-yellow-800',
-    approved: 'bg-green-100 text-green-800',
-    rejected: 'bg-red-100 text-red-800',
+    pending: 'badge-warning',
+    approved: 'badge-success',
+    rejected: 'badge-danger',
   };
 
   ngOnInit() {
@@ -206,7 +206,7 @@ export class AdminReviews implements OnInit {
   }
 
   statusColor(s: string): string {
-    return this.statusColors[s] ?? 'bg-gray-100 text-gray-700';
+    return this.statusColors[s] ?? 'badge-neutral';
   }
 
   stars(rating: number): number[] {

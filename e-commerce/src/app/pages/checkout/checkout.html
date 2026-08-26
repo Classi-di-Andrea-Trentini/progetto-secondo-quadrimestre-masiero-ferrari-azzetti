@@ -1,21 +1,21 @@
 <!-- Success screen -->
 @if (success()) {
-  <div class="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 max-w-md w-full p-8 text-center">
-      <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-5">
-        <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  <div class="min-h-screen flex items-center justify-center bg-sunken p-4">
+    <div class="bg-surface rounded-sm shadow-sm border border-line max-w-md w-full p-8 text-center">
+      <div class="w-16 h-16 bg-success-wash rounded-full flex items-center justify-center mx-auto mb-5">
+        <svg class="w-8 h-8 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
         </svg>
       </div>
-      <h1 class="text-2xl font-bold text-gray-900 mb-2">Ordine confermato!</h1>
-      <p class="text-gray-500 text-sm mb-1">Il tuo ordine è stato ricevuto con successo.</p>
-      <p class="font-mono text-xs text-gray-400 mb-1">ID: {{ success()!.orderId.slice(0, 8) }}…</p>
-      <p class="text-lg font-bold text-gray-900 mt-3 mb-6">Totale: {{ formatPrice(success()!.total) }}</p>
+      <h1 class="text-2xl font-bold text-ink mb-2">Ordine confermato!</h1>
+      <p class="text-ink-muted text-sm mb-1">Il tuo ordine è stato ricevuto con successo.</p>
+      <p class="font-mono text-xs text-ink-muted mb-1">ID: {{ success()!.orderId.slice(0, 8) }}…</p>
+      <p class="text-lg font-bold text-ink mt-3 mb-6">Totale: {{ formatPrice(success()!.total) }}</p>
       <div class="flex flex-col gap-2">
-        <a routerLink="/me" class="w-full px-6 py-3 bg-gray-900 text-white rounded-xl text-sm font-medium hover:bg-gray-700 transition-colors text-center block">
+        <a routerLink="/me" class="w-full px-6 py-3 bg-ink text-white rounded-sm text-sm font-medium hover:bg-ink-strong transition-colors text-center block">
           Vai ai miei ordini
         </a>
-        <a routerLink="/products" class="w-full px-6 py-3 border border-gray-200 text-gray-700 rounded-xl text-sm hover:bg-gray-50 transition-colors text-center block">
+        <a routerLink="/products" class="w-full px-6 py-3 border border-line text-ink-2 rounded-sm text-sm hover:bg-sunken transition-colors text-center block">
           Continua a fare shopping
         </a>
       </div>
@@ -23,14 +23,14 @@
   </div>
 
 } @else {
-  <div class="min-h-screen bg-gray-50">
+  <div class="min-h-screen bg-sunken">
 
     <!-- Nav breadcrumb -->
-    <div class="bg-white border-b border-gray-200 px-4 py-3">
+    <div class="bg-surface border-b border-line px-4 py-3">
       <div class="max-w-5xl mx-auto flex items-center gap-2 text-sm">
-        <a routerLink="/products" class="text-gray-400 hover:text-gray-700">Prodotti</a>
-        <span class="text-gray-300">›</span>
-        <span class="text-gray-900 font-medium">Checkout</span>
+        <a routerLink="/products" class="text-ink-muted hover:text-ink">Prodotti</a>
+        <span class="text-ink-muted">›</span>
+        <span class="text-ink font-medium">Checkout</span>
       </div>
     </div>
 
@@ -43,10 +43,10 @@
             <div class="flex flex-col items-center">
               <div
                 class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors"
-                [class.bg-gray-900]="i <= stepIndex()"
+                [class.bg-ink]="i <= stepIndex()"
                 [class.text-white]="i <= stepIndex()"
-                [class.bg-gray-200]="i > stepIndex()"
-                [class.text-gray-500]="i > stepIndex()"
+                [class.bg-line]="i > stepIndex()"
+                [class.text-ink-muted]="i > stepIndex()"
               >
                 @if (i < stepIndex()) {
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -56,10 +56,10 @@
                   {{ i + 1 }}
                 }
               </div>
-              <span class="text-xs mt-1.5 font-medium" [class.text-gray-900]="i <= stepIndex()" [class.text-gray-400]="i > stepIndex()">{{ s.label }}</span>
+              <span class="text-xs mt-1.5 font-medium" [class.text-ink]="i <= stepIndex()" [class.text-ink-muted]="i > stepIndex()">{{ s.label }}</span>
             </div>
             @if (i < steps.length - 1) {
-              <div class="w-16 sm:w-24 h-px mx-2 mb-4 transition-colors" [class.bg-gray-900]="i < stepIndex()" [class.bg-gray-200]="i >= stepIndex()"></div>
+              <div class="w-16 sm:w-24 h-px mx-2 mb-4 transition-colors" [class.bg-ink]="i < stepIndex()" [class.bg-line]="i >= stepIndex()"></div>
             }
           </div>
         }
@@ -72,7 +72,7 @@
 
           <!-- Error -->
           @if (error()) {
-            <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm flex items-start gap-2">
+            <div class="bg-danger-wash text-danger px-4 py-3 rounded-sm text-sm flex items-start gap-2">
               <svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
               </svg>
@@ -82,12 +82,12 @@
 
           <!-- ─── STEP: ADDRESS ─────────────────────────────── -->
           @if (step() === 'address') {
-            <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
-              <h2 class="font-bold text-gray-900 mb-4">Indirizzo di spedizione</h2>
+            <div class="bg-surface rounded-sm border border-line shadow-sm p-5">
+              <h2 class="font-bold text-ink mb-4">Indirizzo di spedizione</h2>
 
               @if (addressLoading()) {
                 <div class="flex justify-center py-8">
-                  <div class="w-6 h-6 border-4 border-gray-300 border-t-gray-900 rounded-full animate-spin"></div>
+                  <div class="w-6 h-6 border-4 border-line-strong border-t-gray-900 rounded-full animate-spin"></div>
                 </div>
               } @else {
                 <!-- Existing addresses -->
@@ -96,29 +96,29 @@
                     @for (addr of addresses(); track addr.id) {
                       <button
                         (click)="selectAddress(addr.id)"
-                        class="w-full text-left px-4 py-3.5 border rounded-xl transition-all"
-                        [class.border-gray-900]="selectedAddressId() === addr.id"
-                        [class.bg-gray-50]="selectedAddressId() === addr.id"
-                        [class.border-gray-200]="selectedAddressId() !== addr.id"
-                        [class.hover:border-gray-400]="selectedAddressId() !== addr.id"
+                        class="w-full text-left px-4 py-3.5 border rounded-sm transition-all"
+                        [class.border-ink]="selectedAddressId() === addr.id"
+                        [class.bg-sunken]="selectedAddressId() === addr.id"
+                        [class.border-line]="selectedAddressId() !== addr.id"
+                        [class.hover:border-ink]="selectedAddressId() !== addr.id"
                       >
                         <div class="flex items-start gap-3">
                           <div class="mt-0.5">
                             <div class="w-4 h-4 rounded-full border-2 flex items-center justify-center transition-colors"
-                              [class.border-gray-900]="selectedAddressId() === addr.id"
-                              [class.border-gray-300]="selectedAddressId() !== addr.id">
+                              [class.border-ink]="selectedAddressId() === addr.id"
+                              [class.border-line-strong]="selectedAddressId() !== addr.id">
                               @if (selectedAddressId() === addr.id) {
-                                <div class="w-2 h-2 rounded-full bg-gray-900"></div>
+                                <div class="w-2 h-2 rounded-full bg-ink"></div>
                               }
                             </div>
                           </div>
                           <div>
-                            <p class="font-medium text-gray-900 text-sm">{{ addr.fullName }}</p>
-                            <p class="text-gray-500 text-xs mt-0.5">{{ addr.street }}{{ addr.street2 ? ', ' + addr.street2 : '' }}</p>
-                            <p class="text-gray-500 text-xs">{{ addr.postalCode }} {{ addr.city }}{{ addr.province ? ' (' + addr.province + ')' : '' }}, {{ addr.country }}</p>
-                            @if (addr.phone) { <p class="text-gray-400 text-xs">{{ addr.phone }}</p> }
+                            <p class="font-medium text-ink text-sm">{{ addr.fullName }}</p>
+                            <p class="text-ink-muted text-xs mt-0.5">{{ addr.street }}{{ addr.street2 ? ', ' + addr.street2 : '' }}</p>
+                            <p class="text-ink-muted text-xs">{{ addr.postalCode }} {{ addr.city }}{{ addr.province ? ' (' + addr.province + ')' : '' }}, {{ addr.country }}</p>
+                            @if (addr.phone) { <p class="text-ink-muted text-xs">{{ addr.phone }}</p> }
                             @if (addr.isDefault) {
-                              <span class="inline-block mt-1 text-xs text-green-700 bg-green-50 px-2 py-0.5 rounded-full">Predefinito</span>
+                              <span class="inline-block mt-1 text-xs text-success bg-success-wash px-2 py-0.5 rounded-full">Predefinito</span>
                             }
                           </div>
                         </div>
@@ -130,7 +130,7 @@
                 <!-- Add new address toggle -->
                 <button
                   (click)="toggleNewAddressForm()"
-                  class="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors mb-3"
+                  class="flex items-center gap-2 text-sm text-ink-2 hover:text-ink transition-colors mb-3"
                 >
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
@@ -140,45 +140,45 @@
 
                 <!-- New address form -->
                 @if (showNewAddressForm()) {
-                  <form [formGroup]="addressForm" (ngSubmit)="saveNewAddress()" class="border border-gray-200 rounded-xl p-4 space-y-3">
+                  <form [formGroup]="addressForm" (ngSubmit)="saveNewAddress()" class="border border-line rounded-sm p-4 space-y-3">
                     @if (addressFormError()) {
-                      <div class="bg-red-50 border border-red-200 text-red-600 px-3 py-2 rounded-lg text-xs">{{ addressFormError() }}</div>
+                      <div class="bg-danger-wash text-danger px-3 py-2 rounded-sm text-xs">{{ addressFormError() }}</div>
                     }
                     <div class="grid grid-cols-2 gap-3">
                       <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1">Nome completo *</label>
-                        <input formControlName="fullName" type="text" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"/>
+                        <label class="block text-xs font-medium text-ink-2 mb-1">Nome completo *</label>
+                        <input formControlName="fullName" type="text" class="field"/>
                       </div>
                       <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1">Telefono</label>
-                        <input formControlName="phone" type="tel" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"/>
+                        <label class="block text-xs font-medium text-ink-2 mb-1">Telefono</label>
+                        <input formControlName="phone" type="tel" class="field"/>
                       </div>
                     </div>
                     <div>
-                      <label class="block text-xs font-medium text-gray-700 mb-1">Indirizzo (via e numero) *</label>
-                      <input formControlName="street" type="text" placeholder="es. Via Roma 12" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"/>
+                      <label class="block text-xs font-medium text-ink-2 mb-1">Indirizzo (via e numero) *</label>
+                      <input formControlName="street" type="text" placeholder="es. Via Roma 12" class="field"/>
                     </div>
                     <div>
-                      <label class="block text-xs font-medium text-gray-700 mb-1">Interno / scala / altre info</label>
-                      <input formControlName="street2" type="text" placeholder="es. Interno 3, Scala B" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"/>
+                      <label class="block text-xs font-medium text-ink-2 mb-1">Interno / scala / altre info</label>
+                      <input formControlName="street2" type="text" placeholder="es. Interno 3, Scala B" class="field"/>
                     </div>
                     <div class="grid grid-cols-3 gap-3">
                       <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1">CAP *</label>
-                        <input formControlName="postalCode" type="text" placeholder="es. 00100" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"/>
+                        <label class="block text-xs font-medium text-ink-2 mb-1">CAP *</label>
+                        <input formControlName="postalCode" type="text" placeholder="es. 00100" class="field"/>
                       </div>
                       <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1">Città *</label>
-                        <input formControlName="city" type="text" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"/>
+                        <label class="block text-xs font-medium text-ink-2 mb-1">Città *</label>
+                        <input formControlName="city" type="text" class="field"/>
                       </div>
                       <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1">Provincia</label>
-                        <input formControlName="province" type="text" placeholder="es. RM" maxlength="2" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 uppercase"/>
+                        <label class="block text-xs font-medium text-ink-2 mb-1">Provincia</label>
+                        <input formControlName="province" type="text" placeholder="es. RM" maxlength="2" class="field uppercase"/>
                       </div>
                     </div>
                     <div>
-                      <label class="block text-xs font-medium text-gray-700 mb-1">Paese *</label>
-                      <select formControlName="country" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 bg-white">
+                      <label class="block text-xs font-medium text-ink-2 mb-1">Paese *</label>
+                      <select formControlName="country" class="field">
                         <option value="IT">Italia</option>
                         <option value="DE">Germania</option>
                         <option value="FR">Francia</option>
@@ -188,9 +188,9 @@
                       </select>
                     </div>
                     <button type="submit" [disabled]="addressForm.invalid || addressFormLoading()"
-                      class="w-full px-4 py-2.5 bg-gray-900 text-white text-sm rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors">
+                      class="w-full px-4 py-2.5 bg-ink text-white text-sm rounded-sm hover:bg-ink-strong disabled:opacity-50 transition-colors">
                       @if (addressFormLoading()) {
-                        <span class="inline-block w-4 h-4 border-2 border-gray-400 border-t-white rounded-full animate-spin mx-auto"></span>
+                        <span class="inline-block w-4 h-4 border-2 border-line-strong border-t-white rounded-full animate-spin mx-auto"></span>
                       } @else { Salva indirizzo }
                     </button>
                   </form>
@@ -201,78 +201,78 @@
 
           <!-- ─── STEP: SHIPPING ──────────────────────────────────── -->
           @if (step() === 'shipping') {
-            <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
-              <h2 class="font-bold text-gray-900 mb-4">Metodo di spedizione</h2>
+            <div class="bg-surface rounded-sm border border-line shadow-sm p-5">
+              <h2 class="font-bold text-ink mb-4">Metodo di spedizione</h2>
               <div class="space-y-3">
 
                 <button (click)="shippingMethod.set('standard')"
-                  class="w-full text-left px-4 py-4 border rounded-xl transition-all"
-                  [class.border-gray-900]="shippingMethod() === 'standard'"
-                  [class.bg-gray-50]="shippingMethod() === 'standard'"
-                  [class.border-gray-200]="shippingMethod() !== 'standard'"
+                  class="w-full text-left px-4 py-4 border rounded-sm transition-all"
+                  [class.border-ink]="shippingMethod() === 'standard'"
+                  [class.bg-sunken]="shippingMethod() === 'standard'"
+                  [class.border-line]="shippingMethod() !== 'standard'"
                 >
                   <div class="flex items-center justify-between">
                     <div class="flex items-center gap-3">
                       <div class="w-4 h-4 rounded-full border-2 flex items-center justify-center"
-                        [class.border-gray-900]="shippingMethod() === 'standard'"
-                        [class.border-gray-300]="shippingMethod() !== 'standard'">
+                        [class.border-ink]="shippingMethod() === 'standard'"
+                        [class.border-line-strong]="shippingMethod() !== 'standard'">
                         @if (shippingMethod() === 'standard') {
-                          <div class="w-2 h-2 rounded-full bg-gray-900"></div>
+                          <div class="w-2 h-2 rounded-full bg-ink"></div>
                         }
                       </div>
                       <div>
-                        <p class="font-medium text-gray-900 text-sm">Spedizione standard</p>
-                        <p class="text-xs text-gray-500">3–5 giorni lavorativi</p>
+                        <p class="font-medium text-ink text-sm">Spedizione standard</p>
+                        <p class="text-xs text-ink-muted">3–5 giorni lavorativi</p>
                       </div>
                     </div>
-                    <span class="font-semibold text-sm text-gray-900">
+                    <span class="font-semibold text-sm text-ink">
                       {{ cart.subtotal() - promoDiscount() >= FREE_SHIPPING_THRESHOLD ? 'Gratuita' : formatPrice(SHIPPING_COSTS.standard) }}
                     </span>
                   </div>
                 </button>
 
                 <button (click)="shippingMethod.set('express')"
-                  class="w-full text-left px-4 py-4 border rounded-xl transition-all"
-                  [class.border-gray-900]="shippingMethod() === 'express'"
-                  [class.bg-gray-50]="shippingMethod() === 'express'"
-                  [class.border-gray-200]="shippingMethod() !== 'express'"
+                  class="w-full text-left px-4 py-4 border rounded-sm transition-all"
+                  [class.border-ink]="shippingMethod() === 'express'"
+                  [class.bg-sunken]="shippingMethod() === 'express'"
+                  [class.border-line]="shippingMethod() !== 'express'"
                 >
                   <div class="flex items-center justify-between">
                     <div class="flex items-center gap-3">
                       <div class="w-4 h-4 rounded-full border-2 flex items-center justify-center"
-                        [class.border-gray-900]="shippingMethod() === 'express'"
-                        [class.border-gray-300]="shippingMethod() !== 'express'">
+                        [class.border-ink]="shippingMethod() === 'express'"
+                        [class.border-line-strong]="shippingMethod() !== 'express'">
                         @if (shippingMethod() === 'express') {
-                          <div class="w-2 h-2 rounded-full bg-gray-900"></div>
+                          <div class="w-2 h-2 rounded-full bg-ink"></div>
                         }
                       </div>
                       <div>
-                        <p class="font-medium text-gray-900 text-sm">Spedizione express</p>
-                        <p class="text-xs text-gray-500">1–2 giorni lavorativi</p>
+                        <p class="font-medium text-ink text-sm">Spedizione express</p>
+                        <p class="text-xs text-ink-muted">1–2 giorni lavorativi</p>
                       </div>
                     </div>
-                    <span class="font-semibold text-sm text-gray-900">{{ formatPrice(SHIPPING_COSTS.express) }}</span>
+                    <span class="font-semibold text-sm text-ink">{{ formatPrice(SHIPPING_COSTS.express) }}</span>
                   </div>
                 </button>
               </div>
 
               @if (cart.subtotal() >= FREE_SHIPPING_THRESHOLD) {
-                <div class="mt-3 text-xs text-green-600 bg-green-50 px-3 py-2 rounded-lg">
+                <div class="mt-3 text-xs text-success bg-success-wash px-3 py-2 rounded-sm">
                   ✓ Spedizione standard gratuita per ordini sopra €{{ FREE_SHIPPING_THRESHOLD }}
                 </div>
               }
             </div>
 
             <!-- Promo code -->
-            <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
-              <h2 class="font-bold text-gray-900 mb-3">Codice promozionale</h2>
+            <div class="bg-surface rounded-sm border border-line shadow-sm p-5">
+              <h2 class="font-bold text-ink mb-3">Codice promozionale</h2>
               @if (appliedPromoCode()) {
-                <div class="flex items-center justify-between bg-green-50 border border-green-200 px-4 py-3 rounded-xl">
+                <div class="flex items-center justify-between bg-success-wash border border-transparent px-4 py-3 rounded-sm">
                   <div>
-                    <p class="text-sm font-bold text-green-900 font-mono">{{ appliedPromoCode() }}</p>
-                    <p class="text-xs text-green-700">{{ promoSuccess() }}</p>
+                    <p class="text-sm font-bold text-success font-mono">{{ appliedPromoCode() }}</p>
+                    <p class="text-xs text-success">{{ promoSuccess() }}</p>
                   </div>
-                  <button (click)="removePromo()" class="text-green-700 hover:text-red-600 transition-colors text-xs underline">Rimuovi</button>
+                  <button (click)="removePromo()" class="text-success hover:text-danger transition-colors text-xs underline">Rimuovi</button>
                 </div>
               } @else {
                 <div class="flex gap-2">
@@ -282,34 +282,34 @@
                     (keyup.enter)="applyPromo()"
                     type="text"
                     placeholder="Inserisci codice…"
-                    class="flex-1 px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 uppercase font-mono"
+                    class="flex-1 px-3 py-2.5 text-sm border border-line rounded-sm focus:outline-none focus:ring-2 focus:ring-ink uppercase font-mono"
                   />
                   <button (click)="applyPromo()" [disabled]="promoLoading() || !promoCode().trim()"
-                    class="px-4 py-2.5 bg-gray-900 text-white text-sm rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors">
+                    class="px-4 py-2.5 bg-ink text-white text-sm rounded-sm hover:bg-ink-strong disabled:opacity-50 transition-colors">
                     @if (promoLoading()) {
-                      <span class="inline-block w-4 h-4 border-2 border-gray-400 border-t-white rounded-full animate-spin"></span>
+                      <span class="inline-block w-4 h-4 border-2 border-line-strong border-t-white rounded-full animate-spin"></span>
                     } @else { Applica }
                   </button>
                 </div>
                 @if (promoError()) {
-                  <p class="mt-1.5 text-xs text-red-600">{{ promoError() }}</p>
+                  <p class="mt-1.5 text-xs text-danger">{{ promoError() }}</p>
                 }
               }
             </div>
 
             <!-- Gift card -->
-            <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
-              <h2 class="font-bold text-gray-900 mb-3">Gift card</h2>
+            <div class="bg-surface rounded-sm border border-line shadow-sm p-5">
+              <h2 class="font-bold text-ink mb-3">Gift card</h2>
               @if (appliedGiftCard()) {
-                <div class="flex items-center justify-between bg-green-50 border border-green-200 px-4 py-3 rounded-xl">
+                <div class="flex items-center justify-between bg-success-wash border border-transparent px-4 py-3 rounded-sm">
                   <div>
-                    <p class="text-sm font-bold text-green-900 font-mono">{{ appliedGiftCard() }}</p>
-                    <p class="text-xs text-green-700">
+                    <p class="text-sm font-bold text-success font-mono">{{ appliedGiftCard() }}</p>
+                    <p class="text-xs text-success">
                       Saldo {{ formatPrice(giftCardBalance()) }} — su quest'ordine se ne usano
                       {{ formatPrice(giftCardApplied()) }}
                     </p>
                   </div>
-                  <button (click)="removeGiftCard()" class="text-green-700 hover:text-red-600 transition-colors text-xs underline">Rimuovi</button>
+                  <button (click)="removeGiftCard()" class="text-success hover:text-danger transition-colors text-xs underline">Rimuovi</button>
                 </div>
               } @else {
                 <div class="flex gap-2">
@@ -319,26 +319,26 @@
                     (keyup.enter)="applyGiftCard()"
                     type="text"
                     placeholder="GC-XXXX-XXXX-XXXX"
-                    class="flex-1 px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 uppercase font-mono"
+                    class="flex-1 px-3 py-2.5 text-sm border border-line rounded-sm focus:outline-none focus:ring-2 focus:ring-ink uppercase font-mono"
                   />
                   <button (click)="applyGiftCard()" [disabled]="giftCardLoading() || !giftCardCode().trim()"
-                    class="px-4 py-2.5 bg-gray-900 text-white text-sm rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors">
+                    class="px-4 py-2.5 bg-ink text-white text-sm rounded-sm hover:bg-ink-strong disabled:opacity-50 transition-colors">
                     @if (giftCardLoading()) {
-                      <span class="inline-block w-4 h-4 border-2 border-gray-400 border-t-white rounded-full animate-spin"></span>
+                      <span class="inline-block w-4 h-4 border-2 border-line-strong border-t-white rounded-full animate-spin"></span>
                     } @else { Verifica }
                   </button>
                 </div>
                 @if (giftCardError()) {
-                  <p class="mt-1.5 text-xs text-red-600">{{ giftCardError() }}</p>
+                  <p class="mt-1.5 text-xs text-danger">{{ giftCardError() }}</p>
                 }
               }
             </div>
 
             <!-- Punti fedelta' -->
             @if (loyalty(); as points) {
-              <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
-                <h2 class="font-bold text-gray-900 mb-3">Punti fedeltà</h2>
-                <p class="text-sm text-gray-600">
+              <div class="bg-surface rounded-sm border border-line shadow-sm p-5">
+                <h2 class="font-bold text-ink mb-3">Punti fedeltà</h2>
+                <p class="text-sm text-ink-2">
                   Hai <strong>{{ points.balance }}</strong> punti, pari a
                   <strong>{{ formatPrice(points.value) }}</strong>.
                 </p>
@@ -347,13 +347,13 @@
                     <input type="checkbox" class="w-4 h-4"
                            [checked]="useLoyalty()"
                            (change)="useLoyalty.set(!useLoyalty())" />
-                    <span class="text-sm text-gray-900">
+                    <span class="text-sm text-ink">
                       Usa {{ loyaltyPointsToUse() }} punti su quest'ordine
                       ({{ formatPrice(loyaltyDiscount()) }})
                     </span>
                   </label>
                 } @else {
-                  <p class="mt-2 text-xs text-gray-500">
+                  <p class="mt-2 text-xs text-ink-muted">
                     Servono almeno {{ points.minRedeemable }} punti per usarli.
                   </p>
                 }
@@ -361,60 +361,60 @@
             }
 
             <!-- Notes -->
-            <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
-              <h2 class="font-bold text-gray-900 mb-3">Note per l'ordine</h2>
+            <div class="bg-surface rounded-sm border border-line shadow-sm p-5">
+              <h2 class="font-bold text-ink mb-3">Note per l'ordine</h2>
               <textarea
                 [ngModel]="notes()"
                 (ngModelChange)="notes.set($event)"
                 rows="3"
                 placeholder="Istruzioni di consegna, lasciare in portineria, ecc…"
-                class="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 resize-none"
+                class="field resize-none"
               ></textarea>
             </div>
           }
 
           <!-- ─── STEP: REVIEW ──────────────────────────────────────── -->
           @if (step() === 'review') {
-            <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
-              <h2 class="font-bold text-gray-900 mb-4">Riepilogo ordine</h2>
+            <div class="bg-surface rounded-sm border border-line shadow-sm p-5">
+              <h2 class="font-bold text-ink mb-4">Riepilogo ordine</h2>
 
               <!-- Items -->
               <div class="space-y-3 mb-5">
                 @for (item of cart.items(); track item.variantId) {
                   <div class="flex items-center gap-3">
-                    <div class="w-14 h-14 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
+                    <div class="w-14 h-14 rounded-sm overflow-hidden bg-sunken flex-shrink-0">
                       @if (item.imageUrl) {
                         <img [src]="item.imageUrl" [alt]="item.productName" class="w-full h-full object-cover"/>
                       }
                     </div>
                     <div class="flex-1 min-w-0">
-                      <p class="text-sm font-medium text-gray-900 truncate">{{ item.productName }}</p>
-                      <p class="text-xs text-gray-400">{{ item.variantLabel }}</p>
-                      <p class="text-xs text-gray-500">×{{ item.quantity }}</p>
+                      <p class="text-sm font-medium text-ink truncate">{{ item.productName }}</p>
+                      <p class="text-xs text-ink-muted">{{ item.variantLabel }}</p>
+                      <p class="text-xs text-ink-muted">×{{ item.quantity }}</p>
                     </div>
-                    <p class="text-sm font-semibold text-gray-900 flex-shrink-0">{{ formatPrice(item.unitPrice * item.quantity) }}</p>
+                    <p class="text-sm font-semibold text-ink flex-shrink-0">{{ formatPrice(item.unitPrice * item.quantity) }}</p>
                   </div>
                 }
               </div>
 
               <!-- Address & shipping summary -->
-              <div class="grid grid-cols-2 gap-4 pt-4 border-t border-gray-100">
+              <div class="grid grid-cols-2 gap-4 pt-4 border-t border-line">
                 <div>
-                  <p class="text-xs font-medium text-gray-500 uppercase mb-1.5">Spedizione a</p>
+                  <p class="text-xs font-medium text-ink-muted uppercase mb-1.5">Spedizione a</p>
                   @if (selectedAddress()) {
-                    <p class="text-sm text-gray-900 font-medium">{{ selectedAddress()!.fullName }}</p>
-                    <p class="text-xs text-gray-500">{{ selectedAddress()!.street }}</p>
-                    <p class="text-xs text-gray-500">{{ selectedAddress()!.postalCode }} {{ selectedAddress()!.city }}{{ selectedAddress()!.province ? ' (' + selectedAddress()!.province + ')' : '' }}</p>
+                    <p class="text-sm text-ink font-medium">{{ selectedAddress()!.fullName }}</p>
+                    <p class="text-xs text-ink-muted">{{ selectedAddress()!.street }}</p>
+                    <p class="text-xs text-ink-muted">{{ selectedAddress()!.postalCode }} {{ selectedAddress()!.city }}{{ selectedAddress()!.province ? ' (' + selectedAddress()!.province + ')' : '' }}</p>
                   }
                 </div>
                 <div>
-                  <p class="text-xs font-medium text-gray-500 uppercase mb-1.5">Metodo</p>
-                  <p class="text-sm text-gray-900">{{ shippingMethod() === 'standard' ? 'Standard (3-5gg)' : 'Express (1-2gg)' }}</p>
+                  <p class="text-xs font-medium text-ink-muted uppercase mb-1.5">Metodo</p>
+                  <p class="text-sm text-ink">{{ shippingMethod() === 'standard' ? 'Standard (3-5gg)' : 'Express (1-2gg)' }}</p>
                 </div>
               </div>
 
               @if (appliedPromoCode()) {
-                <div class="mt-3 text-xs text-green-700 bg-green-50 px-3 py-2 rounded-lg flex items-center gap-2">
+                <div class="mt-3 text-xs text-success bg-success-wash px-3 py-2 rounded-sm flex items-center gap-2">
                   <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                   </svg>
@@ -424,7 +424,7 @@
             </div>
 
             <!-- Payment note -->
-            <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 text-sm text-blue-700 flex items-start gap-2">
+            <div class="bg-info-wash border border-transparent rounded-sm p-4 text-sm text-info flex items-start gap-2">
               <svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
               </svg>
@@ -435,7 +435,7 @@
           <!-- Navigation buttons -->
           <div class="flex gap-3">
             @if (step() !== 'address') {
-              <button (click)="prevStep()" class="flex items-center gap-2 px-5 py-3 border border-gray-200 rounded-xl text-sm hover:bg-gray-50 transition-colors">
+              <button (click)="prevStep()" class="flex items-center gap-2 px-5 py-3 border border-line rounded-sm text-sm hover:bg-sunken transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                 </svg>
@@ -447,7 +447,7 @@
               <button
                 (click)="nextStep()"
                 [disabled]="step() === 'address' && !selectedAddressId()"
-                class="flex items-center gap-2 px-6 py-3 bg-gray-900 text-white rounded-xl text-sm font-medium hover:bg-gray-700 disabled:opacity-50 transition-colors"
+                class="flex items-center gap-2 px-6 py-3 bg-ink text-white rounded-sm text-sm font-medium hover:bg-ink-strong disabled:opacity-50 transition-colors"
               >
                 Continua
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -458,10 +458,10 @@
               <button
                 (click)="placeOrder()"
                 [disabled]="loading()"
-                class="flex items-center gap-2 px-6 py-3 bg-gray-900 text-white rounded-xl text-sm font-medium hover:bg-gray-700 disabled:opacity-50 transition-colors"
+                class="flex items-center gap-2 px-6 py-3 bg-ink text-white rounded-sm text-sm font-medium hover:bg-ink-strong disabled:opacity-50 transition-colors"
               >
                 @if (loading()) {
-                  <span class="inline-block w-4 h-4 border-2 border-gray-400 border-t-white rounded-full animate-spin"></span>
+                  <span class="inline-block w-4 h-4 border-2 border-line-strong border-t-white rounded-full animate-spin"></span>
                   Elaborazione…
                 } @else {
                   Conferma ordine
@@ -476,63 +476,63 @@
 
         <!-- Right: order summary sidebar -->
         <div class="lg:col-span-1">
-          <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 sticky top-6">
-            <h3 class="font-bold text-gray-900 mb-4">Riepilogo</h3>
+          <div class="bg-surface rounded-sm border border-line shadow-sm p-5 sticky top-6">
+            <h3 class="font-bold text-ink mb-4">Riepilogo</h3>
 
             <div class="space-y-2 text-sm mb-4">
               @for (item of cart.items(); track item.variantId) {
                 <div class="flex justify-between items-start gap-2">
                   <div class="flex-1 min-w-0">
-                    <p class="text-gray-700 truncate">{{ item.productName }}</p>
-                    <p class="text-gray-400 text-xs">{{ item.variantLabel }} ×{{ item.quantity }}</p>
+                    <p class="text-ink-2 truncate">{{ item.productName }}</p>
+                    <p class="text-ink-muted text-xs">{{ item.variantLabel }} ×{{ item.quantity }}</p>
                   </div>
-                  <span class="text-gray-900 font-medium flex-shrink-0">{{ formatPrice(item.unitPrice * item.quantity) }}</span>
+                  <span class="text-ink font-medium flex-shrink-0">{{ formatPrice(item.unitPrice * item.quantity) }}</span>
                 </div>
               }
             </div>
 
-            <div class="border-t border-gray-100 pt-3 space-y-1.5 text-sm">
-              <div class="flex justify-between text-gray-500">
+            <div class="border-t border-line pt-3 space-y-1.5 text-sm">
+              <div class="flex justify-between text-ink-muted">
                 <span>Subtotale</span>
                 <span>{{ formatPrice(cart.subtotal()) }}</span>
               </div>
               @if (promoDiscount() > 0) {
-                <div class="flex justify-between text-green-600">
+                <div class="flex justify-between text-success">
                   <span>Sconto promo</span>
                   <span>–{{ formatPrice(promoDiscount()) }}</span>
                 </div>
               }
-              <div class="flex justify-between text-gray-500">
+              <div class="flex justify-between text-ink-muted">
                 <span>Spedizione</span>
                 <span>{{ shippingCost() === 0 ? 'Gratuita' : formatPrice(shippingCost()) }}</span>
               </div>
               @if (loyaltyDiscount() > 0) {
-                <div class="flex justify-between text-green-600">
+                <div class="flex justify-between text-success">
                   <span>Punti fedeltà</span>
                   <span>–{{ formatPrice(loyaltyDiscount()) }}</span>
                 </div>
               }
               @if (giftCardApplied() > 0) {
-                <div class="flex justify-between text-green-600">
+                <div class="flex justify-between text-success">
                   <span>Gift card</span>
                   <span>–{{ formatPrice(giftCardApplied()) }}</span>
                 </div>
               }
-              <div class="flex justify-between font-bold text-gray-900 pt-2 border-t border-gray-100 text-base">
+              <div class="flex justify-between font-bold text-ink pt-2 border-t border-line text-base">
                 <span>Totale</span>
                 <span>{{ formatPrice(total()) }}</span>
               </div>
               <!-- Da pagare davvero: se punti e buono coprono tutto, e' zero -->
               @if (amountToPay() !== total()) {
-                <div class="flex justify-between font-bold text-gray-900 text-base">
+                <div class="flex justify-between font-bold text-ink text-base">
                   <span>Da pagare</span>
                   <span>{{ formatPrice(amountToPay()) }}</span>
                 </div>
               }
             </div>
 
-            <div class="mt-4 flex items-center gap-2 text-xs text-gray-400">
-              <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="mt-4 flex items-center gap-2 text-xs text-ink-muted">
+              <svg class="w-4 h-4 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
               </svg>
               Transazione sicura e protetta

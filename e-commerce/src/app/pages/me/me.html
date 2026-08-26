@@ -1,29 +1,29 @@
 <div class="max-w-4xl mx-auto px-4 py-10">
 
-  <nav class="flex justify-center gap-6 sm:gap-10 border-b border-gray-200 mb-12 flex-wrap">
+  <nav class="flex justify-center gap-6 sm:gap-10 border-b border-line mb-12 flex-wrap">
     <a (click)="setTab('profile')"
        class="pb-4 text-sm font-semibold uppercase tracking-wider cursor-pointer transition-colors"
-       [ngClass]="activeTab() === 'profile' ? 'text-black border-b-2 border-black' : 'text-gray-400 hover:text-gray-700'">
+       [ngClass]="activeTab() === 'profile' ? 'text-black border-b-2 border-black' : 'text-ink-muted hover:text-ink'">
       Profile
     </a>
     <a (click)="setTab('orders')"
        class="pb-4 text-sm font-semibold uppercase tracking-wider cursor-pointer transition-colors"
-       [ngClass]="activeTab() === 'orders' ? 'text-black border-b-2 border-black' : 'text-gray-400 hover:text-gray-700'">
+       [ngClass]="activeTab() === 'orders' ? 'text-black border-b-2 border-black' : 'text-ink-muted hover:text-ink'">
       Orders
     </a>
     <a (click)="setTab('addresses')"
        class="pb-4 text-sm font-semibold uppercase tracking-wider cursor-pointer transition-colors"
-       [ngClass]="activeTab() === 'addresses' ? 'text-black border-b-2 border-black' : 'text-gray-400 hover:text-gray-700'">
+       [ngClass]="activeTab() === 'addresses' ? 'text-black border-b-2 border-black' : 'text-ink-muted hover:text-ink'">
       Addresses
     </a>
     <a (click)="setTab('favorites')"
        class="pb-4 text-sm font-semibold uppercase tracking-wider cursor-pointer transition-colors"
-       [ngClass]="activeTab() === 'favorites' ? 'text-black border-b-2 border-black' : 'text-gray-400 hover:text-gray-700'">
+       [ngClass]="activeTab() === 'favorites' ? 'text-black border-b-2 border-black' : 'text-ink-muted hover:text-ink'">
       Saved
     </a>
     <a (click)="setTab('settings')"
        class="pb-4 text-sm font-semibold uppercase tracking-wider cursor-pointer transition-colors"
-       [ngClass]="activeTab() === 'settings' ? 'text-black border-b-2 border-black' : 'text-gray-400 hover:text-gray-700'">
+       [ngClass]="activeTab() === 'settings' ? 'text-black border-b-2 border-black' : 'text-ink-muted hover:text-ink'">
       Settings
     </a>
   </nav>
@@ -37,18 +37,18 @@
 
             <!-- Personal information -->
             <div class="mb-12">
-              <div class="flex justify-between items-center border-b border-gray-100 pb-4 mb-6">
+              <div class="flex justify-between items-center border-b border-line pb-4 mb-6">
                 <h2 class="text-xl font-bold">Personal Information</h2>
                 @if (!isEditing()) {
                   <button (click)="startEditing()"
-                    class="text-sm text-gray-400 hover:text-black underline transition-colors">
+                    class="text-sm text-ink-muted hover:text-black underline transition-colors">
                     Edit
                   </button>
                 }
               </div>
 
               @if (saveSuccess()) {
-                <div class="mb-6 px-4 py-3 bg-green-50 border border-green-200 text-sm text-green-700 rounded">
+                <div class="mb-6 px-4 py-3 bg-success-wash border border-transparent text-sm text-success rounded">
                   Profile updated successfully.
                 </div>
               }
@@ -57,25 +57,25 @@
                 <!-- Read view -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div>
-                    <p class="text-xs text-gray-400 uppercase tracking-widest mb-1">Full name</p>
+                    <p class="text-xs text-ink-muted uppercase tracking-widest mb-1">Full name</p>
                     <p class="font-medium">{{ user.fullName }}</p>
                   </div>
                   <div>
-                    <p class="text-xs text-gray-400 uppercase tracking-widest mb-1">Phone</p>
+                    <p class="text-xs text-ink-muted uppercase tracking-widest mb-1">Phone</p>
                     <p class="font-medium">{{ user.phone ?? '—' }}</p>
                   </div>
                   <div>
-                    <p class="text-xs text-gray-400 uppercase tracking-widest mb-1">Date of birth</p>
+                    <p class="text-xs text-ink-muted uppercase tracking-widest mb-1">Date of birth</p>
                     <p class="font-medium">
                       {{ user.birthDate ? (user.birthDate | date: 'longDate') : '—' }}
                     </p>
                   </div>
                   <div>
-                    <p class="text-xs text-gray-400 uppercase tracking-widest mb-1">Gender</p>
+                    <p class="text-xs text-ink-muted uppercase tracking-widest mb-1">Gender</p>
                     <p class="font-medium">{{ user.gender ?? '—' }}</p>
                   </div>
                   <div>
-                    <p class="text-xs text-gray-400 uppercase tracking-widest mb-1">Member since</p>
+                    <p class="text-xs text-ink-muted uppercase tracking-widest mb-1">Member since</p>
                     <p class="font-medium">{{ user.createdAt | date: 'MMMM y' }}</p>
                   </div>
                 </div>
@@ -86,40 +86,40 @@
 
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div class="md:col-span-2">
-                      <label class="block text-xs font-semibold uppercase tracking-widest text-gray-500 mb-1.5">
+                      <label class="block text-xs font-semibold uppercase tracking-widest text-ink-muted mb-1.5">
                         Full name
                       </label>
                       <input type="text" formControlName="fullName"
-                        class="w-full border px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-black transition"
-                        [ngClass]="fullName.invalid && fullName.touched ? 'border-red-400' : 'border-gray-300'" />
+                        class="field"
+                        [ngClass]="fullName.invalid && fullName.touched ? 'border-danger' : 'border-line-strong'" />
                       @if (fullName.invalid && fullName.touched) {
-                        <p class="mt-1 text-xs text-red-500">Minimum 2 characters</p>
+                        <p class="mt-1 text-xs text-danger">Minimum 2 characters</p>
                       }
                     </div>
 
                     <div>
-                      <label class="block text-xs font-semibold uppercase tracking-widest text-gray-500 mb-1.5">
+                      <label class="block text-xs font-semibold uppercase tracking-widest text-ink-muted mb-1.5">
                         Phone
                       </label>
                       <input type="tel" formControlName="phone"
                         placeholder="+39 333 1234567"
-                        class="w-full border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-black transition" />
+                        class="field" />
                     </div>
 
                     <div>
-                      <label class="block text-xs font-semibold uppercase tracking-widest text-gray-500 mb-1.5">
+                      <label class="block text-xs font-semibold uppercase tracking-widest text-ink-muted mb-1.5">
                         Date of birth
                       </label>
                       <input type="date" formControlName="birthDate"
-                        class="w-full border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-black transition" />
+                        class="field" />
                     </div>
 
                     <div>
-                      <label class="block text-xs font-semibold uppercase tracking-widest text-gray-500 mb-1.5">
+                      <label class="block text-xs font-semibold uppercase tracking-widest text-ink-muted mb-1.5">
                         Gender
                       </label>
                       <select formControlName="gender"
-                        class="w-full border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-black transition bg-white">
+                        class="field bg-surface">
                         <option value="">Not specified</option>
                         <option value="male">Male</option>
                         <option value="female">Female</option>
@@ -129,18 +129,18 @@
                   </div>
 
                   @if (saveError()) {
-                    <div class="px-4 py-3 bg-red-50 border border-red-200 text-sm text-red-700 rounded">
+                    <div class="px-4 py-3 bg-danger-wash text-sm text-danger rounded-sm">
                       {{ saveError() }}
                     </div>
                   }
 
                   <div class="flex gap-3 pt-2">
                     <button type="submit" [disabled]="saveLoading()"
-                      class="px-6 py-2.5 bg-black text-white text-sm font-semibold uppercase tracking-widest hover:bg-gray-900 transition disabled:opacity-50">
+                      class="px-6 py-2.5 bg-black text-white text-sm font-semibold uppercase tracking-widest hover:bg-ink transition disabled:opacity-50">
                       @if (saveLoading()) { Saving… } @else { Save }
                     </button>
                     <button type="button" (click)="cancelEditing()"
-                      class="px-6 py-2.5 border border-gray-300 text-sm font-semibold uppercase tracking-widest hover:border-black transition">
+                      class="px-6 py-2.5 border border-line-strong text-sm font-semibold uppercase tracking-widest hover:border-black transition">
                       Cancel
                     </button>
                   </div>
@@ -150,13 +150,13 @@
             </div>
 
             <!-- Email -->
-            <div class="border-t border-gray-100 pt-8">
+            <div class="border-t border-line pt-8">
               <div class="flex justify-between items-center mb-4">
                 <div>
-                  <p class="text-xs text-gray-400 uppercase tracking-widest mb-1">Email</p>
+                  <p class="text-xs text-ink-muted uppercase tracking-widest mb-1">Email</p>
                   <p class="font-medium">{{ user.email }}</p>
                   @if (user.emailVerifiedAt) {
-                    <p class="text-xs text-green-600 mt-0.5">Verified</p>
+                    <p class="text-xs text-success mt-0.5">Verified</p>
                   } @else {
                     <p class="text-xs text-amber-600 mt-0.5">Not verified</p>
                     <button (click)="sendVerification()" [disabled]="verifyLoading()"
@@ -164,61 +164,61 @@
                       @if (verifyLoading()) { Sending… } @else { Send verification email }
                     </button>
                     @if (verifyMessage()) {
-                      <p class="mt-1 text-xs text-gray-500">{{ verifyMessage() }}</p>
+                      <p class="mt-1 text-xs text-ink-muted">{{ verifyMessage() }}</p>
                     }
                   }
                 </div>
                 <button (click)="emailChangeVisible.set(!emailChangeVisible())"
-                  class="text-sm text-gray-400 hover:text-black underline transition-colors">
+                  class="text-sm text-ink-muted hover:text-black underline transition-colors">
                   {{ emailChangeVisible() ? 'Cancel' : 'Change email' }}
                 </button>
               </div>
 
               @if (emailChangeVisible()) {
-                <div class="mt-4 p-5 bg-gray-50 border border-gray-200 rounded">
-                  <p class="text-xs text-gray-500 mb-4">
+                <div class="mt-4 p-5 bg-sunken border border-line rounded">
+                  <p class="text-xs text-ink-muted mb-4">
                     Changing your email requires confirmation via a link sent to the new address.
                     Please enter your current password to proceed.
                   </p>
 
                   <form [formGroup]="emailForm" (ngSubmit)="submitEmailChange()" novalidate class="space-y-4">
                     <div>
-                      <label class="block text-xs font-semibold uppercase tracking-widest text-gray-500 mb-1.5">
+                      <label class="block text-xs font-semibold uppercase tracking-widest text-ink-muted mb-1.5">
                         New email
                       </label>
                       <input type="email" formControlName="newEmail"
                         autocomplete="email"
                         placeholder="new@email.com"
-                        class="w-full border px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-black transition"
-                        [ngClass]="newEmail.invalid && newEmail.touched ? 'border-red-400' : 'border-gray-300'" />
+                        class="field"
+                        [ngClass]="newEmail.invalid && newEmail.touched ? 'border-danger' : 'border-line-strong'" />
                       @if (newEmail.invalid && newEmail.touched) {
-                        <p class="mt-1 text-xs text-red-500">Please enter a valid email address</p>
+                        <p class="mt-1 text-xs text-danger">Please enter a valid email address</p>
                       }
                     </div>
 
                     <div>
-                      <label class="block text-xs font-semibold uppercase tracking-widest text-gray-500 mb-1.5">
+                      <label class="block text-xs font-semibold uppercase tracking-widest text-ink-muted mb-1.5">
                         Current password
                       </label>
                       <input type="password" formControlName="currentPassword"
                         autocomplete="current-password"
                         placeholder="••••••••"
-                        class="w-full border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-black transition" />
+                        class="field" />
                     </div>
 
                     @if (emailError()) {
-                      <div class="px-4 py-3 bg-red-50 border border-red-200 text-sm text-red-700 rounded">
+                      <div class="px-4 py-3 bg-danger-wash text-sm text-danger rounded-sm">
                         {{ emailError() }}
                       </div>
                     }
                     @if (emailSuccess()) {
-                      <div class="px-4 py-3 bg-green-50 border border-green-200 text-sm text-green-700 rounded">
+                      <div class="px-4 py-3 bg-success-wash border border-transparent text-sm text-success rounded">
                         {{ emailSuccess() }}
                       </div>
                     }
 
                     <button type="submit" [disabled]="emailLoading()"
-                      class="px-6 py-2.5 bg-black text-white text-sm font-semibold uppercase tracking-widest hover:bg-gray-900 transition disabled:opacity-50">
+                      class="px-6 py-2.5 bg-black text-white text-sm font-semibold uppercase tracking-widest hover:bg-ink transition disabled:opacity-50">
                       @if (emailLoading()) { Sending… } @else { Send change request }
                     </button>
                   </form>
@@ -232,80 +232,80 @@
 
       @case ('orders') {
         <section>
-          <div class="flex items-center justify-between border-b border-gray-100 pb-4 mb-6">
+          <div class="flex items-center justify-between border-b border-line pb-4 mb-6">
             <h2 class="text-xl font-bold">Order History</h2>
             @if (ordersTotal() > 0) {
-              <span class="text-sm text-gray-400">{{ ordersTotal() }} ordini</span>
+              <span class="text-sm text-ink-muted">{{ ordersTotal() }} ordini</span>
             }
           </div>
 
           @if (returnSuccess()) {
-            <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm mb-4">{{ returnSuccess() }}</div>
+            <div class="bg-success-wash text-success px-4 py-3 rounded-sm text-sm mb-4">{{ returnSuccess() }}</div>
           }
           @if (cancelOrderSuccess()) {
-            <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm mb-4">{{ cancelOrderSuccess() }}</div>
+            <div class="bg-success-wash text-success px-4 py-3 rounded-sm text-sm mb-4">{{ cancelOrderSuccess() }}</div>
           }
 
           @if (ordersLoading()) {
             <div class="flex justify-center py-16">
-              <div class="w-6 h-6 border-4 border-gray-200 border-t-gray-900 rounded-full animate-spin"></div>
+              <div class="w-6 h-6 border-4 border-line border-t-gray-900 rounded-full animate-spin"></div>
             </div>
           } @else if (ordersError()) {
-            <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">{{ ordersError() }}</div>
+            <div class="bg-danger-wash text-danger px-4 py-3 rounded-sm text-sm">{{ ordersError() }}</div>
           } @else if (orders().length === 0) {
             <div class="text-center py-16 space-y-4">
-              <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto">
-                <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div class="w-16 h-16 bg-sunken rounded-full flex items-center justify-center mx-auto">
+                <svg class="w-8 h-8 text-ink-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                 </svg>
               </div>
-              <p class="text-gray-400 text-sm">Nessun ordine ancora.</p>
-              <a routerLink="/products" class="inline-block px-5 py-2.5 bg-gray-900 text-white text-sm rounded-lg hover:bg-gray-700 transition-colors">
+              <p class="text-ink-muted text-sm">Nessun ordine ancora.</p>
+              <a routerLink="/products" class="inline-block btn btn-primary">
                 Inizia a fare shopping
               </a>
             </div>
           } @else {
             <div class="space-y-3">
               @for (order of orders(); track order.id) {
-                <div class="border border-gray-200 rounded-xl overflow-hidden">
+                <div class="border border-line rounded-sm overflow-hidden">
                   <!-- Order header -->
                   <button
                     (click)="toggleOrderExpand(order.id)"
-                    class="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+                    class="w-full flex items-center justify-between p-4 hover:bg-sunken transition-colors"
                   >
                     <div class="flex items-center gap-4 text-left">
                       <div>
-                        <p class="font-mono text-xs text-gray-400">{{ order.id.slice(0, 8) }}…</p>
-                        <p class="text-xs text-gray-400 mt-0.5">{{ order.createdAt | date: 'dd/MM/yyyy' }}</p>
+                        <p class="font-mono text-xs text-ink-muted">{{ order.id.slice(0, 8) }}…</p>
+                        <p class="text-xs text-ink-muted mt-0.5">{{ order.createdAt | date: 'dd/MM/yyyy' }}</p>
                       </div>
                       <div>
-                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium" [ngClass]="orderStatusColor(order.status)">
+                        <span class="badge" [ngClass]="orderStatusColor(order.status)">
                           {{ orderStatusLabel(order.status) }}
                         </span>
                       </div>
                       <div>
-                        <p class="text-xs text-gray-500">{{ order.items.length }} articol{{ order.items.length !== 1 ? 'i' : 'o' }}</p>
+                        <p class="text-xs text-ink-muted">{{ order.items.length }} articol{{ order.items.length !== 1 ? 'i' : 'o' }}</p>
                       </div>
                     </div>
                     <div class="flex items-center gap-3">
-                      <span class="font-bold text-gray-900">{{ formatOrderPrice(order.total) }}</span>
+                      <span class="font-bold text-ink">{{ formatOrderPrice(order.total) }}</span>
                       @if (canCancelOrder(order.status)) {
                         <button (click)="$event.stopPropagation(); requestCancelOrder(order.id)"
-                          class="px-2 py-1 text-xs border border-red-200 text-red-600 rounded-lg hover:bg-red-50 transition-colors">
+                          class="px-2 py-1 text-xs border border-transparent text-danger rounded-sm hover:bg-danger-wash transition-colors">
                           Annulla
                         </button>
                       }
                       @if (canRequestReturn(order)) {
                         <button (click)="openReturnModal(order, $event)"
-                          class="px-2 py-1 text-xs border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
+                          class="px-2 py-1 text-xs border border-line-strong text-ink-2 rounded-sm hover:bg-sunken transition-colors">
                           Richiedi reso
                         </button>
                       } @else if (returnStatusByOrderId()[order.id]) {
-                        <span class="px-2 py-1 text-xs rounded-lg bg-blue-50 text-blue-700 border border-blue-100">
+                        <span class="px-2 py-1 text-xs rounded-sm bg-info-wash text-info border border-transparent">
                           Reso: {{ returnStatusLabels[returnStatusByOrderId()[order.id]] ?? returnStatusByOrderId()[order.id] }}
                         </span>
                       }
-                      <svg class="w-4 h-4 text-gray-400 transition-transform" [class.rotate-180]="expandedOrderId() === order.id" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg class="w-4 h-4 text-ink-muted transition-transform" [class.rotate-180]="expandedOrderId() === order.id" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                       </svg>
                     </div>
@@ -313,27 +313,27 @@
 
                   <!-- Order detail (expanded) -->
                   @if (expandedOrderId() === order.id) {
-                    <div class="border-t border-gray-100 px-4 py-4 bg-gray-50">
+                    <div class="border-t border-line px-4 py-4 bg-sunken">
                       <div class="space-y-2 mb-4">
                         @for (item of order.items; track $index) {
                           <div class="flex justify-between items-center text-sm">
-                            <span class="text-gray-700">{{ item.productName }} <span class="text-gray-400">×{{ item.quantity }}</span></span>
-                            <span class="font-medium text-gray-900">{{ formatOrderPrice(item.lineTotal) }}</span>
+                            <span class="text-ink-2">{{ item.productName }} <span class="text-ink-muted">×{{ item.quantity }}</span></span>
+                            <span class="font-medium text-ink">{{ formatOrderPrice(item.lineTotal) }}</span>
                           </div>
                         }
                       </div>
-                      <div class="border-t border-gray-200 pt-3 space-y-1 text-sm">
-                        <div class="flex justify-between text-gray-500">
+                      <div class="border-t border-line pt-3 space-y-1 text-sm">
+                        <div class="flex justify-between text-ink-muted">
                           <span>Spedizione</span>
                           <span>{{ formatOrderPrice(order.shippingCost) === '€ 0,00' ? 'Gratuita' : formatOrderPrice(order.shippingCost) }}</span>
                         </div>
                         @if (formatOrderPrice(order.discountTotal) !== '€ 0,00') {
-                          <div class="flex justify-between text-green-600">
+                          <div class="flex justify-between text-success">
                             <span>Sconto</span>
                             <span>–{{ formatOrderPrice(order.discountTotal) }}</span>
                           </div>
                         }
-                        <div class="flex justify-between font-bold text-gray-900 border-t border-gray-200 pt-2 mt-1">
+                        <div class="flex justify-between font-bold text-ink border-t border-line pt-2 mt-1">
                           <span>Totale</span>
                           <span>{{ formatOrderPrice(order.total) }}</span>
                         </div>
@@ -341,24 +341,24 @@
 
                       <!-- Cronologia degli stati: il backend la restituiva gia', non si vedeva -->
                       @if (order.statusHistory?.length) {
-                        <div class="border-t border-gray-200 mt-4 pt-4">
-                          <p class="text-sm font-semibold text-gray-900 mb-3">Stato dell'ordine</p>
+                        <div class="border-t border-line mt-4 pt-4">
+                          <p class="text-sm font-semibold text-ink mb-3">Stato dell'ordine</p>
                           <ol class="space-y-3">
                             @for (step of order.statusHistory; track $index; let last = $last) {
                               <li class="flex gap-3">
                                 <div class="flex flex-col items-center">
                                   <span class="w-2.5 h-2.5 rounded-full mt-1.5"
-                                        [class.bg-gray-900]="last"
-                                        [class.bg-gray-300]="!last"></span>
+                                        [class.bg-ink]="last"
+                                        [class.bg-line-strong]="!last"></span>
                                   @if (!last) {
-                                    <span class="w-px flex-1 bg-gray-200"></span>
+                                    <span class="w-px flex-1 bg-line"></span>
                                   }
                                 </div>
                                 <div class="pb-1">
-                                  <p class="text-sm text-gray-900">
+                                  <p class="text-sm text-ink">
                                     {{ orderStatusLabels[step.status] ?? step.status }}
                                   </p>
-                                  <p class="text-xs text-gray-500">
+                                  <p class="text-xs text-ink-muted">
                                     {{ step.createdAt | date: 'd MMM y, HH:mm' }}
                                     @if (step.note) {
                                       — {{ step.note }}
@@ -372,21 +372,21 @@
                       }
 
                       @if (order.trackingNumber) {
-                        <div class="border-t border-gray-200 mt-4 pt-4 text-sm">
-                          <span class="text-gray-500">Spedizione:</span>
+                        <div class="border-t border-line mt-4 pt-4 text-sm">
+                          <span class="text-ink-muted">Spedizione:</span>
                           @if (order.trackingUrl) {
                             <a [href]="order.trackingUrl" target="_blank" rel="noopener"
-                               class="ml-1 font-medium text-gray-900 underline">{{ order.trackingNumber }}</a>
+                               class="ml-1 font-medium text-ink underline">{{ order.trackingNumber }}</a>
                           } @else {
-                            <span class="ml-1 font-medium text-gray-900">{{ order.trackingNumber }}</span>
+                            <span class="ml-1 font-medium text-ink">{{ order.trackingNumber }}</span>
                           }
                         </div>
                       }
 
-                      <div class="border-t border-gray-200 mt-4 pt-4">
+                      <div class="border-t border-line mt-4 pt-4">
                         <button (click)="downloadInvoice(order.id, $event)"
                                 [disabled]="invoiceLoadingId() === order.id"
-                                class="text-sm font-medium text-gray-900 underline disabled:opacity-40">
+                                class="text-sm font-medium text-ink underline disabled:opacity-40">
                           @if (invoiceLoadingId() === order.id) {
                             Preparazione…
                           } @else {
@@ -404,10 +404,10 @@
             @if (ordersTotalPages() > 1) {
               <div class="flex justify-center gap-2 mt-6">
                 <button (click)="loadOrders(ordersPage() - 1)" [disabled]="ordersPage() === 1"
-                  class="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40">‹</button>
-                <span class="px-3 py-1.5 text-sm text-gray-500">{{ ordersPage() }} / {{ ordersTotalPages() }}</span>
+                  class="px-3 py-1.5 text-sm border border-line rounded-sm hover:bg-sunken disabled:opacity-40">‹</button>
+                <span class="px-3 py-1.5 text-sm text-ink-muted">{{ ordersPage() }} / {{ ordersTotalPages() }}</span>
                 <button (click)="loadOrders(ordersPage() + 1)" [disabled]="ordersPage() === ordersTotalPages()"
-                  class="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40">›</button>
+                  class="px-3 py-1.5 text-sm border border-line rounded-sm hover:bg-sunken disabled:opacity-40">›</button>
               </div>
             }
           }
@@ -416,10 +416,10 @@
 
       @case ('addresses') {
         <section>
-          <div class="flex items-center justify-between border-b border-gray-100 pb-4 mb-6">
+          <div class="flex items-center justify-between border-b border-line pb-4 mb-6">
             <h2 class="text-xl font-bold">Shipping Addresses</h2>
             <button (click)="showAddressForm.set(!showAddressForm())"
-              class="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white text-sm rounded-lg hover:bg-gray-700 transition-colors">
+              class="flex items-center gap-2 px-4 py-2 bg-ink text-white text-sm rounded-sm hover:bg-ink-strong transition-colors">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
               </svg>
@@ -428,53 +428,53 @@
           </div>
 
           @if (addressAction()) {
-            <div class="mb-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">{{ addressAction() }}</div>
+            <div class="mb-4 bg-success-wash text-success px-4 py-3 rounded-sm text-sm">{{ addressAction() }}</div>
           }
           @if (addressesError()) {
-            <div class="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">{{ addressesError() }}</div>
+            <div class="mb-4 bg-danger-wash text-danger px-4 py-3 rounded-sm text-sm">{{ addressesError() }}</div>
           }
 
           @if (showAddressForm()) {
-            <form [formGroup]="newAddressForm" (ngSubmit)="saveAddress()" class="border border-gray-200 rounded-xl p-5 mb-6 space-y-3 bg-gray-50">
-              <h3 class="font-semibold text-gray-900 text-sm mb-2">Nuovo indirizzo</h3>
+            <form [formGroup]="newAddressForm" (ngSubmit)="saveAddress()" class="border border-line rounded-sm p-5 mb-6 space-y-3 bg-sunken">
+              <h3 class="font-semibold text-ink text-sm mb-2">Nuovo indirizzo</h3>
               @if (addressFormError()) {
-                <div class="bg-red-50 border border-red-200 text-red-600 px-3 py-2 rounded-lg text-xs">{{ addressFormError() }}</div>
+                <div class="bg-danger-wash text-danger px-3 py-2 rounded-sm text-xs">{{ addressFormError() }}</div>
               }
               <div class="grid grid-cols-2 gap-3">
                 <div>
-                  <label class="block text-xs font-medium text-gray-700 mb-1">Nome completo *</label>
-                  <input formControlName="fullName" type="text" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 bg-white"/>
+                  <label class="block text-xs font-medium text-ink-2 mb-1">Nome completo *</label>
+                  <input formControlName="fullName" type="text" class="field"/>
                 </div>
                 <div>
-                  <label class="block text-xs font-medium text-gray-700 mb-1">Telefono</label>
-                  <input formControlName="phone" type="tel" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 bg-white"/>
+                  <label class="block text-xs font-medium text-ink-2 mb-1">Telefono</label>
+                  <input formControlName="phone" type="tel" class="field"/>
                 </div>
               </div>
               <div>
-                <label class="block text-xs font-medium text-gray-700 mb-1">Via e numero civico *</label>
-                <input formControlName="street" type="text" placeholder="es. Via Roma 12" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 bg-white"/>
+                <label class="block text-xs font-medium text-ink-2 mb-1">Via e numero civico *</label>
+                <input formControlName="street" type="text" placeholder="es. Via Roma 12" class="field"/>
               </div>
               <div>
-                <label class="block text-xs font-medium text-gray-700 mb-1">Interno / scala</label>
-                <input formControlName="street2" type="text" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 bg-white"/>
+                <label class="block text-xs font-medium text-ink-2 mb-1">Interno / scala</label>
+                <input formControlName="street2" type="text" class="field"/>
               </div>
               <div class="grid grid-cols-3 gap-3">
                 <div>
-                  <label class="block text-xs font-medium text-gray-700 mb-1">CAP *</label>
-                  <input formControlName="postalCode" type="text" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 bg-white"/>
+                  <label class="block text-xs font-medium text-ink-2 mb-1">CAP *</label>
+                  <input formControlName="postalCode" type="text" class="field"/>
                 </div>
                 <div>
-                  <label class="block text-xs font-medium text-gray-700 mb-1">Città *</label>
-                  <input formControlName="city" type="text" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 bg-white"/>
+                  <label class="block text-xs font-medium text-ink-2 mb-1">Città *</label>
+                  <input formControlName="city" type="text" class="field"/>
                 </div>
                 <div>
-                  <label class="block text-xs font-medium text-gray-700 mb-1">Prov.</label>
-                  <input formControlName="province" type="text" maxlength="2" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 bg-white uppercase"/>
+                  <label class="block text-xs font-medium text-ink-2 mb-1">Prov.</label>
+                  <input formControlName="province" type="text" maxlength="2" class="field uppercase"/>
                 </div>
               </div>
               <div>
-                <label class="block text-xs font-medium text-gray-700 mb-1">Paese *</label>
-                <select formControlName="country" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 bg-white">
+                <label class="block text-xs font-medium text-ink-2 mb-1">Paese *</label>
+                <select formControlName="country" class="field">
                   <option value="IT">Italia</option>
                   <option value="DE">Germania</option>
                   <option value="FR">Francia</option>
@@ -485,12 +485,12 @@
               </div>
               <div class="flex items-center gap-2">
                 <input formControlName="isDefault" type="checkbox" id="addrDefault" class="w-4 h-4 accent-gray-900"/>
-                <label for="addrDefault" class="text-xs text-gray-700">Imposta come predefinito</label>
+                <label for="addrDefault" class="text-xs text-ink-2">Imposta come predefinito</label>
               </div>
               <button type="submit" [disabled]="newAddressForm.invalid || addressFormLoading()"
-                class="w-full px-4 py-2.5 bg-gray-900 text-white text-sm rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors">
+                class="w-full px-4 py-2.5 bg-ink text-white text-sm rounded-sm hover:bg-ink-strong disabled:opacity-50 transition-colors">
                 @if (addressFormLoading()) {
-                  <span class="inline-block w-4 h-4 border-2 border-gray-400 border-t-white rounded-full animate-spin mx-auto"></span>
+                  <span class="inline-block w-4 h-4 border-2 border-line-strong border-t-white rounded-full animate-spin mx-auto"></span>
                 } @else { Salva indirizzo }
               </button>
             </form>
@@ -498,41 +498,41 @@
 
           @if (addressesLoading()) {
             <div class="flex justify-center py-12">
-              <div class="w-6 h-6 border-4 border-gray-200 border-t-gray-900 rounded-full animate-spin"></div>
+              <div class="w-6 h-6 border-4 border-line border-t-gray-900 rounded-full animate-spin"></div>
             </div>
           } @else if (addresses().length === 0) {
             <div class="text-center py-12">
-              <svg class="w-12 h-12 text-gray-200 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-12 h-12 text-line mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
               </svg>
-              <p class="text-gray-400 text-sm">Nessun indirizzo salvato.</p>
+              <p class="text-ink-muted text-sm">Nessun indirizzo salvato.</p>
             </div>
           } @else {
             <div class="space-y-3">
               @for (addr of addresses(); track addr.id) {
-                <div class="border border-gray-200 rounded-xl p-4 flex items-start justify-between gap-4"
-                  [class.border-gray-900]="addr.isDefault" [class.bg-gray-50]="addr.isDefault">
+                <div class="border border-line rounded-sm p-4 flex items-start justify-between gap-4"
+                  [class.border-ink]="addr.isDefault" [class.bg-sunken]="addr.isDefault">
                   <div class="flex-1">
                     <div class="flex items-center gap-2 mb-1">
-                      <p class="font-semibold text-gray-900 text-sm">{{ addr.fullName }}</p>
+                      <p class="font-semibold text-ink text-sm">{{ addr.fullName }}</p>
                       @if (addr.isDefault) {
-                        <span class="text-xs bg-gray-900 text-white px-2 py-0.5 rounded-full">Predefinito</span>
+                        <span class="text-xs bg-ink text-white px-2 py-0.5 rounded-full">Predefinito</span>
                       }
                     </div>
-                    <p class="text-sm text-gray-600">{{ addr.street }}{{ addr.street2 ? ', ' + addr.street2 : '' }}</p>
-                    <p class="text-sm text-gray-600">{{ addr.postalCode }} {{ addr.city }}{{ addr.province ? ' (' + addr.province + ')' : '' }}, {{ addr.country }}</p>
-                    @if (addr.phone) { <p class="text-xs text-gray-400 mt-0.5">{{ addr.phone }}</p> }
+                    <p class="text-sm text-ink-2">{{ addr.street }}{{ addr.street2 ? ', ' + addr.street2 : '' }}</p>
+                    <p class="text-sm text-ink-2">{{ addr.postalCode }} {{ addr.city }}{{ addr.province ? ' (' + addr.province + ')' : '' }}, {{ addr.country }}</p>
+                    @if (addr.phone) { <p class="text-xs text-ink-muted mt-0.5">{{ addr.phone }}</p> }
                   </div>
                   <div class="flex flex-col gap-1.5 flex-shrink-0">
                     @if (!addr.isDefault) {
                       <button (click)="setDefaultAddress(addr.id)"
-                        class="text-xs px-3 py-1.5 border border-gray-200 rounded-lg hover:border-gray-900 transition-colors text-gray-600">
+                        class="text-xs px-3 py-1.5 border border-line rounded-sm hover:border-ink transition-colors text-ink-2">
                         Imposta predefinito
                       </button>
                     }
                     <button (click)="deleteAddress(addr.id)"
-                      class="text-xs px-3 py-1.5 border border-red-200 text-red-600 rounded-lg hover:bg-red-50 transition-colors">
+                      class="text-xs px-3 py-1.5 border border-transparent text-danger rounded-sm hover:bg-danger-wash transition-colors">
                       Elimina
                     </button>
                   </div>
@@ -545,15 +545,15 @@
 
       @case ('favorites') {
         <section>
-          <h2 class="text-xl font-bold border-b border-gray-100 pb-4 mb-6">Saved Products</h2>
+          <h2 class="text-xl font-bold border-b border-line pb-4 mb-6">Saved Products</h2>
 
           @if (wishlist.items().length === 0) {
             <div class="text-center py-16">
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.2" class="mx-auto mb-4">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" class="mx-auto mb-4 text-line-strong">
                 <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
               </svg>
-              <p class="text-gray-400 text-sm mb-4">No saved products yet.</p>
-              <a routerLink="/products" class="inline-block bg-black text-white text-xs tracking-widest uppercase px-6 py-3 hover:bg-gray-800 transition-colors">
+              <p class="text-ink-muted text-sm mb-4">No saved products yet.</p>
+              <a routerLink="/products" class="inline-block bg-black text-white text-xs tracking-widest uppercase px-6 py-3 hover:bg-ink-strong transition-colors">
                 Browse the collection
               </a>
             </div>
@@ -562,7 +562,7 @@
               @for (item of wishlist.items(); track item.id) {
                 <div class="relative group">
                   <a [routerLink]="['/product', item.product.slug]" class="block">
-                    <div class="aspect-[3/4] bg-gray-100 overflow-hidden">
+                    <div class="aspect-[3/4] bg-sunken overflow-hidden">
                       <img
                         [src]="wishlistCoverImage(item)"
                         [alt]="item.product.name"
@@ -575,8 +575,8 @@
                   </a>
                   <button
                     (click)="removeFromWishlist(item.product.id)"
-                    class="absolute top-2 right-2 bg-white/85 backdrop-blur w-8 h-8 rounded-full flex items-center justify-center text-red-500 hover:scale-110 transition-transform shadow-sm">
-                    <svg viewBox="0 0 24 24" width="16" height="16" fill="#e02020" stroke="#e02020" stroke-width="1.6">
+                    class="absolute top-2 right-2 bg-surface/85 backdrop-blur w-8 h-8 rounded-full flex items-center justify-center text-danger hover:scale-110 transition-transform shadow-sm">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" stroke="currentColor" stroke-width="1.6" class="text-accent">
                       <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
                     </svg>
                   </button>
@@ -589,68 +589,68 @@
 
       @case ('settings') {
         <section>
-          <h2 class="text-xl font-bold border-b border-gray-100 pb-4 mb-6">Account Settings</h2>
+          <h2 class="text-xl font-bold border-b border-line pb-4 mb-6">Account Settings</h2>
 
           <!-- Change password -->
           <div class="mb-10">
-            <h3 class="text-sm font-semibold uppercase tracking-widest text-gray-500 mb-5">Change password</h3>
+            <h3 class="text-sm font-semibold uppercase tracking-widest text-ink-muted mb-5">Change password</h3>
             <form [formGroup]="passwordForm" (ngSubmit)="submitPasswordChange()" novalidate class="space-y-4 max-w-sm">
               <div>
-                <label class="block text-xs font-semibold uppercase tracking-widest text-gray-500 mb-1.5">
+                <label class="block text-xs font-semibold uppercase tracking-widest text-ink-muted mb-1.5">
                   Current password
                 </label>
                 <input type="password" formControlName="currentPassword"
                   autocomplete="current-password"
                   placeholder="••••••••"
-                  class="w-full border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-black transition" />
+                  class="field" />
               </div>
               <div>
-                <label class="block text-xs font-semibold uppercase tracking-widest text-gray-500 mb-1.5">
+                <label class="block text-xs font-semibold uppercase tracking-widest text-ink-muted mb-1.5">
                   New password
                 </label>
                 <input type="password" formControlName="newPassword"
                   autocomplete="new-password"
                   placeholder="••••••••"
-                  class="w-full border px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-black transition"
-                  [ngClass]="newPassword.invalid && newPassword.touched ? 'border-red-400' : 'border-gray-300'" />
+                  class="field"
+                  [ngClass]="newPassword.invalid && newPassword.touched ? 'border-danger' : 'border-line-strong'" />
                 @if (newPassword.invalid && newPassword.touched) {
-                  <p class="mt-1 text-xs text-red-500">Minimum 8 characters</p>
+                  <p class="mt-1 text-xs text-danger">Minimum 8 characters</p>
                 }
               </div>
               <div>
-                <label class="block text-xs font-semibold uppercase tracking-widest text-gray-500 mb-1.5">
+                <label class="block text-xs font-semibold uppercase tracking-widest text-ink-muted mb-1.5">
                   Confirm new password
                 </label>
                 <input type="password" formControlName="confirmPassword"
                   autocomplete="new-password"
                   placeholder="••••••••"
-                  class="w-full border px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-black transition"
-                  [ngClass]="passwordForm.hasError('mismatch') && confirmPassword.touched ? 'border-red-400' : 'border-gray-300'" />
+                  class="field"
+                  [ngClass]="passwordForm.hasError('mismatch') && confirmPassword.touched ? 'border-danger' : 'border-line-strong'" />
                 @if (passwordForm.hasError('mismatch') && confirmPassword.touched) {
-                  <p class="mt-1 text-xs text-red-500">Passwords do not match</p>
+                  <p class="mt-1 text-xs text-danger">Passwords do not match</p>
                 }
               </div>
 
               @if (passwordError()) {
-                <div class="px-4 py-3 bg-red-50 border border-red-200 text-sm text-red-700 rounded">
+                <div class="px-4 py-3 bg-danger-wash text-sm text-danger rounded-sm">
                   {{ passwordError() }}
                 </div>
               }
               @if (passwordSuccess()) {
-                <div class="px-4 py-3 bg-green-50 border border-green-200 text-sm text-green-700 rounded">
+                <div class="px-4 py-3 bg-success-wash border border-transparent text-sm text-success rounded">
                   {{ passwordSuccess() }}
                 </div>
               }
 
               <button type="submit" [disabled]="passwordLoading()"
-                class="px-6 py-2.5 bg-black text-white text-sm font-semibold uppercase tracking-widest hover:bg-gray-900 transition disabled:opacity-50">
+                class="px-6 py-2.5 bg-black text-white text-sm font-semibold uppercase tracking-widest hover:bg-ink transition disabled:opacity-50">
                 @if (passwordLoading()) { Saving… } @else { Update password }
               </button>
             </form>
           </div>
 
-          <div class="border-t border-gray-100 pt-6">
-            <h3 class="text-sm font-semibold uppercase tracking-widest text-gray-500 mb-4">Session</h3>
+          <div class="border-t border-line pt-6">
+            <h3 class="text-sm font-semibold uppercase tracking-widest text-ink-muted mb-4">Session</h3>
             <button (click)="logout()"
               class="px-6 py-2.5 border border-black text-sm font-semibold uppercase tracking-widest hover:bg-black hover:text-white transition">
               Sign out
@@ -668,18 +668,18 @@
 @if (cancelOrderId()) {
   <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
     <div class="absolute inset-0 bg-black/40" (click)="dismissCancelOrder()"></div>
-    <div class="relative bg-white rounded-xl shadow-2xl max-w-sm w-full p-6">
-      <h3 class="text-lg font-bold text-gray-900 mb-2">Annulla ordine</h3>
-      <p class="text-gray-500 text-sm mb-6">Sei sicuro di voler annullare questo ordine? L'azione è irreversibile.</p>
+    <div class="relative bg-surface rounded-sm shadow-2xl max-w-sm w-full p-6">
+      <h3 class="text-lg font-bold text-ink mb-2">Annulla ordine</h3>
+      <p class="text-ink-muted text-sm mb-6">Sei sicuro di voler annullare questo ordine? L'azione è irreversibile.</p>
       <div class="flex gap-3">
         <button (click)="dismissCancelOrder()"
-          class="flex-1 px-4 py-2.5 border border-gray-200 rounded-lg text-sm hover:bg-gray-50">
+          class="btn btn-outline flex-1">
           Indietro
         </button>
         <button (click)="confirmCancelOrder()" [disabled]="cancelOrderLoading()"
-          class="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 disabled:opacity-50">
+          class="flex-1 px-4 py-2.5 bg-danger text-white rounded-sm text-sm hover:bg-danger disabled:opacity-50">
           @if (cancelOrderLoading()) {
-            <span class="inline-block w-4 h-4 border-2 border-red-300 border-t-white rounded-full animate-spin mx-auto"></span>
+            <span class="inline-block w-4 h-4 border-2 border-danger border-t-white rounded-full animate-spin mx-auto"></span>
           } @else { Annulla ordine }
         </button>
       </div>
@@ -691,46 +691,46 @@
 @if (returnModalOrder(); as order) {
   <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
     <div class="absolute inset-0 bg-black/40" (click)="closeReturnModal()"></div>
-    <div class="relative bg-white rounded-xl shadow-2xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto">
-      <h3 class="text-lg font-bold text-gray-900 mb-2">Richiedi reso</h3>
-      <p class="text-gray-500 text-sm mb-4">Scegli quali articoli restituire e quanti.</p>
+    <div class="relative bg-surface rounded-sm shadow-2xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto">
+      <h3 class="text-lg font-bold text-ink mb-2">Richiedi reso</h3>
+      <p class="text-ink-muted text-sm mb-4">Scegli quali articoli restituire e quanti.</p>
 
       <div class="space-y-3 mb-4">
         @for (item of order.items; track item.id) {
-          <div class="flex items-center justify-between gap-3 border border-gray-200 rounded-lg px-3 py-2">
+          <div class="flex items-center justify-between gap-3 border border-line rounded-sm px-3 py-2">
             <div class="text-sm">
-              <p class="text-gray-900">{{ item.productName }}</p>
-              <p class="text-gray-400 text-xs">Acquistati: {{ item.quantity }}</p>
+              <p class="text-ink">{{ item.productName }}</p>
+              <p class="text-ink-muted text-xs">Acquistati: {{ item.quantity }}</p>
             </div>
             <div class="flex items-center gap-2">
               <button type="button" (click)="setReturnQuantity(item.id, (returnQuantities()[item.id] ?? 0) - 1, item.quantity)"
-                class="w-7 h-7 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50">−</button>
+                class="w-7 h-7 border border-line rounded-sm text-ink-2 hover:bg-sunken">−</button>
               <span class="w-6 text-center text-sm">{{ returnQuantities()[item.id] ?? 0 }}</span>
               <button type="button" (click)="setReturnQuantity(item.id, (returnQuantities()[item.id] ?? 0) + 1, item.quantity)"
-                class="w-7 h-7 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50">+</button>
+                class="w-7 h-7 border border-line rounded-sm text-ink-2 hover:bg-sunken">+</button>
             </div>
           </div>
         }
       </div>
 
-      <label class="block text-sm text-gray-700 mb-1">Motivo del reso</label>
+      <label class="block text-sm text-ink-2 mb-1">Motivo del reso</label>
       <textarea [ngModel]="returnReason()" (ngModelChange)="returnReason.set($event)" rows="3"
         placeholder="Descrivi il motivo (almeno 10 caratteri)…"
-        class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mb-2 resize-none"></textarea>
+        class="w-full border border-line rounded-sm px-3 py-2 text-sm mb-2 resize-none"></textarea>
 
       @if (returnError()) {
-        <div class="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-lg text-sm mb-3">{{ returnError() }}</div>
+        <div class="bg-danger-wash text-danger px-3 py-2 rounded-sm text-sm mb-3">{{ returnError() }}</div>
       }
 
       <div class="flex gap-3 mt-2">
         <button (click)="closeReturnModal()"
-          class="flex-1 px-4 py-2.5 border border-gray-200 rounded-lg text-sm hover:bg-gray-50">
+          class="btn btn-outline flex-1">
           Indietro
         </button>
         <button (click)="submitReturn()" [disabled]="returnLoading() || !returnHasSelection"
-          class="flex-1 px-4 py-2.5 bg-gray-900 text-white rounded-lg text-sm hover:bg-gray-800 disabled:opacity-50">
+          class="flex-1 px-4 py-2.5 bg-ink text-white rounded-sm text-sm hover:bg-ink-strong disabled:opacity-50">
           @if (returnLoading()) {
-            <span class="inline-block w-4 h-4 border-2 border-gray-500 border-t-white rounded-full animate-spin mx-auto"></span>
+            <span class="inline-block w-4 h-4 border-2 border-line-strong border-t-white rounded-full animate-spin mx-auto"></span>
           } @else { Invia richiesta }
         </button>
       </div>

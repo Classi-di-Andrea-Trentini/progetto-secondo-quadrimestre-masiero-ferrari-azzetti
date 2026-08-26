@@ -34,14 +34,14 @@ export class AdminDashboard implements OnInit, OnDestroy {
   };
 
   readonly statusColors: Record<string, string> = {
-    pending: 'bg-yellow-100 text-yellow-800',
-    paid: 'bg-blue-100 text-blue-800',
-    processing: 'bg-indigo-100 text-indigo-800',
-    shipped: 'bg-purple-100 text-purple-800',
-    delivered: 'bg-green-100 text-green-800',
-    completed: 'bg-green-200 text-green-900',
-    cancelled: 'bg-red-100 text-red-800',
-    refunded: 'bg-gray-100 text-gray-700',
+    pending: 'badge-warning',
+    paid: 'badge-info',
+    processing: 'badge-info',
+    shipped: 'badge-accent',
+    delivered: 'badge-success',
+    completed: 'badge-success',
+    cancelled: 'badge-danger',
+    refunded: 'badge-neutral',
   };
 
   ngOnInit() {
@@ -101,6 +101,6 @@ export class AdminDashboard implements OnInit, OnDestroy {
   }
 
   statusColor(s: string): string {
-    return this.statusColors[s] ?? 'bg-gray-100 text-gray-700';
+    return this.statusColors[s] ?? 'badge-neutral';
   }
 }

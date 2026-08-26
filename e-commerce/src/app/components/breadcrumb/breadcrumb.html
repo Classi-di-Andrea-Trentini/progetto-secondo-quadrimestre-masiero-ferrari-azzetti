@@ -1,12 +1,12 @@
-<nav class="flex items-center gap-1 text-xs text-gray-400 mb-4" aria-label="Breadcrumb">
+<nav class="flex flex-wrap items-center gap-1.5 text-xs text-ink-muted mb-5" aria-label="Percorso">
   @for (item of items; track $index; let i = $index) {
     @if (i > 0) {
-      <span class="mx-1">/</span>
+      <span class="text-line-strong" aria-hidden="true">/</span>
     }
     @if (!isLast(i) && item.link) {
-      <a [routerLink]="item.link" class="hover:text-gray-700 transition-colors">{{ item.label }}</a>
+      <a [routerLink]="item.link" class="hover:text-ink transition-colors">{{ item.label }}</a>
     } @else {
-      <span class="text-gray-700 font-medium">{{ item.label }}</span>
+      <span class="text-ink font-semibold" aria-current="page">{{ item.label }}</span>
     }
   }
 </nav>

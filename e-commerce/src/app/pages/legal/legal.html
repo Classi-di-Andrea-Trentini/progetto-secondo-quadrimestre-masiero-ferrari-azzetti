@@ -1,14 +1,16 @@
 <section class="legal-shell px-6 py-14 sm:py-18 lg:px-8">
   <div class="mx-auto max-w-4xl">
-    <nav class="legal-nav mb-8 flex flex-wrap gap-3" aria-label="Legal pages navigation">
-      <a href="/legal/privacy" class="legal-chip">Privacy</a>
-      <a href="/legal/terms" class="legal-chip">Terms</a>
-      <a href="/legal/cookies" class="legal-chip">Cookies</a>
+    <!-- routerLink, non href: con href ogni passaggio fra le tre pagine legali
+         ricaricava l'intera applicazione da zero. -->
+    <nav class="legal-nav mb-8 flex flex-wrap gap-2" aria-label="Pagine legali">
+      <a routerLink="/legal/privacy" routerLinkActive="is-current" class="legal-chip">Privacy</a>
+      <a routerLink="/legal/terms" routerLinkActive="is-current" class="legal-chip">Termini</a>
+      <a routerLink="/legal/cookies" routerLinkActive="is-current" class="legal-chip">Cookie</a>
     </nav>
 
     <header class="legal-header mb-10">
       <h1 class="legal-title">{{ doc.title }}</h1>
-      <p class="legal-updated mt-2">Last updated: {{ doc.updatedAt }}</p>
+      <p class="legal-updated mt-2">Ultimo aggiornamento: {{ doc.updatedAt }}</p>
       <p class="legal-intro mt-5">{{ doc.intro }}</p>
     </header>
 

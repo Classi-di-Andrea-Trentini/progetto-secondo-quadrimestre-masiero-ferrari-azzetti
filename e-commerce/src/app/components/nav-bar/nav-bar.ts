@@ -32,10 +32,14 @@ export class NavBar {
   private isHidden = signal(false);
   private isScrolled = signal(false);
 
-  navClasses = computed(() => ({ // classe tailwind
-    'fixed top-0 left-0 right-0 z-50 bg-white transition-transform duration-300': true,
-    '-translate-y-full': this.isHidden(),
-    'shadow-md': this.isScrolled(),
+
+  navClasses = computed(() => ({
+    'fixed top-0 left-0 right-0 z-sticky bg-surface transition-transform duration-300 ease-out-expo':
+      true,
+    // Non si ritira mentre il menu mobile e' aperto: prima bastava scorrere di
+    // un dito col menu aperto e la barra spariva portandosi via il menu.
+    '-translate-y-full': this.isHidden() && !this.menuOpen(),
+    'border-b border-line': this.isScrolled(),
   }));
 
   // function to manage scroll up to then show the navbar

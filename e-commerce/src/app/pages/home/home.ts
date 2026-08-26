@@ -20,70 +20,71 @@ export class Home implements OnInit {
     {
       image:
         'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=1200&q=80',
-      title: 'Outerwear Edit',
-      subtitle: 'Layering pieces for transitional days',
+      title: 'Capispalla',
+      subtitle: 'Strati per le mezze stagioni',
     },
     {
       image:
         'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=1200&q=80',
-      title: 'Minimal Wardrobe',
-      subtitle: 'Clean silhouettes and timeless essentials',
+      title: 'Guardaroba minimo',
+      subtitle: 'Linee pulite, capi che restano',
     },
     {
       image:
         'https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=1200&q=80',
-      title: 'Evening Neutrals',
-      subtitle: 'Elevated tones for refined occasions',
+      title: 'Neutri da sera',
+      subtitle: 'Toni sobri per le occasioni',
     },
     {
       image:
         'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=1200&q=80',
-      title: 'Street Tailoring',
-      subtitle: 'Structured fits with relaxed attitude',
+      title: 'Sartoria di strada',
+      subtitle: 'Tagli costruiti, portati morbidi',
     },
     {
       image:
         'https://images.unsplash.com/photo-1463100099107-aa0980c362e6?auto=format&fit=crop&w=1200&q=80',
-      title: 'Monochrome Line',
-      subtitle: 'Black and ivory staples reimagined',
+      title: 'Linea monocroma',
+      subtitle: 'Nero e avorio, i due estremi',
     },
     {
       image:
         'https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=1200&q=80',
-      title: 'Weekend Capsule',
-      subtitle: 'Effortless pieces for off-duty looks',
+      title: 'Capsule weekend',
+      subtitle: 'Quello che metti senza pensarci',
     },
   ];
 
   readonly activeSlide = signal(0);
 
+  /** Il primo blocco e' l'ancora della fascia; gli altri due la accompagnano. */
   readonly promoShowcase = [
     {
-      label: 'new season',
-      title: 'New Collection',
+      label: 'Saldi di stagione',
+      title: 'Fino a',
+      highlight: '−60%',
       description:
-        'Essential pieces with refined proportions and carefully selected materials for every day.',
-      notes: ['Modern silhouettes', 'Premium fabrics', 'Timeless palette'],
-      cta: 'Discover More',
+        'Una selezione di capi essenziali a prezzo ridotto, finché durano le taglie.',
+      notes: ['Prezzi a tempo', 'I più venduti', 'Spedizione in 48h'],
+      cta: 'Vai ai saldi',
       link: '/products',
     },
     {
-      label: 'seasonal sale',
-      title: 'Up to',
-      highlight: '-60%',
+      label: 'Nuova stagione',
+      title: 'La collezione',
       description:
-        'An exclusive selection of essential items at special prices for a limited time.',
-      notes: ['Limited-time prices', 'Best-selling edits', 'Fast worldwide shipping'],
-      cta: 'Shop the Sale',
+        'Proporzioni sobrie e materiali scelti uno per uno, pensati per tutti i giorni.',
+      notes: ['Linee attuali', 'Tessuti scelti', 'Palette senza tempo'],
+      cta: 'Scopri',
       link: '/products',
     },
     {
-      label: 'members benefits',
-      title: 'Early Access',
+      label: 'Per chi ha un account',
+      title: 'Accesso in anteprima',
       description:
-        'Sign in to preview upcoming drops, save wishlists, and unlock private offers.',
-      notes: ['Private offers', 'Wishlist sync', 'Early product drops'],
-      cta: 'Go to Account',
+        'Entra per vedere gli arrivi in anticipo, salvare la lista dei desideri e usare i tuoi punti.',
+      notes: ['Offerte riservate', 'Lista dei desideri', 'Punti fedeltà'],
+      cta: 'Vai all\'account',
       link: '/me',
       loginLink: '/login',
     },

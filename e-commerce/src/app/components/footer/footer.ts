@@ -1,13 +1,13 @@
 import { Component, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
-import { NavigationEnd, Router } from '@angular/router';
+import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { API_URL } from '../../services/api.config';
 
 @Component({
   selector: 'app-footer',
-  imports: [FormsModule],
+  imports: [FormsModule, RouterLink],
   templateUrl: './footer.html',
   styleUrl: './footer.css',
 })
@@ -45,7 +45,7 @@ export class Footer {
           this.subscribing.set(false);
         },
         error: (err) => {
-          const msg = err?.error?.message ?? 'Something went wrong. Please try again.';
+          const msg = err?.error?.message ?? 'Qualcosa è andato storto. Riprova.';
           this.subscribeError.set(msg);
           this.subscribing.set(false);
         },

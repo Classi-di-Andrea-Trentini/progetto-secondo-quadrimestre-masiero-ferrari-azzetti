@@ -46,11 +46,11 @@ export class Products implements OnInit, OnDestroy {
   searchQuery = signal('');
 
   readonly sortOptions = [
-    { value: 'newest',     label: 'Newest' },
-    { value: 'popular',    label: 'Best Sellers' },
-    { value: 'rating',     label: 'Top Rated' },
-    { value: 'price_asc',  label: 'Price: Low to High' },
-    { value: 'price_desc', label: 'Price: High to Low' },
+    { value: 'newest',     label: 'Novità' },
+    { value: 'popular',    label: 'Più venduti' },
+    { value: 'rating',     label: 'Più votati' },
+    { value: 'price_asc',  label: 'Prezzo crescente' },
+    { value: 'price_desc', label: 'Prezzo decrescente' },
   ];
 
   ngOnInit() {
@@ -67,6 +67,13 @@ export class Products implements OnInit, OnDestroy {
       const term = params['q'] ?? '';
       if (term !== this.searchQuery()) {
         this.searchQuery.set(term);
+        this.currentPage.set(1);
+      }
+      // `?sort=` arriva dai link del footer. Va validato contro le opzioni vere:
+      // un valore inventato nell'URL finirebbe dritto al backend.
+      const sort = params['sort'];
+      if (sort && this.sortOptions.some((o) => o.value === sort) && sort !== this.sortBy()) {
+        this.sortBy.set(sort);
         this.currentPage.set(1);
       }
       this.loadProducts();

@@ -1,120 +1,151 @@
-<!-- Overlay -->
 <div
-  class="fixed inset-0 bg-black/40 z-50 transition-opacity duration-300"
-  [class.opacity-100]="cart.isOpen()"
-  [class.opacity-0]="!cart.isOpen()"
-  [class.pointer-events-none]="!cart.isOpen()"
+  class="cart-drawer-backdrop"
+  [attr.data-open]="cart.isOpen()"
+  [attr.aria-hidden]="!cart.isOpen()"
   (click)="cart.close()"
 ></div>
 
-<!-- Cart drawer -->
-<div
-  class="fixed top-0 right-0 h-full w-80 sm:w-96 bg-white z-50 shadow-2xl transition-transform duration-300 ease-in-out flex flex-col"
-  [class.translate-x-0]="cart.isOpen()"
-  [class.translate-x-full]="!cart.isOpen()"
+<aside
+  class="cart-drawer"
+  [attr.data-open]="cart.isOpen()"
+  [attr.inert]="cart.isOpen() ? null : ''"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="cart-drawer-title"
 >
-  <!-- Header -->
-  <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-    <div class="flex items-center gap-2">
-      <h2 class="text-base font-bold text-gray-900">Carrello</h2>
+  <header class="cart-drawer-header">
+    <h2 class="cart-drawer-title" id="cart-drawer-title">
+      Carrello
       @if (cart.itemCount() > 0) {
-        <span class="w-5 h-5 rounded-full bg-gray-900 text-white text-xs flex items-center justify-center font-bold">
-          {{ cart.itemCount() }}
-        </span>
+        <span class="cart-drawer-count">{{ cart.itemCount() }}</span>
       }
-    </div>
-    <button (click)="cart.close()" class="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors" aria-label="Chiudi carrello">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+    </h2>
+    <button type="button" class="cart-drawer-close" (click)="cart.close()" aria-label="Chiudi carrello">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
       </svg>
     </button>
-  </div>
+  </header>
 
-  <!-- Items -->
-  <div class="flex-1 overflow-y-auto">
-    @if (cart.items().length === 0) {
-      <div class="flex flex-col items-center justify-center h-full gap-4 px-5 text-center">
-        <div class="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center">
-          <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
-          </svg>
+  <div class="cart-drawer-body">
+    @if (!cart.ready()) {
+      <!-- Lo scheletro ha la forma della riga che sta arrivando, non uno spinner. -->
+      @for (i of [1, 2, 3]; track i) {
+        <div class="cart-line">
+          <div class="cart-line-thumb skeleton"></div>
+          <div class="flex-1 flex flex-col gap-2 pt-1">
+            <div class="skeleton h-3.5 w-3/4"></div>
+            <div class="skeleton h-2.5 w-1/3"></div>
+            <div class="skeleton h-7 w-24 mt-auto"></div>
+          </div>
         </div>
-        <div>
-          <p class="text-sm font-medium text-gray-900 mb-1">Il carrello è vuoto</p>
-          <p class="text-xs text-gray-400">Aggiungi prodotti per iniziare</p>
-        </div>
-        <button (click)="cart.close()" routerLink="/products"
-          class="px-5 py-2.5 bg-gray-900 text-white text-sm rounded-xl hover:bg-gray-700 transition-colors">
-          Scopri i prodotti
-        </button>
+      }
+    } @else if (cart.items().length === 0) {
+      <div class="empty h-full">
+        <svg
+          class="w-10 h-10 text-ink-muted mb-1"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.25"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 0 0-8 0v4M5 9h14l1 12H4L5 9z" />
+        </svg>
+        <p class="empty-title">Il carrello è vuoto</p>
+        <p class="empty-body">
+          Quello che aggiungi resta qui anche se chiudi il sito: lo ritrovi al prossimo accesso.
+        </p>
+        <a routerLink="/products" (click)="cart.close()" class="btn btn-primary mt-3">Scopri la collezione</a>
       </div>
     } @else {
-      <div class="divide-y divide-gray-100 px-4 py-2">
-        @for (item of cart.items(); track item.variantId) {
-          <div class="flex gap-3 py-4">
-            <!-- Image -->
-            <div class="w-16 h-16 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
-              @if (item.imageUrl) {
-                <img [src]="item.imageUrl" [alt]="item.productName" class="w-full h-full object-cover"/>
-              }
+      @if (cart.hasIssues()) {
+        <p class="flex items-start gap-2 m-4 p-3 bg-warning-wash text-warning text-xs leading-relaxed rounded-sm">
+          <i class="fa-solid fa-triangle-exclamation mt-0.5" aria-hidden="true"></i>
+          <span>Alcuni articoli sono cambiati di prezzo o disponibilità. Controlla prima di procedere.</span>
+        </p>
+      }
+
+      @for (item of cart.items(); track item.variantId) {
+        <article class="cart-line">
+          <div class="cart-line-thumb">
+            @if (item.imageUrl) {
+              <img [src]="item.imageUrl" [alt]="item.productName" loading="lazy" />
+            }
+          </div>
+
+          <div class="flex-1 min-w-0 flex flex-col">
+            <div class="flex items-start justify-between gap-2">
+              <div class="min-w-0">
+                <p class="text-sm font-semibold text-ink truncate">{{ item.productName }}</p>
+                @if (item.variantLabel) {
+                  <p class="text-xs text-ink-muted mt-0.5">{{ item.variantLabel }}</p>
+                }
+              </div>
+              <button
+                type="button"
+                (click)="remove(item.variantId)"
+                class="shrink-0 -mt-0.5 -mr-1 p-1 text-ink-muted hover:text-danger transition-colors rounded-sm"
+                [attr.aria-label]="'Rimuovi ' + item.productName"
+              >
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                </svg>
+              </button>
             </div>
 
-            <!-- Info -->
-            <div class="flex-1 min-w-0">
-              <p class="text-sm font-medium text-gray-900 truncate">{{ item.productName }}</p>
-              @if (item.variantLabel) {
-                <p class="text-xs text-gray-400 mt-0.5">{{ item.variantLabel }}</p>
-              }
-              <div class="flex items-center justify-between mt-2">
-                <!-- Qty controls -->
-                <div class="flex items-center border border-gray-200 rounded-lg overflow-hidden">
-                  <button (click)="decreaseQty(item.variantId, item.quantity)" class="w-7 h-7 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition-colors text-sm">
-                    −
-                  </button>
-                  <span class="w-7 text-center text-sm font-medium text-gray-900">{{ item.quantity }}</span>
-                  <button (click)="increaseQty(item.variantId, item.quantity)" class="w-7 h-7 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition-colors text-sm">
-                    +
-                  </button>
-                </div>
-                <div class="text-right">
-                  <p class="text-sm font-bold text-gray-900">{{ formatPrice(item.unitPrice * item.quantity) }}</p>
-                  @if (item.originalPrice !== item.unitPrice) {
-                    <p class="text-xs text-gray-400 line-through">{{ formatPrice(item.originalPrice * item.quantity) }}</p>
-                  }
-                </div>
+            <div class="flex items-end justify-between gap-2 mt-auto pt-3">
+              <div class="qty">
+                <button
+                  type="button"
+                  (click)="decreaseQty(item.variantId, item.quantity)"
+                  [attr.aria-label]="'Diminuisci quantità di ' + item.productName"
+                >
+                  &minus;
+                </button>
+                <span class="qty-value" aria-live="polite">{{ item.quantity }}</span>
+                <button
+                  type="button"
+                  (click)="increaseQty(item.variantId, item.quantity)"
+                  [attr.aria-label]="'Aumenta quantità di ' + item.productName"
+                >
+                  +
+                </button>
+              </div>
+
+              <div class="text-right leading-tight">
+                <p class="text-sm font-bold text-ink tnum">{{ formatPrice(item.unitPrice * item.quantity) }}</p>
+                @if (item.originalPrice !== item.unitPrice) {
+                  <p class="text-2xs text-ink-muted line-through tnum">
+                    {{ formatPrice(item.originalPrice * item.quantity) }}
+                  </p>
+                }
               </div>
             </div>
-
-            <!-- Remove -->
-            <button (click)="remove(item.variantId)" class="p-1 text-gray-300 hover:text-red-500 transition-colors self-start flex-shrink-0" aria-label="Rimuovi">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-              </svg>
-            </button>
           </div>
-        }
-      </div>
+        </article>
+      }
     }
   </div>
 
-  <!-- Footer -->
-  @if (cart.items().length > 0) {
-    <div class="px-5 py-4 border-t border-gray-100 space-y-3 bg-white">
-      <div class="flex justify-between font-bold text-gray-900">
-        <span>Subtotale</span>
-        <span>{{ formatPrice(cart.subtotal()) }}</span>
+  @if (cart.ready() && cart.items().length > 0) {
+    <footer class="cart-drawer-footer">
+      <div class="flex items-baseline justify-between">
+        <span class="text-2xs font-bold uppercase tracking-[0.09em] text-ink-2">Subtotale</span>
+        <span class="font-display text-2xl font-semibold text-ink tnum">{{ formatPrice(cart.subtotal()) }}</span>
       </div>
-      <p class="text-xs text-gray-400">Spedizione e sconti calcolati al checkout</p>
+      <p class="text-2xs text-ink-muted -mt-2">Spedizione e sconti calcolati al checkout.</p>
       <a
         routerLink="/checkout"
         (click)="cart.close()"
-        class="block w-full text-center bg-gray-900 text-white py-3 rounded-xl text-sm font-semibold hover:bg-gray-700 transition-colors"
+        class="btn btn-primary btn-block btn-lg"
+        [attr.data-loading]="cart.isSyncing() ? 'true' : null"
       >
         Procedi al checkout
       </a>
-      <button (click)="cart.close()" class="w-full text-center text-sm text-gray-500 hover:text-gray-900 transition-colors py-1">
+      <button type="button" (click)="cart.close()" class="btn btn-ghost btn-sm btn-block">
         Continua lo shopping
       </button>
-    </div>
+    </footer>
   }
-</div>
+</aside>

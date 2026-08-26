@@ -169,14 +169,14 @@ export class MeComponent {
   };
 
   readonly orderStatusColors: Record<string, string> = {
-    pending: 'bg-yellow-100 text-yellow-800',
-    paid: 'bg-blue-100 text-blue-800',
-    processing: 'bg-indigo-100 text-indigo-800',
-    shipped: 'bg-purple-100 text-purple-800',
-    delivered: 'bg-green-100 text-green-800',
-    completed: 'bg-green-200 text-green-900',
-    cancelled: 'bg-red-100 text-red-800',
-    refunded: 'bg-gray-100 text-gray-700',
+    pending: 'badge-warning',
+    paid: 'badge-info',
+    processing: 'badge-info',
+    shipped: 'badge-accent',
+    delivered: 'badge-success',
+    completed: 'badge-success',
+    cancelled: 'badge-danger',
+    refunded: 'badge-neutral',
   };
 
   // -- Modifica profilo --
@@ -315,7 +315,7 @@ export class MeComponent {
   }
 
   orderStatusLabel(s: string): string { return this.orderStatusLabels[s] ?? s; }
-  orderStatusColor(s: string): string { return this.orderStatusColors[s] ?? 'bg-gray-100 text-gray-700'; }
+  orderStatusColor(s: string): string { return this.orderStatusColors[s] ?? 'badge-neutral'; }
   canCancelOrder(status: string): boolean { return status === 'pending' || status === 'paid'; }
 
   requestCancelOrder(id: string) { this.cancelOrderId.set(id); }

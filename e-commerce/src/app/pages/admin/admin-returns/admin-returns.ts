@@ -40,11 +40,11 @@ export class AdminReturns implements OnInit {
   ];
 
   readonly statusColors: Record<string, string> = {
-    requested: 'bg-yellow-100 text-yellow-800',
-    approved: 'bg-blue-100 text-blue-800',
-    rejected: 'bg-red-100 text-red-800',
-    received: 'bg-purple-100 text-purple-800',
-    refunded: 'bg-green-100 text-green-800',
+    requested: 'badge-warning',
+    approved: 'badge-info',
+    rejected: 'badge-danger',
+    received: 'badge-accent',
+    refunded: 'badge-success',
   };
 
   ngOnInit() { this.load(); }
@@ -77,7 +77,7 @@ export class AdminReturns implements OnInit {
   }
 
   statusLabel(s: string): string { return this.allStatuses.find(x => x.value === s)?.label ?? s; }
-  statusColor(s: string): string { return this.statusColors[s] ?? 'bg-gray-100 text-gray-700'; }
+  statusColor(s: string): string { return this.statusColors[s] ?? 'badge-neutral'; }
 
   openDetail(r: AdminReturn) {
     this.selectedReturn.set(r);
