@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,12 +26,15 @@ public class AuthController {
     private final AuthService auth;
     private final UserRepository users;
     private final long ttlSeconds;
+    private final boolean secureCookies;
 
     public AuthController(AuthService auth, UserRepository users,
-                          it.commonera.backend.security.JwtService jwt) {
+                          it.commonera.backend.security.JwtService jwt,
+                          @Value("${app.cookie.secure:false}") boolean secureCookies) {
         this.auth = auth;
         this.users = users;
         this.ttlSeconds = jwt.ttlSeconds();
+        this.secureCookies = secureCookies;
     }
 
     @PostMapping("/register")
@@ -74,6 +78,13 @@ public class AuthController {
                 // HttpOnly: un token leggibile da JavaScript e' un token rubabile con
                 // una sola XSS.
                 .httpOnly(true)
+                // Secure e' pilotato da COOKIE_SECURE, non fisso: acceso qui sopra
+                // HTTPS il browser smette di mandare il cookie su http:// (SSL strip
+                // e sniffing in chiaro), ma acceso su un deploy in HTTP — la LAN di
+                // classe, http://<host>:4200 — il cookie sparisce e il login smette
+                // di funzionare senza un solo messaggio d'errore. Va acceso insieme
+                // al reverse proxy TLS, non prima.
+                .secure(secureCookies)
                 .path("/")
                 .sameSite("Lax")
                 .maxAge(Duration.ofSeconds(maxAge))
