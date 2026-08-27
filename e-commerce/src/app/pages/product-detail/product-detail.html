@@ -112,7 +112,7 @@
                   Le taglie esaurite restano selezionabili: e' l'unico modo per
                   chiedere l'avviso di ritorno disponibilita'. Disabilitandole, il
                   cliente vedeva solo una taglia barrata e se ne andava. L'acquisto
-                  resta bloccato dal bottone "OUT OF STOCK" qui sotto.
+                  resta bloccato dal bottone "ESAURITO" qui sotto.
                 -->
                 <button
                   class="size-btn"
@@ -135,13 +135,13 @@
           [disabled]="!selectedSize() || !inStock()"
           (click)="addToCart()">
           @if (addedToCart()) {
-            ✓ ADDED TO CART
+            ✓ AGGIUNTO AL CARRELLO
           } @else if (!selectedSize()) {
             SCEGLI UNA TAGLIA
           } @else if (!inStock()) {
-            OUT OF STOCK
+            ESAURITO
           } @else {
-            ADD TO CART
+            AGGIUNGI AL CARRELLO
           }
         </button>
 
