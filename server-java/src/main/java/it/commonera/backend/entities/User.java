@@ -55,6 +55,13 @@ public class User {
 
     private String phone;
 
+    /** Colonne che esistono da sempre nello schema ma che nessuna entita' leggeva:
+        senza, la tab "Profilo" di /me perdeva in silenzio data di nascita e genere. */
+    @Column(name = "birth_date")
+    private java.time.LocalDate birthDate;
+
+    private String gender;
+
     @Column(name = "newsletter_opt_in", nullable = false)
     private Boolean newsletterOptIn = false;
 

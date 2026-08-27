@@ -1,12 +1,14 @@
 package it.commonera.backend.controllers;
 
 import it.commonera.backend.dtos.AuthDtos;
+import it.commonera.backend.dtos.UserDtos;
 import it.commonera.backend.dtos.UserResponse;
 import it.commonera.backend.exceptions.ApiException;
 import it.commonera.backend.repositories.UserRepository;
 import it.commonera.backend.security.CurrentUser;
 import it.commonera.backend.security.JwtCookieFilter;
 import it.commonera.backend.services.AuthService;
+import it.commonera.backend.services.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
@@ -25,14 +27,16 @@ public class AuthController {
 
     private final AuthService auth;
     private final UserRepository users;
+    private final UserService profiles;
     private final long ttlSeconds;
     private final boolean secureCookies;
 
-    public AuthController(AuthService auth, UserRepository users,
+    public AuthController(AuthService auth, UserRepository users, UserService profiles,
                           it.commonera.backend.security.JwtService jwt,
                           @Value("${app.cookie.secure:false}") boolean secureCookies) {
         this.auth = auth;
         this.users = users;
+        this.profiles = profiles;
         this.ttlSeconds = jwt.ttlSeconds();
         this.secureCookies = secureCookies;
     }
@@ -63,6 +67,23 @@ public class AuthController {
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie("", 0).toString())
                 .body(Map.of("message", "Logout effettuato"));
+    }
+
+    /**
+     * Richiesta di reimpostazione password.
+     *
+     * Risponde sempre lo stesso messaggio, esista o no l'indirizzo: distinguere i due
+     * casi regalerebbe a chiunque un modo di sapere chi e' cliente.
+     */
+    @PostMapping("/forgot-password")
+    public Map<String, Object> forgotPassword(@Valid @RequestBody UserDtos.ForgotPasswordRequest body) {
+        profiles.requestPasswordReset(body.email());
+        return Map.of("message", "Se l'indirizzo e' registrato, riceverai un'email con le istruzioni.");
+    }
+
+    @PostMapping("/reset-password")
+    public Map<String, Object> resetPassword(@Valid @RequestBody UserDtos.ResetPasswordRequest body) {
+        return Map.of("message", profiles.resetPassword(body.token(), body.password()));
     }
 
     @GetMapping("/me")

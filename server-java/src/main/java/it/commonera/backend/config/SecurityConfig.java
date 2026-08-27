@@ -48,7 +48,16 @@ public class SecurityConfig {
                         // Catalogo e recensioni sono pubblici: sono le pagine che devono
                         // essere indicizzate.
                         .requestMatchers(HttpMethod.GET, "/products/**", "/reviews/product/**").permitAll()
+                        // Le foto prodotto caricate dall'admin: senza questa riga
+                        // rispondevano 401 a chi non era collegato, cioe' proprio ai
+                        // clienti che devono vedere la merce. Solo GET: caricarle
+                        // resta una rotta /admin/**.
+                        .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
                         .requestMatchers("/auth/register", "/auth/login").permitAll()
+                        // Password dimenticata e conferma dell'indirizzo email: ci si
+                        // arriva **senza** essere collegati, e' tutto il loro senso.
+                        .requestMatchers("/auth/forgot-password", "/auth/reset-password").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/users/verify-email/**", "/users/confirm-email/**").permitAll()
                         // Chiunque puo' iscriversi, anche senza account: stesso comportamento
                         // pubblico del backend Node (nessun JwtAuthGuard su questa rotta).
                         .requestMatchers("/newsletter/subscribe").permitAll()

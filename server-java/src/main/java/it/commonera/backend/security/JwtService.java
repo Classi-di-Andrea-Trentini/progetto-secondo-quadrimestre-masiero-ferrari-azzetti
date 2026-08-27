@@ -9,9 +9,11 @@ import org.springframework.stereotype.Service;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
 import java.util.HexFormat;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -72,6 +74,37 @@ public class JwtService {
         }
     }
 
+    /**
+     * Token firmato con uno scopo dichiarato (verifica email, cambio indirizzo), che
+     * porta con se' i dati che servono a chiuderlo.
+     *
+     * Lo scopo sta **dentro** la firma: senza, un link di verifica email varrebbe come
+     * link di cambio indirizzo, e i due non fanno la stessa cosa.
+     */
+    public String issuePurposeToken(UUID userId, String purpose, Map<String, String> extra, Duration ttl) {
+        Instant now = Instant.now();
+        var builder = Jwts.builder()
+                .subject(userId.toString())
+                .claim("purpose", purpose)
+                .issuedAt(Date.from(now))
+                .expiration(Date.from(now.plus(ttl)));
+        extra.forEach(builder::claim);
+        return builder.signWith(key).compact();
+    }
+
+    /** `null` se il token non e' valido, e' scaduto o e' stato emesso per un altro scopo. */
+    public PurposeClaims parsePurposeToken(String token, String expectedPurpose) {
+        try {
+            var body = Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload();
+            if (!expectedPurpose.equals(body.get("purpose", String.class))) return null;
+            return new PurposeClaims(
+                    UUID.fromString(body.getSubject()),
+                    body.get("newEmail", String.class));
+        } catch (Exception ignored) {
+            return null;
+        }
+    }
+
     /** SHA-256 del token: e' l'impronta salvata in `sessions.token_hash`. */
     public String fingerprint(String token) {
         try {
@@ -87,4 +120,6 @@ public class JwtService {
     }
 
     public record Claims(UUID userId, UUID sessionId) {}
+
+    public record PurposeClaims(UUID userId, String newEmail) {}
 }
