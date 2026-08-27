@@ -1,9 +1,11 @@
 package it.commonera.backend.controllers;
 
+import it.commonera.backend.dtos.ProductDtos;
 import it.commonera.backend.services.ProductService;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -40,6 +42,38 @@ public class ProductsController {
                 page, capped);
 
         return Map.of("data", result.getContent(), "meta", ProductService.meta(result, capped));
+    }
+
+    /**
+     * Valori possibili dei filtri del catalogo.
+     *
+     * Sta **prima** di `/{slug}` per leggibilita', ma non e' l'ordine a salvarlo:
+     * Spring preferisce comunque il percorso letterale alla variabile. Finche' questo
+     * endpoint non esisteva, `/products/filters` finiva su `bySlug("filters")` e la
+     * barra dei filtri restava vuota per un 404.
+     */
+    @GetMapping("/filters")
+    public Map<String, Object> filters() {
+        return products.filters();
+    }
+
+    /** Prodotti per id, nell'ordine chiesto: i "visti di recente" del browser. */
+    @GetMapping("/by-ids")
+    public List<ProductDtos.ProductView> byIds(@RequestParam(required = false) String ids) {
+        if (ids == null || ids.isBlank()) return List.of();
+
+        List<UUID> parsed = new ArrayList<>();
+        for (String raw : ids.split(",")) {
+            String candidate = raw.trim();
+            if (candidate.isEmpty()) continue;
+            try {
+                parsed.add(UUID.fromString(candidate));
+            } catch (IllegalArgumentException ignored) {
+                // La lista arriva dal localStorage del browser: un id storto e' roba
+                // vecchia o modificata a mano, non un motivo per rispondere 400.
+            }
+        }
+        return products.findByIdsAsView(parsed);
     }
 
     @GetMapping("/{slug}")

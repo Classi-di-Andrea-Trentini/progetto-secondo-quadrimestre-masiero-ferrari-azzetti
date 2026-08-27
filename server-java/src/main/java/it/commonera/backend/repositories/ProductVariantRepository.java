@@ -29,4 +29,20 @@ public interface ProductVariantRepository extends JpaRepository<ProductVariant, 
     @Query("update ProductVariant v set v.stockQty = v.stockQty - :qty " +
            "where v.id = :id and v.stockQty >= :qty")
     int decrementStock(@Param("id") UUID id, @Param("qty") int qty);
+
+    /**
+     * Colori disponibili a catalogo, con quanti **prodotti distinti** li hanno: lo
+     * stesso maglione in cinque taglie nere e' un prodotto nero, non cinque.
+     */
+    @Query("select v.color, v.colorHex, count(distinct v.product.id) from ProductVariant v " +
+           "where v.isActive = true and v.colorHex is not null " +
+           "and v.product.isActive = true and v.product.deletedAt is null " +
+           "group by v.color, v.colorHex order by count(distinct v.product.id) desc")
+    List<Object[]> availableColors();
+
+    @Query("select v.size, count(distinct v.product.id) from ProductVariant v " +
+           "where v.isActive = true and v.size is not null " +
+           "and v.product.isActive = true and v.product.deletedAt is null " +
+           "group by v.size")
+    List<Object[]> availableSizes();
 }
