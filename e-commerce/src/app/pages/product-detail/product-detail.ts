@@ -66,19 +66,21 @@ export class ProductDetail implements OnInit, OnDestroy {
 
   readonly Math = Math;
 
+  // Etichette e testi in italiano come il resto del sito: erano rimasti in
+  // inglese ed erano l'unica cosa che si leggeva in due lingue nella pagina.
   readonly accordionSections = [
-    { id: 'details',   label: 'DETAILS' },
-    { id: 'sizeguide', label: 'SIZE GUIDE' },
-    { id: 'fabric',    label: 'MATERIALS & FABRIC' },
-    { id: 'washing',   label: 'CARE INSTRUCTIONS' },
-    { id: 'shipping',  label: 'SHIPPING & RETURNS' },
+    { id: 'details',   label: 'DETTAGLI' },
+    { id: 'sizeguide', label: 'GUIDA ALLE TAGLIE' },
+    { id: 'fabric',    label: 'MATERIALI E TESSUTO' },
+    { id: 'washing',   label: 'CURA DEL CAPO' },
+    { id: 'shipping',  label: 'SPEDIZIONI E RESI' },
   ];
 
   readonly accordionContent: Record<string, string> = {
-    sizeguide: 'XS: EU 44 / S: EU 46 / M: EU 48 / L: EU 50 / XL: EU 52 / XXL: EU 54\n\nFor in-between sizes, we recommend sizing up. All measurements refer to body size, not garment size.',
-    fabric: 'Fabric composition and country of origin are indicated on the inner label. All materials are carefully selected for durability, comfort, and responsible sourcing.',
-    washing: 'Hand wash or machine wash at 30°C on a delicate cycle. Do not bleach. Iron on low heat. Do not tumble dry. Dry flat to preserve shape.',
-    shipping: 'Standard Shipping (3–5 business days): free on orders over €100, otherwise €4.90.\nExpress Shipping (1–2 business days): €9.90.\nFree returns within 30 days of receipt — item must be unworn with original tags attached.',
+    sizeguide: 'XS: IT 44 / S: IT 46 / M: IT 48 / L: IT 50 / XL: IT 52 / XXL: IT 54\n\nSe sei fra due taglie ti consigliamo la piu\u2019 grande. Le misure si riferiscono al corpo, non al capo.',
+    fabric: 'Composizione e paese di origine sono indicati sull\u2019etichetta interna. I materiali sono scelti per durata, comfort e provenienza responsabile.',
+    washing: 'Lavare a mano o in lavatrice a 30\u00b0C con ciclo delicato. Non candeggiare. Stirare a bassa temperatura. Non asciugare in asciugatrice. Asciugare in piano per non deformare il capo.',
+    shipping: 'Spedizione standard (3\u20135 giorni lavorativi): gratuita sopra i 100\u20ac, altrimenti 4,90\u20ac.\nSpedizione espressa (1\u20132 giorni lavorativi): 9,90\u20ac.\nResi gratuiti entro 30 giorni dalla consegna \u2014 il capo non deve essere stato indossato e deve avere ancora il cartellino.',
   };
 
   ngOnInit() {

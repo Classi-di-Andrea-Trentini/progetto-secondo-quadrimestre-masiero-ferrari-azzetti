@@ -4,27 +4,27 @@
     <a (click)="setTab('profile')"
        class="pb-4 text-sm font-semibold uppercase tracking-wider cursor-pointer transition-colors"
        [ngClass]="activeTab() === 'profile' ? 'text-black border-b-2 border-black' : 'text-ink-muted hover:text-ink'">
-      Profile
+      Profilo
     </a>
     <a (click)="setTab('orders')"
        class="pb-4 text-sm font-semibold uppercase tracking-wider cursor-pointer transition-colors"
        [ngClass]="activeTab() === 'orders' ? 'text-black border-b-2 border-black' : 'text-ink-muted hover:text-ink'">
-      Orders
+      Ordini
     </a>
     <a (click)="setTab('addresses')"
        class="pb-4 text-sm font-semibold uppercase tracking-wider cursor-pointer transition-colors"
        [ngClass]="activeTab() === 'addresses' ? 'text-black border-b-2 border-black' : 'text-ink-muted hover:text-ink'">
-      Addresses
+      Indirizzi
     </a>
     <a (click)="setTab('favorites')"
        class="pb-4 text-sm font-semibold uppercase tracking-wider cursor-pointer transition-colors"
        [ngClass]="activeTab() === 'favorites' ? 'text-black border-b-2 border-black' : 'text-ink-muted hover:text-ink'">
-      Saved
+      Preferiti
     </a>
     <a (click)="setTab('settings')"
        class="pb-4 text-sm font-semibold uppercase tracking-wider cursor-pointer transition-colors"
        [ngClass]="activeTab() === 'settings' ? 'text-black border-b-2 border-black' : 'text-ink-muted hover:text-ink'">
-      Settings
+      Impostazioni
     </a>
   </nav>
 
@@ -38,18 +38,18 @@
             <!-- Personal information -->
             <div class="mb-12">
               <div class="flex justify-between items-center border-b border-line pb-4 mb-6">
-                <h2 class="text-xl font-bold">Personal Information</h2>
+                <h2 class="text-xl font-bold">Dati personali</h2>
                 @if (!isEditing()) {
                   <button (click)="startEditing()"
                     class="text-sm text-ink-muted hover:text-black underline transition-colors">
-                    Edit
+                    Modifica
                   </button>
                 }
               </div>
 
               @if (saveSuccess()) {
                 <div class="mb-6 px-4 py-3 bg-success-wash border border-transparent text-sm text-success rounded">
-                  Profile updated successfully.
+                  Profilo aggiornato.
                 </div>
               }
 
@@ -57,25 +57,25 @@
                 <!-- Read view -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div>
-                    <p class="text-xs text-ink-muted uppercase tracking-widest mb-1">Full name</p>
+                    <p class="text-xs text-ink-muted uppercase tracking-widest mb-1">Nome completo</p>
                     <p class="font-medium">{{ user.fullName }}</p>
                   </div>
                   <div>
-                    <p class="text-xs text-ink-muted uppercase tracking-widest mb-1">Phone</p>
+                    <p class="text-xs text-ink-muted uppercase tracking-widest mb-1">Telefono</p>
                     <p class="font-medium">{{ user.phone ?? '—' }}</p>
                   </div>
                   <div>
-                    <p class="text-xs text-ink-muted uppercase tracking-widest mb-1">Date of birth</p>
+                    <p class="text-xs text-ink-muted uppercase tracking-widest mb-1">Data di nascita</p>
                     <p class="font-medium">
                       {{ user.birthDate ? (user.birthDate | date: 'longDate') : '—' }}
                     </p>
                   </div>
                   <div>
-                    <p class="text-xs text-ink-muted uppercase tracking-widest mb-1">Gender</p>
+                    <p class="text-xs text-ink-muted uppercase tracking-widest mb-1">Genere</p>
                     <p class="font-medium">{{ user.gender ?? '—' }}</p>
                   </div>
                   <div>
-                    <p class="text-xs text-ink-muted uppercase tracking-widest mb-1">Member since</p>
+                    <p class="text-xs text-ink-muted uppercase tracking-widest mb-1">Cliente dal</p>
                     <p class="font-medium">{{ user.createdAt | date: 'MMMM y' }}</p>
                   </div>
                 </div>
@@ -87,13 +87,13 @@
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div class="md:col-span-2">
                       <label class="block text-xs font-semibold uppercase tracking-widest text-ink-muted mb-1.5">
-                        Full name
+                        Nome completo
                       </label>
                       <input type="text" formControlName="fullName"
                         class="field"
                         [ngClass]="fullName.invalid && fullName.touched ? 'border-danger' : 'border-line-strong'" />
                       @if (fullName.invalid && fullName.touched) {
-                        <p class="mt-1 text-xs text-danger">Minimum 2 characters</p>
+                        <p class="mt-1 text-xs text-danger">Almeno 2 caratteri</p>
                       }
                     </div>
 
@@ -108,7 +108,7 @@
 
                     <div>
                       <label class="block text-xs font-semibold uppercase tracking-widest text-ink-muted mb-1.5">
-                        Date of birth
+                        Data di nascita
                       </label>
                       <input type="date" formControlName="birthDate"
                         class="field" />
@@ -120,10 +120,10 @@
                       </label>
                       <select formControlName="gender"
                         class="field bg-surface">
-                        <option value="">Not specified</option>
-                        <option value="male">Male</option>
-                        <option value="female">Female</option>
-                        <option value="other">Other</option>
+                        <option value="">Non specificato</option>
+                        <option value="male">Uomo</option>
+                        <option value="female">Donna</option>
+                        <option value="other">Altro</option>
                       </select>
                     </div>
                   </div>
@@ -137,11 +137,11 @@
                   <div class="flex gap-3 pt-2">
                     <button type="submit" [disabled]="saveLoading()"
                       class="px-6 py-2.5 bg-black text-white text-sm font-semibold uppercase tracking-widest hover:bg-ink transition disabled:opacity-50">
-                      @if (saveLoading()) { Saving… } @else { Save }
+                      @if (saveLoading()) { Salvataggio… } @else { Salva }
                     </button>
                     <button type="button" (click)="cancelEditing()"
                       class="px-6 py-2.5 border border-line-strong text-sm font-semibold uppercase tracking-widest hover:border-black transition">
-                      Cancel
+                      Annulla
                     </button>
                   </div>
 
@@ -156,9 +156,9 @@
                   <p class="text-xs text-ink-muted uppercase tracking-widest mb-1">Email</p>
                   <p class="font-medium">{{ user.email }}</p>
                   @if (user.emailVerifiedAt) {
-                    <p class="text-xs text-success mt-0.5">Verified</p>
+                    <p class="text-xs text-success mt-0.5">Verificata</p>
                   } @else {
-                    <p class="text-xs text-amber-600 mt-0.5">Not verified</p>
+                    <p class="text-xs text-amber-600 mt-0.5">Non verificata</p>
                     <button (click)="sendVerification()" [disabled]="verifyLoading()"
                       class="mt-1.5 text-xs text-black underline hover:no-underline disabled:opacity-50 transition-opacity">
                       @if (verifyLoading()) { Sending… } @else { Send verification email }
@@ -170,7 +170,7 @@
                 </div>
                 <button (click)="emailChangeVisible.set(!emailChangeVisible())"
                   class="text-sm text-ink-muted hover:text-black underline transition-colors">
-                  {{ emailChangeVisible() ? 'Cancel' : 'Change email' }}
+                  {{ emailChangeVisible() ? 'Annulla' : 'Cambia email' }}
                 </button>
               </div>
 
@@ -192,13 +192,13 @@
                         class="field"
                         [ngClass]="newEmail.invalid && newEmail.touched ? 'border-danger' : 'border-line-strong'" />
                       @if (newEmail.invalid && newEmail.touched) {
-                        <p class="mt-1 text-xs text-danger">Please enter a valid email address</p>
+                        <p class="mt-1 text-xs text-danger">Inserisci un indirizzo email valido</p>
                       }
                     </div>
 
                     <div>
                       <label class="block text-xs font-semibold uppercase tracking-widest text-ink-muted mb-1.5">
-                        Current password
+                        Password attuale
                       </label>
                       <input type="password" formControlName="currentPassword"
                         autocomplete="current-password"
@@ -233,7 +233,7 @@
       @case ('orders') {
         <section>
           <div class="flex items-center justify-between border-b border-line pb-4 mb-6">
-            <h2 class="text-xl font-bold">Order History</h2>
+            <h2 class="text-xl font-bold">Storico ordini</h2>
             @if (ordersTotal() > 0) {
               <span class="text-sm text-ink-muted">{{ ordersTotal() }} ordini</span>
             }
@@ -417,7 +417,7 @@
       @case ('addresses') {
         <section>
           <div class="flex items-center justify-between border-b border-line pb-4 mb-6">
-            <h2 class="text-xl font-bold">Shipping Addresses</h2>
+            <h2 class="text-xl font-bold">Indirizzi di spedizione</h2>
             <button (click)="showAddressForm.set(!showAddressForm())"
               class="flex items-center gap-2 px-4 py-2 bg-ink text-white text-sm rounded-sm hover:bg-ink-strong transition-colors">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -545,14 +545,14 @@
 
       @case ('favorites') {
         <section>
-          <h2 class="text-xl font-bold border-b border-line pb-4 mb-6">Saved Products</h2>
+          <h2 class="text-xl font-bold border-b border-line pb-4 mb-6">Preferiti</h2>
 
           @if (wishlist.items().length === 0) {
             <div class="text-center py-16">
               <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" class="mx-auto mb-4 text-line-strong">
                 <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
               </svg>
-              <p class="text-ink-muted text-sm mb-4">No saved products yet.</p>
+              <p class="text-ink-muted text-sm mb-4">Non hai ancora preferiti.</p>
               <a routerLink="/products" class="inline-block bg-black text-white text-xs tracking-widest uppercase px-6 py-3 hover:bg-ink-strong transition-colors">
                 Browse the collection
               </a>
@@ -589,15 +589,15 @@
 
       @case ('settings') {
         <section>
-          <h2 class="text-xl font-bold border-b border-line pb-4 mb-6">Account Settings</h2>
+          <h2 class="text-xl font-bold border-b border-line pb-4 mb-6">Impostazioni dell'account</h2>
 
-          <!-- Change password -->
+          <!-- Cambia password -->
           <div class="mb-10">
-            <h3 class="text-sm font-semibold uppercase tracking-widest text-ink-muted mb-5">Change password</h3>
+            <h3 class="text-sm font-semibold uppercase tracking-widest text-ink-muted mb-5">Cambia password</h3>
             <form [formGroup]="passwordForm" (ngSubmit)="submitPasswordChange()" novalidate class="space-y-4 max-w-sm">
               <div>
                 <label class="block text-xs font-semibold uppercase tracking-widest text-ink-muted mb-1.5">
-                  Current password
+                  Password attuale
                 </label>
                 <input type="password" formControlName="currentPassword"
                   autocomplete="current-password"
@@ -606,7 +606,7 @@
               </div>
               <div>
                 <label class="block text-xs font-semibold uppercase tracking-widest text-ink-muted mb-1.5">
-                  New password
+                  Nuova password
                 </label>
                 <input type="password" formControlName="newPassword"
                   autocomplete="new-password"
@@ -614,12 +614,12 @@
                   class="field"
                   [ngClass]="newPassword.invalid && newPassword.touched ? 'border-danger' : 'border-line-strong'" />
                 @if (newPassword.invalid && newPassword.touched) {
-                  <p class="mt-1 text-xs text-danger">Minimum 8 characters</p>
+                  <p class="mt-1 text-xs text-danger">Almeno 8 caratteri</p>
                 }
               </div>
               <div>
                 <label class="block text-xs font-semibold uppercase tracking-widest text-ink-muted mb-1.5">
-                  Confirm new password
+                  Conferma la nuova password
                 </label>
                 <input type="password" formControlName="confirmPassword"
                   autocomplete="new-password"
@@ -627,7 +627,7 @@
                   class="field"
                   [ngClass]="passwordForm.hasError('mismatch') && confirmPassword.touched ? 'border-danger' : 'border-line-strong'" />
                 @if (passwordForm.hasError('mismatch') && confirmPassword.touched) {
-                  <p class="mt-1 text-xs text-danger">Passwords do not match</p>
+                  <p class="mt-1 text-xs text-danger">Le password non coincidono</p>
                 }
               </div>
 
@@ -650,10 +650,10 @@
           </div>
 
           <div class="border-t border-line pt-6">
-            <h3 class="text-sm font-semibold uppercase tracking-widest text-ink-muted mb-4">Session</h3>
+            <h3 class="text-sm font-semibold uppercase tracking-widest text-ink-muted mb-4">Sessione</h3>
             <button (click)="logout()"
               class="px-6 py-2.5 border border-black text-sm font-semibold uppercase tracking-widest hover:bg-black hover:text-white transition">
-              Sign out
+              Esci
             </button>
           </div>
         </section>
