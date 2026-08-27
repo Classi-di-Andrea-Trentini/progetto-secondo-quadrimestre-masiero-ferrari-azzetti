@@ -97,6 +97,10 @@
 .collection-stage {
   position: relative;
   height: 23rem;
+  /* Le due carte laterali sono spinte fuori dal centro apposta: senza tagliarle
+     qui sporgevano oltre il bordo destro e su un telefono l'intera pagina
+     scorreva in orizzontale (436px di larghezza su uno schermo da 375). */
+  overflow: hidden;
 }
 
 .collection-card {

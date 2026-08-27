@@ -692,6 +692,19 @@
 
 /* ── Responsive ───────────────────────────────────────────────────────────── */
 
+/* Sotto i 640px i tre comandi non ci stanno su una riga sola: la ricerca si
+   riduceva a una fessura da cinquanta pixel in cui non si leggeva niente. */
+@media (max-width: 640px) {
+  .toolbar {
+    flex-wrap: wrap;
+  }
+
+  .search-wrap {
+    order: 3;
+    flex-basis: 100%;
+  }
+}
+
 @media (min-width: 1024px) {
   .products-page {
     padding: 0 2rem 5rem;

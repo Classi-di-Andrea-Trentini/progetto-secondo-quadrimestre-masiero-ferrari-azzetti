@@ -66,7 +66,7 @@
 
         <a
           routerLink="/me"
-          class="flex items-center justify-center rounded-sm"
+          class="flex min-h-10 min-w-10 items-center justify-center rounded-sm"
           [attr.aria-label]="initials() ? 'Il mio account' : 'Accedi'"
         >
           @if (initials()) {
@@ -87,7 +87,7 @@
         <button
           type="button"
           (click)="cart.toggle()"
-          class="relative flex items-center justify-center rounded-sm cursor-pointer text-ink-2 hover:text-ink transition-colors"
+          class="relative flex min-h-10 min-w-10 items-center justify-center rounded-sm cursor-pointer text-ink-2 hover:text-ink transition-colors"
           [attr.aria-label]="
             cart.itemCount() > 0 ? 'Apri carrello, ' + cart.itemCount() + ' articoli' : 'Apri carrello, vuoto'
           "
