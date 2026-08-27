@@ -32,6 +32,12 @@ public class ReviewsController {
         return reviews.create(user.id(), body.productId(), body.rating(), body.title(), body.body());
     }
 
+    /** "Utile": lo puo' cliccare solo chi e' collegato, una volta sola. */
+    @PostMapping("/{id}/helpful")
+    public Map<String, Object> voteHelpful(@AuthenticationPrincipal CurrentUser user, @PathVariable UUID id) {
+        return reviews.voteHelpful(user.id(), id);
+    }
+
     @DeleteMapping("/{id}")
     public Map<String, String> delete(@AuthenticationPrincipal CurrentUser user, @PathVariable UUID id) {
         reviews.delete(user.id(), id);

@@ -44,6 +44,25 @@ public class ReviewService {
                         "totalPages", result.getTotalPages()));
     }
 
+    /**
+     * Voto "utile" su una recensione altrui.
+     *
+     * Una persona, un voto: e' la chiave primaria di `review_helpful_votes` a
+     * garantirlo, non un controllo fatto prima e sperando in bene.
+     */
+    @Transactional
+    public Map<String, Object> voteHelpful(UUID userId, UUID reviewId) {
+        var review = reviews.findById(reviewId)
+                .orElseThrow(() -> ApiException.notFound("Review not found"));
+
+        if (reviews.insertHelpfulVote(reviewId, userId) == 0) {
+            throw ApiException.conflict("Hai gia' votato questa recensione");
+        }
+        reviews.incrementHelpfulCount(reviewId);
+
+        return Map.of("helpful", true, "helpfulCount", review.getHelpfulCount() + 1);
+    }
+
     @Transactional
     public Map<String, Object> create(UUID userId, UUID productId, short rating, String title, String body) {
         if (rating < 1 || rating > 5) throw ApiException.badRequest("Rating must be between 1 and 5");
