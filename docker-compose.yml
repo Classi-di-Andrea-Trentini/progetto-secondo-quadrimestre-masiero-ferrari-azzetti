@@ -39,6 +39,12 @@ services:
       JWT_SECRET: "${JWT_SECRET:?manca JWT_SECRET nel file .env, generala con openssl rand -base64 64}"
       FRONTEND_URL: http://localhost:4200
       BACKEND_URL: http://localhost:3000
+      # Primo amministratore: se le imposti nel .env, all'avvio l'account viene
+      # creato (o promosso). Senza, l'unico admin e' quello del seed di scuola,
+      # di cui non si conosce la password.
+      ADMIN_EMAIL: "${ADMIN_EMAIL:-}"
+      ADMIN_PASSWORD: "${ADMIN_PASSWORD:-}"
+      ADMIN_NAME: "${ADMIN_NAME:-Amministratore}"
     volumes:
       # Foto prodotto caricate dagli admin (vedi AdminService#uploadImage):
       # senza un volume nominato, un rebuild dell'immagine le perderebbe tutte.
