@@ -5,6 +5,7 @@ import {
   AdminService,
   AdminProduct,
   AdminProductDetail,
+  AdminCategory,
   ProductVariant,
   ProductImage,
   CreateProductPayload,
@@ -47,13 +48,26 @@ export class AdminProducts implements OnInit {
   confirmDeleteId = signal<string | null>(null);
   deleteLoading = signal(false);
 
+  // ─── Categorie ────────────────────────────────────────────────────────────
+  // Il backend rifiuta un prodotto senza categoria: finche' questa tendina non
+  // c'era, "Nuovo prodotto" falliva sempre con "categoryId is required".
+  categories = signal<AdminCategory[]>([]);
+  showNewCategory = signal(false);
+  newCategoryName = '';
+  categoryLoading = signal(false);
+
   // ─── Info form ────────────────────────────────────────────────────────────
   readonly productForm = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.minLength(2)]],
     slug: ['', [Validators.required, Validators.pattern(/^[a-z0-9-]+$/)]],
+    categoryId: ['', [Validators.required]],
+    shortDesc: [''],
+    brand: [''],
     description: [''],
     basePrice: [0, [Validators.required, Validators.min(0.01)]],
     isActive: [true],
+    isFeatured: [false],
+    isNewArrival: [false],
   });
 
   // ─── Variant form ─────────────────────────────────────────────────────────
@@ -85,6 +99,39 @@ export class AdminProducts implements OnInit {
 
   ngOnInit() {
     this.load();
+    this.loadCategories();
+  }
+
+  loadCategories() {
+    this.adminSvc.getCategories().subscribe({
+      next: (list) => this.categories.set(list),
+      error: () => this.formError.set('Impossibile caricare le categorie'),
+    });
+  }
+
+  /** Il nome della categoria con quello del padre davanti: "Shoes / Sneakers". */
+  categoryLabel(category: AdminCategory): string {
+    const parent = this.categories().find((c) => c.id === category.parentId);
+    return parent ? `${parent.name} / ${category.name}` : category.name;
+  }
+
+  async createCategory() {
+    const name = this.newCategoryName.trim();
+    if (!name || this.categoryLoading()) return;
+    this.categoryLoading.set(true);
+    this.formError.set(null);
+    try {
+      const created = await firstValueFrom(this.adminSvc.createCategory({ name }));
+      this.categories.update((list) => [...list, created]);
+      // Selezionata subito: chi crea una categoria la sta creando per questo prodotto.
+      this.productForm.controls.categoryId.setValue(created.id);
+      this.newCategoryName = '';
+      this.showNewCategory.set(false);
+    } catch (err: any) {
+      this.formError.set(err?.error?.message ?? 'Impossibile creare la categoria');
+    } finally {
+      this.categoryLoading.set(false);
+    }
   }
 
   load() {
@@ -120,7 +167,11 @@ export class AdminProducts implements OnInit {
     this.editingProduct.set(null);
     this.formError.set(null);
     this.activeTab.set('info');
-    this.productForm.reset({ name: '', slug: '', description: '', basePrice: 0, isActive: true });
+    this.productForm.reset({
+      name: '', slug: '', categoryId: '', shortDesc: '', brand: '', description: '',
+      basePrice: 0, isActive: true, isFeatured: false, isNewArrival: false,
+    });
+    this.showNewCategory.set(false);
     this.showModal.set(true);
   }
 
@@ -136,9 +187,14 @@ export class AdminProducts implements OnInit {
       this.productForm.patchValue({
         name: detail.name,
         slug: detail.slug,
+        categoryId: detail.category?.id ?? '',
+        shortDesc: detail.shortDesc ?? '',
+        brand: detail.brand ?? '',
         description: detail.description ?? '',
         basePrice: parseFloat(String(detail.basePrice)),
         isActive: detail.isActive,
+        isFeatured: detail.isFeatured ?? false,
+        isNewArrival: detail.isNewArrival ?? false,
       });
     } catch {
       this.formError.set('Impossibile caricare il prodotto');
@@ -176,8 +232,19 @@ export class AdminProducts implements OnInit {
     this.formLoading.set(true);
     this.formError.set(null);
 
-    const { name, slug, description, basePrice, isActive } = this.productForm.getRawValue();
-    const payload: CreateProductPayload = { name, slug, description: description || undefined, basePrice, isActive };
+    const form = this.productForm.getRawValue();
+    const payload: CreateProductPayload = {
+      name: form.name,
+      slug: form.slug,
+      categoryId: form.categoryId,
+      description: form.description || undefined,
+      shortDesc: form.shortDesc || undefined,
+      brand: form.brand || undefined,
+      basePrice: form.basePrice,
+      isActive: form.isActive,
+      isFeatured: form.isFeatured,
+      isNewArrival: form.isNewArrival,
+    };
 
     const editing = this.editingProduct();
     const obs = editing

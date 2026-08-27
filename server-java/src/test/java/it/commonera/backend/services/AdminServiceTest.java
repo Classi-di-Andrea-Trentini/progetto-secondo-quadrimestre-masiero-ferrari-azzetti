@@ -133,9 +133,13 @@ class AdminServiceTest extends AbstractIntegrationTest {
 
         var created = admin.createProduct(new AdminDtos.CreateProductRequest(
                 "Prodotto Admin", "prodotto-admin-" + UUID.randomUUID(), "Descrizione",
-                category.getId(), new BigDecimal("29.90"), true));
+                "Sottotitolo", "MarcaAdmin", category.getId(), new BigDecimal("29.90"), true, false, true));
         UUID productId = (UUID) created.get("id");
         assertThat(created.get("name")).isEqualTo("Prodotto Admin");
+        // Marca e flag della vetrina: erano nel form dell'admin ma il backend li
+        // buttava via in silenzio, e la scheda tornava sempre senza marca.
+        assertThat(created.get("brand")).isEqualTo("MarcaAdmin");
+        assertThat(created.get("isNewArrival")).isEqualTo(true);
 
         var variant = admin.createVariant(productId, new AdminDtos.CreateVariantRequest(
                 "SKU-ADMIN-" + UUID.randomUUID(), "M", "Nero", "#000000", null,
@@ -181,10 +185,10 @@ class AdminServiceTest extends AbstractIntegrationTest {
 
         String slug = "slug-duplicato-" + UUID.randomUUID();
         admin.createProduct(new AdminDtos.CreateProductRequest(
-                "Primo", slug, null, category.getId(), new BigDecimal("10.00"), true));
+                "Primo", slug, null, null, null, category.getId(), new BigDecimal("10.00"), true, null, null));
 
         assertThatThrownBy(() -> admin.createProduct(new AdminDtos.CreateProductRequest(
-                "Secondo", slug, null, category.getId(), new BigDecimal("20.00"), true)))
+                "Secondo", slug, null, null, null, category.getId(), new BigDecimal("20.00"), true, null, null)))
                 .isInstanceOf(ApiException.class)
                 .hasMessageContaining("Slug");
     }

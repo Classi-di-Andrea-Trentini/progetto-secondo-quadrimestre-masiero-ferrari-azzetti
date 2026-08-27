@@ -1,7 +1,7 @@
 <div class="p-6 max-w-7xl mx-auto">
 
   <!-- Header -->
-  <div class="flex items-center justify-between mb-6">
+  <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
     <div>
       <h1 class="text-2xl font-bold text-ink">Prodotti</h1>
       <p class="text-ink-muted text-sm mt-1">{{ total() }} prodotti nel catalogo</p>
@@ -220,6 +220,43 @@
                   placeholder="nome-prodotto"/>
               </div>
               <div>
+                <label class="block text-sm font-medium text-ink-2 mb-1">Categoria *</label>
+                @if (showNewCategory()) {
+                  <div class="flex flex-col sm:flex-row gap-2">
+                    <input [(ngModel)]="newCategoryName" [ngModelOptions]="{ standalone: true }"
+                      (keyup.enter)="createCategory()" type="text"
+                      class="field" placeholder="Nome della nuova categoria"/>
+                    <div class="flex gap-2">
+                      <button type="button" (click)="createCategory()" [disabled]="categoryLoading()"
+                        class="btn btn-primary whitespace-nowrap">Crea</button>
+                      <button type="button" (click)="showNewCategory.set(false)"
+                        class="btn btn-outline whitespace-nowrap">Annulla</button>
+                    </div>
+                  </div>
+                } @else {
+                  <div class="flex flex-col sm:flex-row gap-2">
+                    <select formControlName="categoryId" class="field">
+                      <option value="">Scegli una categoria…</option>
+                      @for (c of categories(); track c.id) {
+                        <option [value]="c.id">{{ categoryLabel(c) }}</option>
+                      }
+                    </select>
+                    <button type="button" (click)="showNewCategory.set(true)"
+                      class="btn btn-outline whitespace-nowrap">+ Nuova</button>
+                  </div>
+                }
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-ink-2 mb-1">Marca</label>
+                <input formControlName="brand" type="text" class="field" placeholder="Marca o produttore"/>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-ink-2 mb-1">
+                  Sottotitolo <span class="text-ink-muted font-normal">(la riga sotto il nome, a catalogo)</span>
+                </label>
+                <input formControlName="shortDesc" type="text" class="field" placeholder="Cotone biologico, taglio dritto"/>
+              </div>
+              <div>
                 <label class="block text-sm font-medium text-ink-2 mb-1">Descrizione</label>
                 <textarea formControlName="description" rows="3"
                   class="field resize-none"
@@ -233,6 +270,14 @@
               <div class="flex items-center gap-3">
                 <input formControlName="isActive" type="checkbox" id="isActive" class="w-4 h-4 accent-gray-900"/>
                 <label for="isActive" class="text-sm text-ink-2">Prodotto attivo (visibile ai clienti)</label>
+              </div>
+              <div class="flex items-center gap-3">
+                <input formControlName="isNewArrival" type="checkbox" id="isNewArrival" class="w-4 h-4 accent-gray-900"/>
+                <label for="isNewArrival" class="text-sm text-ink-2">Novità (compare fra gli arrivi in home)</label>
+              </div>
+              <div class="flex items-center gap-3">
+                <input formControlName="isFeatured" type="checkbox" id="isFeatured" class="w-4 h-4 accent-gray-900"/>
+                <label for="isFeatured" class="text-sm text-ink-2">In evidenza (vetrina della home)</label>
               </div>
               <div class="flex gap-3 pt-2">
                 <button type="button" (click)="closeModal()"

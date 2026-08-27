@@ -352,8 +352,12 @@ public class AdminService {
         view.put("name", p.getName());
         view.put("slug", p.getSlug());
         view.put("description", p.getDescription());
+        view.put("shortDesc", p.getShortDesc());
+        view.put("brand", p.getBrand());
         view.put("basePrice", p.getBasePrice());
         view.put("isActive", p.getIsActive());
+        view.put("isFeatured", p.getIsFeatured());
+        view.put("isNewArrival", p.getIsNewArrival());
         view.put("soldCount", p.getSoldCount());
         view.put("avgRating", p.getAvgRating());
         view.put("createdAt", p.getCreatedAt());
