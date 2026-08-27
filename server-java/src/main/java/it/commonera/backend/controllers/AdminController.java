@@ -138,6 +138,23 @@ public class AdminController {
         return admin.deleteProduct(id);
     }
 
+    // ─── Categorie ──────────────────────────────────────────────────────────
+
+    /**
+     * Le categorie esistenti: senza questa lista la scheda prodotto non poteva
+     * chiedere una categoria, e `createProduct` rifiutava ogni prodotto nuovo con
+     * "categoryId is required" — cioe' l'admin non poteva mettere a catalogo niente.
+     */
+    @GetMapping("/categories")
+    public List<Map<String, Object>> getCategories() {
+        return admin.getCategories();
+    }
+
+    @PostMapping("/categories")
+    public Map<String, Object> createCategory(@RequestBody AdminDtos.CreateCategoryRequest body) {
+        return admin.createCategory(body);
+    }
+
     // ─── Varianti ───────────────────────────────────────────────────────────
 
     @PostMapping("/products/{id}/variants")

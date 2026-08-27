@@ -69,3 +69,6 @@ yarn-error.log*
 # Backend Java
 server-java/build/
 server-java/.gradle/
+# Foto prodotto caricate dall'admin: quando il backend gira fuori da Docker
+# la cartella nasce dentro il repo (in Docker e' il volume `uploads`).
+server-java/uploads/

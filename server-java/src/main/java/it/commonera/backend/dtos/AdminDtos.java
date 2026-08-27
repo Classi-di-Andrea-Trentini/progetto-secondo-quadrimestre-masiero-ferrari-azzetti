@@ -7,10 +7,17 @@ import java.util.UUID;
 public class AdminDtos {
 
     public record CreateProductRequest(
-            String name, String slug, String description, UUID categoryId, BigDecimal basePrice, Boolean isActive) {}
+            String name, String slug, String description, String shortDesc, String brand,
+            UUID categoryId, BigDecimal basePrice, Boolean isActive,
+            Boolean isFeatured, Boolean isNewArrival) {}
 
     public record UpdateProductRequest(
-            String name, String description, UUID categoryId, BigDecimal basePrice, Boolean isActive) {}
+            String name, String description, String shortDesc, String brand,
+            UUID categoryId, BigDecimal basePrice, Boolean isActive,
+            Boolean isFeatured, Boolean isNewArrival) {}
+
+    /** Categoria creata dall'admin: il negozio non e' obbligato a restare dentro quelle del seed. */
+    public record CreateCategoryRequest(String name, String slug, String description, UUID parentId) {}
 
     public record CreateVariantRequest(
             String sku, String size, String color, String colorHex, String material,

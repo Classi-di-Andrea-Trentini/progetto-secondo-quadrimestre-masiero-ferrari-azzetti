@@ -41,7 +41,6 @@ public class AdminService {
     private final PaymentRepository payments;
     private final PromoCodeRepository promoCodeRepo;
     private final MailService mail;
-    private final String backendUrl;
     private final String uploadsDir;
 
     public AdminService(OrderRepository orders, UserRepository users, ProductRepository products,
@@ -49,7 +48,6 @@ public class AdminService {
                         CategoryRepository categories, ReviewRepository reviews,
                         StockAlertRepository stockAlerts, UserAddressRepository addresses,
                         PaymentRepository payments, PromoCodeRepository promoCodeRepo, MailService mail,
-                        @org.springframework.beans.factory.annotation.Value("${app.backend-url}") String backendUrl,
                         @org.springframework.beans.factory.annotation.Value("${app.uploads-dir:uploads}") String uploadsDir) {
         this.orders = orders;
         this.users = users;
@@ -63,7 +61,6 @@ public class AdminService {
         this.payments = payments;
         this.promoCodeRepo = promoCodeRepo;
         this.mail = mail;
-        this.backendUrl = backendUrl;
         this.uploadsDir = uploadsDir;
     }
 
@@ -387,8 +384,12 @@ public class AdminService {
         product.setName(dto.name());
         product.setSlug(dto.slug());
         product.setDescription(dto.description());
+        product.setShortDesc(dto.shortDesc());
+        product.setBrand(blankToNull(dto.brand()));
         product.setBasePrice(dto.basePrice());
         product.setIsActive(dto.isActive() == null || dto.isActive());
+        product.setIsFeatured(Boolean.TRUE.equals(dto.isFeatured()));
+        product.setIsNewArrival(Boolean.TRUE.equals(dto.isNewArrival()));
         var saved = products.save(product);
         return productListView(saved);
     }
@@ -398,14 +399,83 @@ public class AdminService {
         var product = products.findById(id).orElseThrow(() -> ApiException.notFound("Prodotto non trovato"));
         if (dto.name() != null) product.setName(dto.name());
         if (dto.description() != null) product.setDescription(dto.description());
+        if (dto.shortDesc() != null) product.setShortDesc(blankToNull(dto.shortDesc()));
+        if (dto.brand() != null) product.setBrand(blankToNull(dto.brand()));
         if (dto.categoryId() != null) {
             product.setCategory(categories.findById(dto.categoryId())
                     .orElseThrow(() -> ApiException.badRequest("Category not found")));
         }
         if (dto.basePrice() != null) product.setBasePrice(dto.basePrice());
         if (dto.isActive() != null) product.setIsActive(dto.isActive());
+        if (dto.isFeatured() != null) product.setIsFeatured(dto.isFeatured());
+        if (dto.isNewArrival() != null) product.setIsNewArrival(dto.isNewArrival());
         var saved = products.save(product);
         return productListView(saved);
+    }
+
+    private static String blankToNull(String value) {
+        return value == null || value.isBlank() ? null : value.trim();
+    }
+
+    // ─── Categorie ──────────────────────────────────────────────────────────
+
+    /**
+     * Le categorie, tutte: qui servono a riempire la tendina della scheda prodotto, e
+     * una categoria spenta resta comunque una casella dove mettere la merce.
+     */
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> getCategories() {
+        return categories.findAllByOrderBySortOrderAscNameAsc().stream()
+                .map(c -> {
+                    var view = new LinkedHashMap<String, Object>();
+                    view.put("id", c.getId());
+                    view.put("name", c.getName());
+                    view.put("slug", c.getSlug());
+                    view.put("parentId", c.getParentId());
+                    view.put("isActive", c.getIsActive());
+                    return (Map<String, Object>) view;
+                })
+                .toList();
+    }
+
+    @Transactional
+    public Map<String, Object> createCategory(AdminDtos.CreateCategoryRequest dto) {
+        if (dto.name() == null || dto.name().isBlank()) throw ApiException.badRequest("Il nome e' obbligatorio");
+
+        String slug = dto.slug() == null || dto.slug().isBlank() ? slugify(dto.name()) : dto.slug().trim().toLowerCase();
+        if (!slug.matches("^[a-z0-9-]+$")) throw ApiException.badRequest("Slug non valido");
+        if (categories.existsBySlugIgnoreCase(slug)) throw ApiException.badRequest("Slug gia' in uso");
+
+        if (dto.parentId() != null && categories.findById(dto.parentId()).isEmpty()) {
+            throw ApiException.badRequest("Category not found");
+        }
+
+        var category = new Category();
+        category.setName(dto.name().trim());
+        category.setSlug(slug);
+        category.setDescription(blankToNull(dto.description()));
+        category.setParentId(dto.parentId());
+        category.setIsActive(true);
+        var saved = categories.save(category);
+
+        var view = new LinkedHashMap<String, Object>();
+        view.put("id", saved.getId());
+        view.put("name", saved.getName());
+        view.put("slug", saved.getSlug());
+        view.put("parentId", saved.getParentId());
+        view.put("isActive", saved.getIsActive());
+        return view;
+    }
+
+    /** "Felpe & Maglie" -> "felpe-maglie". */
+    private static String slugify(String name) {
+        String slug = java.text.Normalizer.normalize(name, java.text.Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "")
+                .toLowerCase()
+                .replaceAll("[^a-z0-9]+", "-")
+                .replaceAll("^-|-$", "");
+        if (slug.isBlank()) throw ApiException.badRequest("Dal nome non esce uno slug valido: scrivilo a mano");
+        return slug;
     }
 
     @Transactional
@@ -593,9 +663,11 @@ public class AdminService {
             throw ApiException.badRequest("Impossibile salvare il file: " + e.getMessage());
         }
 
-        // `/uploads/**` e' servito da WebConfig; il prefisso `/api` arriva dal
-        // context-path del backend, come per ogni altra rotta.
-        String url = backendUrl + "/api/uploads/products/" + filename;
+        // URL **relativo**, non `backendUrl + ...`: l'indirizzo del backend finirebbe
+        // scritto dentro ogni riga di `product_images`, e il giorno che il sito cambia
+        // host tutte le foto gia' caricate punterebbero al vecchio. Relativo passa dal
+        // proxy `/api` che il frontend ha gia', qualunque sia il dominio.
+        String url = "/api/uploads/products/" + filename;
         return addImage(productId, url, null, null, null);
     }
 
