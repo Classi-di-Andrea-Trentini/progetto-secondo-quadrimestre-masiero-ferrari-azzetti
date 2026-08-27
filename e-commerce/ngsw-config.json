@@ -1,0 +1,45 @@
+{
+  "$schema": "./node_modules/@angular/service-worker/config/schema.json",
+  "index": "/index.html",
+  "assetGroups": [
+    {
+      "name": "app",
+      "installMode": "prefetch",
+      "resources": {
+        "files": [
+          "/favicon.ico",
+          "/index.csr.html",
+          "/index.html",
+          "/manifest.webmanifest",
+          "/*.css",
+          "/*.js"
+        ]
+      }
+    },
+    {
+      "name": "assets",
+      "installMode": "lazy",
+      "updateMode": "prefetch",
+      "resources": {
+        "files": [
+          "/media/**",
+          "/icons/**",
+          "/*.(svg|cur|jpg|jpeg|png|apng|webp|avif|gif|otf|ttf|woff|woff2)"
+        ]
+      }
+    }
+  ],
+  "dataGroups": [
+    {
+      "comment": "Catalogo e foto prodotto: la copia serve solo a mostrare qualcosa quando la rete manca. 'freshness' prova sempre la rete per prima e usa la cache dopo 3 secondi, cosi' un prezzo aggiornato non resta nascosto. Carrello, ordini, login e area admin non sono qui apposta: dati personali dentro una cache del browser sono un problema, non una comodita'.",
+      "name": "catalogo",
+      "urls": ["/api/products", "/api/products/**", "/api/uploads/**"],
+      "cacheConfig": {
+        "strategy": "freshness",
+        "maxSize": 120,
+        "maxAge": "1h",
+        "timeout": "3s"
+      }
+    }
+  ]
+}
