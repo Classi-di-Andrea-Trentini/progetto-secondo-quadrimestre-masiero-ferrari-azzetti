@@ -2,6 +2,7 @@ package it.commonera.backend.dtos;
 
 import it.commonera.backend.entities.User;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -11,6 +12,10 @@ import java.util.UUID;
  * Contiene **tutti** i campi che il frontend usa: nel backend Node era gia' successo
  * che una risposta parziale lasciasse il segnale con valori nulli fino al refresh
  * della pagina. Non contiene mai `passwordHash`.
+ *
+ * `birthDate`, `gender` e `newsletterOptIn` mancavano: la scheda profilo li mostrava
+ * sempre vuoti ("—") anche subito dopo averli salvati, perche' la risposta non li
+ * riportava indietro.
  */
 public record UserResponse(
         UUID id,
@@ -19,6 +24,9 @@ public record UserResponse(
         String role,
         String avatarUrl,
         String phone,
+        LocalDate birthDate,
+        String gender,
+        Boolean newsletterOptIn,
         LocalDateTime emailVerifiedAt,
         LocalDateTime createdAt) {
 
@@ -30,6 +38,9 @@ public record UserResponse(
                 user.getRole().name(),
                 user.getAvatarUrl(),
                 user.getPhone(),
+                user.getBirthDate(),
+                user.getGender(),
+                user.getNewsletterOptIn(),
                 user.getEmailVerifiedAt(),
                 user.getCreatedAt());
     }
