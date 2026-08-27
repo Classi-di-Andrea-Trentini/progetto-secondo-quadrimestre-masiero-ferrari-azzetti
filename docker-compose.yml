@@ -3,9 +3,15 @@ services:
     build: ./e-commerce
     ports:
       - "4200:4200"
-    volumes:
-      - ./e-commerce:/app
-      - /app/node_modules
+    environment:
+      # Il server SSR fa da proxy verso il backend per /api e /uploads: senza dev
+      # server di Angular davanti, e' lui a tenere tutto sulla stessa origine
+      # (vedi e-commerce/src/server.ts).
+      BACKEND_URL: http://backend:3000
+    # Niente bind mount dei sorgenti: l'immagine contiene il **costruito** di
+    # produzione, e montarci sopra la cartella di sviluppo lo coprirebbe. Per
+    # lavorare col ricaricamento automatico si usa `npm run start:local` fuori
+    # da Docker, che e' anche molto piu' veloce.
     depends_on:
       - backend
 
