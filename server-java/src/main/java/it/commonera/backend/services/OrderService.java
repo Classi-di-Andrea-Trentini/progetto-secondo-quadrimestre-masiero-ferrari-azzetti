@@ -2,11 +2,9 @@ package it.commonera.backend.services;
 
 import it.commonera.backend.entities.Order;
 import it.commonera.backend.entities.OrderStatus;
-import it.commonera.backend.entities.OrderStatusHistory;
 import it.commonera.backend.exceptions.ApiException;
 import it.commonera.backend.repositories.OrderRepository;
 import it.commonera.backend.repositories.PaymentRepository;
-import it.commonera.backend.repositories.ProductVariantRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,17 +29,13 @@ public class OrderService {
 
     private final OrderRepository orders;
     private final PaymentRepository payments;
-    private final ProductVariantRepository variants;
-    private final GiftCardService giftCards;
-    private final LoyaltyService loyalty;
+    private final OrderCompensationService compensation;
 
-    public OrderService(OrderRepository orders, PaymentRepository payments, ProductVariantRepository variants,
-                        GiftCardService giftCards, LoyaltyService loyalty) {
+    public OrderService(OrderRepository orders, PaymentRepository payments,
+                        OrderCompensationService compensation) {
         this.orders = orders;
         this.payments = payments;
-        this.variants = variants;
-        this.giftCards = giftCards;
-        this.loyalty = loyalty;
+        this.compensation = compensation;
     }
 
     @Transactional(readOnly = true)
@@ -71,42 +65,13 @@ public class OrderService {
             throw ApiException.badRequest("Order can no longer be cancelled");
         }
 
-        // Transizione atomica **come primo scalo**, prima di toccare buono e punti:
-        // senza `@Version` sull'ordine, due `cancel()` concorrenti leggerebbero
-        // entrambi lo stato annullabile controllato qui sopra e rimborserebbero
-        // entrambi. Se qui non viene toccata nessuna riga, l'altra richiesta e'
-        // arrivata prima — niente rimborso doppio, a prescindere da cos'altro
-        // protegga (o non protegga) la parte punti/buono piu' sotto.
-        if (orders.updateStatusIfCurrentIn(order.getId(), OrderStatus.cancelled, CANCELLABLE) == 0) {
+        // Tutta la compensazione — stato, giacenza, buono, punti — sta in
+        // OrderCompensationService, perche' la fanno identica anche il webhook del
+        // pagamento fallito e il raccoglitore degli ordini abbandonati. Il falso
+        // significa che un'altra richiesta ha gia' chiuso questo ordine.
+        if (!compensation.releaseAndCancel(order, CANCELLABLE, userId, "Annullato dal cliente")) {
             throw ApiException.badRequest("Order can no longer be cancelled");
         }
-        order.setStatus(OrderStatus.cancelled);
-
-        // La merce torna a magazzino: annullare senza ripristinare la giacenza
-        // significa perdere pezzi che nessuno ha mai comprato.
-        for (var item : order.getItems()) {
-            variants.findById(item.getVariantId()).ifPresent(variant -> {
-                variant.setStockQty(variant.getStockQty() + item.getQuantity());
-                variants.save(variant);
-            });
-        }
-
-        // Stesso principio per buono e punti: quello che il checkout ha scalato o
-        // accreditato per questo ordine deve tornare indietro, nella stessa
-        // transazione dello scalo di magazzino qui sopra — se una delle due cose
-        // fallisse, l'annullamento non deve restare a meta'.
-        if (order.getGiftCardId() != null && order.getGiftCardAmount() != null
-                && order.getGiftCardAmount().signum() > 0) {
-            giftCards.refund(order.getGiftCardId(), order.getGiftCardAmount(), order.getId());
-        }
-        loyalty.reverseForOrder(order.getUserId(), order.getId());
-
-        var entry = new OrderStatusHistory();
-        entry.setOrder(order);
-        entry.setStatus(OrderStatus.cancelled);
-        entry.setChangedBy(userId);
-        entry.setNote("Annullato dal cliente");
-        order.getStatusHistory().add(entry);
 
         return view(order);
     }

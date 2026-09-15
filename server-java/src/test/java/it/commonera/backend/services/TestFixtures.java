@@ -24,14 +24,22 @@ public class TestFixtures {
     private final UserRepository users;
     private final UserAddressRepository addresses;
     private final OrderRepository orders;
+    private final GiftCardService giftCards;
+    private final LoyaltyEntryRepository loyaltyEntries;
+    private final CheckoutService checkout;
 
     @PersistenceContext
     private EntityManager em;
 
-    public TestFixtures(UserRepository users, UserAddressRepository addresses, OrderRepository orders) {
+    public TestFixtures(UserRepository users, UserAddressRepository addresses, OrderRepository orders,
+                        GiftCardService giftCards, LoyaltyEntryRepository loyaltyEntries,
+                        CheckoutService checkout) {
         this.users = users;
         this.addresses = addresses;
         this.orders = orders;
+        this.giftCards = giftCards;
+        this.loyaltyEntries = loyaltyEntries;
+        this.checkout = checkout;
     }
 
     public User aUser() {
@@ -99,5 +107,51 @@ public class TestFixtures {
         payment.setProvider("stripe");
         payment.setProviderTxId(providerTxId);
         return payment;
+    }
+
+    /** Un buono con un saldo noto, emesso da un amministratore di comodo. */
+    public GiftCard aGiftCardWithBalance(BigDecimal balance) {
+        return giftCards.issue(aUser().getId(), balance, "buono di prova", null);
+    }
+
+    /** Punti gia' a saldo: sotto i 500 il riscatto al checkout non e' ammesso. */
+    public void grantPoints(UUID userId, int points) {
+        var entry = new LoyaltyEntry();
+        entry.setUserId(userId);
+        entry.setPoints(points);
+        entry.setReason("seed-di-prova");
+        loyaltyEntries.save(entry);
+        em.flush();
+    }
+
+    /**
+     * Un ordine vero, passato dal checkout reale con buono e punti: il percorso
+     * che la compensazione deve saper disfare. Costruirlo a mano rischierebbe di
+     * provare l'inversione di qualcosa che il checkout non fa davvero.
+     */
+    public CheckedOut aCheckoutWithGiftCardAndPoints(int quantity, BigDecimal giftCardBalance, int points) {
+        var buyer = aUser();
+        var address = anAddressFor(buyer);
+        var variant = aVariantWithStock(10);
+        var card = giftCards.issue(buyer.getId(), giftCardBalance, "buono di prova", null);
+        if (points > 0) {
+            grantPoints(buyer.getId(), points);
+        }
+
+        var request = new CheckoutService.Request(address.getId(),
+                java.util.List.of(new CheckoutService.Line(variant.getId(), quantity)),
+                "standard", null, card.getCode(), points > 0 ? points : null, null);
+        var result = checkout.placeOrder(buyer.getId(), request);
+        em.flush();
+        em.clear();
+
+        var order = orders.findById((UUID) result.get("orderId")).orElseThrow();
+        return new CheckedOut(order, buyer.getId(), variant.getId(), quantity, card.getId());
+    }
+
+    public record CheckedOut(Order order, UUID userId, UUID variantId, int quantity, UUID giftCardId) {
+        public UUID orderId() {
+            return order.getId();
+        }
     }
 }
