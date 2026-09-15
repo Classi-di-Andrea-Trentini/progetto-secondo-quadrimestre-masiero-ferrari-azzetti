@@ -1,16 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-labelledby="ttl">
   <title id="ttl">Cintura in pelle nera con fibbia</title>
-  <rect width="400" height="400" fill="#F5F5F5"/>
-  <ellipse cx="200" cy="356" rx="126" ry="12" fill="#E8E8E8"/>
-  <path d="M96 300 Q96 128 200 128 Q304 128 304 300" fill="none" stroke="#1A1A1A" stroke-width="34"/>
-  <path d="M113 300 Q113 145 200 145 Q287 145 287 300" fill="none" stroke="#111111" stroke-width="2.4"/>
-  <path d="M79 300 Q79 111 200 111 Q321 111 321 300" fill="none" stroke="#111111" stroke-width="2.4"/>
-  <path d="M107 300 Q107 152 200 152 Q293 152 293 300" fill="none" stroke="#B5451B" stroke-width="1.8" stroke-dasharray="7 6"/>
-  <path d="M85 300 Q85 118 200 118 Q315 118 315 300" fill="none" stroke="#B5451B" stroke-width="1.8" stroke-dasharray="7 6"/>
-  <rect x="72" y="298" width="48" height="58" rx="9" fill="none" stroke="#111111" stroke-width="7"/>
-  <path d="M96 298 L96 342" stroke="#111111" stroke-width="6" stroke-linecap="round"/>
-  <path d="M287 300 L321 300 L308 344 Q304 352 300 344 Z" fill="#1A1A1A" stroke="#111111" stroke-width="2.6" stroke-linejoin="round"/>
-  <g fill="#F5F5F5" stroke="#111111" stroke-width="1.8">
+  <rect width="400" height="400" fill="#F3F3F5"/>
+  <ellipse cx="200" cy="356" rx="126" ry="12" fill="#E2E3E5"/>
+  <path d="M96 300 Q96 128 200 128 Q304 128 304 300" fill="none" stroke="#232328" stroke-width="34"/>
+  <path d="M113 300 Q113 145 200 145 Q287 145 287 300" fill="none" stroke="#17171B" stroke-width="2.4"/>
+  <path d="M79 300 Q79 111 200 111 Q321 111 321 300" fill="none" stroke="#17171B" stroke-width="2.4"/>
+  <path d="M107 300 Q107 152 200 152 Q293 152 293 300" fill="none" stroke="#A73C2A" stroke-width="1.8" stroke-dasharray="7 6"/>
+  <path d="M85 300 Q85 118 200 118 Q315 118 315 300" fill="none" stroke="#A73C2A" stroke-width="1.8" stroke-dasharray="7 6"/>
+  <rect x="72" y="298" width="48" height="58" rx="9" fill="none" stroke="#17171B" stroke-width="7"/>
+  <path d="M96 298 L96 342" stroke="#17171B" stroke-width="6" stroke-linecap="round"/>
+  <path d="M287 300 L321 300 L308 344 Q304 352 300 344 Z" fill="#232328" stroke="#17171B" stroke-width="2.6" stroke-linejoin="round"/>
+  <g fill="#F3F3F5" stroke="#17171B" stroke-width="1.8">
     <circle cx="304" cy="268" r="5"/>
     <circle cx="303" cy="240" r="5"/>
     <circle cx="301" cy="212" r="5"/>

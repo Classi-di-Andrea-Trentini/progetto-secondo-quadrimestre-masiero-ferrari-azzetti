@@ -1,21 +1,21 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-labelledby="ttl">
   <title id="ttl">Sneakers nere high-top</title>
-  <rect width="400" height="400" fill="#F5F5F5"/>
-  <ellipse cx="204" cy="306" rx="146" ry="12" fill="#E8E8E8"/>
-  <path d="M78 254 L78 148 Q78 122 106 118 Q140 114 158 140 L176 120 Q188 112 198 126 L232 200 Q242 222 258 228 L304 242 Q334 250 340 254 Z" fill="#1C1C1C" stroke="#111111" stroke-width="3.2" stroke-linejoin="round"/>
-  <path d="M106 118 Q140 114 158 140 L152 152 Q136 130 108 134 Z" fill="#3A3A3A" stroke="#111111" stroke-width="2.2" stroke-linejoin="round"/>
-  <path d="M176 120 Q188 112 198 126 L218 168 L198 176 L172 134 Z" fill="#2B2B2B" stroke="#111111" stroke-width="2.2" stroke-linejoin="round"/>
-  <g stroke="#DADADA" stroke-width="2.6" stroke-linecap="round" fill="none">
+  <rect width="400" height="400" fill="#F3F3F5"/>
+  <ellipse cx="204" cy="306" rx="146" ry="12" fill="#E2E3E5"/>
+  <path d="M78 254 L78 148 Q78 122 106 118 Q140 114 158 140 L176 120 Q188 112 198 126 L232 200 Q242 222 258 228 L304 242 Q334 250 340 254 Z" fill="#232328" stroke="#17171B" stroke-width="3.2" stroke-linejoin="round"/>
+  <path d="M106 118 Q140 114 158 140 L152 152 Q136 130 108 134 Z" fill="#424247" stroke="#17171B" stroke-width="2.2" stroke-linejoin="round"/>
+  <path d="M176 120 Q188 112 198 126 L218 168 L198 176 L172 134 Z" fill="#303035" stroke="#17171B" stroke-width="2.2" stroke-linejoin="round"/>
+  <g stroke="#CFCFD2" stroke-width="2.6" stroke-linecap="round" fill="none">
     <path d="M160 152 L180 140"/>
     <path d="M166 174 L188 162"/>
     <path d="M174 196 L196 184"/>
     <path d="M182 218 L206 206"/>
     <path d="M190 240 L216 228"/>
   </g>
-  <circle cx="112" cy="196" r="17" fill="none" stroke="#6E6E6E" stroke-width="2.6"/>
-  <path d="M104 196 L120 196 M112 188 L112 204" stroke="#6E6E6E" stroke-width="2.4" stroke-linecap="round"/>
-  <path d="M290 238 Q302 218 328 218" fill="none" stroke="#5A5A5A" stroke-width="2.4"/>
-  <path d="M64 252 L342 252 Q356 254 354 268 Q352 288 332 288 L82 288 Q62 288 60 268 Q59 256 64 252 Z" fill="#F0F0F0" stroke="#111111" stroke-width="3.2" stroke-linejoin="round"/>
-  <path d="M62 270 L352 270" fill="none" stroke="#111111" stroke-width="2"/>
-  <rect x="80" y="160" width="5" height="20" rx="1.6" fill="#B5451B"/>
+  <circle cx="112" cy="196" r="17" fill="none" stroke="#6E6F75" stroke-width="2.6"/>
+  <path d="M104 196 L120 196 M112 188 L112 204" stroke="#6E6F75" stroke-width="2.4" stroke-linecap="round"/>
+  <path d="M290 238 Q302 218 328 218" fill="none" stroke="#54545A" stroke-width="2.4"/>
+  <path d="M64 252 L342 252 Q356 254 354 268 Q352 288 332 288 L82 288 Q62 288 60 268 Q59 256 64 252 Z" fill="#ECECEF" stroke="#17171B" stroke-width="3.2" stroke-linejoin="round"/>
+  <path d="M62 270 L352 270" fill="none" stroke="#17171B" stroke-width="2"/>
+  <rect x="80" y="160" width="5" height="20" rx="1.6" fill="#A73C2A"/>
 </svg>

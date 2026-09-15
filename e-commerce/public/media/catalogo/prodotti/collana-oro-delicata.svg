@@ -1,17 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-labelledby="ttl">
   <title id="ttl">Collana sottile con pendente</title>
-  <rect width="400" height="400" fill="#F5F5F5"/>
-  <ellipse cx="200" cy="356" rx="96" ry="11" fill="#E8E8E8"/>
-  <path d="M112 96 Q104 236 200 252 Q296 236 288 96" fill="none" stroke="#C3A88D" stroke-width="7"/>
-  <path d="M112 96 Q104 236 200 252 Q296 236 288 96" fill="none" stroke="#9C8468" stroke-width="7" stroke-dasharray="3 8" stroke-linecap="round"/>
-  <path d="M112 96 Q104 236 200 252 Q296 236 288 96" fill="none" stroke="#111111" stroke-width="1.2" fill-opacity="0"/>
-  <circle cx="112" cy="96" r="10" fill="none" stroke="#C3A88D" stroke-width="5"/>
-  <circle cx="288" cy="96" r="10" fill="none" stroke="#C3A88D" stroke-width="5"/>
-  <circle cx="112" cy="96" r="10" fill="none" stroke="#111111" stroke-width="1.4"/>
-  <circle cx="288" cy="96" r="10" fill="none" stroke="#111111" stroke-width="1.4"/>
-  <circle cx="200" cy="262" r="11" fill="none" stroke="#C3A88D" stroke-width="5"/>
-  <circle cx="200" cy="262" r="11" fill="none" stroke="#111111" stroke-width="1.4"/>
-  <path d="M200 272 L228 312 L200 348 L172 312 Z" fill="#C3A88D" stroke="#111111" stroke-width="2.8" stroke-linejoin="round"/>
-  <path d="M200 272 L200 348 M172 312 L228 312" fill="none" stroke="#8C7458" stroke-width="2"/>
-  <path d="M200 272 L214 312 L200 348 L186 312 Z" fill="#D7C2AA" stroke="#8C7458" stroke-width="1.6"/>
+  <rect width="400" height="400" fill="#F3F3F5"/>
+  <ellipse cx="200" cy="356" rx="96" ry="11" fill="#E2E3E5"/>
+  <path d="M112 96 Q104 236 200 252 Q296 236 288 96" fill="none" stroke="#C6AC94" stroke-width="7"/>
+  <path d="M112 96 Q104 236 200 252 Q296 236 288 96" fill="none" stroke="#A0836A" stroke-width="7" stroke-dasharray="3 8" stroke-linecap="round"/>
+  <path d="M112 96 Q104 236 200 252 Q296 236 288 96" fill="none" stroke="#17171B" stroke-width="1.2" fill-opacity="0"/>
+  <circle cx="112" cy="96" r="10" fill="none" stroke="#C6AC94" stroke-width="5"/>
+  <circle cx="288" cy="96" r="10" fill="none" stroke="#C6AC94" stroke-width="5"/>
+  <circle cx="112" cy="96" r="10" fill="none" stroke="#17171B" stroke-width="1.4"/>
+  <circle cx="288" cy="96" r="10" fill="none" stroke="#17171B" stroke-width="1.4"/>
+  <circle cx="200" cy="262" r="11" fill="none" stroke="#C6AC94" stroke-width="5"/>
+  <circle cx="200" cy="262" r="11" fill="none" stroke="#17171B" stroke-width="1.4"/>
+  <path d="M200 272 L228 312 L200 348 L172 312 Z" fill="#C6AC94" stroke="#17171B" stroke-width="2.8" stroke-linejoin="round"/>
+  <path d="M200 272 L200 348 M172 312 L228 312" fill="none" stroke="#7D634E" stroke-width="2"/>
+  <path d="M200 272 L214 312 L200 348 L186 312 Z" fill="#DFD0BF" stroke="#7D634E" stroke-width="1.6"/>
 </svg>

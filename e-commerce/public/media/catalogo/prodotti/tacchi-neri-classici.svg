@@ -1,12 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-labelledby="ttl">
   <title id="ttl">Decolleté nere con tacco a spillo</title>
-  <rect width="400" height="400" fill="#F5F5F5"/>
-  <ellipse cx="184" cy="320" rx="142" ry="12" fill="#E8E8E8"/>
-  <path d="M250 250 L272 244 L290 296 Q291 302 285 302 L276 302 Q271 302 270 297 Z" fill="#1A1A1A" stroke="#111111" stroke-width="3.2" stroke-linejoin="round"/>
-  <path d="M56 282 Q92 240 150 226 L196 210 Q226 200 236 166 L278 166 L272 250 L250 256 L88 290 Q58 294 56 282 Z" fill="#1A1A1A" stroke="#111111" stroke-width="3.2" stroke-linejoin="round"/>
-  <path d="M152 224 Q200 208 234 170 Q212 212 168 230 Z" fill="#3D3D3D"/>
-  <path d="M236 166 L278 166" fill="none" stroke="#4A4A4A" stroke-width="2.4"/>
-  <path d="M250 256 L272 250" fill="none" stroke="#4A4A4A" stroke-width="2.4"/>
-  <path d="M88 290 L250 254" fill="none" stroke="#B5451B" stroke-width="5" stroke-linecap="round"/>
-  <path d="M272 298 L288 298" fill="none" stroke="#B5451B" stroke-width="4.5" stroke-linecap="round"/>
+  <rect width="400" height="400" fill="#F3F3F5"/>
+  <ellipse cx="184" cy="320" rx="142" ry="12" fill="#E2E3E5"/>
+  <path d="M250 250 L272 244 L290 296 Q291 302 285 302 L276 302 Q271 302 270 297 Z" fill="#232328" stroke="#17171B" stroke-width="3.2" stroke-linejoin="round"/>
+  <path d="M56 282 Q92 240 150 226 L196 210 Q226 200 236 166 L278 166 L272 250 L250 256 L88 290 Q58 294 56 282 Z" fill="#232328" stroke="#17171B" stroke-width="3.2" stroke-linejoin="round"/>
+  <path d="M152 224 Q200 208 234 170 Q212 212 168 230 Z" fill="#424247"/>
+  <path d="M236 166 L278 166" fill="none" stroke="#54545A" stroke-width="2.4"/>
+  <path d="M250 256 L272 250" fill="none" stroke="#54545A" stroke-width="2.4"/>
+  <path d="M88 290 L250 254" fill="none" stroke="#A73C2A" stroke-width="5" stroke-linecap="round"/>
+  <path d="M272 298 L288 298" fill="none" stroke="#A73C2A" stroke-width="4.5" stroke-linecap="round"/>
 </svg>

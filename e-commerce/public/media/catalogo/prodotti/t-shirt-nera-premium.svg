@@ -1,14 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-labelledby="ttl">
   <title id="ttl">T-shirt nera premium</title>
-  <rect width="400" height="400" fill="#F5F5F5"/>
-  <ellipse cx="200" cy="332" rx="116" ry="13" fill="#E8E8E8"/>
-  <path d="M150 116 L118 130 L94 176 L128 198 L142 178 L142 306 Q142 314 150 314 L250 314 Q258 314 258 306 L258 178 L272 198 L306 176 L282 130 L250 116 Q200 152 150 116 Z" fill="#171717" stroke="#111111" stroke-width="3.2" stroke-linejoin="round"/>
-  <path d="M176 200 L172 306" fill="none" stroke="#2B2B2B" stroke-width="15" stroke-linecap="round"/>
-  <path d="M152 119 Q200 180 248 119" fill="none" stroke="#7A7A7A" stroke-width="2.6" stroke-linecap="round"/>
-  <path d="M101 167 L135 189" fill="none" stroke="#4A4A4A" stroke-width="2.2" stroke-linecap="round"/>
-  <path d="M265 189 L299 167" fill="none" stroke="#4A4A4A" stroke-width="2.2" stroke-linecap="round"/>
-  <path d="M142 300 L258 300" fill="none" stroke="#3B3B3B" stroke-width="2" stroke-linecap="round"/>
-  <rect x="147.5" y="290" width="4.5" height="17" rx="1.5" fill="#B5451B"/>
-  <circle cx="202" cy="232" r="14" fill="none" stroke="#6B6B6B" stroke-width="2"/>
-  <path d="M202 225 L202 239 M195 232 L209 232" stroke="#6B6B6B" stroke-width="2" stroke-linecap="round"/>
+  <rect width="400" height="400" fill="#F3F3F5"/>
+  <ellipse cx="200" cy="332" rx="116" ry="13" fill="#E2E3E5"/>
+  <path d="M150 116 L118 130 L94 176 L128 198 L142 178 L142 306 Q142 314 150 314 L250 314 Q258 314 258 306 L258 178 L272 198 L306 176 L282 130 L250 116 Q200 152 150 116 Z" fill="#232328" stroke="#17171B" stroke-width="3.2" stroke-linejoin="round"/>
+  <path d="M176 200 L172 306" fill="none" stroke="#303035" stroke-width="15" stroke-linecap="round"/>
+  <path d="M152 119 Q200 180 248 119" fill="none" stroke="#85868B" stroke-width="2.6" stroke-linecap="round"/>
+  <path d="M101 167 L135 189" fill="none" stroke="#54545A" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M265 189 L299 167" fill="none" stroke="#54545A" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M142 300 L258 300" fill="none" stroke="#424247" stroke-width="2" stroke-linecap="round"/>
+  <rect x="147.5" y="290" width="4.5" height="17" rx="1.5" fill="#A73C2A"/>
+  <circle cx="202" cy="232" r="14" fill="none" stroke="#6E6F75" stroke-width="2"/>
+  <path d="M202 225 L202 239 M195 232 L209 232" stroke="#6E6F75" stroke-width="2" stroke-linecap="round"/>
 </svg>

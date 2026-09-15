@@ -1,28 +1,28 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 768" role="img" aria-labelledby="ttl">
   <title id="ttl">Minimal Wardrobe</title>
-  <rect width="960" height="768" fill="#EDEDED"/>
-  <circle cx="480" cy="330" r="286" fill="#E2E2E2"/>
-  <path d="M0 596 L960 596" stroke="#D7D7D7" stroke-width="3"/>
+  <rect width="960" height="768" fill="#ECECEF"/>
+  <circle cx="480" cy="330" r="286" fill="#E2E3E5"/>
+  <path d="M0 596 L960 596" stroke="#CFCFD2" stroke-width="3"/>
   <g transform="translate(70,200) scale(1.06)">
-    <path d="M150 116 L118 130 L94 176 L128 198 L142 178 L142 306 Q142 314 150 314 L250 314 Q258 314 258 306 L258 178 L272 198 L306 176 L282 130 L250 116 Q200 152 150 116 Z" fill="#FFFFFF" stroke="#111111" stroke-width="3.2" stroke-linejoin="round"/>
-    <path d="M186 202 L184 308" fill="none" stroke="#EDEDED" stroke-width="16" stroke-linecap="round"/>
-    <path d="M152 119 Q200 180 248 119" fill="none" stroke="#111111" stroke-width="2.8" stroke-linecap="round"/>
-    <path d="M101 167 L135 189 M265 189 L299 167" fill="none" stroke="#111111" stroke-width="2.4" stroke-linecap="round"/>
-    <path d="M142 300 L258 300" fill="none" stroke="#D7D7D7" stroke-width="2.2" stroke-linecap="round"/>
-    <rect x="147.5" y="290" width="4.5" height="17" rx="1.5" fill="#B5451B"/>
+    <path d="M150 116 L118 130 L94 176 L128 198 L142 178 L142 306 Q142 314 150 314 L250 314 Q258 314 258 306 L258 178 L272 198 L306 176 L282 130 L250 116 Q200 152 150 116 Z" fill="#FFFFFF" stroke="#17171B" stroke-width="3.2" stroke-linejoin="round"/>
+    <path d="M186 202 L184 308" fill="none" stroke="#ECECEF" stroke-width="16" stroke-linecap="round"/>
+    <path d="M152 119 Q200 180 248 119" fill="none" stroke="#17171B" stroke-width="2.8" stroke-linecap="round"/>
+    <path d="M101 167 L135 189 M265 189 L299 167" fill="none" stroke="#17171B" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M142 300 L258 300" fill="none" stroke="#CFCFD2" stroke-width="2.2" stroke-linecap="round"/>
+    <rect x="147.5" y="290" width="4.5" height="17" rx="1.5" fill="#A73C2A"/>
   </g>
   <g transform="translate(470,168) scale(1.02)">
-    <path d="M140 108 L132 240 L125 352 Q125 359 132 359 L178 359 Q185 359 186 352 L199 214 L201 214 L214 352 Q215 359 222 359 L268 359 Q275 359 275 352 L268 240 L260 108 Z" fill="#6E6E6E" stroke="#111111" stroke-width="3.2" stroke-linejoin="round"/>
-    <path d="M152 120 L146 350 M248 120 L254 350" fill="none" stroke="#565656" stroke-width="9" stroke-linecap="round"/>
-    <rect x="137" y="84" width="126" height="28" rx="5" fill="#7C7C7C" stroke="#111111" stroke-width="3.2"/>
-    <g stroke="#111111" stroke-width="2.4" fill="none" stroke-linecap="round">
+    <path d="M140 108 L132 240 L125 352 Q125 359 132 359 L178 359 Q185 359 186 352 L199 214 L201 214 L214 352 Q215 359 222 359 L268 359 Q275 359 275 352 L268 240 L260 108 Z" fill="#6E6F75" stroke="#17171B" stroke-width="3.2" stroke-linejoin="round"/>
+    <path d="M152 120 L146 350 M248 120 L254 350" fill="none" stroke="#54545A" stroke-width="9" stroke-linecap="round"/>
+    <rect x="137" y="84" width="126" height="28" rx="5" fill="#85868B" stroke="#17171B" stroke-width="3.2"/>
+    <g stroke="#17171B" stroke-width="2.4" fill="none" stroke-linecap="round">
       <path d="M148 80 L148 116 M196 80 L196 116 M252 80 L252 116"/>
     </g>
-    <g stroke="#B5451B" stroke-width="2" fill="none" stroke-linecap="round" stroke-dasharray="6 5">
+    <g stroke="#A73C2A" stroke-width="2" fill="none" stroke-linecap="round" stroke-dasharray="6 5">
       <path d="M200 114 L200 152 Q200 164 208 170"/>
       <path d="M146 116 Q170 134 188 116"/><path d="M254 116 Q230 134 212 116"/>
       <path d="M132 336 L180 336 M220 336 L268 336"/>
     </g>
-    <circle cx="200" cy="98" r="6" fill="#EDEDED" stroke="#111111" stroke-width="2.4"/>
+    <circle cx="200" cy="98" r="6" fill="#ECECEF" stroke="#17171B" stroke-width="2.4"/>
   </g>
 </svg>

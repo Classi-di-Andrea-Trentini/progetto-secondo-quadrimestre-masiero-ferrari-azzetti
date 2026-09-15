@@ -1,14 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-labelledby="ttl">
   <title id="ttl">Scarpe con plateau e tacco a blocco</title>
-  <rect width="400" height="400" fill="#F5F5F5"/>
-  <ellipse cx="180" cy="316" rx="142" ry="12" fill="#E8E8E8"/>
-  <path d="M248 238 L292 228 Q300 226 300 236 L300 288 Q300 298 290 298 L258 298 Q248 298 248 288 Z" fill="#C3A88D" stroke="#111111" stroke-width="3.2" stroke-linejoin="round"/>
-  <path d="M252 280 L298 280" fill="none" stroke="#8C7458" stroke-width="2.2"/>
-  <path d="M56 262 Q92 220 150 206 L196 190 Q226 180 236 146 L278 146 L272 230 L250 236 L88 270 Q58 274 56 262 Z" fill="#C3A88D" stroke="#111111" stroke-width="3.2" stroke-linejoin="round"/>
-  <path d="M152 204 Q200 188 234 150 Q212 192 168 210 Z" fill="#A98F76"/>
-  <path d="M236 146 L278 146" fill="none" stroke="#8C7458" stroke-width="2.4"/>
-  <path d="M56 262 Q50 288 78 294 L254 258 L250 234 L88 270 Q60 274 56 262 Z" fill="#D7C2AA" stroke="#111111" stroke-width="3.2" stroke-linejoin="round"/>
-  <path d="M74 280 Q160 272 252 246" fill="none" stroke="#8C7458" stroke-width="2"/>
-  <path d="M80 292 L252 256" fill="none" stroke="#B5451B" stroke-width="4.5" stroke-linecap="round"/>
-  <path d="M254 292 L298 292" fill="none" stroke="#B5451B" stroke-width="4.5" stroke-linecap="round"/>
+  <rect width="400" height="400" fill="#F3F3F5"/>
+  <ellipse cx="180" cy="316" rx="142" ry="12" fill="#E2E3E5"/>
+  <path d="M248 238 L292 228 Q300 226 300 236 L300 288 Q300 298 290 298 L258 298 Q248 298 248 288 Z" fill="#C6AC94" stroke="#17171B" stroke-width="3.2" stroke-linejoin="round"/>
+  <path d="M252 280 L298 280" fill="none" stroke="#7D634E" stroke-width="2.2"/>
+  <path d="M56 262 Q92 220 150 206 L196 190 Q226 180 236 146 L278 146 L272 230 L250 236 L88 270 Q58 274 56 262 Z" fill="#C6AC94" stroke="#17171B" stroke-width="3.2" stroke-linejoin="round"/>
+  <path d="M152 204 Q200 188 234 150 Q212 192 168 210 Z" fill="#A0836A"/>
+  <path d="M236 146 L278 146" fill="none" stroke="#7D634E" stroke-width="2.4"/>
+  <path d="M56 262 Q50 288 78 294 L254 258 L250 234 L88 270 Q60 274 56 262 Z" fill="#DFD0BF" stroke="#17171B" stroke-width="3.2" stroke-linejoin="round"/>
+  <path d="M74 280 Q160 272 252 246" fill="none" stroke="#7D634E" stroke-width="2"/>
+  <path d="M80 292 L252 256" fill="none" stroke="#A73C2A" stroke-width="4.5" stroke-linecap="round"/>
+  <path d="M254 292 L298 292" fill="none" stroke="#A73C2A" stroke-width="4.5" stroke-linecap="round"/>
 </svg>

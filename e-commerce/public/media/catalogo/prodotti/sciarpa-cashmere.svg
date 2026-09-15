@@ -1,20 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-labelledby="ttl">
   <title id="ttl">Sciarpa in cashmere annodata</title>
-  <rect width="400" height="400" fill="#F5F5F5"/>
-  <ellipse cx="200" cy="348" rx="108" ry="12" fill="#E8E8E8"/>
-  <path d="M160 150 L132 306 L190 318 L198 158 Z" fill="#C3A88D" stroke="#111111" stroke-width="3.2" stroke-linejoin="round"/>
-  <path d="M202 158 L210 318 L268 306 L240 150 Z" fill="#B4A08A" stroke="#111111" stroke-width="3.2" stroke-linejoin="round"/>
-  <g stroke="#9C8468" stroke-width="2" fill="none">
+  <rect width="400" height="400" fill="#F3F3F5"/>
+  <ellipse cx="200" cy="348" rx="108" ry="12" fill="#E2E3E5"/>
+  <path d="M160 150 L132 306 L190 318 L198 158 Z" fill="#C6AC94" stroke="#17171B" stroke-width="3.2" stroke-linejoin="round"/>
+  <path d="M202 158 L210 318 L268 306 L240 150 Z" fill="#B3977F" stroke="#17171B" stroke-width="3.2" stroke-linejoin="round"/>
+  <g stroke="#A0836A" stroke-width="2" fill="none">
     <path d="M154 186 L196 190 M148 218 L194 222 M142 250 L192 254 M136 282 L190 286"/>
     <path d="M204 190 L246 186 M206 222 L252 218 M208 254 L258 250 M210 286 L264 282"/>
   </g>
-  <g stroke="#111111" stroke-width="2.6" stroke-linecap="round">
+  <g stroke="#17171B" stroke-width="2.6" stroke-linecap="round">
     <path d="M136 308 L132 338 M148 311 L144 341 M160 313 L156 343 M172 315 L168 345 M184 317 L180 347"/>
     <path d="M214 317 L210 347 M226 315 L222 345 M238 313 L234 343 M250 311 L246 341 M262 308 L258 338"/>
   </g>
-  <ellipse cx="200" cy="140" rx="64" ry="42" fill="none" stroke="#CFB79E" stroke-width="30"/>
-  <ellipse cx="200" cy="140" rx="79" ry="57" fill="none" stroke="#111111" stroke-width="3"/>
-  <ellipse cx="200" cy="140" rx="49" ry="27" fill="none" stroke="#111111" stroke-width="3"/>
-  <path d="M136 140 Q136 96 200 96 Q264 96 264 140" fill="none" stroke="#9C8468" stroke-width="2.2"/>
-  <rect x="222" y="172" width="5" height="19" rx="1.6" fill="#B5451B"/>
+  <ellipse cx="200" cy="140" rx="64" ry="42" fill="none" stroke="#DFD0BF" stroke-width="30"/>
+  <ellipse cx="200" cy="140" rx="79" ry="57" fill="none" stroke="#17171B" stroke-width="3"/>
+  <ellipse cx="200" cy="140" rx="49" ry="27" fill="none" stroke="#17171B" stroke-width="3"/>
+  <path d="M136 140 Q136 96 200 96 Q264 96 264 140" fill="none" stroke="#A0836A" stroke-width="2.2"/>
+  <rect x="222" y="172" width="5" height="19" rx="1.6" fill="#A73C2A"/>
 </svg>

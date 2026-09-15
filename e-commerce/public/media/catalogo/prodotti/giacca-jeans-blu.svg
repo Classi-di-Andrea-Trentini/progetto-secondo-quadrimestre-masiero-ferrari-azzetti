@@ -1,26 +1,26 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-labelledby="ttl">
   <title id="ttl">Giacca di jeans</title>
-  <rect width="400" height="400" fill="#F5F5F5"/>
-  <ellipse cx="200" cy="330" rx="118" ry="13" fill="#E8E8E8"/>
-  <path d="M148 120 L110 138 L92 282 Q90 292 100 293 L128 297 Q137 298 138 289 L150 196 L150 306 Q150 314 158 314 L242 314 Q250 314 250 306 L250 196 L262 289 Q263 298 272 297 L300 293 Q310 292 308 282 L290 138 L252 120 Q200 146 148 120 Z" fill="#6E6E6E" stroke="#111111" stroke-width="3.2" stroke-linejoin="round"/>
-  <path d="M148 120 L202 148 L172 174 Z" fill="#848484" stroke="#111111" stroke-width="2.8" stroke-linejoin="round"/>
-  <path d="M252 120 L198 148 L228 174 Z" fill="#848484" stroke="#111111" stroke-width="2.8" stroke-linejoin="round"/>
-  <path d="M196 148 L196 312 M204 148 L204 312" fill="none" stroke="#111111" stroke-width="2.4"/>
-  <g fill="#F5F5F5" stroke="#111111" stroke-width="2.2">
+  <rect width="400" height="400" fill="#F3F3F5"/>
+  <ellipse cx="200" cy="330" rx="118" ry="13" fill="#E2E3E5"/>
+  <path d="M148 120 L110 138 L92 282 Q90 292 100 293 L128 297 Q137 298 138 289 L150 196 L150 306 Q150 314 158 314 L242 314 Q250 314 250 306 L250 196 L262 289 Q263 298 272 297 L300 293 Q310 292 308 282 L290 138 L252 120 Q200 146 148 120 Z" fill="#6E6F75" stroke="#17171B" stroke-width="3.2" stroke-linejoin="round"/>
+  <path d="M148 120 L202 148 L172 174 Z" fill="#85868B" stroke="#17171B" stroke-width="2.8" stroke-linejoin="round"/>
+  <path d="M252 120 L198 148 L228 174 Z" fill="#85868B" stroke="#17171B" stroke-width="2.8" stroke-linejoin="round"/>
+  <path d="M196 148 L196 312 M204 148 L204 312" fill="none" stroke="#17171B" stroke-width="2.4"/>
+  <g fill="#F3F3F5" stroke="#17171B" stroke-width="2.2">
     <circle cx="200" cy="182" r="5"/>
     <circle cx="200" cy="216" r="5"/>
     <circle cx="200" cy="250" r="5"/>
   </g>
-  <g fill="#7C7C7C" stroke="#111111" stroke-width="2.4" stroke-linejoin="round">
+  <g fill="#85868B" stroke="#17171B" stroke-width="2.4" stroke-linejoin="round">
     <path d="M158 188 L186 188 L186 222 L158 222 Z"/>
     <path d="M214 188 L242 188 L242 222 L214 222 Z"/>
     <path d="M156 184 L188 184 L188 198 L156 198 Z"/>
     <path d="M212 184 L244 184 L244 198 L212 198 Z"/>
   </g>
-  <circle cx="172" cy="191" r="3" fill="#111111"/>
-  <circle cx="228" cy="191" r="3" fill="#111111"/>
-  <path d="M150 288 L250 288" fill="none" stroke="#111111" stroke-width="2.6"/>
-  <g stroke="#B5451B" stroke-width="2" fill="none" stroke-dasharray="6 5" stroke-linecap="round">
+  <circle cx="172" cy="191" r="3" fill="#17171B"/>
+  <circle cx="228" cy="191" r="3" fill="#17171B"/>
+  <path d="M150 288 L250 288" fill="none" stroke="#17171B" stroke-width="2.6"/>
+  <g stroke="#A73C2A" stroke-width="2" fill="none" stroke-dasharray="6 5" stroke-linecap="round">
     <path d="M156 296 L244 296"/>
     <path d="M156 164 Q200 186 244 164"/>
     <path d="M100 280 L130 284 M300 280 L270 284"/>

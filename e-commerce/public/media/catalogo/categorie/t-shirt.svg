@@ -1,14 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" role="img" aria-labelledby="ttl">
   <title id="ttl">T-shirt</title>
-  <rect width="600" height="400" fill="#F0F0F0"/>
-  <circle cx="300" cy="196" r="152" fill="#E6E6E6"/>
+  <rect width="600" height="400" fill="#ECECEF"/>
+  <circle cx="300" cy="196" r="152" fill="#E2E3E5"/>
   <g transform="translate(112,34) scale(0.88)">
-    <path d="M150 116 L118 130 L94 176 L128 198 L142 178 L142 306 Q142 314 150 314 L250 314 Q258 314 258 306 L258 178 L272 198 L306 176 L282 130 L250 116 Q200 152 150 116 Z" fill="#FFFFFF" stroke="#111111" stroke-width="3.6" stroke-linejoin="round"/>
-    <path d="M186 202 L184 308" fill="none" stroke="#EDEDED" stroke-width="16" stroke-linecap="round"/>
-    <path d="M152 119 Q200 180 248 119" fill="none" stroke="#111111" stroke-width="3" stroke-linecap="round"/>
-    <path d="M101 167 L135 189 M265 189 L299 167" fill="none" stroke="#111111" stroke-width="2.6" stroke-linecap="round"/>
-    <path d="M142 300 L258 300" fill="none" stroke="#D7D7D7" stroke-width="2.4" stroke-linecap="round"/>
-    <rect x="147.5" y="290" width="5" height="18" rx="1.6" fill="#B5451B"/>
+    <path d="M150 116 L118 130 L94 176 L128 198 L142 178 L142 306 Q142 314 150 314 L250 314 Q258 314 258 306 L258 178 L272 198 L306 176 L282 130 L250 116 Q200 152 150 116 Z" fill="#FFFFFF" stroke="#17171B" stroke-width="3.6" stroke-linejoin="round"/>
+    <path d="M186 202 L184 308" fill="none" stroke="#ECECEF" stroke-width="16" stroke-linecap="round"/>
+    <path d="M152 119 Q200 180 248 119" fill="none" stroke="#17171B" stroke-width="3" stroke-linecap="round"/>
+    <path d="M101 167 L135 189 M265 189 L299 167" fill="none" stroke="#17171B" stroke-width="2.6" stroke-linecap="round"/>
+    <path d="M142 300 L258 300" fill="none" stroke="#CFCFD2" stroke-width="2.4" stroke-linecap="round"/>
+    <rect x="147.5" y="290" width="5" height="18" rx="1.6" fill="#A73C2A"/>
   </g>
-  <path d="M48 356 L128 356" stroke="#B5451B" stroke-width="4" stroke-linecap="round"/>
+  <path d="M48 356 L128 356" stroke="#A73C2A" stroke-width="4" stroke-linecap="round"/>
 </svg>
