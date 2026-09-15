@@ -19,12 +19,12 @@
       <!-- LEFT: Gallery -->
       <div class="gallery">
         <div class="gallery-main">
-          @if (activeImage()) {
-            <img
-              [src]="activeImage()!.url"
-              [alt]="activeImage()!.altText || product()!.name"
-              class="main-img">
-          }
+          <app-product-image
+            class="main-img"
+            [src]="activeImage()?.url"
+            [alt]="activeImage()?.altText || product()!.name"
+            position="center top"
+            loading="eager" />
         </div>
 
         @if (galleryImages().length > 1) {
@@ -34,7 +34,9 @@
                 class="thumb"
                 [class.active]="activeImageIndex() === i"
                 (click)="setActiveImage(i)">
-                <img [src]="img.url" [alt]="img.altText || (product()!.name + ' ' + (i + 1))">
+                <app-product-image
+                  [src]="img.url"
+                  [alt]="img.altText || (product()!.name + ' ' + (i + 1))" />
               </button>
             }
           </div>
@@ -313,7 +315,7 @@
           @for (p of related(); track p.id) {
             <a [routerLink]="['/product', p.slug]" class="related-card">
               <div class="related-img">
-                <img [src]="coverImageOf(p)" [alt]="p.name" loading="lazy">
+                <app-product-image [src]="coverImageOf(p)" [alt]="p.name" />
               </div>
               <div class="related-info">
                 <span class="related-name">{{ p.name }}</span>

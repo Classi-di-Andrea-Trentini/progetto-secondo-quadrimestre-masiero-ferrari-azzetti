@@ -563,10 +563,10 @@
                 <div class="relative group">
                   <a [routerLink]="['/product', item.product.slug]" class="block">
                     <div class="aspect-[3/4] bg-sunken overflow-hidden">
-                      <img
+                      <app-product-image
                         [src]="wishlistCoverImage(item)"
                         [alt]="item.product.name"
-                        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                        class="block w-full h-full group-hover:scale-105 transition-transform duration-300" />
                     </div>
                     <div class="flex justify-between items-baseline pt-2 pb-4 px-0.5">
                       <span class="text-sm">{{ item.product.name }}</span>

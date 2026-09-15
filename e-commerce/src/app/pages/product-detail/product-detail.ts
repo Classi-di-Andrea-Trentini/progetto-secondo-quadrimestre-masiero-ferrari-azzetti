@@ -15,11 +15,12 @@ import { RecentlyViewedService } from '../../services/recently-viewed';
 import { AuthService } from '../../services/auth';
 import { CartService } from '../../services/cart-service';
 import { ReviewsService, Review } from '../../services/reviews.service';
+import { ProductImageComponent } from '../../components/product-image/product-image';
 
 @Component({
   selector: 'app-product-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, BreadcrumbComponent],
+  imports: [CommonModule, RouterModule, FormsModule, BreadcrumbComponent, ProductImageComponent],
   templateUrl: './product-detail.html',
   styleUrl: './product-detail.css',
 })

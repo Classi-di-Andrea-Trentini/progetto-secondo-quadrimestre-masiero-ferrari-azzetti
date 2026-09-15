@@ -8,6 +8,7 @@ import { AuthService } from '../../services/auth';
 import { WishlistService } from '../../services/wishlist.service';
 import { CartService, AddressData } from '../../services/cart-service';
 import { API_URL } from '../../services/api.config';
+import { ProductImageComponent } from '../../components/product-image/product-image';
 
 interface OrderSummary {
   id: string;
@@ -31,7 +32,7 @@ type TabSection = 'profile' | 'orders' | 'favorites' | 'addresses' | 'settings';
 @Component({
   selector: 'app-me',
   standalone: true,
-  imports: [NgClass, DatePipe, ReactiveFormsModule, FormsModule, RouterModule],
+  imports: [NgClass, DatePipe, ReactiveFormsModule, FormsModule, RouterModule, ProductImageComponent],
   templateUrl: './me.html',
   styleUrls: ['./me.css'],
 })
