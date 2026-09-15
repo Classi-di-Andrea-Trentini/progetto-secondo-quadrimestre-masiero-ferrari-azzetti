@@ -203,21 +203,21 @@
                 </button>
 
                 <!-- Cover image -->
-                <img
+                <app-product-image
                   [src]="coverImage(p)"
                   [alt]="p.name"
+                  fit="contain"
                   class="img-primary"
-                  [class.fade-out]="hoveredId() === p.id && hasHoverImage(p)"
-                  loading="lazy">
+                  [class.fade-out]="hoveredId() === p.id && hasHoverImage(p)" />
 
                 <!-- Hover image -->
                 @if (hasHoverImage(p)) {
-                  <img
+                  <app-product-image
                     [src]="hoverImage(p)"
                     [alt]="p.name + ' — vista alternativa'"
+                    fit="contain"
                     class="img-hover"
-                    [class.fade-in]="hoveredId() === p.id"
-                    loading="lazy">
+                    [class.fade-in]="hoveredId() === p.id" />
                 }
 
                 <!-- Quick-view hint -->

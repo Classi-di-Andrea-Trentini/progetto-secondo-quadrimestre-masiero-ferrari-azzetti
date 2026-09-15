@@ -70,12 +70,10 @@
   overflow: hidden;
   margin-bottom: 8px;
 }
-.gallery-main img,
 .gallery-main .main-img {
+  display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: center top;
   transition: opacity 0.3s;
 }
 
@@ -99,10 +97,10 @@
   transition: border-color 0.15s;
 }
 .thumb.active { border-color: var(--color-ink); }
-.thumb img {
+.thumb app-product-image {
+  display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover;
 }
 
 /* ── INFO PANEL ───────────────────────────────────────────── */
@@ -296,13 +294,13 @@
   background: var(--color-sunken);
   overflow: hidden;
 }
-.related-img img {
+.related-img app-product-image {
+  display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover;
   transition: transform 0.4s ease;
 }
-.related-card:hover .related-img img { transform: scale(1.04); }
+.related-card:hover .related-img app-product-image { transform: scale(1.04); }
 
 .related-info {
   padding: 10px 2px 0;

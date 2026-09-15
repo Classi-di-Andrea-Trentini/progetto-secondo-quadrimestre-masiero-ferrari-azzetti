@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 768" role="img" aria-labelledby="ttl">
+  <title id="ttl">Outerwear Edit</title>
+  <rect width="960" height="768" fill="#ECECEF"/>
+  <circle cx="480" cy="330" r="286" fill="#E2E3E5"/>
+  <path d="M0 596 L960 596" stroke="#CFCFD2" stroke-width="3"/>
+  <g transform="translate(60,160) scale(1.02)">
+    <path d="M148 154 Q142 80 200 80 Q258 80 252 154 Z" fill="#424247" stroke="#17171B" stroke-width="3.4" stroke-linejoin="round"/>
+    <path d="M168 154 Q166 108 200 108 Q234 108 232 154 Z" fill="#ECECEF" stroke="#17171B" stroke-width="2.6"/>
+    <g fill="#E2E3E5" stroke="#17171B" stroke-width="1.9">
+      <circle cx="170" cy="124" r="9"/><circle cx="166" cy="142" r="9"/><circle cx="180" cy="110" r="9"/>
+      <circle cx="200" cy="104" r="9"/><circle cx="220" cy="110" r="9"/><circle cx="234" cy="124" r="9"/>
+      <circle cx="238" cy="142" r="9"/>
+    </g>
+    <path d="M142 148 L106 170 L86 306 Q84 316 94 317 L124 321 Q134 322 135 313 L148 212 L148 348 Q148 356 156 356 L244 356 Q252 356 252 348 L252 212 L265 313 Q266 322 276 321 L306 317 Q316 316 314 306 L294 170 L258 148 Z" fill="#54545A" stroke="#17171B" stroke-width="3.4" stroke-linejoin="round"/>
+    <path d="M142 148 Q170 172 200 172 Q230 172 258 148" fill="#424247" stroke="#17171B" stroke-width="2.8" stroke-linejoin="round"/>
+    <path d="M200 172 L200 356" fill="none" stroke="#17171B" stroke-width="3"/>
+    <g fill="#424247" stroke="#17171B" stroke-width="2.6" stroke-linejoin="round">
+      <path d="M156 288 L190 288 L190 328 L156 328 Z"/><path d="M210 288 L244 288 L244 328 L210 328 Z"/>
+      <path d="M154 282 L192 282 L192 296 L154 296 Z"/><path d="M208 282 L246 282 L246 296 L208 296 Z"/>
+    </g>
+    <circle cx="178" cy="256" r="5" fill="#A73C2A"/>
+    <circle cx="222" cy="256" r="5" fill="#A73C2A"/>
+  </g>
+  <g transform="translate(470,196) scale(0.94)">
+    <path d="M150 122 L112 140 L94 284 Q92 294 102 295 L130 299 Q139 300 140 291 L152 198 L152 308 Q152 316 160 316 L240 316 Q248 316 248 308 L248 198 L260 291 Q261 300 270 299 L298 295 Q308 294 306 284 L288 140 L250 122 Q200 150 150 122 Z" fill="#232328" stroke="#17171B" stroke-width="3.4" stroke-linejoin="round"/>
+    <path d="M150 122 L206 154 L170 192 Z" fill="#303035" stroke="#17171B" stroke-width="2.8" stroke-linejoin="round"/>
+    <path d="M250 122 L194 154 L228 190 Z" fill="#303035" stroke="#17171B" stroke-width="2.8" stroke-linejoin="round"/>
+    <path d="M212 158 L222 294" fill="none" stroke="#9E9EA2" stroke-width="3" stroke-dasharray="5 4"/>
+    <rect x="152" y="284" width="96" height="20" fill="#0A0A0D" stroke="#17171B" stroke-width="2.6"/>
+    <rect x="184" y="280" width="30" height="28" rx="4" fill="#B7B7BA" stroke="#17171B" stroke-width="2.4"/>
+    <rect x="157" y="289" width="4.5" height="10" rx="1.4" fill="#A73C2A"/>
+  </g>
+</svg>

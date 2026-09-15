@@ -5,9 +5,10 @@ import { RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../services/auth';
-import { WishlistService } from '../../services/wishlist.service';
+import { WishlistService, WishlistItem } from '../../services/wishlist.service';
 import { CartService, AddressData } from '../../services/cart-service';
 import { API_URL } from '../../services/api.config';
+import { ProductImageComponent } from '../../components/product-image/product-image';
 
 interface OrderSummary {
   id: string;
@@ -31,7 +32,7 @@ type TabSection = 'profile' | 'orders' | 'favorites' | 'addresses' | 'settings';
 @Component({
   selector: 'app-me',
   standalone: true,
-  imports: [NgClass, DatePipe, ReactiveFormsModule, FormsModule, RouterModule],
+  imports: [NgClass, DatePipe, ReactiveFormsModule, FormsModule, RouterModule, ProductImageComponent],
   templateUrl: './me.html',
   styleUrls: ['./me.css'],
 })
@@ -420,19 +421,11 @@ export class MeComponent {
     await this.wishlist.toggle(productId);
   }
 
-  wishlistCoverImage(item: any): string {
-    return item.product?.images?.find((i: any) => i.isCover)?.url
-      ?? item.product?.images?.[0]?.url
-      ?? '';
-  }
 
-  wishlistPrice(item: any): string {
-    const p = item.product;
-    if (!p) return '';
-    const d = p.discounts?.[0];
-    let price = parseFloat(String(p.basePrice));
-    if (d?.type === 'percentage') price = price * (1 - parseFloat(String(d.value)) / 100);
-    else if (d?.type === 'fixed_amount') price -= parseFloat(String(d.value));
+  /** GET /wishlist non manda gli sconti: qui si mostra il prezzo di listino. */
+  wishlistPrice(item: WishlistItem): string {
+    const price = parseFloat(String(item.basePrice));
+    if (!Number.isFinite(price)) return '';
     return '€ ' + price.toFixed(2).replace('.', ',');
   }
 

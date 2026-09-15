@@ -11,13 +11,14 @@ import {
   CreateProductPayload,
 } from '../../../services/admin.service';
 import { firstValueFrom } from 'rxjs';
+import { ProductImageComponent } from '../../../components/product-image/product-image';
 
 type ModalTab = 'info' | 'variants' | 'images';
 
 @Component({
   selector: 'app-admin-products',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, ProductImageComponent],
   templateUrl: './admin-products.html',
   styleUrl: './admin-products.css',
 })

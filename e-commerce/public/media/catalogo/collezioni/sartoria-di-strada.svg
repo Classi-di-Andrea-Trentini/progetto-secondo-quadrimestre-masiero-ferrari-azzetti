@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 768" role="img" aria-labelledby="ttl">
+  <title id="ttl">Street Tailoring</title>
+  <rect width="960" height="768" fill="#ECECEF"/>
+  <circle cx="480" cy="330" r="286" fill="#E2E3E5"/>
+  <path d="M0 596 L960 596" stroke="#CFCFD2" stroke-width="3"/>
+  <g transform="translate(58,178) scale(1.02)">
+    <path d="M148 120 L110 138 L92 282 Q90 292 100 293 L128 297 Q137 298 138 289 L150 196 L150 306 Q150 314 158 314 L242 314 Q250 314 250 306 L250 196 L262 289 Q263 298 272 297 L300 293 Q310 292 308 282 L290 138 L252 120 Q200 146 148 120 Z" fill="#6E6F75" stroke="#17171B" stroke-width="3.2" stroke-linejoin="round"/>
+    <path d="M148 120 L202 148 L172 174 Z" fill="#85868B" stroke="#17171B" stroke-width="2.8" stroke-linejoin="round"/>
+    <path d="M252 120 L198 148 L228 174 Z" fill="#85868B" stroke="#17171B" stroke-width="2.8" stroke-linejoin="round"/>
+    <path d="M196 148 L196 312 M204 148 L204 312" fill="none" stroke="#17171B" stroke-width="2.4"/>
+    <g fill="#ECECEF" stroke="#17171B" stroke-width="2.2">
+      <circle cx="200" cy="182" r="5"/><circle cx="200" cy="216" r="5"/><circle cx="200" cy="250" r="5"/>
+    </g>
+    <g fill="#85868B" stroke="#17171B" stroke-width="2.4" stroke-linejoin="round">
+      <path d="M158 188 L186 188 L186 222 L158 222 Z"/><path d="M214 188 L242 188 L242 222 L214 222 Z"/>
+      <path d="M156 184 L188 184 L188 198 L156 198 Z"/><path d="M212 184 L244 184 L244 198 L212 198 Z"/>
+    </g>
+    <path d="M150 288 L250 288" fill="none" stroke="#17171B" stroke-width="2.6"/>
+    <path d="M156 296 L244 296" fill="none" stroke="#A73C2A" stroke-width="2" stroke-dasharray="6 5"/>
+  </g>
+  <g transform="translate(468,224) scale(1.0)">
+    <path d="M78 254 L78 148 Q78 122 106 118 Q140 114 158 140 L176 120 Q188 112 198 126 L232 200 Q242 222 258 228 L304 242 Q334 250 340 254 Z" fill="#232328" stroke="#17171B" stroke-width="3.2" stroke-linejoin="round"/>
+    <path d="M106 118 Q140 114 158 140 L152 152 Q136 130 108 134 Z" fill="#424247" stroke="#17171B" stroke-width="2.2" stroke-linejoin="round"/>
+    <g stroke="#CFCFD2" stroke-width="2.6" stroke-linecap="round" fill="none">
+      <path d="M160 152 L180 140"/><path d="M166 174 L188 162"/><path d="M174 196 L196 184"/>
+      <path d="M182 218 L206 206"/><path d="M190 240 L216 228"/>
+    </g>
+    <circle cx="112" cy="196" r="17" fill="none" stroke="#6E6F75" stroke-width="2.6"/>
+    <path d="M64 252 L342 252 Q356 254 354 268 Q352 288 332 288 L82 288 Q62 288 60 268 Q59 256 64 252 Z" fill="#F3F3F5" stroke="#17171B" stroke-width="3.2" stroke-linejoin="round"/>
+    <path d="M62 270 L352 270" fill="none" stroke="#17171B" stroke-width="2"/>
+    <rect x="80" y="160" width="5" height="20" rx="1.6" fill="#A73C2A"/>
+  </g>
+</svg>

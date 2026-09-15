@@ -8,11 +8,12 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { WishlistService } from '../../services/wishlist.service';
 import { SkeletonComponent } from '../../components/skeleton/skeleton';
 import { AuthService } from '../../services/auth';
+import { ProductImageComponent } from '../../components/product-image/product-image';
 
 @Component({
   selector: 'app-products',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, SkeletonComponent],
+  imports: [CommonModule, RouterModule, FormsModule, SkeletonComponent, ProductImageComponent],
   templateUrl: './products.html',
   styleUrl: './products.css',
 })

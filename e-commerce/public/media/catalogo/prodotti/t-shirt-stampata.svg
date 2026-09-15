@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-labelledby="ttl">
+  <title id="ttl">T-shirt con stampa artistica</title>
+  <defs>
+    <clipPath id="tee-print">
+      <path d="M150 116 L118 130 L94 176 L128 198 L142 178 L142 306 Q142 314 150 314 L250 314 Q258 314 258 306 L258 178 L272 198 L306 176 L282 130 L250 116 Q200 152 150 116 Z"/>
+    </clipPath>
+  </defs>
+  <rect width="400" height="400" fill="#F3F3F5"/>
+  <ellipse cx="200" cy="332" rx="116" ry="13" fill="#E2E3E5"/>
+  <path d="M150 116 L118 130 L94 176 L128 198 L142 178 L142 306 Q142 314 150 314 L250 314 Q258 314 258 306 L258 178 L272 198 L306 176 L282 130 L250 116 Q200 152 150 116 Z" fill="#FFFFFF" stroke="#17171B" stroke-width="3.2" stroke-linejoin="round"/>
+  <g clip-path="url(#tee-print)">
+    <circle cx="200" cy="236" r="46" fill="#E2E3E5"/>
+    <path d="M200 190 A46 46 0 0 1 200 282 Z" fill="#A73C2A"/>
+    <circle cx="200" cy="236" r="22" fill="#F3F3F5"/>
+    <circle cx="200" cy="236" r="9" fill="#17171B"/>
+    <path d="M150 290 L250 290" stroke="#17171B" stroke-width="2.4"/>
+    <path d="M162 298 L238 298" stroke="#85868B" stroke-width="2"/>
+  </g>
+  <path d="M152 119 Q200 180 248 119" fill="none" stroke="#17171B" stroke-width="2.6" stroke-linecap="round"/>
+  <path d="M101 167 L135 189" fill="none" stroke="#17171B" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M265 189 L299 167" fill="none" stroke="#17171B" stroke-width="2.2" stroke-linecap="round"/>
+</svg>

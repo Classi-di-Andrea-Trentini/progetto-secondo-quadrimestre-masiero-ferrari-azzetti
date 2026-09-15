@@ -19,12 +19,12 @@
       <!-- LEFT: Gallery -->
       <div class="gallery">
         <div class="gallery-main">
-          @if (activeImage()) {
-            <img
-              [src]="activeImage()!.url"
-              [alt]="activeImage()!.altText || product()!.name"
-              class="main-img">
-          }
+          <app-product-image
+            class="main-img"
+            [src]="activeImage()?.url"
+            [alt]="activeImage()?.altText || product()!.name"
+            fit="contain"
+            loading="eager" />
         </div>
 
         @if (galleryImages().length > 1) {
@@ -34,7 +34,10 @@
                 class="thumb"
                 [class.active]="activeImageIndex() === i"
                 (click)="setActiveImage(i)">
-                <img [src]="img.url" [alt]="img.altText || (product()!.name + ' ' + (i + 1))">
+                <app-product-image
+                  [src]="img.url"
+                  [alt]="img.altText || (product()!.name + ' ' + (i + 1))"
+                  fit="contain" />
               </button>
             }
           </div>
@@ -313,7 +316,7 @@
           @for (p of related(); track p.id) {
             <a [routerLink]="['/product', p.slug]" class="related-card">
               <div class="related-img">
-                <img [src]="coverImageOf(p)" [alt]="p.name" loading="lazy">
+                <app-product-image [src]="coverImageOf(p)" [alt]="p.name" fit="contain" />
               </div>
               <div class="related-info">
                 <span class="related-name">{{ p.name }}</span>
@@ -340,11 +343,11 @@
           @for (item of recent.products(); track item.id) {
             <a [routerLink]="['/product', item.slug]" class="group block">
               <div class="aspect-square overflow-hidden bg-sunken rounded-sm">
-                <img
+                <app-product-image
                   [src]="item.images[0]?.url"
                   [alt]="item.name"
-                  loading="lazy"
-                  class="h-full w-full object-cover transition-transform group-hover:scale-105"
+                  fit="contain"
+                  class="block h-full w-full transition-transform group-hover:scale-105"
                 />
               </div>
               <p class="mt-2 text-sm font-medium truncate">{{ item.name }}</p>

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" role="img" aria-labelledby="ttl">
+  <title id="ttl">Accessori</title>
+  <rect width="600" height="400" fill="#ECECEF"/>
+  <circle cx="300" cy="196" r="152" fill="#E2E3E5"/>
+  <g transform="translate(22,52) scale(0.66)">
+    <path d="M116 250 Q116 122 200 122 Q284 122 284 250 Z" fill="#9E9EA2" stroke="#17171B" stroke-width="4.6" stroke-linejoin="round"/>
+    <g stroke="#6E6F75" stroke-width="4" fill="none" stroke-linecap="round">
+      <path d="M144 246 Q142 154 172 128"/><path d="M172 246 Q170 140 188 124"/><path d="M200 246 L200 122"/>
+      <path d="M228 246 Q230 140 212 124"/><path d="M256 246 Q258 154 228 128"/>
+    </g>
+    <rect x="108" y="242" width="184" height="58" rx="15" fill="#B7B7BA" stroke="#17171B" stroke-width="4.6"/>
+    <circle cx="200" cy="112" r="24" fill="#CFCFD2" stroke="#17171B" stroke-width="4.2"/>
+  </g>
+  <g transform="translate(288,30) scale(0.66)">
+    <path d="M96 300 Q96 128 200 128 Q304 128 304 300" fill="none" stroke="#232328" stroke-width="44"/>
+    <path d="M113 300 Q113 145 200 145 Q287 145 287 300" fill="none" stroke="#17171B" stroke-width="3.4"/>
+    <path d="M79 300 Q79 111 200 111 Q321 111 321 300" fill="none" stroke="#17171B" stroke-width="3.4"/>
+    <path d="M107 300 Q107 152 200 152 Q293 152 293 300" fill="none" stroke="#A73C2A" stroke-width="2.6" stroke-dasharray="9 8"/>
+    <rect x="72" y="298" width="48" height="58" rx="9" fill="none" stroke="#17171B" stroke-width="9"/>
+    <path d="M96 298 L96 342" stroke="#17171B" stroke-width="8" stroke-linecap="round"/>
+    <path d="M287 300 L321 300 L308 344 Q304 352 300 344 Z" fill="#232328" stroke="#17171B" stroke-width="3.6" stroke-linejoin="round"/>
+  </g>
+  <path d="M48 356 L128 356" stroke="#A73C2A" stroke-width="4" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-labelledby="ttl">
+  <title id="ttl">Anello solitario con diamante</title>
+  <rect width="400" height="400" fill="#F3F3F5"/>
+  <ellipse cx="200" cy="356" rx="92" ry="11" fill="#E2E3E5"/>
+  <circle cx="200" cy="250" r="82" fill="none" stroke="#C6AC94" stroke-width="20"/>
+  <circle cx="200" cy="250" r="92" fill="none" stroke="#17171B" stroke-width="2.6"/>
+  <circle cx="200" cy="250" r="72" fill="none" stroke="#17171B" stroke-width="2.6"/>
+  <circle cx="200" cy="250" r="82" fill="none" stroke="#DFD0BF" stroke-width="5"/>
+  <path d="M168 170 L200 152 L232 170 L226 182 L174 182 Z" fill="#C6AC94" stroke="#17171B" stroke-width="2.4" stroke-linejoin="round"/>
+  <path d="M158 140 L242 140 L226 122 L174 122 Z" fill="#FFFFFF" stroke="#17171B" stroke-width="2.8" stroke-linejoin="round"/>
+  <path d="M158 140 L242 140 L200 194 Z" fill="#ECECEF" stroke="#17171B" stroke-width="2.8" stroke-linejoin="round"/>
+  <g stroke="#85868B" stroke-width="1.8" fill="none">
+    <path d="M174 122 L180 140 L200 194 M226 122 L220 140 L200 194"/>
+    <path d="M180 140 L200 122 L220 140"/>
+    <path d="M158 140 L180 140 M242 140 L220 140"/>
+  </g>
+  <path d="M158 140 L174 122 M242 140 L226 122" fill="none" stroke="#85868B" stroke-width="1.8"/>
+</svg>

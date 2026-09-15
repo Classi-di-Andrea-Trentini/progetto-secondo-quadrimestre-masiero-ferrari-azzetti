@@ -1,0 +1,40 @@
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.ce-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Segnaposto: stesse superfici e stessa rampa d'inchiostro del resto dell'app,
+   cosi' un prodotto senza immagine legge come una casella vuota voluta e non
+   come un errore di caricamento. */
+.ce-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: var(--color-sunken);
+}
+
+.ce-fallback-mark {
+  width: 42%;
+  max-width: 96px;
+  min-width: 22px;
+  height: auto;
+  fill: none;
+  stroke: var(--color-ink-muted);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ce-fallback-rule {
+  stroke: var(--color-accent);
+  stroke-width: 4;
+}

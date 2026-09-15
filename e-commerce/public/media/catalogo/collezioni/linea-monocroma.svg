@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 768" role="img" aria-labelledby="ttl">
+  <title id="ttl">Monochrome Line</title>
+  <rect width="960" height="768" fill="#ECECEF"/>
+  <circle cx="480" cy="330" r="286" fill="#E2E3E5"/>
+  <path d="M0 596 L960 596" stroke="#CFCFD2" stroke-width="3"/>
+  <g transform="translate(66,200) scale(1.06)">
+    <path d="M150 116 L118 130 L94 176 L128 198 L142 178 L142 306 Q142 314 150 314 L250 314 Q258 314 258 306 L258 178 L272 198 L306 176 L282 130 L250 116 Q200 152 150 116 Z" fill="#FFFFFF" stroke="#17171B" stroke-width="3.2" stroke-linejoin="round"/>
+    <path d="M170 208 L168 300 M198 212 L197 296" fill="none" stroke="#E2E3E5" stroke-width="2.2" stroke-linecap="round"/>
+    <path d="M152 119 Q200 180 248 119" fill="none" stroke="#17171B" stroke-width="2.8" stroke-linecap="round"/>
+    <path d="M101 167 L135 189 M265 189 L299 167" fill="none" stroke="#17171B" stroke-width="2.4" stroke-linecap="round"/>
+    <rect x="147.5" y="290" width="4.5" height="17" rx="1.5" fill="#A73C2A"/>
+  </g>
+  <g transform="translate(466,200) scale(1.06)">
+    <path d="M150 116 L118 130 L94 176 L128 198 L142 178 L142 306 Q142 314 150 314 L250 314 Q258 314 258 306 L258 178 L272 198 L306 176 L282 130 L250 116 Q200 152 150 116 Z" fill="#232328" stroke="#17171B" stroke-width="3.2" stroke-linejoin="round"/>
+    <path d="M176 200 L172 306" fill="none" stroke="#303035" stroke-width="15" stroke-linecap="round"/>
+    <path d="M152 119 Q200 180 248 119" fill="none" stroke="#85868B" stroke-width="2.8" stroke-linecap="round"/>
+    <path d="M101 167 L135 189 M265 189 L299 167" fill="none" stroke="#54545A" stroke-width="2.4" stroke-linecap="round"/>
+    <rect x="147.5" y="290" width="4.5" height="17" rx="1.5" fill="#A73C2A"/>
+  </g>
+</svg>

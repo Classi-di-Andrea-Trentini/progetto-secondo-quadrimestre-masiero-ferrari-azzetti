@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 768" role="img" aria-labelledby="ttl">
+  <title id="ttl">Evening Neutrals</title>
+  <rect width="960" height="768" fill="#ECECEF"/>
+  <circle cx="480" cy="330" r="286" fill="#E2E3E5"/>
+  <path d="M0 596 L960 596" stroke="#CFCFD2" stroke-width="3"/>
+  <g transform="translate(46,230) scale(1.04)">
+    <path d="M250 250 L272 244 L290 296 Q291 302 285 302 L276 302 Q271 302 270 297 Z" fill="#232328" stroke="#17171B" stroke-width="3.2" stroke-linejoin="round"/>
+    <path d="M56 282 Q92 240 150 226 L196 210 Q226 200 236 166 L278 166 L272 250 L250 256 L88 290 Q58 294 56 282 Z" fill="#232328" stroke="#17171B" stroke-width="3.2" stroke-linejoin="round"/>
+    <path d="M152 224 Q200 208 234 170 Q212 212 168 230 Z" fill="#424247"/>
+    <path d="M236 166 L278 166 M250 256 L272 250" fill="none" stroke="#54545A" stroke-width="2.4"/>
+    <path d="M88 290 L250 254" fill="none" stroke="#A73C2A" stroke-width="5" stroke-linecap="round"/>
+    <path d="M272 298 L288 298" fill="none" stroke="#A73C2A" stroke-width="5" stroke-linecap="round"/>
+  </g>
+  <g transform="translate(468,164) scale(1.0)">
+    <path d="M84 206 L316 206 L316 302 Q316 316 302 316 L98 316 Q84 316 84 302 Z" fill="#C6AC94" stroke="#17171B" stroke-width="3.2" stroke-linejoin="round"/>
+    <path d="M84 206 L84 150 Q84 140 94 140 L306 140 Q316 140 316 150 L316 206 L200 268 Z" fill="#DFD0BF" stroke="#17171B" stroke-width="3.2" stroke-linejoin="round"/>
+    <path d="M94 208 L200 264 L306 208" fill="none" stroke="#7D634E" stroke-width="2" stroke-dasharray="7 6"/>
+    <ellipse cx="200" cy="248" rx="19" ry="13" fill="#F3F3F5" stroke="#17171B" stroke-width="2.6"/>
+    <ellipse cx="200" cy="248" rx="8" ry="5" fill="#A73C2A"/>
+    <path d="M96 306 L304 306 M94 150 L306 150" fill="none" stroke="#7D634E" stroke-width="2" stroke-dasharray="7 6"/>
+  </g>
+</svg>
