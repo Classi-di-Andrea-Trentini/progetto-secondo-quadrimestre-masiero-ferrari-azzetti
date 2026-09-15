@@ -45,6 +45,30 @@ public class Payment {
 
     private String provider;
 
+    /**
+     * Identificativo della transazione presso il fornitore (il PaymentIntent, con
+     * Stripe). La colonna e' **UNIQUE**: e' la chiave di idempotenza del webhook,
+     * che il fornitore puo' consegnare piu' di una volta per lo stesso pagamento.
+     */
+    @Column(name = "provider_tx_id")
+    private String providerTxId;
+
+    /**
+     * L'evento grezzo del fornitore, cosi' com'e' arrivato. Serve a ricostruire
+     * cos'e' successo mesi dopo, quando il cliente contesta un addebito e la nostra
+     * riga riassuntiva non basta piu'.
+     */
+    @Column(name = "provider_payload", columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
+    private String providerPayload;
+
+    /** Quanto e' gia' stato restituito: un reso parziale non azzera l'incasso. */
+    @Column(name = "refunded_amount")
+    private BigDecimal refundedAmount;
+
+    @Column(name = "updated_at", insertable = false, updatable = false)
+    private LocalDateTime updatedAt;
+
     @Column(name = "paid_at")
     private LocalDateTime paidAt;
 
