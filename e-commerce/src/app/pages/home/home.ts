@@ -16,40 +16,36 @@ export class Home implements OnInit {
   private readonly platformId = inject(PLATFORM_ID);
 
   readonly featuredProducts = signal<ProductListItem[]>([]);
+  // Illustrazioni interne (e-commerce/public/media/catalogo/collezioni): percorsi
+  // relativi, nessuna dipendenza da CDN esterne.
   readonly collectionHighlights = [
     {
-      image:
-        'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=1200&q=80',
+      image: '/media/catalogo/collezioni/capispalla.svg',
       title: 'Capispalla',
       subtitle: 'Strati per le mezze stagioni',
     },
     {
-      image:
-        'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=1200&q=80',
+      image: '/media/catalogo/collezioni/guardaroba-minimo.svg',
       title: 'Guardaroba minimo',
       subtitle: 'Linee pulite, capi che restano',
     },
     {
-      image:
-        'https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=1200&q=80',
+      image: '/media/catalogo/collezioni/neutri-da-sera.svg',
       title: 'Neutri da sera',
       subtitle: 'Toni sobri per le occasioni',
     },
     {
-      image:
-        'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=1200&q=80',
+      image: '/media/catalogo/collezioni/sartoria-di-strada.svg',
       title: 'Sartoria di strada',
       subtitle: 'Tagli costruiti, portati morbidi',
     },
     {
-      image:
-        'https://images.unsplash.com/photo-1463100099107-aa0980c362e6?auto=format&fit=crop&w=1200&q=80',
+      image: '/media/catalogo/collezioni/linea-monocroma.svg',
       title: 'Linea monocroma',
       subtitle: 'Nero e avorio, i due estremi',
     },
     {
-      image:
-        'https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=1200&q=80',
+      image: '/media/catalogo/collezioni/capsule-weekend.svg',
       title: 'Capsule weekend',
       subtitle: 'Quello che metti senza pensarci',
     },
