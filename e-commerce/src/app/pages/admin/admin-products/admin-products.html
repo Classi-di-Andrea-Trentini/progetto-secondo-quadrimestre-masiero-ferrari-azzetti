@@ -435,7 +435,7 @@
                     <div class="relative group rounded-sm overflow-hidden border-2 aspect-square"
                       [class.border-ink]="img.isCover"
                       [class.border-transparent]="!img.isCover">
-                      <img [src]="img.url" [alt]="img.altText ?? ''" class="w-full h-full object-cover bg-sunken"/>
+                      <app-product-image [src]="img.url" [alt]="img.altText ?? ''" />
                       <!-- Overlay actions -->
                       <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
                         @if (!img.isCover) {
