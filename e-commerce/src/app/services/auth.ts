@@ -149,6 +149,41 @@ export class AuthService {
     return res.message;
   }
 
+  // ─── GDPR ──────────────────────────────────────────────────────────────────
+
+  /**
+   * Art. 17: chiude l'account per sempre.
+   *
+   * La cancellazione lato server e' **logica**: il profilo viene svuotato dei dati
+   * personali ma la riga resta, perche' gli ordini gia' emessi ci sono appesi e una
+   * fattura va conservata per dieci anni. Vedi `PrivacyService` nel backend.
+   *
+   * La password viaggia nel corpo di una DELETE: e' insolito ma legittimo, ed e'
+   * preferibile a metterla nella query string, dove finirebbe nei log del server e
+   * nella cronologia del browser.
+   *
+   * Il segnale utente si azzera qui e non si aspetta il prossimo `/auth/me`:
+   * il cookie e' gia' stato invalidato dal server, e lasciare a schermo un utente
+   * che non esiste piu' mostrerebbe per qualche istante dati appena cancellati.
+   */
+  async eraseAccount(password: string): Promise<string> {
+    const res = await firstValueFrom(
+      this.http.delete<{ message: string }>(`${API_URL}/users/me`, {
+        body: { password },
+        withCredentials: true,
+      }),
+    );
+
+    this._currentUser.set(null);
+
+    // La navigazione non puo' far fallire una cancellazione gia' avvenuta: se
+    // andasse storta, chi chiama mostrerebbe un errore per un account che sul
+    // server non esiste piu', e la persona proverebbe a cancellarlo di nuovo.
+    // Al massimo resta sulla pagina in cui era, ma senza piu' sessione.
+    await this.router.navigate(['/home']).catch(() => false);
+    return res.message;
+  }
+
   extractErrorMessage(err: unknown): string {
     if (err instanceof HttpErrorResponse) {
       const msg = err.error?.message;

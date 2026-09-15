@@ -642,19 +642,68 @@
                 </div>
               }
 
-              <button type="submit" [disabled]="passwordLoading()"
-                class="px-6 py-2.5 bg-black text-white text-sm font-semibold uppercase tracking-widest hover:bg-ink transition disabled:opacity-50">
-                @if (passwordLoading()) { Saving… } @else { Update password }
+              <button type="submit" class="btn btn-primary" [disabled]="passwordLoading()"
+                [attr.data-loading]="passwordLoading() ? 'true' : null">
+                {{ passwordLoading() ? 'Salvataggio…' : 'Aggiorna password' }}
               </button>
             </form>
           </div>
 
+          <!-- ── I tuoi dati (GDPR) ───────────────────────────────────── -->
+          <div class="border-t border-line pt-6 mb-10">
+            <h3 class="text-sm font-semibold uppercase tracking-widest text-ink-muted mb-4">
+              I tuoi dati
+            </h3>
+
+            <div class="panel p-5 max-w-xl">
+              <p class="text-sm font-semibold text-ink">Scarica i tuoi dati</p>
+              <p class="mt-1.5 text-sm text-ink-2 leading-relaxed">
+                Un file con tutto quello che conserviamo su di te: profilo, indirizzi, ordini,
+                recensioni, lista dei desideri e punti fedeltà. È il diritto di portabilità
+                previsto dall'articolo 20 del GDPR.
+              </p>
+
+              @if (exportError()) {
+                <p class="field-error mt-3" aria-live="polite">{{ exportError() }}</p>
+              }
+
+              <button type="button" class="btn btn-outline mt-4" [disabled]="exportLoading()"
+                [attr.data-loading]="exportLoading() ? 'true' : null" (click)="exportMyData()">
+                {{ exportLoading() ? 'Preparazione…' : 'Scarica i tuoi dati' }}
+              </button>
+            </div>
+          </div>
+
+          <div class="border-t border-line pt-6 mb-10">
+            <h3 class="text-sm font-semibold uppercase tracking-widest text-ink-muted mb-4">
+              Sessione
+            </h3>
+            <button type="button" class="btn btn-outline" (click)="logout()">Esci</button>
+          </div>
+
+          <!-- ── Zona irreversibile ─────────────────────────────────────── -->
           <div class="border-t border-line pt-6">
-            <h3 class="text-sm font-semibold uppercase tracking-widest text-ink-muted mb-4">Sessione</h3>
-            <button (click)="logout()"
-              class="px-6 py-2.5 border border-black text-sm font-semibold uppercase tracking-widest hover:bg-black hover:text-white transition">
-              Esci
-            </button>
+            <h3 class="text-sm font-semibold uppercase tracking-widest text-danger mb-4">
+              Cancella account
+            </h3>
+
+            <div class="panel p-5 max-w-xl">
+              <p class="text-sm text-ink-2 leading-relaxed">
+                Cancelliamo il tuo profilo e anonimizziamo nome, email, telefono e indirizzi.
+                Recensioni, lista dei desideri e punti fedeltà vengono eliminati.
+              </p>
+              <p class="mt-3 text-sm text-ink-2 leading-relaxed">
+                Ordini e fatture già emessi restano invece conservati, senza più alcun dato che
+                ti identifichi: la legge impone di tenerli per dieci anni
+                (art. 2220 c.c.), e l'articolo 17.3.b del GDPR lo prevede espressamente.
+                Li puoi scaricare adesso, prima di procedere.
+              </p>
+              <p class="mt-3 text-sm font-semibold text-ink">L'operazione è irreversibile.</p>
+
+              <button type="button" class="btn btn-danger mt-4" (click)="openDeleteAccount()">
+                Cancella il mio account
+              </button>
+            </div>
           </div>
         </section>
       }
@@ -681,6 +730,46 @@
           @if (cancelOrderLoading()) {
             <span class="inline-block w-4 h-4 border-2 border-danger border-t-white rounded-full animate-spin mx-auto"></span>
           } @else { Annulla ordine }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Cancellazione account: serve la password, perché non si torna indietro -->
+@if (deleteAccountOpen()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/40" (click)="closeDeleteAccount()"></div>
+    <div class="panel relative w-full max-w-sm p-6 shadow-2xl" role="dialog" aria-modal="true"
+      aria-labelledby="delete-account-title">
+      <h3 id="delete-account-title" class="text-lg font-bold text-ink mb-2">Cancella account</h3>
+      <p class="text-sm text-ink-2 mb-4 leading-relaxed">
+        I tuoi dati personali vengono anonimizzati subito e non si possono recuperare.
+        Ordini e fatture restano conservati per obbligo di legge, senza più il tuo nome.
+      </p>
+
+      <label class="block text-xs font-semibold uppercase tracking-widest text-ink-muted mb-1.5"
+        for="delete-account-password">
+        Conferma con la password
+      </label>
+      <input id="delete-account-password" type="password" class="field"
+        autocomplete="current-password" placeholder="••••••••"
+        [ngModel]="deleteAccountPassword()" (ngModelChange)="deleteAccountPassword.set($event)"
+        [attr.aria-invalid]="deleteAccountError() ? 'true' : null" />
+
+      @if (deleteAccountError()) {
+        <p class="field-error" aria-live="polite">{{ deleteAccountError() }}</p>
+      }
+
+      <div class="flex gap-3 mt-5">
+        <button type="button" class="btn btn-outline flex-1" [disabled]="deleteAccountLoading()"
+          (click)="closeDeleteAccount()">
+          Annulla
+        </button>
+        <button type="button" class="btn btn-danger flex-1" [disabled]="deleteAccountLoading()"
+          [attr.data-loading]="deleteAccountLoading() ? 'true' : null"
+          (click)="confirmDeleteAccount()">
+          {{ deleteAccountLoading() ? 'Cancellazione…' : 'Cancella per sempre' }}
         </button>
       </div>
     </div>
