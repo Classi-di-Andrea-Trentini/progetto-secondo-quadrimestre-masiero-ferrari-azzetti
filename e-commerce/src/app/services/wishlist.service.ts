@@ -1,14 +1,21 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
-import { ProductListItem } from './products.service';
 import { API_URL } from './api.config';
 
+/**
+ * Forma restituita da GET /wishlist: il backend appiattisce il prodotto, non
+ * restituisce la riga di wishlist. `id` e' quindi l'id del **prodotto**.
+ * Prima qui era dichiarato un oggetto annidato `product` che il server non ha
+ * mai mandato: la scheda dei preferiti andava in errore su `item.product.slug`
+ * e restava vuota.
+ */
 export interface WishlistItem {
   id: string;
-  productId: string;
-  addedAt: string;
-  product: ProductListItem;
+  name: string;
+  slug: string;
+  basePrice: number | string;
+  imageUrl: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -46,7 +53,7 @@ export class WishlistService {
         this.http.get<WishlistItem[]>(`${API_URL}/wishlist`, { withCredentials: true }),
       );
       this._items.set(items);
-      this._savedIds.set(new Set(items.map(i => i.productId)));
+      this._savedIds.set(new Set(items.map(i => i.id)));
       this._loaded = true;
     } catch {
       this._items.set([]);
@@ -68,7 +75,7 @@ export class WishlistService {
       } else {
         cur.delete(productId);
         // Rimuovi anche dalla lista items se caricata
-        this._items.update(list => list.filter(i => i.productId !== productId));
+        this._items.update(list => list.filter(i => i.id !== productId));
       }
       this._savedIds.set(cur);
       return res.saved;
