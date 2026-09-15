@@ -6,68 +6,73 @@
 </main>
 <app-footer />
 
-@if (bannerVisible()) {
-  <div class="cookie-banner" role="dialog" aria-label="Cookie consent">
+<!-- Informativa cookie.
 
-    @if (!customizing()) {
-      <!-- ── DEFAULT BANNER ─────────────────────────────── -->
-      <div class="cookie-banner-text">
-        <p class="cookie-banner-title">Cookie preferences</p>
-        <p class="cookie-banner-desc">
-          We use only essential cookies to keep you logged in and remember your consent choice.
-          No analytics or marketing cookies are used.
-          <a routerLink="/legal/cookies" (click)="bannerVisible.set(false)">Cookie Policy</a>
-        </p>
-      </div>
-      <div class="cookie-banner-actions">
-        <button type="button" class="cookie-btn cookie-btn-ghost" (click)="openCustomize()">Customize</button>
-        <button type="button" class="cookie-btn cookie-btn-outline" (click)="decline()">Decline</button>
-        <button type="button" class="cookie-btn" (click)="acceptAll()">Accept all</button>
-      </div>
-
-    } @else {
-      <!-- ── CUSTOMIZE PANEL ────────────────────────────── -->
-      <div class="cookie-customize">
-        <button type="button" class="cookie-back" (click)="backToBanner()">
-          ← Back
+     Non e' un banner di consenso e non ha un pulsante "Rifiuta": il negozio usa
+     solo cookie tecnici, che per l'art. 122 del Codice privacy vanno dichiarati ma
+     non richiedono consenso. Prima il "Decline" c'era e non rifiutava niente —
+     scriveva la stessa identica riga di "Accept all". Vedi CookieConsentService. -->
+@if (cookies.visible()) {
+  <div class="cookie-notice" role="dialog" aria-modal="false" aria-labelledby="cookie-notice-title">
+    @if (!showingDetails()) {
+      <p id="cookie-notice-title" class="cookie-notice-title">Cookie tecnici</p>
+      <p class="cookie-notice-desc">
+        Usiamo solo cookie tecnici: quelli che ti tengono collegato, quelli che ricordano
+        che hai letto questo avviso e quelli di Stripe durante il pagamento. Nessuna
+        statistica, nessuna profilazione, nessuna pubblicità. Non c'è niente da accettare
+        o rifiutare — solo da sapere.
+        <a routerLink="/legal/cookies" (click)="acknowledgeCookies()">Leggi la Cookie Policy</a>
+      </p>
+      <div class="cookie-notice-actions">
+        <button type="button" class="btn btn-ghost btn-sm" (click)="showCookieDetails()">
+          Dettagli
         </button>
-        <p class="cookie-banner-title" style="margin-top:10px">Customize cookies</p>
+        <button type="button" class="btn btn-primary btn-sm" (click)="acknowledgeCookies()">
+          Ho capito
+        </button>
+      </div>
+    } @else {
+      <div class="cookie-details">
+        <button type="button" class="cookie-back" (click)="hideCookieDetails()">← Indietro</button>
+        <p class="cookie-notice-title" style="margin-top: 0.625rem">Cosa usiamo, per categoria</p>
 
         <div class="cookie-toggle-row">
           <div class="cookie-toggle-info">
-            <span class="cookie-toggle-label">Essential cookies</span>
-            <span class="cookie-toggle-desc">Authentication session and consent preference. Cannot be disabled.</span>
+            <span class="cookie-toggle-label">Cookie tecnici</span>
+            <span class="cookie-toggle-desc">
+              Sessione di accesso, memoria di questo avviso e antifrode di Stripe durante il
+              pagamento. Senza, il sito non funziona.
+            </span>
           </div>
-          <div class="cookie-toggle-switch cookie-toggle-switch--on" aria-disabled="true" title="Always active">
-            <span>Always on</span>
-          </div>
+          <div class="cookie-toggle-state cookie-toggle-state--on">Sempre attivi</div>
         </div>
 
         <div class="cookie-toggle-row cookie-toggle-row--muted">
           <div class="cookie-toggle-info">
-            <span class="cookie-toggle-label">Analytics cookies</span>
-            <span class="cookie-toggle-desc">Not used. No analytics or tracking services are configured on this site.</span>
+            <span class="cookie-toggle-label">Cookie analitici</span>
+            <span class="cookie-toggle-desc">
+              Non usati. Nessuna statistica sulla navigazione, né nostra né di terzi.
+            </span>
           </div>
-          <div class="cookie-toggle-switch" aria-disabled="true" title="Not used">
-            <span>Not used</span>
-          </div>
+          <div class="cookie-toggle-state">Non usati</div>
         </div>
 
         <div class="cookie-toggle-row cookie-toggle-row--muted">
           <div class="cookie-toggle-info">
-            <span class="cookie-toggle-label">Marketing cookies</span>
-            <span class="cookie-toggle-desc">Not used. No advertising or profiling services are configured on this site.</span>
+            <span class="cookie-toggle-label">Cookie di profilazione</span>
+            <span class="cookie-toggle-desc">
+              Non usati. Nessun circuito pubblicitario, nessun pixel di tracciamento.
+            </span>
           </div>
-          <div class="cookie-toggle-switch" aria-disabled="true" title="Not used">
-            <span>Not used</span>
-          </div>
+          <div class="cookie-toggle-state">Non usati</div>
         </div>
 
-        <div class="cookie-banner-actions" style="margin-top:14px">
-          <button type="button" class="cookie-btn" (click)="saveCustom()">Save preferences</button>
+        <div class="cookie-notice-actions" style="margin-top: 0.875rem">
+          <button type="button" class="btn btn-primary btn-sm" (click)="acknowledgeCookies()">
+            Ho capito
+          </button>
         </div>
       </div>
     }
-
   </div>
 }

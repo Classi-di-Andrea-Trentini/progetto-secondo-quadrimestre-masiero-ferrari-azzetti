@@ -1,4 +1,5 @@
 import { RenderMode, ServerRoute } from '@angular/ssr';
+import { LEGAL_KEYS } from './pages/legal/legal';
 
 /**
  * Come viene resa ogni pagina.
@@ -14,7 +15,7 @@ import { RenderMode, ServerRoute } from '@angular/ssr';
  * | Rotta | Modo | Perché |
  * |---|---|---|
  * | `/`, `/home`, `/about` | Prerender (SSG) | uguali per tutti e cambiano di rado: si generano una volta in build |
- * | `/legal/:pagina` | Prerender (SSG) | tre pagine fisse, elenco noto in anticipo |
+ * | `/legal/:pagina` | Prerender (SSG) | cinque pagine fisse, elenco noto in anticipo |
  * | `/products` | Server (SSR) | il catalogo cambia e va indicizzato: prerenderarlo lo congelerebbe |
  * | `/product/:slug` | Server (SSR) | prezzo e disponibilità devono essere freschi, ed è la pagina che porta traffico |
  * | login, registrazione, recupero password | Client (SPA) | niente da indicizzare, tutto dipende dal browser |
@@ -33,12 +34,11 @@ export const serverRoutes: ServerRoute[] = [
     path: 'legal/:pagina',
     renderMode: RenderMode.Prerender,
     // L'elenco e' chiuso e noto: senza questi parametri Angular non saprebbe
-    // quali pagine generare.
-    getPrerenderParams: async () => [
-      { pagina: 'privacy' },
-      { pagina: 'terms' },
-      { pagina: 'cookies' },
-    ],
+    // quali pagine generare. Letto da LEGAL_KEYS e non riscritto a mano: la
+    // copia precedente si era gia' fermata a tre pagine, e una pagina legale
+    // che esiste nell'applicazione ma non viene generata resta invisibile ai
+    // motori di ricerca proprio mentre la legge impone di pubblicarla.
+    getPrerenderParams: async () => LEGAL_KEYS.map((pagina) => ({ pagina })),
   },
 
   // ─── Pubbliche ma vive: rese a ogni richiesta ──────────────────────────────

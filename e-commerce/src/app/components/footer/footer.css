@@ -46,6 +46,20 @@
   color: var(--color-ink);
 }
 
+/* "Gestisci cookie" e' un <button> perche' non porta da nessuna parte: riapre un
+   pannello. Deve pero' stare in fila con i link accanto, e un bottone si porta
+   dietro sfondo, bordo, padding, font e testo centrato del browser. */
+.footer-link-button {
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-size: var(--text-sm);
+  text-align: left;
+  cursor: pointer;
+}
+
 .footer-meta {
   background: var(--color-paper);
   border-top: 1px solid var(--color-line);

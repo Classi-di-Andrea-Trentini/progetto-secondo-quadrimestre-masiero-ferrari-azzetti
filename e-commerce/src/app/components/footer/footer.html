@@ -79,7 +79,19 @@
         <ul class="mt-5 flex flex-col gap-3">
           <li><a routerLink="/legal/privacy" class="footer-link">Privacy</a></li>
           <li><a routerLink="/legal/cookies" class="footer-link">Cookie</a></li>
-          <li><a routerLink="/legal/terms" class="footer-link">Termini di servizio</a></li>
+          <li><a routerLink="/legal/terms" class="footer-link">Condizioni di vendita</a></li>
+          <li><a routerLink="/legal/recesso" class="footer-link">Diritto di recesso</a></li>
+          <li>
+            <a routerLink="/legal/spedizioni-e-resi" class="footer-link">Spedizioni e resi</a>
+          </li>
+          <li>
+            <!-- Riapre l'informativa cookie. Prima la scelta era definitiva: chiuso il
+                 banner, non c'era piu' nessun modo di tornarci se non svuotando i dati
+                 del browser. -->
+            <button type="button" class="footer-link footer-link-button" (click)="openCookieNotice()">
+              Gestisci cookie
+            </button>
+          </li>
         </ul>
       </nav>
     </div>
@@ -91,7 +103,7 @@
       class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-5 text-center md:flex-row md:text-left"
     >
       <p class="text-2xs text-ink-muted">
-        © 2026 Common Era — progetto scolastico, il negozio non vende davvero.
+        © 2026 [RAGIONE SOCIALE] — P. IVA [P.IVA] — REA [REA]
       </p>
       <div class="flex items-center gap-2.5">
         <span class="text-2xs uppercase tracking-[0.08em] text-ink-muted">Pagamento simulato</span>

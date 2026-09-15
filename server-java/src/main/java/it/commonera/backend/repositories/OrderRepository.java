@@ -11,11 +11,15 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 public interface OrderRepository extends JpaRepository<Order, UUID>, JpaSpecificationExecutor<Order> {
     Page<Order> findByUserIdOrderByCreatedAtDesc(UUID userId, Pageable pageable);
+
+    /** Senza pagina: l'export dei dati personali li deve contenere tutti. */
+    List<Order> findByUserIdOrderByCreatedAtDesc(UUID userId);
     Optional<Order> findByIdAndUserId(UUID id, UUID userId);
     long countByInvoiceNumberStartingWith(String prefix);
 

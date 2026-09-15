@@ -517,6 +517,91 @@ export class MeComponent {
     }
   }
 
+  // ─── GDPR: i propri dati, e la porta d'uscita ───────────────────────────
+
+  exportLoading = signal(false);
+  exportError = signal<string | null>(null);
+
+  /**
+   * Art. 20: scarica tutto quello che il negozio conserva su di te.
+   *
+   * Passa da `fetch` e non da un `<a href>` per la stessa ragione della fattura:
+   * l'endpoint vuole il cookie di sessione e risponde con un allegato, e un link
+   * diretto non porterebbe le credenziali.
+   */
+  async exportMyData(): Promise<void> {
+    if (this.exportLoading()) return;
+    this.exportLoading.set(true);
+    this.exportError.set(null);
+
+    try {
+      const res = await fetch(`${API_URL}/users/me/export`, { credentials: 'include' });
+      if (!res.ok) throw new Error('Export non disponibile');
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download =
+        res.headers.get('Content-Disposition')?.match(/filename="?([^";]+)"?/)?.[1]
+        ?? 'common-era-dati-personali.json';
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      this.exportError.set('Non è stato possibile scaricare i tuoi dati. Riprova fra poco.');
+    } finally {
+      this.exportLoading.set(false);
+    }
+  }
+
+  // ── Cancellazione dell'account ────────────────────────────────────
+
+  deleteAccountOpen = signal(false);
+  deleteAccountPassword = signal('');
+  deleteAccountLoading = signal(false);
+  deleteAccountError = signal<string | null>(null);
+
+  openDeleteAccount(): void {
+    this.deleteAccountPassword.set('');
+    this.deleteAccountError.set(null);
+    this.deleteAccountOpen.set(true);
+  }
+
+  closeDeleteAccount(): void {
+    if (this.deleteAccountLoading()) return;
+    this.deleteAccountOpen.set(false);
+    this.deleteAccountPassword.set('');
+  }
+
+  /**
+   * Art. 17: chiude l'account.
+   *
+   * La password si controlla anche qui e non solo sul server: non e' sicurezza —
+   * quella la fa il backend — ma evita di mandare una richiesta irreversibile
+   * partita da un campo lasciato vuoto per sbaglio.
+   */
+  async confirmDeleteAccount(): Promise<void> {
+    if (this.deleteAccountLoading()) return;
+
+    const password = this.deleteAccountPassword();
+    if (!password) {
+      this.deleteAccountError.set('Inserisci la password per confermare.');
+      return;
+    }
+
+    this.deleteAccountLoading.set(true);
+    this.deleteAccountError.set(null);
+
+    try {
+      await this.auth.eraseAccount(password);
+      this.deleteAccountOpen.set(false);
+    } catch (err) {
+      this.deleteAccountError.set(this.auth.extractErrorMessage(err));
+    } finally {
+      this.deleteAccountLoading.set(false);
+    }
+  }
+
   async logout() {
     await this.auth.logout();
   }

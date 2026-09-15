@@ -10,4 +10,7 @@ import java.util.UUID;
 public interface WishlistRepository extends JpaRepository<Wishlist, UUID> {
     List<Wishlist> findByUserId(UUID userId);
     Optional<Wishlist> findByUserIdAndProductId(UUID userId, UUID productId);
+
+    /** Cancellazione dell'account: i desideri di qualcuno non sono un documento fiscale. */
+    void deleteByUserId(UUID userId);
 }
