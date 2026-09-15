@@ -29,6 +29,11 @@ dependencies {
     // iText 5+ e' AGPL e non si puo' usare senza pubblicare tutto o pagare.
     implementation 'com.github.librepdf:openpdf:2.0.3'
 
+    // Incasso reale. La libreria ufficiale porta la verifica della firma del
+    // webhook e la chiave di idempotenza: due cose che scritte a mano si sbagliano,
+    // e si sbagliano sui soldi.
+    implementation 'com.stripe:stripe-java:33.4.2'
+
     // JWT nel cookie HttpOnly, come fa il backend Node: stesso schema di sessione.
     implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'

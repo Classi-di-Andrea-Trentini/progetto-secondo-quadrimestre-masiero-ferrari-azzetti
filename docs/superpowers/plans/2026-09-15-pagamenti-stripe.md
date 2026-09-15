@@ -81,7 +81,7 @@ Expected: FAIL, compilazione: `cannot find symbol: class StripeProperties`
 ```groovy
     // Incasso reale. La libreria ufficiale: gestisce firma del webhook e
     // idempotenza, due cose che scritte a mano si sbagliano.
-    implementation 'com.stripe:stripe-java:29.1.0'
+    implementation 'com.stripe:stripe-java:33.4.2'
 ```
 
 `config/StripeProperties.java`:

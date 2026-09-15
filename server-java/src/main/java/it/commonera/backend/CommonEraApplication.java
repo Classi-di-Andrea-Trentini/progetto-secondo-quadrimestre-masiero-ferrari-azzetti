@@ -2,6 +2,7 @@ package it.commonera.backend;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 
 /**
  * Riscrittura in Java del backend di Common Era.
@@ -16,6 +17,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  *    convenzione di Spring non li indovina tutti.
  */
 @SpringBootApplication
+@ConfigurationPropertiesScan
 public class CommonEraApplication {
     public static void main(String[] args) {
         SpringApplication.run(CommonEraApplication.class, args);
