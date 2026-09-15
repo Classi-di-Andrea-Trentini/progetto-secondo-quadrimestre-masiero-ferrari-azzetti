@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-labelledby="ttl">
+  <title id="ttl">Borsa tote in pelle nera</title>
+  <rect width="400" height="400" fill="#F5F5F5"/>
+  <ellipse cx="200" cy="356" rx="106" ry="12" fill="#E8E8E8"/>
+  <path d="M142 186 Q146 118 178 118 Q210 118 214 186" fill="none" stroke="#1A1A1A" stroke-width="10" stroke-linecap="round"/>
+  <path d="M186 186 Q190 118 222 118 Q254 118 258 186" fill="none" stroke="#1A1A1A" stroke-width="10" stroke-linecap="round"/>
+  <path d="M104 182 L296 182 L280 334 Q279 344 269 344 L131 344 Q121 344 120 334 Z" fill="#1F1F1F" stroke="#111111" stroke-width="3.2" stroke-linejoin="round"/>
+  <path d="M104 182 L296 182 L294 206 L106 206 Z" fill="#2E2E2E" stroke="#111111" stroke-width="2.6" stroke-linejoin="round"/>
+  <path d="M116 216 Q200 232 284 216" fill="none" stroke="#B5451B" stroke-width="1.8" stroke-dasharray="7 6"/>
+  <path d="M126 330 L274 330" fill="none" stroke="#B5451B" stroke-width="1.8" stroke-dasharray="7 6"/>
+  <rect x="180" y="248" width="40" height="52" rx="4" fill="none" stroke="#5A5A5A" stroke-width="2.4"/>
+  <path d="M180 264 L220 264" fill="none" stroke="#5A5A5A" stroke-width="2.4"/>
+  <path d="M258 182 L258 206" fill="none" stroke="#111111" stroke-width="2.4"/>
+  <path d="M142 182 L142 206" fill="none" stroke="#111111" stroke-width="2.4"/>
+</svg>

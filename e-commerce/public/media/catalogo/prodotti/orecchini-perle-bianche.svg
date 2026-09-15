@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-labelledby="ttl">
+  <title id="ttl">Orecchini pendenti con perla</title>
+  <defs>
+    <radialGradient id="pearl" cx="36%" cy="30%" r="72%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="55%" stop-color="#EDEDED"/>
+      <stop offset="100%" stop-color="#C9C9C9"/>
+    </radialGradient>
+  </defs>
+  <rect width="400" height="400" fill="#F5F5F5"/>
+  <ellipse cx="200" cy="352" rx="104" ry="11" fill="#E8E8E8"/>
+  <g>
+    <path d="M140 108 Q112 116 112 148 Q112 178 140 186" fill="none" stroke="#B7B7B7" stroke-width="6" stroke-linecap="round"/>
+    <path d="M140 108 Q112 116 112 148 Q112 178 140 186" fill="none" stroke="#111111" stroke-width="1.4"/>
+    <path d="M140 186 L140 230" stroke="#B7B7B7" stroke-width="5"/>
+    <path d="M140 186 L140 230" stroke="#111111" stroke-width="1.2"/>
+    <circle cx="140" cy="222" r="8" fill="#D7C2AA" stroke="#111111" stroke-width="2"/>
+    <circle cx="140" cy="276" r="48" fill="url(#pearl)" stroke="#111111" stroke-width="2.8"/>
+    <ellipse cx="124" cy="258" rx="14" ry="10" fill="#FFFFFF" opacity="0.9" transform="rotate(-28 124 258)"/>
+  </g>
+  <g>
+    <path d="M260 108 Q288 116 288 148 Q288 178 260 186" fill="none" stroke="#B7B7B7" stroke-width="6" stroke-linecap="round"/>
+    <path d="M260 108 Q288 116 288 148 Q288 178 260 186" fill="none" stroke="#111111" stroke-width="1.4"/>
+    <path d="M260 186 L260 230" stroke="#B7B7B7" stroke-width="5"/>
+    <path d="M260 186 L260 230" stroke="#111111" stroke-width="1.2"/>
+    <circle cx="260" cy="222" r="8" fill="#D7C2AA" stroke="#111111" stroke-width="2"/>
+    <circle cx="260" cy="276" r="48" fill="url(#pearl)" stroke="#111111" stroke-width="2.8"/>
+    <ellipse cx="244" cy="258" rx="14" ry="10" fill="#FFFFFF" opacity="0.9" transform="rotate(-28 244 258)"/>
+  </g>
+</svg>

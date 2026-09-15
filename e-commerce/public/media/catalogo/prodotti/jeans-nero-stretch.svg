@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-labelledby="ttl">
+  <title id="ttl">Jeans nero stretch</title>
+  <rect width="400" height="400" fill="#F5F5F5"/>
+  <ellipse cx="200" cy="370" rx="98" ry="11" fill="#E8E8E8"/>
+  <path d="M142 108 L136 240 L134 352 Q134 359 141 359 L180 359 Q187 359 188 352 L199 214 L201 214 L212 352 Q213 359 220 359 L259 359 Q266 359 266 352 L264 240 L258 108 Z" fill="#1C1C1C" stroke="#111111" stroke-width="3.2" stroke-linejoin="round"/>
+  <path d="M154 122 L152 348 M246 122 L248 348" fill="none" stroke="#2F2F2F" stroke-width="9" stroke-linecap="round"/>
+  <rect x="139" y="84" width="122" height="28" rx="5" fill="#252525" stroke="#111111" stroke-width="3.2"/>
+  <g stroke="#3D3D3D" stroke-width="2.4" fill="none" stroke-linecap="round">
+    <path d="M150 80 L150 116 M196 80 L196 116 M250 80 L250 116"/>
+  </g>
+  <g stroke="#8F8F8F" stroke-width="2" fill="none" stroke-linecap="round" stroke-dasharray="6 5">
+    <path d="M200 114 L200 152 Q200 164 208 170"/>
+    <path d="M148 116 Q170 134 188 116"/>
+    <path d="M252 116 Q230 134 212 116"/>
+    <path d="M140 336 L182 336 M218 336 L260 336"/>
+  </g>
+  <rect x="216" y="116" width="22" height="16" rx="3" fill="none" stroke="#5A5A5A" stroke-width="2.2"/>
+  <rect x="256" y="120" width="5" height="18" rx="1.6" fill="#B5451B"/>
+  <circle cx="200" cy="98" r="6" fill="#F5F5F5" stroke="#111111" stroke-width="2.4"/>
+</svg>

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" role="img" aria-labelledby="ttl">
+  <title id="ttl">Gioielli</title>
+  <rect width="600" height="400" fill="#F0F0F0"/>
+  <circle cx="300" cy="196" r="152" fill="#E6E6E6"/>
+  <g transform="translate(24,24) scale(0.68)">
+    <path d="M112 96 Q104 236 200 252 Q296 236 288 96" fill="none" stroke="#C3A88D" stroke-width="10"/>
+    <path d="M112 96 Q104 236 200 252 Q296 236 288 96" fill="none" stroke="#9C8468" stroke-width="10" stroke-dasharray="4 11" stroke-linecap="round"/>
+    <circle cx="112" cy="96" r="12" fill="none" stroke="#C3A88D" stroke-width="7"/>
+    <circle cx="288" cy="96" r="12" fill="none" stroke="#C3A88D" stroke-width="7"/>
+    <path d="M200 262 L230 306 L200 346 L170 306 Z" fill="#C3A88D" stroke="#111111" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M200 262 L214 306 L200 346 L186 306 Z" fill="#D7C2AA" stroke="#8C7458" stroke-width="2.2"/>
+  </g>
+  <g transform="translate(298,58) scale(0.62)">
+    <circle cx="200" cy="250" r="82" fill="none" stroke="#C3A88D" stroke-width="26"/>
+    <circle cx="200" cy="250" r="95" fill="none" stroke="#111111" stroke-width="4"/>
+    <circle cx="200" cy="250" r="69" fill="none" stroke="#111111" stroke-width="4"/>
+    <path d="M168 170 L200 152 L232 170 L226 182 L174 182 Z" fill="#C3A88D" stroke="#111111" stroke-width="3.6" stroke-linejoin="round"/>
+    <path d="M158 140 L242 140 L226 122 L174 122 Z" fill="#FFFFFF" stroke="#111111" stroke-width="4.2" stroke-linejoin="round"/>
+    <path d="M158 140 L242 140 L200 194 Z" fill="#EDEDED" stroke="#111111" stroke-width="4.2" stroke-linejoin="round"/>
+    <g stroke="#8F8F8F" stroke-width="2.6" fill="none">
+      <path d="M174 122 L180 140 L200 194 M226 122 L220 140 L200 194 M180 140 L200 122 L220 140"/>
+    </g>
+  </g>
+  <path d="M48 356 L128 356" stroke="#B5451B" stroke-width="4" stroke-linecap="round"/>
+</svg>

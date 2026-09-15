@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-labelledby="ttl">
+  <title id="ttl">Pochette da sera</title>
+  <rect width="400" height="400" fill="#F5F5F5"/>
+  <ellipse cx="200" cy="328" rx="118" ry="12" fill="#E8E8E8"/>
+  <path d="M84 206 L316 206 L316 302 Q316 316 302 316 L98 316 Q84 316 84 302 Z" fill="#B5451B" stroke="#111111" stroke-width="3.2" stroke-linejoin="round"/>
+  <path d="M84 206 L84 150 Q84 140 94 140 L306 140 Q316 140 316 150 L316 206 L200 268 Z" fill="#C55A2E" stroke="#111111" stroke-width="3.2" stroke-linejoin="round"/>
+  <path d="M94 208 L200 264 L306 208" fill="none" stroke="#7E2F11" stroke-width="2" stroke-dasharray="7 6"/>
+  <ellipse cx="200" cy="248" rx="19" ry="13" fill="#D7C2AA" stroke="#111111" stroke-width="2.6"/>
+  <ellipse cx="200" cy="248" rx="8" ry="5" fill="#B5451B"/>
+  <path d="M96 306 L304 306" fill="none" stroke="#7E2F11" stroke-width="2" stroke-dasharray="7 6"/>
+  <path d="M94 150 L306 150" fill="none" stroke="#7E2F11" stroke-width="2" stroke-dasharray="7 6"/>
+</svg>

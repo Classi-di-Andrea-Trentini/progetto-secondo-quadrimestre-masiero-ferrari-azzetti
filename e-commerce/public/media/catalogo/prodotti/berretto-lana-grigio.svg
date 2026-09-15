@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-labelledby="ttl">
+  <title id="ttl">Berretto in lana merino</title>
+  <rect width="400" height="400" fill="#F5F5F5"/>
+  <ellipse cx="200" cy="320" rx="106" ry="12" fill="#E8E8E8"/>
+  <path d="M116 250 Q116 122 200 122 Q284 122 284 250 Z" fill="#9A9A9A" stroke="#111111" stroke-width="3.2" stroke-linejoin="round"/>
+  <g stroke="#7E7E7E" stroke-width="3" fill="none" stroke-linecap="round">
+    <path d="M144 246 Q142 154 172 128"/>
+    <path d="M172 246 Q170 140 188 124"/>
+    <path d="M200 246 L200 122"/>
+    <path d="M228 246 Q230 140 212 124"/>
+    <path d="M256 246 Q258 154 228 128"/>
+  </g>
+  <rect x="108" y="242" width="184" height="58" rx="15" fill="#B0B0B0" stroke="#111111" stroke-width="3.2"/>
+  <g stroke="#8A8A8A" stroke-width="3" fill="none" stroke-linecap="round">
+    <path d="M130 252 L130 292 M150 252 L150 292 M170 252 L170 292 M190 252 L190 292 M210 252 L210 292 M230 252 L230 292 M250 252 L250 292 M270 252 L270 292"/>
+  </g>
+  <circle cx="200" cy="112" r="24" fill="#C6C6C6" stroke="#111111" stroke-width="3"/>
+  <g stroke="#8A8A8A" stroke-width="2" fill="none">
+    <path d="M186 100 L214 124 M214 100 L186 124 M200 90 L200 134 M178 112 L222 112"/>
+  </g>
+  <rect x="264" y="256" width="5" height="18" rx="1.6" fill="#B5451B"/>
+</svg>
