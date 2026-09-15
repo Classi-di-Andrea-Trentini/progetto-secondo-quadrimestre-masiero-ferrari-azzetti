@@ -96,8 +96,22 @@ export class CartService {
     // fusione non puo' avvenire nel costruttore: serve reagire al cambiamento.
     let wasAuthenticated = false;
     effect(() => {
+      const loading = this.auth.isLoading();
       const authenticated = this.auth.isAuthenticated();
-      if (authenticated === wasAuthenticated) return;
+
+      // Finche' /auth/me e' in volo non c'e' niente da decidere: dichiarare
+      // pronto adesso mostrerebbe il carrello locale a chi ha quello sul server.
+      if (loading) return;
+
+      if (authenticated === wasAuthenticated) {
+        // L'identita' non e' cambiata, ma l'autenticazione si e' conclusa. Per un
+        // ospite questo e' l'**unico** momento in cui il carrello puo' dirsi
+        // pronto: `isAuthenticated` resta falso dall'inizio alla fine, e senza
+        // questo ramo il drawer resterebbe sullo scheletro per sempre.
+        this.ready.set(true);
+        return;
+      }
+
       wasAuthenticated = authenticated;
       if (authenticated) void this.adoptLocalCart().finally(() => this.ready.set(true));
       else {
