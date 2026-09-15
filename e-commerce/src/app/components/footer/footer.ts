@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { API_URL } from '../../services/api.config';
+import { CookieConsentService } from '../../services/cookie-consent';
 
 @Component({
   selector: 'app-footer',
@@ -14,6 +15,7 @@ import { API_URL } from '../../services/api.config';
 export class Footer {
   private readonly router = inject(Router);
   private readonly http = inject(HttpClient);
+  private readonly cookies = inject(CookieConsentService);
 
   email = signal('');
   subscribeMessage = signal('');
@@ -27,6 +29,11 @@ export class Footer {
       .subscribe(() => {
         this.isHomePage.set(this.isHomeRoute(this.router.url));
       });
+  }
+
+  /** "Gestisci cookie": rimette a schermo l'informativa disegnata da App. */
+  openCookieNotice(): void {
+    this.cookies.reopen();
   }
 
   onSubscribe(): void {
