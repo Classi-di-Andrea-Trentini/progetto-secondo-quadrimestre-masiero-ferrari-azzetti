@@ -69,7 +69,7 @@
       @for (item of cart.items(); track item.variantId) {
         <article class="cart-line">
           <div class="cart-line-thumb">
-            <app-product-image [src]="item.imageUrl" [alt]="item.productName" />
+            <app-product-image [src]="item.imageUrl" [alt]="item.productName" fit="contain" />
           </div>
 
           <div class="flex-1 min-w-0 flex flex-col">

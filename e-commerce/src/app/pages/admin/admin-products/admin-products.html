@@ -68,7 +68,7 @@
                 <td class="px-4 py-3">
                   <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-sm overflow-hidden bg-sunken flex-shrink-0">
-                      <app-product-image [src]="product.images[0]?.url" [alt]="product.name" />
+                      <app-product-image [src]="product.images[0]?.url" [alt]="product.name" fit="contain" />
                     </div>
                     <div>
                       <p class="font-medium text-ink">{{ product.name }}</p>
@@ -435,7 +435,7 @@
                     <div class="relative group rounded-sm overflow-hidden border-2 aspect-square"
                       [class.border-ink]="img.isCover"
                       [class.border-transparent]="!img.isCover">
-                      <app-product-image [src]="img.url" [alt]="img.altText ?? ''" />
+                      <app-product-image [src]="img.url" [alt]="img.altText ?? ''" fit="contain" />
                       <!-- Overlay actions -->
                       <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
                         @if (!img.isCover) {
