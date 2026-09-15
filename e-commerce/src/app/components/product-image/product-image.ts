@@ -38,9 +38,6 @@ export class ProductImageComponent {
   /** object-fit dell'immagine reale. */
   @Input() fit: 'cover' | 'contain' = 'cover';
 
-  /** object-position dell'immagine reale. */
-  @Input() position = 'center';
-
   @Input() loading: 'lazy' | 'eager' = 'lazy';
 
   protected readonly showFallback = computed(() => this.source() === null || this.failed());

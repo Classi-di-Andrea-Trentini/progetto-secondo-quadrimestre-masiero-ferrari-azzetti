@@ -206,7 +206,7 @@
                 <app-product-image
                   [src]="coverImage(p)"
                   [alt]="p.name"
-                  position="center top"
+                  fit="contain"
                   class="img-primary"
                   [class.fade-out]="hoveredId() === p.id && hasHoverImage(p)" />
 
@@ -215,7 +215,7 @@
                   <app-product-image
                     [src]="hoverImage(p)"
                     [alt]="p.name + ' — vista alternativa'"
-                    position="center top"
+                    fit="contain"
                     class="img-hover"
                     [class.fade-in]="hoveredId() === p.id" />
                 }

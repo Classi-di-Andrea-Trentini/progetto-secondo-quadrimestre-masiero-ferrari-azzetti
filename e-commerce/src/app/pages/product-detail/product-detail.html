@@ -23,7 +23,7 @@
             class="main-img"
             [src]="activeImage()?.url"
             [alt]="activeImage()?.altText || product()!.name"
-            position="center top"
+            fit="contain"
             loading="eager" />
         </div>
 
@@ -36,7 +36,8 @@
                 (click)="setActiveImage(i)">
                 <app-product-image
                   [src]="img.url"
-                  [alt]="img.altText || (product()!.name + ' ' + (i + 1))" />
+                  [alt]="img.altText || (product()!.name + ' ' + (i + 1))"
+                  fit="contain" />
               </button>
             }
           </div>
@@ -315,7 +316,7 @@
           @for (p of related(); track p.id) {
             <a [routerLink]="['/product', p.slug]" class="related-card">
               <div class="related-img">
-                <app-product-image [src]="coverImageOf(p)" [alt]="p.name" />
+                <app-product-image [src]="coverImageOf(p)" [alt]="p.name" fit="contain" />
               </div>
               <div class="related-info">
                 <span class="related-name">{{ p.name }}</span>
@@ -345,6 +346,7 @@
                 <app-product-image
                   [src]="item.images[0]?.url"
                   [alt]="item.name"
+                  fit="contain"
                   class="block h-full w-full transition-transform group-hover:scale-105"
                 />
               </div>
