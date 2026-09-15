@@ -88,10 +88,14 @@ reaper, cosi' non esistono due implementazioni che possono divergere.
 
 ### Schema
 
-**Nessuna migrazione.** La tabella `payments` ha gia' `provider`, `provider_tx_id TEXT
-UNIQUE`, `provider_payload JSONB`, `refunded_amount`. L'entity `Payment.java` ne mappa tre
-su sette: si aggiungono i campi mancanti. (`ddl-auto=validate` controlla le colonne
+**Quasi nessuna migrazione.** La tabella `payments` ha gia' `provider`, `provider_tx_id
+TEXT UNIQUE`, `provider_payload JSONB`, `refunded_amount`. L'entity `Payment.java` ne mappa
+tre su sette: si aggiungono i campi mancanti. (`ddl-auto=validate` controlla le colonne
 dichiarate, non il contrario — stessa scappatoia gia' usata per `sessions.ip_address`.)
+
+L'unica modifica allo schema, additiva e di una riga: l'enum Postgres `"PaymentStatus"` ha
+`pending/succeeded/failed/refunded` e manca `partially_refunded`, che serve a distinguere
+un reso parziale da un rimborso totale.
 
 ### Rimborsi
 
