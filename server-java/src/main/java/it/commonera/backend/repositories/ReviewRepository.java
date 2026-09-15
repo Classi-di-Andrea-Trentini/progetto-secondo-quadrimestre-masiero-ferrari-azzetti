@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -16,6 +17,21 @@ public interface ReviewRepository extends JpaRepository<Review, UUID>, JpaSpecif
     Page<Review> findByProductIdAndStatus(UUID productId, Review.ReviewStatus status, Pageable pageable);
     Optional<Review> findByUserIdAndProductId(UUID userId, UUID productId);
     boolean existsByUserIdAndProductId(UUID userId, UUID productId);
+
+    List<Review> findByUserId(UUID userId);
+
+    void deleteByUserId(UUID userId);
+
+    /**
+     * I "utile" messi **da** questo utente sulle recensioni altrui.
+     *
+     * Nello schema la tabella non ha un'entita' JPA (e' una chiave composta e nient'altro),
+     * quindi si passa da SQL: e' comunque un dato personale, e resterebbe li' a dire cosa
+     * ha letto e votato una persona che ha chiesto di sparire.
+     */
+    @Modifying
+    @Query(value = "delete from review_helpful_votes where user_id = :userId", nativeQuery = true)
+    int deleteHelpfulVotesByUser(@Param("userId") UUID userId);
 
     /**
      * Registra il voto "utile".

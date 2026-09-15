@@ -19,4 +19,9 @@ public interface LoyaltyEntryRepository extends JpaRepository<LoyaltyEntry, UUID
     int netPointsForOrder(@Param("orderId") UUID orderId);
 
     List<LoyaltyEntry> findTop50ByUserIdOrderByCreatedAtDesc(UUID userId);
+
+    /** Senza il tetto di 50: l'export li deve contenere tutti. */
+    List<LoyaltyEntry> findByUserIdOrderByCreatedAtDesc(UUID userId);
+
+    void deleteByUserId(UUID userId);
 }

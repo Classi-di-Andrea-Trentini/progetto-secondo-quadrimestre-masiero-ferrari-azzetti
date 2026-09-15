@@ -5,6 +5,7 @@ import it.commonera.backend.dtos.UserDtos;
 import it.commonera.backend.dtos.UserResponse;
 import it.commonera.backend.exceptions.ApiException;
 import it.commonera.backend.repositories.UserRepository;
+import it.commonera.backend.security.AuthCookie;
 import it.commonera.backend.security.CurrentUser;
 import it.commonera.backend.security.JwtCookieFilter;
 import it.commonera.backend.services.AuthService;
@@ -12,13 +13,11 @@ import it.commonera.backend.services.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.Duration;
 import java.util.Map;
 
 @RestController
@@ -55,7 +54,8 @@ public class AuthController {
         var issued = auth.login(body.email(), body.password(), request.getHeader("User-Agent"));
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, cookie(issued.token(), ttlSeconds).toString())
+                .header(HttpHeaders.SET_COOKIE,
+                        AuthCookie.session(issued.token(), ttlSeconds, secureCookies).toString())
                 .body(Map.of("user", UserResponse.from(issued.user())));
     }
 
@@ -65,7 +65,7 @@ public class AuthController {
         // Cookie svuotato e scaduto: cancellarlo lato server non basta se il browser
         // continua a mandarlo.
         return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, cookie("", 0).toString())
+                .header(HttpHeaders.SET_COOKIE, AuthCookie.cleared(secureCookies).toString())
                 .body(Map.of("message", "Logout effettuato"));
     }
 
@@ -92,24 +92,6 @@ public class AuthController {
         return users.findById(current.id())
                 .map(UserResponse::from)
                 .orElseThrow(() -> ApiException.unauthorized("Unauthorized"));
-    }
-
-    private ResponseCookie cookie(String value, long maxAge) {
-        return ResponseCookie.from(JwtCookieFilter.COOKIE_NAME, value)
-                // HttpOnly: un token leggibile da JavaScript e' un token rubabile con
-                // una sola XSS.
-                .httpOnly(true)
-                // Secure e' pilotato da COOKIE_SECURE, non fisso: acceso qui sopra
-                // HTTPS il browser smette di mandare il cookie su http:// (SSL strip
-                // e sniffing in chiaro), ma acceso su un deploy in HTTP — la LAN di
-                // classe, http://<host>:4200 — il cookie sparisce e il login smette
-                // di funzionare senza un solo messaggio d'errore. Va acceso insieme
-                // al reverse proxy TLS, non prima.
-                .secure(secureCookies)
-                .path("/")
-                .sameSite("Lax")
-                .maxAge(Duration.ofSeconds(maxAge))
-                .build();
     }
 
     private String readToken(HttpServletRequest request) {
