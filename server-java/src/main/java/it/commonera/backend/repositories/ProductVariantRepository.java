@@ -31,6 +31,22 @@ public interface ProductVariantRepository extends JpaRepository<ProductVariant, 
     int decrementStock(@Param("id") UUID id, @Param("qty") int qty);
 
     /**
+     * Restituzione della giacenza, in un solo UPDATE.
+     *
+     * Il ripristino non parte piu' solo dall'annullamento chiesto dal cliente: lo
+     * fanno anche il webhook del pagamento fallito e il raccoglitore degli ordini
+     * abbandonati, che girano per conto loro e possono incrociarsi. Un
+     * leggi-modifica-scrivi, li', perde un incremento e lascia merce sparita dal
+     * magazzino senza che nessuno l'abbia comprata.
+     *
+     * Nessuna condizione sulla quantita': restituire e' sempre lecito, ed e' il
+     * chiamante a sapere quanto aveva riservato.
+     */
+    @Modifying
+    @Query("update ProductVariant v set v.stockQty = v.stockQty + :qty where v.id = :id")
+    int incrementStock(@Param("id") UUID id, @Param("qty") int qty);
+
+    /**
      * Colori disponibili a catalogo, con quanti **prodotti distinti** li hanno: lo
      * stesso maglione in cinque taglie nere e' un prodotto nero, non cinque.
      */
