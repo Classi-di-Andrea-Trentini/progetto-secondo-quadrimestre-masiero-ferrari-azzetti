@@ -168,10 +168,16 @@
                     }
                   }
                 </div>
-                <button (click)="emailChangeVisible.set(!emailChangeVisible())"
-                  class="text-sm text-ink-muted hover:text-ink underline transition-colors">
-                  {{ emailChangeVisible() ? 'Annulla' : 'Cambia email' }}
-                </button>
+                @if (hasPassword()) {
+                  <button (click)="emailChangeVisible.set(!emailChangeVisible())"
+                    class="text-sm text-ink-muted hover:text-ink underline transition-colors">
+                    {{ emailChangeVisible() ? 'Annulla' : 'Cambia email' }}
+                  </button>
+                } @else {
+                  <!-- Il cambio email si conferma con la password, e questo account non
+                       ne ha: mostrare il bottone porterebbe solo a un errore. -->
+                  <a routerLink="/forgot-password" class="link text-sm">Imposta una password</a>
+                }
               </div>
 
               @if (emailChangeVisible()) {
@@ -592,8 +598,30 @@
 
           <!-- Cambia password -->
           <div class="mb-10">
-            <h3 class="text-sm font-semibold uppercase tracking-widest text-ink-muted mb-5">Cambia password</h3>
-            <form [formGroup]="passwordForm" (ngSubmit)="submitPasswordChange()" novalidate class="space-y-4 max-w-sm">
+            <h3 class="text-sm font-semibold uppercase tracking-widest text-ink-muted mb-5">
+              {{ hasPassword() ? 'Cambia password' : 'Imposta una password' }}
+            </h3>
+
+            @if (!hasPassword()) {
+              <!--
+                Account nato da "Accedi con Google": non c'e' nessuna password attuale
+                da confermare, quindi la form qui sotto non avrebbe niente da chiedere.
+                La strada per averne una e' il link di reimpostazione, che arriva sulla
+                casella — la stessa che Google ha gia' dimostrato essere tua.
+              -->
+              <div class="panel p-5 max-w-sm">
+                <p class="text-sm text-ink-2 leading-relaxed">
+                  Accedi con Google e non hai ancora una password. Puoi impostarne una
+                  quando vuoi: ti mandiamo un link alla tua email. Da quel momento potrai
+                  entrare in entrambi i modi.
+                </p>
+                <a routerLink="/forgot-password" class="btn btn-outline mt-4">Imposta una password</a>
+              </div>
+            }
+
+            @if (hasPassword()) {
+            <form [formGroup]="passwordForm" (ngSubmit)="submitPasswordChange()" novalidate
+              class="space-y-4 max-w-sm">
               <div>
                 <label class="label">
                   Password attuale
@@ -646,6 +674,7 @@
                 {{ passwordLoading() ? 'Salvataggio…' : 'Aggiorna password' }}
               </button>
             </form>
+            }
           </div>
 
           <!-- ── I tuoi dati (GDPR) ───────────────────────────────────── -->
@@ -733,7 +762,7 @@
   </div>
 }
 
-<!-- Cancellazione account: serve la password, perché non si torna indietro -->
+<!-- Cancellazione account: serve una conferma scritta, perché non si torna indietro -->
 @if (deleteAccountOpen()) {
   <div class="fixed inset-0 z-modal flex items-center justify-center p-4">
     <div class="absolute inset-0 bg-inverse/40" (click)="closeDeleteAccount()"></div>
@@ -745,14 +774,26 @@
         Ordini e fatture restano conservati per obbligo di legge, senza più il tuo nome.
       </p>
 
-      <label class="label"
-        for="delete-account-password">
-        Conferma con la password
+      <!--
+        Chi e' entrato con Google non ha nessuna password da digitare: per lui la
+        conferma e' il proprio indirizzo email, scritto per intero. Senza questa
+        distinzione la cancellazione sarebbe impossibile proprio per quegli account —
+        e il diritto all'oblio non e' facoltativo.
+      -->
+      <label class="label" for="delete-account-password">
+        {{ hasPassword() ? 'Conferma con la password' : 'Conferma digitando la tua email' }}
       </label>
-      <input id="delete-account-password" type="password" class="field"
-        autocomplete="current-password" placeholder="••••••••"
-        [ngModel]="deleteAccountPassword()" (ngModelChange)="deleteAccountPassword.set($event)"
-        [attr.aria-invalid]="deleteAccountError() ? 'true' : null" />
+      @if (hasPassword()) {
+        <input id="delete-account-password" type="password" class="field"
+          autocomplete="current-password" placeholder="••••••••"
+          [ngModel]="deleteAccountPassword()" (ngModelChange)="deleteAccountPassword.set($event)"
+          [attr.aria-invalid]="deleteAccountError() ? 'true' : null" />
+      } @else {
+        <input id="delete-account-password" type="email" class="field"
+          autocomplete="off" [placeholder]="auth.currentUser()?.email ?? ''"
+          [ngModel]="deleteAccountPassword()" (ngModelChange)="deleteAccountPassword.set($event)"
+          [attr.aria-invalid]="deleteAccountError() ? 'true' : null" />
+      }
 
       @if (deleteAccountError()) {
         <p class="field-error" aria-live="polite">{{ deleteAccountError() }}</p>

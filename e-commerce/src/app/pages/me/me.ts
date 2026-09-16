@@ -1,4 +1,4 @@
-import { Component, inject, signal, effect } from '@angular/core';
+import { Component, computed, inject, signal, effect } from '@angular/core';
 import { NgClass, DatePipe } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormBuilder, Validators } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -39,6 +39,18 @@ type TabSection = 'profile' | 'orders' | 'favorites' | 'addresses' | 'settings';
 export class MeComponent {
   readonly auth = inject(AuthService);
   readonly wishlist = inject(WishlistService);
+
+  /**
+   * Se questo account una password ce l'ha.
+   *
+   * Chi si e' registrato con Google non ne ha mai scelta una: offrirgli "cambia
+   * password" o chiedergli la "password attuale" per cambiare indirizzo significa
+   * chiedere qualcosa che non esiste, e il server risponderebbe con un errore che
+   * sembra colpa sua. `!== false` e non `=== true`: finche' l'utente non e' ancora
+   * stato caricato non si mostra lo stato speciale, altrimenti la pagina
+   * sfarfallerebbe fra le due versioni a ogni ricaricamento.
+   */
+  readonly hasPassword = computed(() => this.auth.currentUser()?.hasPassword !== false);
   private readonly cart = inject(CartService);
   private readonly fb = inject(FormBuilder);
   private readonly http = inject(HttpClient);

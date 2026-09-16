@@ -8,6 +8,7 @@ import {
 } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth';
+import { GoogleSignInButton } from '../../components/google-sign-in/google-sign-in';
 
 function passwordComplexity(control: AbstractControl): ValidationErrors | null {
   const value: string = control.value ?? '';
@@ -31,7 +32,7 @@ function passwordMatch(group: AbstractControl): ValidationErrors | null {
 
 @Component({
   selector: 'app-register',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, GoogleSignInButton],
   templateUrl: './register.html',
   styleUrl: './register.css',
 })

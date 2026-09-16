@@ -4,7 +4,22 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { MeComponent } from './me';
-import { AuthService } from '../../services/auth';
+import { AuthService, AuthUser } from '../../services/auth';
+
+const someone: AuthUser = {
+  id: '11111111-1111-1111-1111-111111111111',
+  email: 'giulia@example.com',
+  fullName: 'Giulia Bianchi',
+  role: 'user',
+  avatarUrl: null,
+  phone: null,
+  birthDate: null,
+  gender: null,
+  newsletterOptIn: false,
+  emailVerifiedAt: null,
+  hasPassword: true,
+  createdAt: '2026-01-01T00:00:00Z',
+};
 
 describe('Me', () => {
   let component: MeComponent;
@@ -92,5 +107,29 @@ describe('Me', () => {
     // Chiudere a meta' non annulla la richiesta: darebbe solo l'impressione che
     // non sia successo niente.
     expect(component.deleteAccountOpen()).toBe(true);
+  });
+
+  // ─── Account entrati con Google ─────────────────────────────────────────
+
+  it('assumes there is a password while the user is still loading', () => {
+    // Finche' non si sa, si sta sulla versione con password: altrimenti la pagina
+    // sfarfallerebbe fra le due a ogni ricaricamento.
+    expect(component.hasPassword()).toBe(true);
+  });
+
+  it('knows a Google-only account has no password to change', () => {
+    const auth = TestBed.inject(AuthService);
+    vi.spyOn(auth, 'currentUser').mockReturnValue({ ...someone, hasPassword: false });
+
+    // Da qui la pagina smette di offrire "cambia password" e "cambia email", e il
+    // dialogo di cancellazione chiede l'indirizzo email invece della password.
+    expect(component.hasPassword()).toBe(false);
+  });
+
+  it('keeps the password sections for an account that has one', () => {
+    const auth = TestBed.inject(AuthService);
+    vi.spyOn(auth, 'currentUser').mockReturnValue({ ...someone, hasPassword: true });
+
+    expect(component.hasPassword()).toBe(true);
   });
 });
