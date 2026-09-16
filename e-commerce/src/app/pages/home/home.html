@@ -74,8 +74,10 @@
       </div>
     </div>
 
-    <!-- .animate-rise: l'entrata gia' prevista dai token, finora mai usata. -->
-    <app-scroll-strip class="animate-rise">
+    <!-- .animate-rise: l'entrata gia' prevista dai token, finora mai usata.
+         ariaLabel: il default del componente ("Scrollable image strip") e' generico,
+         qui c'e' un'etichetta che dice davvero cosa si sta scorrendo. -->
+    <app-scroll-strip class="animate-rise" ariaLabel="Featured products">
       @for (product of featuredProducts(); track product.id) {
         <a [routerLink]="['/product', product.slug]" class="featured-card w-56 shrink-0 sm:w-64 lg:w-72">
           <div class="featured-img-wrap">
