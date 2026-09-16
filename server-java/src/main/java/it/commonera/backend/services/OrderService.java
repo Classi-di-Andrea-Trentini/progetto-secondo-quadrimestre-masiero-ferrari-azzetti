@@ -45,8 +45,14 @@ public class OrderService {
         int capped = Math.min(Math.max(limit, 1), 50);
         var result = orders.findByUserIdOrderByCreatedAtDesc(userId, PageRequest.of(Math.max(0, page - 1), capped));
 
+        // Una sola interrogazione per l'intera pagina: prima ne partiva una per
+        // ordine dentro `view`, che con 50 ordini in pagina significava 50 query
+        // identiche nella forma e diverse solo per gli id cercati.
+        var content = result.getContent();
+        var coverByVariant = covers.coverByVariant(content.stream().flatMap(o -> o.getItems().stream()).toList());
+
         return Map.of(
-                "data", result.getContent().stream().map(this::view).toList(),
+                "data", content.stream().map(o -> view(o, coverByVariant)).toList(),
                 "meta", Map.of(
                         "total", result.getTotalElements(),
                         "page", result.getNumber() + 1,
@@ -85,6 +91,15 @@ public class OrderService {
 
     /** Conversione dentro la transazione: `open-in-view` e' spento. */
     Map<String, Object> view(Order order) {
+        return view(order, covers.coverByVariant(order.getItems()));
+    }
+
+    /**
+     * Come sopra, ma con la copertina gia' risolta da chi chiama: usato da
+     * {@link #findAll} per risolvere l'intera pagina in una query sola invece di
+     * una per ordine.
+     */
+    private Map<String, Object> view(Order order, Map<UUID, String> coverByVariant) {
         var map = new LinkedHashMap<String, Object>();
         map.put("id", order.getId());
         map.put("status", order.getStatus().name());
@@ -97,7 +112,6 @@ public class OrderService {
         map.put("trackingUrl", order.getTrackingUrl());
         map.put("invoiceNumber", order.getInvoiceNumber());
         map.put("createdAt", order.getCreatedAt());
-        var coverByVariant = covers.coverByVariant(order.getItems());
         map.put("items", order.getItems().stream().map(item -> {
             // `LinkedHashMap` e non `Map.of`: l'immagine puo' mancare, e `Map.of`
             // con un null esplode.

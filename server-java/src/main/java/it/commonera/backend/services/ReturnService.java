@@ -140,9 +140,13 @@ public class ReturnService {
         var usersById = new HashMap<UUID, User>();
         users.findAllById(userIds).forEach(u -> usersById.put(u.getId(), u));
 
+        // Una query sola per tutta la pagina (fino a 100 resi): prima ne partiva
+        // una per reso dentro la `map`.
+        var coverByVariant = covers.coverByVariant(
+                result.getContent().stream().flatMap(r -> orderItemsOf(r).stream()).toList());
         var views = result.getContent().stream()
                 .map(r -> ReturnDtos.View.from(r, ordersById.get(r.getOrderId()), usersById.get(r.getUserId()),
-                        covers.coverByVariant(orderItemsOf(r))))
+                        coverByVariant))
                 .toList();
 
         return Map.of(

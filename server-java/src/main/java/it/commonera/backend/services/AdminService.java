@@ -100,10 +100,15 @@ public class AdminService {
 
         long pendingOrders = all.stream().filter(o -> o.getStatus() == OrderStatus.pending).count();
 
-        var recentOrders = all.stream()
+        var recentOrdersList = all.stream()
                 .sorted(Comparator.comparing(Order::getCreatedAt).reversed())
                 .limit(5)
-                .map(this::orderSummaryView)
+                .toList();
+        // Una query sola per le 5 righe recenti, non una per ordine.
+        var recentCoverByVariant = covers.coverByVariant(
+                recentOrdersList.stream().flatMap(o -> o.getItems().stream()).toList());
+        var recentOrders = recentOrdersList.stream()
+                .map(o -> orderSummaryView(o, recentCoverByVariant))
                 .toList();
 
         var topProducts = products.findAll(Sort.by("soldCount").descending()).stream()
@@ -790,12 +795,25 @@ public class AdminService {
         var result = orders.findAll(orderSpecification(statusFilter, search, matchingUserIds, searchId),
                 PageRequest.of(Math.max(0, page - 1), capped, Sort.by("createdAt").descending()));
 
-        var data = result.getContent().stream().map(this::orderSummaryView).toList();
+        // Una query sola per tutta la pagina (fino a 100 ordini): prima ne
+        // partiva una per ordine dentro `orderSummaryView`.
+        var content = result.getContent();
+        var coverByVariant = covers.coverByVariant(content.stream().flatMap(o -> o.getItems().stream()).toList());
+        var data = content.stream().map(o -> orderSummaryView(o, coverByVariant)).toList();
         return Map.of("data", data,
                 "meta", meta(result.getTotalElements(), result.getNumber() + 1, capped, result.getTotalPages()));
     }
 
     private Map<String, Object> orderSummaryView(Order o) {
+        return orderSummaryView(o, covers.coverByVariant(o.getItems()));
+    }
+
+    /**
+     * Come sopra, ma con la copertina gia' risolta da chi chiama: usato da
+     * {@link #getOrders} e {@link #dashboard} per risolvere piu' ordini in una
+     * query sola invece di una per ordine.
+     */
+    private Map<String, Object> orderSummaryView(Order o, Map<UUID, String> coverByVariant) {
         var view = new LinkedHashMap<String, Object>();
         view.put("id", o.getId());
         view.put("status", o.getStatus().name());
@@ -803,7 +821,6 @@ public class AdminService {
         view.put("createdAt", o.getCreatedAt());
         var user = users.findById(o.getUserId()).orElse(null);
         view.put("user", user == null ? null : Map.of("fullName", user.getFullName(), "email", user.getEmail()));
-        var coverByVariant = covers.coverByVariant(o.getItems());
         view.put("items", o.getItems().stream().map(i -> {
             var row = new LinkedHashMap<String, Object>();
             row.put("productName", i.getProductName());
