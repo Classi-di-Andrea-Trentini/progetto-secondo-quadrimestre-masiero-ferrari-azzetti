@@ -150,7 +150,7 @@ export class MeComponent {
   async setDefaultAddress(id: string) {
     try {
       await firstValueFrom(
-        this.http.patch(`${API_URL}/addresses/${id}/default`, {}, { withCredentials: true })
+        this.http.patch(`${API_URL}/addresses/${id}/set-default`, {}, { withCredentials: true })
       );
       await this.loadAddresses();
     } catch {
