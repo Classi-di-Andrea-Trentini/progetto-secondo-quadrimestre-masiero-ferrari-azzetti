@@ -63,15 +63,64 @@
 .breadcrumb a:hover { color: var(--color-ink); }
 .breadcrumb span:last-child { color: var(--color-ink); }
 
-/* ── MAIN LAYOUT ──────────────────────────────────────────── */
+/* ── MAIN LAYOUT ──────────────────────────────────────────────────────────
+   Mobile-first: sotto lg una colonna sola, gallery e info impilate. Da lg
+   (1024px, lo stesso breakpoint del resto del sito) in su, due colonne.
+   Prima c'erano tre breakpoint ad hoc (1100/900/480): consolidati in uno
+   solo, coerente con products.css e con "lg:" usato ovunque nel sito. ───── */
 .detail-layout {
-  display: grid;
-  grid-template-columns: 1fr 480px;
-  gap: 60px;
-  align-items: start;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+@media (min-width: 1024px) {
+  .detail-layout {
+    display: grid;
+    grid-template-columns: 1fr 480px;
+    gap: 3.75rem;
+    align-items: start;
+  }
 }
 
 /* ── GALLERY ──────────────────────────────────────────────── */
+
+/* Sotto lg: tutta la galleria in una striscia orizzontale con scroll-snap —
+   niente immagine singola + miniature, non c'e' spazio per due colonne e lo
+   swipe e' il gesto naturale su un telefono. Bleed fino al bordo pagina
+   (margin negativo pari al padding di .detail-page) cosi' le immagini toccano
+   i due lati, come in un carosello nativo. */
+.gallery-scroll {
+  display: flex;
+  gap: 0.625rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  margin: 0 -1.25rem;
+  padding: 0 1.25rem;
+}
+.gallery-scroll::-webkit-scrollbar { display: none; }
+
+.gallery-scroll-item {
+  flex: 0 0 82%;
+  aspect-ratio: 3/4;
+  scroll-snap-align: center;
+  background: var(--color-sunken);
+  overflow: hidden;
+}
+.gallery-scroll-item app-product-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Da lg in su: immagine principale grande + miniature selezionabili sotto —
+   il pattern del design (f33fcdda.jpg). Le due gallerie sono nello stesso
+   DOM, alternate via display: nessun JavaScript in piu' per il breakpoint. */
+.gallery-desktop {
+  display: none;
+}
+
 .gallery-main {
   aspect-ratio: 3/4;
   background: var(--color-sunken);
@@ -113,11 +162,16 @@
 
 /* ── INFO PANEL ───────────────────────────────────────────── */
 .detail-info {
-  position: sticky;
-  top: 80px;
   display: flex;
   flex-direction: column;
   gap: 28px;
+}
+
+@media (min-width: 1024px) {
+  .detail-info {
+    position: sticky;
+    top: 80px;
+  }
 }
 
 .info-header { display: flex; flex-direction: column; gap: 6px; }
@@ -152,11 +206,17 @@
   /* Il nome del capo e' il titolo della pagina: stessa voce editoriale del
      titolo del catalogo e delle sezioni della home, non il sans di sistema. */
   font-family: var(--font-display);
-  font-size: var(--text-3xl);
+  font-size: var(--text-2xl);
   font-weight: 600;
   margin: 0;
   line-height: 1.15;
   letter-spacing: -0.02em;
+}
+
+@media (min-width: 1024px) {
+  .product-name {
+    font-size: var(--text-3xl);
+  }
 }
 
 .price-row {
@@ -213,6 +273,8 @@
 .color-circle.selected { outline-color: var(--color-ink); transform: scale(1.1); }
 .color-circle:hover { transform: scale(1.1); }
 
+/* Griglia 3x2 fissa (XS S M L XL XXL), come nel design: non si reimpila a
+   4 o a 2 colonne sotto nessun breakpoint. */
 .size-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
 .size-btn {
   padding: 13px 8px;
@@ -230,44 +292,61 @@
 .size-btn.out-of-stock { opacity: 0.3; cursor: not-allowed; text-decoration: line-through; }
 
 /* ── ADD TO CART ──────────────────────────────────────────── */
-.add-to-cart {
-  width: 100%;
-  padding: 1.125rem;
-  background: var(--color-ink);
-  color: var(--color-surface);
-  border: none;
-  font-size: var(--text-xs);
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: background 0.2s;
+/* Il bottone usa il vocabolario condiviso (.btn .btn-primary .btn-lg
+   .btn-block, gia' nero via --color-cta): qui resta solo lo stato locale
+   "aggiunto", che il vocabolario non prevede. */
+.add-to-cart.added,
+.add-to-cart.added:hover {
+  background: var(--color-success);
 }
-.add-to-cart:disabled { background: var(--color-line-strong); cursor: not-allowed; }
-.add-to-cart.added { background: var(--color-success); }
-.add-to-cart:not(:disabled):hover { background: var(--color-ink); }
 
 /* ── ACCORDIONS ───────────────────────────────────────────── */
+/* <details>/<summary> nativi: tastiera e screen reader gratis, senza una
+   riga di JavaScript. Qui si toglie solo il triangolo di default del
+   browser e si disegna l'icona +/− che il design mostra. */
 .accordions { display: flex; flex-direction: column; }
 .accordion { border-top: 1px solid var(--color-line); }
 .accordion:last-child { border-bottom: 1px solid var(--color-line); }
 
 .accordion-head {
-  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 16px 0;
-  background: none;
-  border: none;
   cursor: pointer;
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  text-align: left;
+  list-style: none;
 }
-.acc-icon { font-size: 18px; font-weight: 300; color: var(--color-ink-2); }
+.accordion-head::-webkit-details-marker { display: none; }
+.accordion-head::marker { content: ''; }
+
+/* Segno "+"/"−" disegnato con due pseudo-elementi: la barra orizzontale resta
+   sempre, quella verticale sparisce quando l'accordion e' aperto. */
+.acc-icon {
+  position: relative;
+  width: 11px;
+  height: 11px;
+  flex-shrink: 0;
+}
+.acc-icon::before,
+.acc-icon::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  background: var(--color-ink-2);
+  transform: translate(-50%, -50%);
+}
+.acc-icon::before { width: 11px; height: 1.5px; }
+.acc-icon::after {
+  width: 1.5px;
+  height: 11px;
+  transition: opacity 160ms var(--ease-out-quart);
+}
+.accordion[open] .acc-icon::after { opacity: 0; }
 
 .accordion-body {
   padding: 0 0 16px;
@@ -294,8 +373,8 @@
 }
 .related-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 2px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
 }
 .related-card {
   display: block;
@@ -326,20 +405,26 @@
 .related-price { font-size: 13px; font-weight: 500; flex-shrink: 0; }
 .related-price s { color: var(--color-ink-muted); font-size: 11px; margin-right: 4px; text-decoration: line-through; }
 
-/* ── RESPONSIVE ───────────────────────────────────────────── */
-@media (max-width: 1100px) {
-  .detail-layout { grid-template-columns: 1fr 420px; gap: 40px; }
+/* ── RECENTLY VIEWED ──────────────────────────────────────── */
+/* Stesso trattamento di .related-grid, per coerenza fra le due strisce di
+   card in fondo alla pagina: prima era l'unica utility responsive Tailwind
+   del template (grid-cols-2 md:grid-cols-4), ora e' CSS come il resto del file. */
+.recent-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
 }
 
-@media (max-width: 900px) {
-  .detail-layout { grid-template-columns: 1fr; gap: 32px; }
-  .detail-info { position: static; }
-  .size-grid { grid-template-columns: repeat(4, 1fr); }
-  .related-grid { grid-template-columns: repeat(2, 1fr); }
+/* ── RESPONSIVE (lg, 1024px) ─────────────────────────────────────────────── */
+@media (min-width: 1024px) {
+  .gallery-scroll { display: none; }
+  .gallery-desktop { display: block; }
+
+  .related-grid { grid-template-columns: repeat(4, 1fr); gap: 2px; }
+  .recent-grid { grid-template-columns: repeat(4, 1fr); }
 }
 
-@media (max-width: 480px) {
-  .product-name { font-size: var(--text-2xl); }
-  .size-grid { grid-template-columns: repeat(3, 1fr); }
-  .related-grid { grid-template-columns: repeat(2, 1fr); }
+@media (prefers-reduced-motion: reduce) {
+  .gallery-scroll { scroll-behavior: auto; }
+  .acc-icon::after { transition: none; }
 }

@@ -62,26 +62,32 @@ export class ProductDetail implements OnInit, OnDestroy {
   activeImageIndex = signal(0);
   selectedColor = signal('');
   selectedSize = signal('');
-  openAccordion = signal<string | null>('details');
   addedToCart = signal(false);
 
   readonly Math = Math;
 
-  // Etichette e testi in italiano come il resto del sito: erano rimasti in
-  // inglese ed erano l'unica cosa che si leggeva in due lingue nella pagina.
+  // Copy in inglese come il resto del sito. Le etichette sono quelle del design
+  // (f33fcdda.jpg): DETAILS / SIZE GUIDE / FABRIC / WASHING INSTRUCTIONS /
+  // SHIPPING & RETURNS \u2014 il testo transforma in maiuscolo via CSS
+  // (.accordion-head { text-transform: uppercase }), qui restano in "title case".
+  // Gli accordion sono <details>/<summary> nativi (vedi product-detail.html): lo
+  // stato aperto/chiuso lo tiene il browser, non serve piu' un signal qui.
   readonly accordionSections = [
-    { id: 'details',   label: 'DETTAGLI' },
-    { id: 'sizeguide', label: 'GUIDA ALLE TAGLIE' },
-    { id: 'fabric',    label: 'MATERIALI E TESSUTO' },
-    { id: 'washing',   label: 'CURA DEL CAPO' },
-    { id: 'shipping',  label: 'SPEDIZIONI E RESI' },
+    { id: 'details',   label: 'Details' },
+    { id: 'sizeguide', label: 'Size Guide' },
+    { id: 'fabric',    label: 'Fabric' },
+    { id: 'washing',   label: 'Washing Instructions' },
+    { id: 'shipping',  label: 'Shipping & Returns' },
   ];
 
+  // Testo dei corpi degli accordion: non e' nel file Figma (design-strings.txt
+  // non contiene questo paragrafo, solo le etichette dei titoli), quindi e'
+  // copy scritto per coerenza col resto del sito, non tradotto da un originale.
   readonly accordionContent: Record<string, string> = {
-    sizeguide: 'XS: IT 44 / S: IT 46 / M: IT 48 / L: IT 50 / XL: IT 52 / XXL: IT 54\n\nSe sei fra due taglie ti consigliamo la piu\u2019 grande. Le misure si riferiscono al corpo, non al capo.',
-    fabric: 'Composizione e paese di origine sono indicati sull\u2019etichetta interna. I materiali sono scelti per durata, comfort e provenienza responsabile.',
-    washing: 'Lavare a mano o in lavatrice a 30\u00b0C con ciclo delicato. Non candeggiare. Stirare a bassa temperatura. Non asciugare in asciugatrice. Asciugare in piano per non deformare il capo.',
-    shipping: 'Spedizione standard (3\u20135 giorni lavorativi): gratuita sopra i 100\u20ac, altrimenti 4,90\u20ac.\nSpedizione espressa (1\u20132 giorni lavorativi): 9,90\u20ac.\nResi gratuiti entro 30 giorni dalla consegna \u2014 il capo non deve essere stato indossato e deve avere ancora il cartellino.',
+    sizeguide: 'XS / S / M / L / XL / XXL \u2014 true to standard EU sizing.\n\nIf you are between sizes, we recommend sizing up. Measurements refer to the body, not the garment.',
+    fabric: 'Composition and country of origin are printed on the inside label. Materials are chosen for durability, comfort and responsible sourcing.',
+    washing: 'Machine or hand wash cold (max 30\u00b0C) on a gentle cycle. Do not bleach. Iron on low heat. Do not tumble dry. Dry flat to keep the garment\u2019s shape.',
+    shipping: 'Standard shipping (3\u20135 business days): free over \u20ac100, otherwise \u20ac4.90.\nExpress shipping (1\u20132 business days): \u20ac9.90.\nFree returns within 30 days of delivery \u2014 the item must be unworn and still have its tag.',
   };
 
   ngOnInit() {
@@ -97,7 +103,6 @@ export class ProductDetail implements OnInit, OnDestroy {
     this.activeImageIndex.set(0);
     this.selectedColor.set('');
     this.selectedSize.set('');
-    this.openAccordion.set('details');
     this.reviews.set([]);
     this.reviewsPage.set(1);
 
@@ -163,7 +168,7 @@ export class ProductDetail implements OnInit, OnDestroy {
     }).subscribe({
       next: () => {
         this.reviewLoading.set(false);
-        this.reviewSuccess.set('Recensione inviata! È in attesa di approvazione.');
+        this.reviewSuccess.set('Review submitted! It is pending approval.');
         this.showReviewForm.set(false);
         this.reviewTitle = '';
         this.reviewBody = '';
@@ -172,7 +177,7 @@ export class ProductDetail implements OnInit, OnDestroy {
       },
       error: (err) => {
         this.reviewLoading.set(false);
-        this.reviewError.set(err?.error?.message ?? 'Impossibile inviare la recensione');
+        this.reviewError.set(err?.error?.message ?? 'Unable to submit the review');
       },
     });
   }
@@ -186,7 +191,7 @@ export class ProductDetail implements OnInit, OnDestroy {
     const p = this.product();
     return [
       { label: 'Home', link: '/home' },
-      { label: 'Prodotti', link: '/products' },
+      { label: 'Products', link: '/products' },
       { label: p ? p.name : '' },
     ];
   };
@@ -325,18 +330,21 @@ export class ProductDetail implements OnInit, OnDestroy {
       );
       this.alertSubscribed.set(!subscribed);
       this.toast.success(
-        subscribed ? 'Avviso annullato.' : 'Ti avviseremo quando torna disponibile.',
+        subscribed ? 'Alert cancelled.' : 'We will notify you when it is back in stock.',
       );
     } catch (err: any) {
-      this.toast.error(err?.error?.message ?? 'Non e\' stato possibile registrare l\'avviso.');
+      this.toast.error(err?.error?.message ?? 'We could not save your alert.');
     } finally {
       this.alertBusy.set(false);
     }
   }
 
   // ─── Helpers ─────────────────────────────────────────────
+  // Formato inglese (€120.00, niente spazio dopo il simbolo): la pagina e'
+  // tutta in inglese, la virgola decimale italiana stonava. Non e' l'unica
+  // formatPrice del progetto — vedi la nota nel report del task 4.
   formatPrice(v: number | string) {
-    return '€ ' + parseFloat(String(v)).toFixed(2).replace('.', ',');
+    return new Intl.NumberFormat('en', { style: 'currency', currency: 'EUR' }).format(parseFloat(String(v)));
   }
 
   coverImageOf(p: ProductListItem) {
@@ -371,10 +379,6 @@ export class ProductDetail implements OnInit, OnDestroy {
 
   setActiveImage(index: number) {
     this.activeImageIndex.set(index);
-  }
-
-  toggleAccordion(id: string) {
-    this.openAccordion.set(this.openAccordion() === id ? null : id);
   }
 
   accordionText(id: string): string {
@@ -432,7 +436,7 @@ export class ProductDetail implements OnInit, OnDestroy {
         setTimeout(() => this.addedToCart.set(false), 2000);
       })
       .catch((err) => {
-        this.toast.error(err?.error?.message ?? 'Impossibile aggiungere il prodotto al carrello.');
+        this.toast.error(err?.error?.message ?? 'Unable to add the product to the cart.');
       });
   }
 }
