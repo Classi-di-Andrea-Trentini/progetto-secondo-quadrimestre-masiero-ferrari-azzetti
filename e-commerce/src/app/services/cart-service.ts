@@ -331,4 +331,15 @@ export class CartService {
       this.http.post<any>(`${API_URL}/checkout`, payload, { withCredentials: true })
     );
   }
+
+  /**
+   * Annulla una prenotazione non ancora pagata. Serve a chi torna indietro nel
+   * checkout per cambiare qualcosa: senza, resterebbe in giro un ordine
+   * `pending` che tiene riservata la merce fino al passaggio del raccoglitore.
+   */
+  cancelPendingOrder(orderId: string): Promise<unknown> {
+    return firstValueFrom(
+      this.http.patch(`${API_URL}/orders/${orderId}/cancel`, {}, { withCredentials: true }),
+    );
+  }
 }

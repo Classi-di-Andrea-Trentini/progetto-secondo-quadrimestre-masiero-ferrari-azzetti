@@ -236,8 +236,33 @@ export class Checkout implements OnInit {
     this.step.set(nextStepFrom(this.step(), this.payable()));
   }
 
-  prevStep() {
-    this.step.set(nextStepFrom(this.step(), this.payable(), 'back'));
+  async prevStep() {
+    const target = nextStepFrom(this.step(), this.payable(), 'back');
+
+    // Tornando **prima** del pagamento si cambiano dati che la prenotazione ha
+    // gia' congelato (indirizzo, spedizione, buono). L'ordine vecchio va
+    // annullato, altrimenti si pagherebbe qualcosa di diverso da quello che si
+    // vede a schermo, e la merce resterebbe riservata due volte.
+    if (this.pendingOrderId() && (target === 'shipping' || target === 'address')) {
+      await this.discardReservation();
+    }
+    this.step.set(target);
+  }
+
+  private async discardReservation(): Promise<void> {
+    const orderId = this.pendingOrderId();
+    if (!orderId) return;
+    try {
+      await this.cart.cancelPendingOrder(orderId);
+    } catch {
+      // Se l'annullo non riesce non si blocca il cliente: l'ordine resta
+      // `pending` e lo raccoglie il reaper dopo mezz'ora.
+    }
+    this.pendingOrderId.set(null);
+    this.serverAmountToPay.set(null);
+    this.clientSecret = null;
+    this.paymentReady.set(false);
+    this.stripe.reset();
   }
 
   async applyPromo() {
