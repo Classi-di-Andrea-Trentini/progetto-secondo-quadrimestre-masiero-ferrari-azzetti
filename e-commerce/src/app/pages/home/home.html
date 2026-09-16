@@ -4,17 +4,17 @@
     <div class="hero-grid">
       <div class="hero-copy text-center lg:text-left">
         <h1 class="hero-title text-d1 sm:text-d2 lg:text-d3">
-          Eleganza quotidiana,
-          <span class="block text-ink-muted">fatta per durare.</span>
+          Everyday elegance,
+          <span class="block text-ink-muted">made to last.</span>
         </h1>
 
         <p class="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-ink-2 lg:mx-0">
-          Una selezione ristretta di capi e accessori dalle linee pulite, in tessuti scelti,
-          pensati per essere indossati tutti i giorni.
+          A curated edit of clothing and accessories in clean lines and considered fabric,
+          made to be worn every day.
         </p>
 
         <div class="mt-9 flex flex-wrap items-center justify-center gap-3 lg:justify-start">
-          <a routerLink="/products" class="btn btn-primary btn-lg">Guarda la collezione</a>
+          <a routerLink="/products" class="btn btn-primary btn-lg">Shop the Collection</a>
 
           @if (auth.currentUser(); as user) {
             <a routerLink="/me" class="btn btn-outline btn-lg">
@@ -26,93 +26,82 @@
               {{ user.fullName.split(' ')[0] }}
             </a>
           } @else {
-            <a routerLink="/login" class="btn btn-outline btn-lg">Accedi</a>
+            <a routerLink="/login" class="btn btn-outline btn-lg">Sign In</a>
           }
         </div>
 
         <ul class="hero-facts">
-          <li>Spedizione in 48 ore</li>
-          <li>Reso semplice</li>
-          <li>Nuovi arrivi ogni settimana</li>
+          <li>Delivery in 48 hours</li>
+          <li>Easy returns</li>
+          <li>New arrivals every week</li>
         </ul>
       </div>
 
-      <a routerLink="/products" class="hero-visual" aria-label="Apri la collezione in evidenza">
+      <a routerLink="/products" class="hero-visual" aria-label="Open the featured collection">
         <img
-          [src]="collectionHighlights[0].image"
-          [alt]="collectionHighlights[0].title"
+          [src]="heroHighlight.image"
+          [alt]="heroHighlight.title"
           class="hero-visual-image"
           loading="eager"
         />
         <div class="hero-visual-overlay" aria-hidden="true"></div>
         <div class="hero-visual-meta">
-          <p class="text-2xs uppercase tracking-[0.28em] text-surface/75">In evidenza</p>
+          <p class="text-2xs uppercase tracking-[0.28em] text-surface/75">Featured</p>
           <h2 class="mt-2 font-display text-3xl font-semibold text-surface">
-            {{ collectionHighlights[0].title }}
+            {{ heroHighlight.title }}
           </h2>
-          <p class="mt-1 text-sm text-surface/80">{{ collectionHighlights[0].subtitle }}</p>
+          <p class="mt-1 text-sm text-surface/80">{{ heroHighlight.subtitle }}</p>
         </div>
       </a>
     </div>
   </div>
 </section>
 
-<!-- ═══ CAROSELLO ══════════════════════════════════════════════════════════ -->
-<section class="collection-shell" aria-roledescription="carosello" aria-label="Selezioni della collezione">
-  <div class="mx-auto max-w-6xl px-6 lg:px-8">
-    <div class="collection-stage">
-      @for (item of collectionHighlights; track item.title; let i = $index) {
-        <article
-          class="collection-card"
-          [class.card-active]="isActive(i)"
-          [class.card-left]="isLeft(i)"
-          [class.card-right]="isRight(i)"
-          [class.card-hidden]="isHidden(i)"
-          [attr.aria-hidden]="isActive(i) ? null : 'true'"
-        >
-          <img [src]="item.image" [alt]="item.title" class="h-full w-full object-cover" loading="lazy" />
-          <div class="collection-overlay" aria-hidden="true"></div>
-          <div class="collection-meta">
-            <p class="text-2xs uppercase tracking-[0.28em] text-surface/75">Look {{ i + 1 }}</p>
-            <h3 class="mt-1.5 font-display text-2xl font-semibold text-surface">{{ item.title }}</h3>
-            <p class="mt-0.5 text-sm text-surface/80">{{ item.subtitle }}</p>
-          </div>
-        </article>
-      }
-    </div>
-
-    <div class="mt-7 flex items-center justify-center gap-4">
-      <button type="button" (click)="prevSlide()" class="collection-nav-btn" aria-label="Look precedente">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-4 w-4" aria-hidden="true">
-          <path d="M15 6l-6 6 6 6" stroke-linecap="round" stroke-linejoin="round" />
-        </svg>
-      </button>
-
-      <div class="flex items-center gap-2">
-        @for (item of collectionHighlights; track item.title; let i = $index) {
-          <button
-            type="button"
-            (click)="goToSlide(i)"
-            class="collection-dot"
-            [class.collection-dot-active]="activeSlide() === i"
-            [attr.aria-current]="activeSlide() === i ? 'true' : null"
-            [attr.aria-label]="'Vai al look ' + (i + 1) + ': ' + item.title"
-          ></button>
-        }
+<!-- ═══ FEATURED PRODUCTS ══════════════════════════════════════════════════
+     Striscia orizzontale (<app-scroll-strip>, task 2): da lg in su la sezione
+     resta incollata mentre la riga trasla in orizzontale; sotto lg diventa una
+     riga con swipe nativo e scroll-snap (la scelta di sotto-lg e' nostra, per
+     istruzione esplicita). Dati reali, non segnaposto: per questo la sezione
+     intera resta dietro l'@if, come gia' era prima di questo passaggio — in
+     prerender (SSG) non c'e' nessun prodotto finche' il browser non idrata.
+     ═══════════════════════════════════════════════════════════════════════ -->
+@if (featuredProducts().length) {
+  <section class="featured-shell py-16 sm:py-20">
+    <div class="mx-auto max-w-6xl px-6 lg:px-8">
+      <div class="mb-10 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 border-b border-line pb-5">
+        <h2 class="display text-3xl sm:text-d1">Featured Products</h2>
+        <a routerLink="/products" class="link text-sm shrink-0">Shop the full collection →</a>
       </div>
-
-      <button type="button" (click)="nextSlide()" class="collection-nav-btn" aria-label="Look successivo">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-4 w-4" aria-hidden="true">
-          <path d="M9 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
-        </svg>
-      </button>
     </div>
-  </div>
-</section>
+
+    <!-- .animate-rise: l'entrata gia' prevista dai token, finora mai usata. -->
+    <app-scroll-strip class="animate-rise">
+      @for (product of featuredProducts(); track product.id) {
+        <a [routerLink]="['/product', product.slug]" class="featured-card w-56 shrink-0 sm:w-64 lg:w-72">
+          <div class="featured-img-wrap">
+            <img [src]="getCoverImage(product)" [alt]="product.name" class="featured-img" loading="lazy" />
+            @if (hasDiscount(product)) {
+              <span class="featured-badge featured-badge-sale">Sale</span>
+            } @else if (product.isNewArrival) {
+              <span class="featured-badge">New</span>
+            }
+          </div>
+          <div class="featured-info">
+            <p class="featured-cat">{{ product.category.name }}</p>
+            <h3 class="featured-name">{{ product.name }}</h3>
+            <p class="featured-price tnum">{{ formatPrice(product) }}</p>
+          </div>
+        </a>
+      }
+    </app-scroll-strip>
+  </section>
+}
 
 <!-- ═══ FASCIA PROMO ═══════════════════════════════════════════════════════
      Non tre card uguali: il pannello dei saldi e' l'ancora e occupa il doppio,
-     gli altri due sono blocchi di testo appoggiati alla stessa riga.
+     gli altri due sono blocchi di testo appoggiati alla stessa riga. I primi
+     due blocchi sono il copy letterale del design (CollectionBanner e
+     SaleBanner in design-code.txt); il terzo e' funzionalita' del sito.
      ═══════════════════════════════════════════════════════════════════════ -->
 <section class="promo-shell">
   <div class="promo-board mx-auto max-w-6xl px-6 lg:px-8">
@@ -136,7 +125,7 @@
         </ul>
 
         @if (i === 0) {
-          <p class="promo-countdown">I saldi chiudono domenica a mezzanotte.</p>
+          <p class="promo-countdown">Sale ends Sunday at midnight.</p>
         }
 
         <a
@@ -144,7 +133,7 @@
           class="promo-cta"
         >
           @if (block.loginLink && auth.isAuthenticated()) {
-            Vai all'account
+            Go to account
           } @else {
             {{ block.cta }}
           }
@@ -153,36 +142,3 @@
     }
   </div>
 </section>
-
-<!-- ═══ NUOVI ARRIVI ═══════════════════════════════════════════════════════ -->
-@if (featuredProducts().length) {
-  <section class="featured-shell px-6 py-16 sm:py-20 lg:px-8">
-    <div class="mx-auto max-w-6xl">
-      <div class="mb-10 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 border-b border-line pb-5">
-        <h2 class="display text-3xl sm:text-d1">Appena arrivati</h2>
-        <a routerLink="/products" class="link text-sm shrink-0">Tutta la collezione →</a>
-      </div>
-
-      <!-- .animate-rise: l'entrata gia' prevista dai token, finora mai usata. -->
-      <div class="featured-grid animate-rise">
-        @for (product of featuredProducts(); track product.id) {
-          <a [routerLink]="['/product', product.slug]" class="featured-card">
-            <div class="featured-img-wrap">
-              <img [src]="getCoverImage(product)" [alt]="product.name" class="featured-img" loading="lazy" />
-              @if (hasDiscount(product)) {
-                <span class="featured-badge featured-badge-sale">Saldo</span>
-              } @else if (product.isNewArrival) {
-                <span class="featured-badge">Novità</span>
-              }
-            </div>
-            <div class="featured-info">
-              <p class="featured-cat">{{ product.category.name }}</p>
-              <h3 class="featured-name">{{ product.name }}</h3>
-              <p class="featured-price tnum">{{ formatPrice(product) }}</p>
-            </div>
-          </a>
-        }
-      </div>
-    </div>
-  </section>
-}

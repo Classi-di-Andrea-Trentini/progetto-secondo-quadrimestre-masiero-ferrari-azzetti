@@ -3,10 +3,11 @@ import { isPlatformBrowser } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth';
 import { ProductsService, ProductListItem } from '../../services/products.service';
+import { ScrollStrip } from '../../components/scroll-strip/scroll-strip';
 
 @Component({
   selector: 'app-home',
-  imports: [RouterModule],
+  imports: [RouterModule, ScrollStrip],
   templateUrl: './home.html',
   styleUrl: './home.css',
 })
@@ -16,71 +17,49 @@ export class Home implements OnInit {
   private readonly platformId = inject(PLATFORM_ID);
 
   readonly featuredProducts = signal<ProductListItem[]>([]);
-  // Illustrazioni interne (e-commerce/public/media/catalogo/collezioni): percorsi
-  // relativi, nessuna dipendenza da CDN esterne.
-  readonly collectionHighlights = [
-    {
-      image: '/media/catalogo/collezioni/capispalla.svg',
-      title: 'Capispalla',
-      subtitle: 'Strati per le mezze stagioni',
-    },
-    {
-      image: '/media/catalogo/collezioni/guardaroba-minimo.svg',
-      title: 'Guardaroba minimo',
-      subtitle: 'Linee pulite, capi che restano',
-    },
-    {
-      image: '/media/catalogo/collezioni/neutri-da-sera.svg',
-      title: 'Neutri da sera',
-      subtitle: 'Toni sobri per le occasioni',
-    },
-    {
-      image: '/media/catalogo/collezioni/sartoria-di-strada.svg',
-      title: 'Sartoria di strada',
-      subtitle: 'Tagli costruiti, portati morbidi',
-    },
-    {
-      image: '/media/catalogo/collezioni/linea-monocroma.svg',
-      title: 'Linea monocroma',
-      subtitle: 'Nero e avorio, i due estremi',
-    },
-    {
-      image: '/media/catalogo/collezioni/capsule-weekend.svg',
-      title: 'Capsule weekend',
-      subtitle: 'Quello che metti senza pensarci',
-    },
-  ];
 
-  readonly activeSlide = signal(0);
+  /** Immagine di apertura dell'hero (e-commerce/public/media/catalogo/collezioni):
+      percorso relativo, nessuna dipendenza da CDN esterne. Il fan carousel che
+      un tempo ruotava su sei di queste illustrazioni e' sparito insieme al resto
+      della sua sezione: la striscia di prodotti veri (<app-scroll-strip>) copre
+      lo stesso ruolo editoriale con dati reali invece che segnaposto. */
+  readonly heroHighlight = {
+    image: '/media/catalogo/collezioni/capispalla.svg',
+    title: 'Outerwear',
+    subtitle: 'Layers for the shoulder seasons',
+  };
 
-  /** Il primo blocco e' l'ancora della fascia; gli altri due la accompagnano. */
+  /** Le prime due voci sono il copy letterale dei banner del design (design-code.txt,
+      blocchi CollectionBanner e SaleBanner). La terza non ha un equivalente nel
+      design: e' una funzionalita' del sito (accesso account) che non avrebbe senso
+      togliere solo perche' il file Figma non la mostra. */
   readonly promoShowcase = [
     {
-      label: 'Saldi di stagione',
-      title: 'Fino a',
-      highlight: '−60%',
+      label: 'Seasonal Sale',
+      title: 'Up to',
+      highlight: '-60%',
       description:
-        'Una selezione di capi essenziali a prezzo ridotto, finché durano le taglie.',
-      notes: ['Prezzi a tempo', 'I più venduti', 'Spedizione in 48h'],
-      cta: 'Vai ai saldi',
+        'An exclusive selection of essential pieces at special prices. For a limited time only.',
+      notes: ['Limited-time prices', 'Best sellers', '48h delivery'],
+      cta: 'Shop the Sale',
       link: '/products',
     },
     {
-      label: 'Nuova stagione',
-      title: 'La collezione',
+      label: 'New Season',
+      title: 'New Collection',
       description:
-        'Proporzioni sobrie e materiali scelti uno per uno, pensati per tutti i giorni.',
-      notes: ['Linee attuali', 'Tessuti scelti', 'Palette senza tempo'],
-      cta: 'Scopri',
+        'Essentiality, refined proportions and carefully selected materials. A modern vision of everyday style.',
+      notes: ['Current lines', 'Chosen fabrics', 'Timeless palette'],
+      cta: 'Discover More',
       link: '/products',
     },
     {
-      label: 'Per chi ha un account',
-      title: 'Accesso in anteprima',
+      label: 'For account holders',
+      title: 'Early access',
       description:
-        'Entra per vedere gli arrivi in anticipo, salvare la lista dei desideri e usare i tuoi punti.',
-      notes: ['Offerte riservate', 'Lista dei desideri', 'Punti fedeltà'],
-      cta: 'Vai all\'account',
+        'Sign in to see new arrivals first, save your wishlist and use your loyalty points.',
+      notes: ['Member-only offers', 'Wishlist', 'Loyalty points'],
+      cta: 'Go to account',
       link: '/me',
       loginLink: '/login',
     },
@@ -88,7 +67,7 @@ export class Home implements OnInit {
 
   ngOnInit(): void {
     if (!isPlatformBrowser(this.platformId)) return;
-    this.productsService.getProducts({ sortBy: 'newest', limit: 4 }).subscribe({
+    this.productsService.getProducts({ sortBy: 'newest', limit: 8 }).subscribe({
       next: (res) => this.featuredProducts.set(res.data),
     });
   }
@@ -109,50 +88,4 @@ export class Home implements OnInit {
   hasDiscount(product: ProductListItem): boolean {
     return product.discounts.length > 0;
   }
-
-  prevSlide(): void {
-    const total = this.collectionHighlights.length;
-    this.activeSlide.update((value) => (value - 1 + total) % total);
-  }
-
-  nextSlide(): void {
-    const total = this.collectionHighlights.length;
-    this.activeSlide.update((value) => (value + 1) % total);
-  }
-
-  goToSlide(index: number): void {
-    this.activeSlide.set(index);
-  }
-
-  isActive(index: number): boolean {
-    return this.getSlideOffset(index) === 0;
-  }
-
-  isLeft(index: number): boolean {
-    return this.getSlideOffset(index) === -1;
-  }
-
-  isRight(index: number): boolean {
-    return this.getSlideOffset(index) === 1;
-  }
-
-  isHidden(index: number): boolean {
-    return !this.isActive(index) && !this.isLeft(index) && !this.isRight(index);
-  }
-
-  private getSlideOffset(index: number): number {
-    const total = this.collectionHighlights.length;
-    let offset = index - this.activeSlide();
-
-    if (offset > total / 2) {
-      offset -= total;
-    }
-
-    if (offset < -total / 2) {
-      offset += total;
-    }
-
-    return offset;
-  }
-
 }

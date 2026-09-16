@@ -87,136 +87,6 @@
   bottom: 1.375rem;
 }
 
-/* ── CAROSELLO ────────────────────────────────────────────────────────────── */
-
-.collection-shell {
-  background: var(--color-paper);
-  padding: 1rem 0 4rem;
-}
-
-.collection-stage {
-  position: relative;
-  height: 23rem;
-  /* Le due carte laterali sono spinte fuori dal centro apposta: senza tagliarle
-     qui sporgevano oltre il bordo destro e su un telefono l'intera pagina
-     scorreva in orizzontale (436px di larghezza su uno schermo da 375). */
-  overflow: hidden;
-}
-
-.collection-card {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  height: 20rem;
-  width: min(72vw, 23rem);
-  overflow: hidden;
-  border-radius: 3px;
-  background: var(--color-sunken);
-  transform-origin: center;
-  transition:
-    transform 520ms var(--ease-out-expo),
-    opacity 360ms var(--ease-out-quart),
-    box-shadow 360ms var(--ease-out-quart);
-}
-
-.collection-meta {
-  position: absolute;
-  left: 1.25rem;
-  right: 1.25rem;
-  bottom: 1.125rem;
-  z-index: 2;
-  opacity: 0;
-  transform: translateY(0.5rem);
-  transition:
-    transform 300ms var(--ease-out-expo),
-    opacity 300ms var(--ease-out-quart);
-}
-
-.collection-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to top, oklch(0.145 0.008 285 / 0.7), oklch(0.145 0.008 285 / 0.1) 55%, transparent 78%);
-}
-
-.card-active {
-  z-index: 3;
-  opacity: 1;
-  transform: translateX(-50%) scale(1);
-  box-shadow: var(--shadow-float);
-}
-
-.card-active .collection-meta {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.card-left,
-.card-right {
-  z-index: 2;
-  opacity: 0.55;
-}
-
-.card-left {
-  transform: translateX(calc(-50% - 12rem)) translateY(1rem) scale(0.88);
-}
-
-.card-right {
-  transform: translateX(calc(-50% + 12rem)) translateY(1rem) scale(0.88);
-}
-
-.card-hidden {
-  z-index: 0;
-  opacity: 0;
-  pointer-events: none;
-  transform: translateX(-50%) translateY(2rem) scale(0.8);
-}
-
-.collection-nav-btn {
-  display: inline-flex;
-  height: 2.25rem;
-  width: 2.25rem;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--color-line-strong);
-  border-radius: 50%;
-  background: var(--color-surface);
-  color: var(--color-ink-2);
-  cursor: pointer;
-  transition:
-    border-color 180ms var(--ease-out-quart),
-    color 180ms var(--ease-out-quart);
-}
-
-.collection-nav-btn:hover {
-  border-color: var(--color-ink);
-  color: var(--color-ink);
-}
-
-.collection-dot {
-  height: 0.375rem;
-  width: 0.375rem;
-  border: 0;
-  border-radius: 50%;
-  padding: 0;
-  background: var(--color-line-strong);
-  cursor: pointer;
-  transition:
-    width 220ms var(--ease-out-expo),
-    background-color 180ms var(--ease-out-quart);
-}
-
-.collection-dot:hover {
-  background: var(--color-ink-muted);
-}
-
-/* Il pallino attivo si allunga invece di cambiare colore: in una palette
-   monocroma la lunghezza si legge, la tinta no. */
-.collection-dot-active {
-  width: 1.25rem;
-  border-radius: 3px;
-  background: var(--color-ink);
-}
-
 /* ── FASCIA PROMO ─────────────────────────────────────────────────────────── */
 
 .promo-shell {
@@ -371,12 +241,6 @@
   border-top: 1px solid var(--color-line);
 }
 
-.featured-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 2rem 1.25rem;
-}
-
 .featured-card {
   display: block;
   color: inherit;
@@ -415,9 +279,13 @@
   color: var(--color-ink);
 }
 
+/* --color-badge-sale (Figma #C3A88D): il token dedicato al badge "Sale" delle
+   card prodotto, aggiunto dal task 1. Prima di questo passaggio la regola
+   puntava ancora a --color-accent, il rosso-terracotta usato altrove per
+   sconti e stati d'errore: due segnali diversi con lo stesso colore. */
 .featured-badge-sale {
-  background: var(--color-accent);
-  color: var(--color-surface);
+  background: var(--color-badge-sale);
+  color: var(--color-ink-strong);
 }
 
 .featured-info {
@@ -452,29 +320,9 @@
   .hero-visual {
     min-height: 20rem;
   }
-
-  .collection-stage {
-    height: 19rem;
-  }
-
-  .collection-card {
-    height: 17rem;
-  }
-
-  .card-left {
-    transform: translateX(calc(-50% - 8rem)) translateY(0.75rem) scale(0.86);
-  }
-
-  .card-right {
-    transform: translateX(calc(-50% + 8rem)) translateY(0.75rem) scale(0.86);
-  }
 }
 
 @media (min-width: 768px) {
-  .featured-grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-
   .promo-board {
     grid-template-columns: 1fr 1fr;
   }
@@ -497,8 +345,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .collection-card,
-  .collection-meta,
   .featured-img,
   .hero-visual,
   .hero-visual-image,
