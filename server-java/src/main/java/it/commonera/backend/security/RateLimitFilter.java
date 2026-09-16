@@ -15,6 +15,7 @@ import org.springframework.web.util.pattern.PathPatternParser;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 /**
@@ -149,7 +150,10 @@ public class RateLimitFilter extends OncePerRequestFilter {
     private RateLimitPolicy match(String method, PathContainer path) {
         for (var compiled : policies) {
             Set<String> methods = compiled.policy().methods();
-            if (!methods.isEmpty() && !methods.contains(method.toUpperCase())) continue;
+            // Locale.ROOT e non quello di sistema: i metodi HTTP sono ASCII, e in
+            // turco `toUpperCase()` trasformerebbe la "i" in "İ" facendo fallire
+            // il confronto — un limite che sparisce a seconda di dove gira.
+            if (!methods.isEmpty() && !methods.contains(method.toUpperCase(Locale.ROOT))) continue;
             if (matchesAny(compiled.patterns(), path)) return compiled.policy();
         }
         return null;
