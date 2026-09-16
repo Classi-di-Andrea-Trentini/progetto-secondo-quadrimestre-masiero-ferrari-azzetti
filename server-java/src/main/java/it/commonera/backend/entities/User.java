@@ -21,9 +21,26 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
-    /** Hash BCrypt. Il nome della colonna dice "hash" apposta: non e' la password. */
-    @Column(name = "password_hash", nullable = false)
+    /**
+     * Hash BCrypt. Il nome della colonna dice "hash" apposta: non e' la password.
+     *
+     * Puo' essere `null`: chi si e' registrato con Google non ne ha mai scelta una.
+     * Ogni punto che la legge deve reggere il `null` — vedi {@link #hasPassword()},
+     * {@code AuthService#login} e i controlli in {@code UserService}.
+     */
+    @Column(name = "password_hash")
     private String passwordHash;
+
+    /**
+     * L'identificativo stabile dell'account Google collegato (`sub` dell'id_token),
+     * `null` per chi entra solo con la password.
+     *
+     * Si conserva il `sub` e non l'email perche' l'email di un account Google puo'
+     * cambiare, mentre il `sub` no: collegare per indirizzo significherebbe perdere
+     * il collegamento al primo cambio, o peggio agganciarlo a un'altra persona.
+     */
+    @Column(name = "google_sub", unique = true)
+    private String googleSub;
 
     @Column(name = "full_name", nullable = false)
     private String fullName;
@@ -80,5 +97,15 @@ public class User {
     /** L'email non verificata blocca il login: stessa regola del backend Node. */
     public boolean isEmailVerified() {
         return emailVerifiedAt != null;
+    }
+
+    /** Falso per gli account nati da "Accedi con Google": non hanno mai avuto una password. */
+    public boolean hasPassword() {
+        return passwordHash != null && !passwordHash.isBlank();
+    }
+
+    /** Vero se l'account e' collegato a un'identita' Google. */
+    public boolean hasGoogleIdentity() {
+        return googleSub != null && !googleSub.isBlank();
     }
 }

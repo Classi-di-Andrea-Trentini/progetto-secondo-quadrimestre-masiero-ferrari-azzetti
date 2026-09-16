@@ -553,3 +553,18 @@ ALTER TABLE reviews ADD COLUMN IF NOT EXISTS photos TEXT[] NOT NULL DEFAULT '{}'
 -- parziale oppure "riuscito" per un incasso di cui una parte e' gia' tornata
 -- indietro. ADD VALUE IF NOT EXISTS lo rende ripetibile su basi dati esistenti.
 ALTER TYPE "PaymentStatus" ADD VALUE IF NOT EXISTS 'partially_refunded';
+
+-- ─── Accesso con Google ───────────────────────────────────────────────────────
+-- Chi entra con Google non sceglie mai una password, quindi `password_hash` non
+-- puo' piu' essere obbligatoria: senza questa riga l'inserimento di un utente
+-- solo-Google fallisce sul vincolo NOT NULL. DROP NOT NULL e' ripetibile, su una
+-- colonna gia' nullable non fa nulla.
+ALTER TABLE users ALTER COLUMN password_hash DROP NOT NULL;
+
+-- L'identita' Google si riconosce dal `sub`, non dall'email: il `sub` e' stabile
+-- per sempre, l'indirizzo puo' cambiare (e un indirizzo liberato puo' finire a
+-- un'altra persona). Unico, perche' due account nostri non possono essere lo
+-- stesso account Google; NULL per tutti quelli che Google non lo usano, e in
+-- Postgres un indice unico ammette quanti NULL vuole.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS google_sub VARCHAR(255);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_users_google_sub ON users (google_sub);
