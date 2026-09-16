@@ -50,6 +50,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class OrderServiceTest extends AbstractIntegrationTest {
 
     @Autowired
+    TestFixtures fixtures;
+
+    @Autowired
     private UserRepository users;
     @Autowired
     private UserAddressRepository addresses;
@@ -144,6 +147,9 @@ class OrderServiceTest extends AbstractIntegrationTest {
         UUID orderId = (UUID) result.get("orderId");
         em.flush();
         em.clear();
+        // L'ordine nasce `pending`: qui si simula la conferma del fornitore,
+        // che e' cio' che accredita i punti e rende l'ordine annullabile da pagato.
+        fixtures.confirmPaid(orderId);
 
         // Dopo il checkout: 500 punti spesi (-5.00 di sconto) portano il totale a
         // 95.00; il buono da 30.00 copre 30.00 di quei 95.00 e si svuota; 95 punti
@@ -396,6 +402,9 @@ class OrderServiceTest extends AbstractIntegrationTest {
         UUID orderId = (UUID) result.get("orderId");
         em.flush();
         em.clear();
+        // L'ordine nasce `pending`: qui si simula la conferma del fornitore,
+        // che e' cio' che accredita i punti e rende l'ordine annullabile da pagato.
+        fixtures.confirmPaid(orderId);
 
         int stockAfterCheckout = variants.findById(variant.getId()).orElseThrow().getStockQty();
         BigDecimal giftCardAfterCheckout = giftCardRepo.findById(card.getId()).orElseThrow().getCurrentBalance();
@@ -494,6 +503,9 @@ class OrderServiceTest extends AbstractIntegrationTest {
         UUID orderId = (UUID) result.get("orderId");
         em.flush();
         em.clear();
+        // L'ordine nasce `pending`: qui si simula la conferma del fornitore,
+        // che e' cio' che accredita i punti e rende l'ordine annullabile da pagato.
+        fixtures.confirmPaid(orderId);
 
         // 500 punti spesi (-5.00) e 500 punti accreditati sull'imponibile scontato
         // (505.00 - 5.00 = 500.00): il saldo non si e' mosso, il delta per questo

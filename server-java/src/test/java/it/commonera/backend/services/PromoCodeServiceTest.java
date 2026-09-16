@@ -37,6 +37,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class PromoCodeServiceTest extends AbstractIntegrationTest {
 
     @Autowired
+    private TestFixtures fixtures;
+
+    @Autowired
     private UserRepository users;
     @Autowired
     private UserAddressRepository addresses;
@@ -261,7 +264,13 @@ class PromoCodeServiceTest extends AbstractIntegrationTest {
                 null,
                 null);
 
-        checkout.placeOrder(buyer.getId(), request);
+        var result = checkout.placeOrder(buyer.getId(), request);
+        em.flush();
+        em.clear();
+
+        // L'ordine nasce `pending`: i punti arrivano con la conferma del
+        // fornitore, non con la prenotazione.
+        fixtures.confirmPaid((java.util.UUID) result.get("orderId"));
         em.flush();
         em.clear();
 

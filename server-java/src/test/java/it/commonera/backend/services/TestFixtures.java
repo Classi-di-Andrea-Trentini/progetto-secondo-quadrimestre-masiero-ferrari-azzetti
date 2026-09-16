@@ -27,19 +27,51 @@ public class TestFixtures {
     private final GiftCardService giftCards;
     private final LoyaltyEntryRepository loyaltyEntries;
     private final CheckoutService checkout;
+    private final PaymentRepository payments;
+    private final LoyaltyService loyaltyService;
 
     @PersistenceContext
     private EntityManager em;
 
     public TestFixtures(UserRepository users, UserAddressRepository addresses, OrderRepository orders,
                         GiftCardService giftCards, LoyaltyEntryRepository loyaltyEntries,
-                        CheckoutService checkout) {
+                        CheckoutService checkout, PaymentRepository payments,
+                        LoyaltyService loyaltyService) {
         this.users = users;
         this.addresses = addresses;
         this.orders = orders;
         this.giftCards = giftCards;
         this.loyaltyEntries = loyaltyEntries;
         this.checkout = checkout;
+        this.payments = payments;
+        this.loyaltyService = loyaltyService;
+    }
+
+    /**
+     * Porta a `paid` un ordine appena prenotato, come fara' il webhook del
+     * fornitore quando conferma l'incasso.
+     *
+     * Serve perche' dalla fase A in poi {@link CheckoutService#placeOrder} lascia
+     * l'ordine `pending`: i test che verificano cose che accadono **dopo**
+     * l'incasso (punti accreditati, annullamento di un ordine pagato) hanno
+     * bisogno di quel passaggio, che prima avveniva da solo perche' il checkout
+     * si dichiarava pagato senza che nessuno avesse pagato.
+     */
+    public void confirmPaid(UUID orderId) {
+        var order = orders.findById(orderId).orElseThrow();
+        payments.findByOrderId(orderId).ifPresent(payment -> {
+            payment.setStatus(Payment.PaymentStatus.succeeded);
+            payment.setPaidAt(LocalDateTime.now());
+            payments.save(payment);
+        });
+        order.setStatus(OrderStatus.paid);
+        orders.save(order);
+        // L'accredito passa dal servizio vero, non da una formula ricopiata qui:
+        // una copia diverge al primo cambiamento e i test smetterebbero di
+        // descrivere quello che fa il negozio.
+        loyaltyService.award(order.getUserId(), order.getId(),
+                order.getSubtotal().subtract(order.getDiscountTotal()));
+        em.flush();
     }
 
     public User aUser() {
