@@ -1,13 +1,13 @@
 # Common Era — backend Java
 
-Riscrittura in **Spring Boot 4 / Java 21** del backend NestJS, nella copia
-`...-azzetti-java`. Vive accanto a `server/` (Node), non al suo posto: i due parlano
-lo **stesso database** e la **stessa API**, quindi si possono accendere alternati e
-confrontare senza toccare il frontend.
+Riscrittura in **Spring Boot 4 / Java 21** del backend NestJS. È il backend **in
+uso**: `docker-compose.yml` costruisce questo, e `server/` (Node) resta nel
+repository solo come riferimento. I due parlano lo stesso database e la stessa API,
+il che ha permesso di accenderli alternati e confrontarli durante la riscrittura.
 
 ## Stato
 
-Il nucleo è portato e provato dal vivo contro il database vero.
+La riscrittura è **completa**: tutte le aree del backend Node sono state portate.
 
 | Area | Stato |
 |---|---|
@@ -24,9 +24,16 @@ Il nucleo è portato e provato dal vivo contro il database vero.
 | **Punti fedeltà** (saldo, storico, accredito, sconto) | fatto |
 | **Avvisi "torna disponibile"** | fatto |
 | **Area amministrativa**: statistiche, magazzino, rettifiche, moderazione, stati ordine | fatto |
-| **Invio email** via SMTP (stesso trasporto del backend Node) | fatto |
-| Codici promo, resi, newsletter | **da portare** |
-| Carrello abbandonato, sitemap | **da portare** |
+| **Invio email** via SMTP | fatto |
+| **Codici promo, resi, newsletter** | fatto |
+| **GDPR**: export dei dati e cancellazione dell'account | fatto |
+| **Incasso reale** (Stripe): astrazione pronta, non collegata al checkout | **da fare** |
+| Email di conferma d'ordine, spedizione, consegna | **da fare** |
+| Limite di richieste oltre il login; transizioni di stato ordine validate | **da fare** |
+| Carrello abbandonato, sitemap | **da fare** |
+
+L'elenco ragionato e verificato di cosa manca è in
+[`docs/11-what-is-missing.md`](../docs/11-what-is-missing.md).
 
 ## Avvio
 
@@ -35,13 +42,14 @@ Serve il Postgres del compose già in piedi (`docker compose up -d db` nella rad
 ```bash
 cd server-java
 DATABASE_URL_JDBC="jdbc:postgresql://localhost:5433/mydb" \
-DB_USER=user DB_PASSWORD=password \
+DB_USER=user DB_PASSWORD=<quella scritta nel .env> \
 JWT_SECRET="$(openssl rand -base64 48)" \
 PORT=8080 ./gradlew bootRun
 ```
 
-L'API risponde su `http://localhost:8080/api`, lo stesso prefisso del backend Node
-(che sta sulla 3000): per puntarci il frontend basta cambiare la porta nel proxy.
+L'API risponde su `http://localhost:8080/api`. Per puntarci il frontend:
+`cd e-commerce && npm run start:local`, che usa `proxy.conf.local.json`. Dentro
+Docker il backend sta invece sulla **3000**.
 
 ## Le decisioni che vale la pena conoscere
 
@@ -77,9 +85,27 @@ spento, perché sembra funzionare.
 chi non è autenticato e 403 per chi non ha i permessi — Spring di suo risponderebbe
 403 in entrambi i casi, e il frontend usa il 401 per mandare al login.
 
-## Verificato dal vivo
+## Test
 
-Contro il database del compose, con il backend Node acceso in parallelo:
+```bash
+./gradlew test     # 81 test
+```
+
+I test avviano un **Postgres vero** con Testcontainers e ci caricano dentro lo
+stesso `database/init/001_schema.sql` di produzione: un test che validasse contro
+uno schema generato da Hibernate non proverebbe niente. Senza un demone Docker
+raggiungibile la suite non parte.
+
+Il container è un singleton avviato a mano in un blocco statico e mai fermato: con
+`@Container` verrebbe spento alla fine della prima classe di test, e la seconda lo
+troverebbe morto (è esattamente quello che succedeva). Ogni test gira in una
+transazione che viene sempre annullata.
+
+Girano anche in integrazione continua, a ogni push: `.github/workflows/test.yml`.
+
+## Verificato dal vivo durante la riscrittura
+
+Contro il database del compose, con il backend Node ancora acceso in parallelo:
 
 - catalogo: **24 prodotti**, identici al Node;
 - ricerca: `nera` → 4, `t-shirt nera` → 1, `tshirt` → 3, `zzzzz` → 0, **gli stessi

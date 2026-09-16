@@ -1,67 +1,76 @@
-# Frontend — Shared Components
+# Frontend — i componenti condivisi
 
-Components in `e-commerce/src/app/components/` are reusable pieces rendered by the main app shell or embedded in pages.
+`e-commerce/src/app/components/`. Sette, tutti standalone.
 
----
+| Cartella | Selettore | Cosa fa |
+|---|---|---|
+| `nav-bar/` | `app-nav-bar` | barra in alto |
+| `cart/` | `app-cart` | pannello laterale del carrello |
+| `footer/` | `app-footer` | pie' di pagina |
+| `breadcrumb/` | `app-breadcrumb` | navigazione gerarchica |
+| `product-image/` | `app-product-image` | immagine prodotto con segnaposto |
+| `skeleton/` | `app-skeleton` | scheletro di caricamento |
+| `toast/` | `app-toast` | notifiche temporanee |
 
-## NavBar — components/nav-bar/
+`NavBar`, `Cart`, `Toast` e `Footer` vivono in `app.html`, cioe' sono sempre a
+schermo. Gli altri li usano le pagine.
 
-The top navigation bar. Rendered in `app.component.html` (or equivalent root template) so it appears on every page.
+## NavBar
 
-### Scroll behaviour
+Si ritira scorrendo verso il basso e ricompare scorrendo verso l'alto (soglia di 8
+pixel, per non tremare). **Non si ritira mentre il menu mobile e' aperto**: prima
+bastava scorrere di un dito col menu aperto e la barra spariva portandosi via il
+menu.
 
-The navbar auto-hides when scrolling down and reappears when scrolling up. The logic lives in a `@HostListener('window:scroll')` method that tracks `lastScrollY` and compares it to the current scroll position. A `THRESHOLD` of 8 pixels filters out small wobbles so the bar does not flicker when the page is almost still.
+Mostra il badge del carrello (`cart.itemCount()`), le iniziali dell'utente
+collegato, e il link al pannello se il ruolo e' `admin`.
 
-Two private signals drive the CSS:
-- `isHidden` — set to true when scrolling down.
-- `isScrolled` — set to true once any scrolling has happened, adds a shadow.
+**Non ha una casella di ricerca.** Il catalogo sa filtrare per `?q=`, ma da
+nessuna parte dell'interfaccia si puo' scrivere una parola da cercare: e' una delle
+voci di [11-what-is-missing.md](./11-what-is-missing.md).
 
-`navClasses` is a computed signal that returns the Tailwind/CSS class object for the nav element.
+## Cart
 
-### Auth integration
+Pannello laterale con le righe, le quantita' modificabili e il subtotale. Legge il
+segnale `ready` di `CartService`: finche' e' falso mostra lo scheletro, perche' il
+carrello di chi e' collegato arriva dal server **dopo** il primo render, e mostrare
+"carrello vuoto" in quell'istante e' una bugia.
 
-Injects `AuthService`. Reads `auth.currentUser()` to conditionally show the login/register links or the user avatar with initials.
+## Footer
 
-`initials` — a computed signal that extracts the first letter of the first name and the first letter of the last name from `currentUser().fullName`. Used for the avatar circle when the user has no profile image.
+Link alle cinque pagine legali e il link **"Gestisci cookie"**, che chiama
+`CookieConsentService.reopen()` e rimette a schermo l'informativa disegnata da
+`App`. Senza, la lettura dell'informativa sarebbe definitiva e non ci sarebbe modo
+di tornarci.
 
-### Cart badge
+## ProductImage
 
-Injects `CartService`. Reads `cart.itemCount()` (when implemented) to show the count badge on the cart icon. Currently shows when `cart.isOpen` toggle is available.
+Copre i tre casi in cui il catalogo mostrerebbe un riquadro rotto: URL assente, URL
+vuoto, URL non raggiungibile (404, host sparito). In tutti e tre disegna un
+segnaposto invece di lasciare l'icona di immagine rotta del browser.
 
-### Dependencies
+Riempie il contenitore, quindi va usato dentro il box che ne definisce proporzioni e
+dimensioni (`.card-image`, `.thumb`, `aspect-[3/4]`…). `OnPush`, perche' un'immagine
+non cambia da sola.
 
-Uses `RouterLink` and `RouterLinkActive` for navigation links, `NgClass` for the scroll-based class binding.
+Prima catalogo, scheda e wishlist mostravano un `<img>` con `src` vuoto e nessun
+`onerror`.
 
----
+## Breadcrumb, Skeleton, Toast
 
-## Cart — components/cart/
+- **Breadcrumb** — riceve una lista di `BreadcrumbItem` e disegna il percorso.
+- **Skeleton** — il rettangolo grigio animato, usato mentre si aspettano i dati.
+- **Toast** — legge il segnale `toasts` di `ToastService` e mostra i messaggi in
+  coda, con scomparsa automatica.
 
-Il drawer carrello laterale. Si apre/chiude tramite `CartService.isOpen`.
+## `search-bar`, rimosso
 
-Il template include:
-- Overlay scuro con click-to-close
-- Lista item renderizzata da `cart.items()` con immagine, nome variante, prezzo unitario
-- Controlli quantità (+ / −) che chiamano `cart.updateQuantity()` e `cart.removeItem()`
-- Subtotale da `cart.subtotal()`
-- Pulsante "Vai al checkout" che naviga a `/checkout`
-- Stato vuoto con link a `/products`
+C'era un componente `SearchBar` completo e funzionante, che navigava a
+`/products?q=…`. **Nessuna pagina lo importava**, nemmeno la barra in alto: era
+codice morto che faceva credere, leggendo l'elenco dei componenti, che la ricerca
+esistesse. E' stato rimosso; la funzione resta da fare, montando una casella nella
+`NavBar`.
 
----
-
-## SearchBar — components/search-bar/
-
-Barra di ricerca che naviga a `/products?q=<query>`. Legge il parametro `q` dall'URL all'inizializzazione per pre-popolare il campo se l'utente è già nella pagina prodotti.
-
----
-
-## Footer — components/footer/
-
-Not explored in detail, but present in the components directory. Likely a static HTML footer with brand information, navigation links, and legal page links.
-
----
-
-## How components are wired together
-
-The root application template (rendered by `AppComponent`) includes `<app-nav-bar>` and `<app-cart>` alongside the `<router-outlet>`. This means these components are always mounted and their services are initialised before any page component renders.
-
-Because `CartService` and `AuthService` are provided in root, the same instance is shared between `NavBar`, `Cart`, and any page component that needs them. A page calling `auth.updateProfile()` immediately reflects in the navbar's user display without any additional event handling.
+Insieme e' sparita la cartella `src/app/interfaces/`: sedici file, dieci dei quali
+vuoti, e **nessuno importato da nessuna parte**. I tipi vivono accanto al servizio
+che li usa.

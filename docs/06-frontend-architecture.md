@@ -1,77 +1,109 @@
-# Frontend Architecture
+# Frontend — architettura
 
-## Technology choices
+Angular 21, in `e-commerce/`. Tutti i componenti sono **standalone**: nel codice
+dell'applicazione non esiste un solo `NgModule`. Si usa la sintassi di controllo
+nuova (`@if`, `@for`, `@switch`) e lo stato si tiene nei **signal**.
 
-Angular 21 with SSR enabled. All components are standalone — there are no `NgModule` classes in the application code. The app uses the new Angular control flow syntax (`@if`, `@for`, `@switch`) instead of the older structural directives. State management is done with Angular signals.
+## Comandi
 
-## SSR and the browser check pattern
-
-The application runs on the server during SSR to generate the initial HTML. This creates a problem: any code that touches browser-only APIs (`localStorage`, `document`, `window`, cookie access) will throw on the server and crash the render.
-
-The pattern used throughout the codebase is:
-
-```typescript
-private readonly platformId = inject(PLATFORM_ID);
-
-ngOnInit() {
-  if (!isPlatformBrowser(this.platformId)) return;
-  // browser-only code here
-}
+```bash
+cd e-commerce
+npm ci
+npm start        # ng serve (proxy verso il backend: proxy.conf.json)
+npm run start:local   # ng serve con proxy.conf.local.json, per il backend fuori Docker
+npm run build    # build di produzione + prerender
+npm test         # Vitest su jsdom
 ```
 
-The auth guard also handles this: on the server it returns `of(true)` immediately and lets the page render, because the user's auth state cannot be known without cookies. The real check happens on the client after hydration.
+## L'URL dell'API sta in un posto solo
 
-`isPlatformBrowser` is imported from `@angular/common`. `PLATFORM_ID` is injected via `inject()` in the constructor or field initialiser.
+`services/api.config.ts` esporta `API_URL`, e nessun servizio scrive un indirizzo a
+mano.
 
-## How services talk to the backend
+- **Nel browser** vale `/api`: relativo, stessa origine. Il dev server di Angular e
+  il server SSR inoltrano quel percorso al backend, e cosi' non esistono problemi di
+  CORS, di cookie cross-site, ne' di visibilita' delle porte su Codespaces.
+- **In SSR** `window` non esiste e non si passa per il proxy, quindi si va dritti al
+  backend: `BACKEND_URL` se c'e', altrimenti `http://backend:3000/api`, che e' il
+  nome del servizio nella rete di Compose.
 
-Every Angular service uses `HttpClient` to call the backend at `http://localhost:3000`. The base URL is hardcoded as a module-level constant in each service file. There is no environment file or injection token wrapping this.
+## SSR: una scelta per rotta
 
-All requests that need authentication send `{ withCredentials: true }` so the browser includes the `access_token` cookie. The cookie is HttpOnly so it is never directly accessible to JavaScript.
+`angular.json` ha `outputMode: "server"`, e `app.routes.server.ts` decide come viene
+resa ogni rotta. Il criterio e' uno solo — **chi deve leggere questa pagina?**
 
-Almost all service methods are `async` and use `firstValueFrom(this.http.get/post/patch...)` to convert the Observable to a Promise. This allows calling them with `await` and handling errors with `try/catch`.
+| Rotta | Modo | Perche' |
+|---|---|---|
+| `/`, `/home`, `/about` | Prerender (SSG) | uguali per tutti e cambiano di rado |
+| `/legal/:pagina` | Prerender (SSG) | cinque pagine fisse, elenco noto in anticipo |
+| `/products` | Server (SSR) | il catalogo cambia e va indicizzato |
+| `/product/:slug` | Server (SSR) | prezzo e disponibilita' devono essere freschi |
+| login, registrazione, recupero password | Client (SPA) | niente da indicizzare |
+| `/me`, `/checkout`, `/admin/**` | Client (SPA) | sul server non c'e' nessun utente da rendere |
+| `**` (404) | Server, **`status: 404`** | pubblica, e deve rispondere col codice giusto |
 
-## Signals and state
+La regola dietro la tabella: **SSG se il contenuto e' uguale per tutti e stabile,
+SSR se e' pubblico ma cambia, SPA se e' privato.**
 
-The global auth state lives in `AuthService` as a private `WritableSignal<AuthUser | null>` exposed as a readonly signal. Components that need the user just inject `AuthService` and read `auth.currentUser()`.
+Le pagine legali si prerenderizzano leggendo `LEGAL_KEYS` e non un elenco riscritto
+a mano: la copia precedente si era gia' fermata a tre pagine, e una pagina legale
+che esiste nell'applicazione ma non viene generata resta invisibile ai motori di
+ricerca proprio mentre la legge impone di pubblicarla.
 
-`computed()` signals derive values from other signals and update automatically. Example: `isAuthenticated = computed(() => this._currentUser() !== null)`.
+## Il jolly e la 404
 
-`effect()` is used in one component (`MeComponent`) to sync a form's values when the user signal changes, because the form needs to be pre-filled with the current user's data on mount.
+`{ path: '**', component: NotFound }` in `app.routes.ts`, con `status: 404` sulla
+rotta server. Prima faceva `redirectTo: 'home'`: un indirizzo sbagliato finiva in
+home **con stato 200**, quindi chi aveva sbagliato a scrivere non se ne accorgeva e
+un motore di ricerca considerava valido qualunque URL inventato.
 
-## app.routes.ts
+Lo stato HTTP si puo' scegliere **solo** in `app.routes.server.ts`: dal componente
+non si arriva alla risposta.
 
-The route table is flat with no lazy loading. All page components are imported at the top of the file and referenced directly.
+## Guardie
 
+`guards/auth-guard-guard.ts` (su `/me` e `/checkout`) e
+`guards/admin-guard-guard.ts` (su `/admin/**`).
+
+Entrambe controllano `isPlatformBrowser` e **lasciano passare sul server**: durante
+l'idratazione SSR non c'e' nessun utente da leggere, e una guardia che redirige li'
+innesca un ciclo. `authGuardGuard` aspetta inoltre che `AuthService.isLoading()`
+sia `false`, altrimenti manderebbe al login chiunque ricarichi la pagina prima che
+`/auth/me` abbia risposto.
+
+## Stato con i signal
+
+Niente `BehaviorSubject`, niente `EventEmitter` per lo stato condiviso: i servizi
+espongono `signal()` in sola lettura e `computed()`, i componenti li leggono e si
+aggiornano da soli.
+
+```ts
+readonly currentUser = this._currentUser.asReadonly();
+readonly isAuthenticated = computed(() => this._currentUser() !== null);
+readonly isAdmin = computed(() => this._currentUser()?.role === 'admin');
 ```
-/           → redirects to /home
-/home       → Home
-/login      → Login
-/register   → Register
-/products   → Products
-/product/:slug  → ProductDetail
-/me         → MeComponent  (guarded by authGuardGuard)
-/verify-email/:token → VerifyEmail
-/legal/:pagina → Legal
-/**         → redirects to /home
-```
 
-## authGuardGuard
+Gli `HttpClient` che restituiscono `Observable` vengono consumati con
+`firstValueFrom` dove il servizio espone metodi `async`.
 
-The guard is a `CanActivateFn`. It handles SSR by returning `of(true)` immediately when not in a browser. In the browser, it waits for `AuthService.isLoading` to become false by converting the signal to an Observable with `toObservable()`, filtering out the loading state with `filter(loading => !loading)`, taking the first emission, and then returning either `true` or a redirect to `/login`.
+## Design system — `src/styles.css`
 
-This is necessary because `AuthService` checks the current session with `GET /auth/me` asynchronously in its constructor. If the guard checked `isAuthenticated()` synchronously, it would always find false during the first render before the HTTP call completes.
+Monocromo editoriale: **una rampa d'inchiostro**, un accento usato sotto il 10%
+della superficie, colori semantici per gli stati. Tutti i colori sono in **OKLCH**,
+con il contrasto misurato: `--color-ink-muted` sta a 4,81:1 su `paper` ed e' il
+pavimento — sotto quello non si scende per il testo.
 
-## Component structure
+Il vocabolario di classi si usa cosi' com'e':
 
-Components are in two groups:
+| Classe | Cosa |
+|---|---|
+| `.btn` + `.btn-primary` / `.btn-outline` / `.btn-ghost` / `.btn-danger`, con `.btn-sm` / `.btn-lg` / `.btn-block` | i bottoni, con tutti gli stati (hover, focus, disabilitato, `data-loading`) |
+| `.field`, `.field-error`, `.field-hint` | i campi |
+| `.badge` + varianti | le etichette di stato |
+| `.display` | i titoli editoriali (serif) |
+| `.rule`, `.measure`, `.auto-grid`, `.empty` | filetto, colonna di testo a 68ch, griglia prodotti, stato vuoto |
+| `.z-sticky`, `.z-drawer`, `.z-modal`, `.z-toast`, … | scala di `z-index` semantica, al posto dei 90/100/9999 sparsi |
 
-**pages/** — full-page route components. Each has a `.ts`, `.html`, and `.css` file.
-
-**components/** — reusable pieces rendered within pages. Currently: `nav-bar`, `footer`, `search-bar`, `cart`.
-
-Every component declares `standalone: true` in its decorator and lists its own imports. The pattern is to import only what the component actually uses: `CommonModule` if `NgClass`/`DatePipe` are needed, `RouterModule` for `routerLink`, `ReactiveFormsModule` for forms.
-
-## Decimal fields from Prisma
-
-`Product.basePrice` and all other `Decimal` fields in the schema come through the API as strings. Angular templates and service methods must call `parseFloat(String(value))` before any arithmetic. Calling `.toFixed()` directly on the raw value throws a TypeError and crashes the `@for` loop rendering the list.
+**Ricostruire un bottone con le utility Tailwind e' un errore**: si perdono focus,
+stato disabilitato e indicatore di caricamento, e la pagina diverge dal resto del
+sito alla prima modifica dei token.

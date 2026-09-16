@@ -19,6 +19,7 @@ import { AdminReturns } from './pages/admin/admin-returns/admin-returns';
 import { Checkout } from './pages/checkout/checkout';
 import { ForgotPassword } from './pages/forgot-password/forgot-password';
 import { ResetPassword } from './pages/reset-password/reset-password';
+import { NotFound } from './pages/not-found/not-found';
 import { authGuardGuard } from './guards/auth-guard-guard';
 import { adminGuardGuard } from './guards/admin-guard-guard';
 
@@ -53,5 +54,8 @@ export const routes: Routes = [
       { path: 'returns', component: AdminReturns },
     ],
   },
-  { path: '**', redirectTo: 'home' },
+  // Il jolly rende una 404 vera e non reindirizza piu' in home: un indirizzo
+  // sbagliato deve dirlo, non fingere che vada tutto bene. Lo stato HTTP 404 lo
+  // mette `app.routes.server.ts`, che e' l'unico punto in cui si puo' scegliere.
+  { path: '**', component: NotFound },
 ];
