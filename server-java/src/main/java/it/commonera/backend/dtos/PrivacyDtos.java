@@ -20,9 +20,17 @@ import java.util.UUID;
  */
 public class PrivacyDtos {
 
-    /** Cancellazione: la password e' la conferma. Un click solo sarebbe troppo poco. */
+    /**
+     * Cancellazione: serve una conferma scritta, un click solo sarebbe troppo poco.
+     *
+     * Il campo si chiama ancora `password` perche' e' quello che il frontend manda da
+     * sempre, ma per un account nato da "Accedi con Google" la conferma attesa e' il
+     * proprio indirizzo email — una password quegli account non l'hanno mai avuta
+     * (vedi {@code PrivacyService#eraseAccount}). Da qui il limite a 255 e non a 72:
+     * un indirizzo email puo' essere piu' lungo di una password BCrypt.
+     */
     public record EraseAccountRequest(
-            @NotBlank @Size(max = 72) String password) {}
+            @NotBlank @Size(max = 255) String password) {}
 
     public record DataExport(
             LocalDateTime generatedAt,

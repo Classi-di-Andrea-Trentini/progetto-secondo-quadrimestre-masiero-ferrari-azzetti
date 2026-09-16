@@ -164,13 +164,28 @@ public class PrivacyService {
      * La password e' la conferma: senza, basterebbe una richiesta partita da una
      * pagina altrui (il cookie e' {@code SameSite=Lax}, ma una cancellazione
      * irreversibile merita una conferma esplicita e non solo una sessione aperta).
+     *
+     * Chi e' entrato con Google una password non ce l'ha, e {@code matches(x, null)}
+     * risponde sempre `false`: senza una seconda strada il diritto alla cancellazione
+     * (art. 17 GDPR) sarebbe diventato inesigibile dal browser proprio per quegli
+     * account. Per loro la conferma e' il **proprio indirizzo email**, digitato per
+     * intero — la stessa cosa che chiede qualunque dialogo di cancellazione serio, e
+     * un dato che chi non e' il titolare della sessione non ha motivo di conoscere.
+     * Chi una password ce l'ha continua a doverla digitare: l'indirizzo non basta,
+     * altrimenti la corsia nuova aprirebbe una scorciatoia su quella vecchia.
      */
     @Transactional
-    public void eraseAccount(UUID userId, String password) {
+    public void eraseAccount(UUID userId, String confirmation) {
         var user = require(userId);
 
-        if (!encoder.matches(password, user.getPasswordHash())) {
-            throw ApiException.unauthorized("Password non corretta");
+        boolean confirmed = user.hasPassword()
+                ? encoder.matches(confirmation, user.getPasswordHash())
+                : user.getEmail().equalsIgnoreCase(confirmation == null ? "" : confirmation.trim());
+
+        if (!confirmed) {
+            throw ApiException.unauthorized(user.hasPassword()
+                    ? "Password non corretta"
+                    : "Per confermare, digita l'indirizzo email del tuo account");
         }
 
         // Un negozio senza nessun amministratore attivo non si recupera dal browser:
@@ -200,17 +215,23 @@ public class PrivacyService {
     /**
      * Il profilo, sovrascritto.
      *
-     * Non si azzerano i campi obbligatori ({@code email}, {@code full_name},
-     * {@code password_hash} sono {@code NOT NULL}): ci si scrive sopra. L'email porta
-     * un UUID perche' la colonna e' {@code UNIQUE} e due cancellazioni si
-     * scontrerebbero; la password diventa un valore casuale che nessuno conosce,
-     * cosi' la vecchia non apre piu' niente nemmeno se un giorno qualcuno
-     * riattivasse la riga a mano.
+     * Non si azzerano i campi obbligatori ({@code email} e {@code full_name} sono
+     * {@code NOT NULL}): ci si scrive sopra. L'email porta un UUID perche' la colonna
+     * e' {@code UNIQUE} e due cancellazioni si scontrerebbero; la password diventa un
+     * valore casuale che nessuno conosce, cosi' la vecchia non apre piu' niente
+     * nemmeno se un giorno qualcuno riattivasse la riga a mano.
+     *
+     * {@code google_sub} invece va messo a {@code NULL}, non sovrascritto: e' un dato
+     * personale (identifica un account Google preciso) e soprattutto e' {@code UNIQUE}.
+     * Lasciarlo appeso a una riga cancellata impedirebbe per sempre a quella persona
+     * di registrarsi di nuovo con lo stesso account Google — {@code findByGoogleSub}
+     * troverebbe il vecchio utente cancellato e rifiuterebbe l'accesso.
      */
     private void anonymiseProfile(User user) {
         user.setEmail("utente-cancellato-" + UUID.randomUUID() + ANONYMOUS_EMAIL_DOMAIN);
         user.setFullName(ANONYMOUS_NAME);
         user.setPasswordHash(encoder.encode(randomSecret()));
+        user.setGoogleSub(null);
         user.setPhone(null);
         user.setBirthDate(null);
         user.setGender(null);
