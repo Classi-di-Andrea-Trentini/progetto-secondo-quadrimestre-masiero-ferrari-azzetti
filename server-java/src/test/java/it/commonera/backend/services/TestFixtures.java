@@ -140,6 +140,14 @@ public class TestFixtures {
         return returnRepo.findById(view.id()).orElseThrow();
     }
 
+    /** Forza lo stato di un ordine scavalcando ogni controllo: serve ai casi limite. */
+    public void forceStatus(UUID orderId, OrderStatus status) {
+        var order = orders.findById(orderId).orElseThrow();
+        order.setStatus(status);
+        orders.save(order);
+        em.flush();
+    }
+
     /**
      * Sposta indietro la data di creazione di un ordine.
      *

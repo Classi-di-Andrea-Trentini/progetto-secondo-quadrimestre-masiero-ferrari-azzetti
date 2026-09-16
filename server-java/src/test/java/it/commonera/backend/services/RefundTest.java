@@ -77,6 +77,20 @@ class RefundTest extends AbstractIntegrationTest {
                         new BigDecimal("9999.00"))));
     }
 
+    @Test
+    void cancellingAnOrderMarkedPaidWithoutAConfirmedChargeStillReleasesEverything() {
+        // Stato che oggi si puo' raggiungere solo forzando lo stato da admin: se
+        // qui si lanciasse, l'annullamento lascerebbe merce e buono bloccati.
+        var draft = fixtures.aPendingCheckout();
+        fixtures.forceStatus(draft.orderId(), OrderStatus.paid);
+        int stockBefore = fixtures.stockOf(draft.variantId());
+
+        assertDoesNotThrow(() -> orderService.cancel(draft.userId(), draft.orderId()));
+
+        assertEquals(OrderStatus.cancelled, orders.findById(draft.orderId()).orElseThrow().getStatus());
+        assertEquals(stockBefore + draft.quantity(), fixtures.stockOf(draft.variantId()));
+    }
+
     /**
      * Piu' rimborsi parziali si sommano. Qui si passa direttamente dal servizio
      * perche' su un ordine si puo' aprire **un solo reso**: la somma dei

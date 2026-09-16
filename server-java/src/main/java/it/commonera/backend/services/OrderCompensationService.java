@@ -77,8 +77,16 @@ public class OrderCompensationService {
         // ancora `pending` non ha incassi da restituire: rimborsarlo lo stesso
         // sarebbe denaro regalato.
         if (previous == OrderStatus.paid) {
-            payments.findByOrderId(order.getId()).ifPresent(payment ->
-                    refundCharge(order, outstanding(payment), "Ordine annullato"));
+            payments.findByOrderId(order.getId())
+                    // Solo un incasso davvero riuscito si rimborsa. Un ordine
+                    // portato a `paid` senza conferma del fornitore non deve far
+                    // fallire l'annullamento: qui si sta gia' disfacendo tutto, e
+                    // rifiutarsi lascerebbe merce e buono bloccati per un difetto
+                    // di stato che il cliente non ha causato.
+                    .filter(payment -> payment.getStatus() == Payment.PaymentStatus.succeeded
+                            || payment.getStatus() == Payment.PaymentStatus.partially_refunded)
+                    .ifPresent(payment ->
+                            refundCharge(order, outstanding(payment), "Ordine annullato"));
         }
 
         // La merce torna a magazzino: compensare senza ripristinare la giacenza

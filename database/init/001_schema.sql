@@ -551,5 +551,9 @@ ALTER TABLE reviews ADD COLUMN IF NOT EXISTS photos TEXT[] NOT NULL DEFAULT '{}'
 -- Un reso puo' restituire una parte di quanto incassato: senza questo valore lo
 -- stato del pagamento dovrebbe mentire, dicendo "rimborsato" per un rimborso
 -- parziale oppure "riuscito" per un incasso di cui una parte e' gia' tornata
--- indietro. ADD VALUE IF NOT EXISTS lo rende ripetibile su basi dati esistenti.
+-- indietro.
+--
+-- ⚠️ Questo file lo esegue Docker **solo su un volume vuoto**: su un database
+-- gia' creato questa riga non arriverebbe mai. La stessa istruzione viene percio'
+-- applicata anche all'avvio dell'applicazione, da `SchemaUpgrades`.
 ALTER TYPE "PaymentStatus" ADD VALUE IF NOT EXISTS 'partially_refunded';
