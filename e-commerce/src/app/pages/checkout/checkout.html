@@ -85,7 +85,7 @@
 
           <!-- ─── STEP: ADDRESS ─────────────────────────────── -->
           @if (step() === 'address') {
-            <div class="checkout-panel">
+            <div class="panel p-5">
               <h2 class="checkout-panel-title">Shipping address</h2>
 
               @if (addressLoading()) {
@@ -195,7 +195,7 @@
 
           <!-- ─── STEP: SHIPPING ──────────────────────────────────── -->
           @if (step() === 'shipping') {
-            <div class="checkout-panel">
+            <div class="panel p-5">
               <h2 class="checkout-panel-title">Shipping method</h2>
               <div class="option-list">
 
@@ -245,7 +245,7 @@
 
             <!-- Punti fedelta' -->
             @if (loyalty(); as points) {
-              <div class="checkout-panel">
+              <div class="panel p-5">
                 <h2 class="checkout-panel-title">Loyalty points</h2>
                 <p class="checkout-body-text">
                   You have <strong>{{ points.balance }}</strong> points, worth
@@ -270,7 +270,7 @@
             }
 
             <!-- Notes -->
-            <div class="checkout-panel">
+            <div class="panel p-5">
               <h2 class="checkout-panel-title">Order notes</h2>
               <textarea
                 [ngModel]="notes()"
@@ -287,7 +287,7 @@
                volta che si passa al riepilogo, e al ritorno la carta gia' digitata
                sarebbe sparita. -->
           @if (pendingOrderId() && payable() > 0) {
-            <div class="checkout-panel" [hidden]="step() !== 'payment'">
+            <div class="panel p-5" [hidden]="step() !== 'payment'">
               <h2 class="checkout-panel-title">Payment</h2>
               <p class="checkout-body-text measure">
                 There's <strong>{{ formatPrice(payable()) }}</strong> left to pay.
@@ -314,7 +314,7 @@
           }
 
           @if (step() === 'review') {
-            <div class="checkout-panel">
+            <div class="panel p-5">
               <h2 class="checkout-panel-title">Review your order</h2>
 
               <!-- Items -->
@@ -415,9 +415,11 @@
       @for (item of cart.items(); track item.variantId) {
         <div class="order-summary-item">
           <div class="order-summary-item-thumb">
-            @if (item.imageUrl) {
-              <img [src]="item.imageUrl" [alt]="item.productName"/>
-            }
+            <span class="order-summary-item-media">
+              @if (item.imageUrl) {
+                <img [src]="item.imageUrl" [alt]="item.productName"/>
+              }
+            </span>
             <span class="order-summary-item-qty">{{ item.quantity }}</span>
           </div>
           <div class="order-summary-item-info">
@@ -462,7 +464,7 @@
           </button>
         </div>
         @if (promoError()) {
-          <p class="checkout-field-error">{{ promoError() }}</p>
+          <p class="field-error">{{ promoError() }}</p>
         }
       }
 
@@ -495,7 +497,7 @@
           </button>
         </div>
         @if (giftCardError()) {
-          <p class="checkout-field-error">{{ giftCardError() }}</p>
+          <p class="field-error">{{ giftCardError() }}</p>
         }
       }
     </div>
