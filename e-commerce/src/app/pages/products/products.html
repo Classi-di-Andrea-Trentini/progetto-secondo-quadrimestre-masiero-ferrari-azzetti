@@ -172,7 +172,8 @@
           <button class="btn btn-outline mt-2" (click)="clearFilters()">Azzera i filtri</button>
         </div>
       } @else {
-        <div class="product-grid">
+        <!-- .animate-rise: l'entrata gia' prevista dai token, finora mai usata. -->
+        <div class="product-grid animate-rise">
           @for (p of products(); track p.id) {
             <a
               [routerLink]="['/product', p.slug]"
