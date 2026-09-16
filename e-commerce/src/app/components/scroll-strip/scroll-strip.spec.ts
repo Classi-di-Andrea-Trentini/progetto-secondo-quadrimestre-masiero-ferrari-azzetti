@@ -38,4 +38,18 @@ describe('ScrollStrip', () => {
     const fixture = TestBed.createComponent(ScrollStrip);
     expect(() => fixture.detectChanges()).not.toThrow();
   });
+
+  it('keeps the fallback scrollable container keyboard-reachable and labelled', () => {
+    // Sotto lg e con prefers-reduced-motion la striscia diventa un contenitore
+    // overflow-x:auto in puro CSS: senza tabindex non e' raggiungibile da
+    // tastiera (WCAG 2.1.1) e senza role/aria-label uno screen reader non
+    // capisce che quella zona scorre.
+    const fixture = TestBed.createComponent(ScrollStrip);
+    fixture.detectChanges();
+
+    const sticky: HTMLElement = fixture.nativeElement.querySelector('.scroll-strip__sticky');
+    expect(sticky.tabIndex).toBe(0);
+    expect(sticky.getAttribute('role')).toBe('region');
+    expect(sticky.getAttribute('aria-label')?.trim()).toBeTruthy();
+  });
 });

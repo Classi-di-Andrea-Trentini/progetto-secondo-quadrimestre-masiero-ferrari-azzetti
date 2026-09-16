@@ -33,6 +33,9 @@
   }
   .scroll-strip__rail {
     transform: none !important;
+    /* Niente transform animato in questo ramo: promuovere comunque un layer
+       di compositing con will-change sarebbe spreco puro. */
+    will-change: auto;
   }
   .scroll-strip__rail > * {
     scroll-snap-align: start;
@@ -53,5 +56,6 @@
   }
   .scroll-strip__rail {
     transform: none !important;
+    will-change: auto;
   }
 }

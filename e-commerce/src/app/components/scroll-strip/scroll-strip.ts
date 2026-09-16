@@ -3,6 +3,7 @@ import {
   Component,
   DestroyRef,
   ElementRef,
+  Input,
   afterNextRender,
   inject,
   signal,
@@ -31,6 +32,15 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ScrollStrip {
+  /**
+   * Etichetta (in inglese, come il resto del copy del sito) letta dagli screen
+   * reader sul contenitore `.scroll-strip__sticky`: e' l'elemento che sotto `lg`
+   * e con `prefers-reduced-motion` diventa davvero scorrevole (overflow-x:auto),
+   * quindi ha bisogno di un ruolo dichiarato. Chi usa il componente puo'
+   * sovrascriverla per descrivere il contenuto proiettato.
+   */
+  @Input() ariaLabel = 'Scrollable image strip';
+
   readonly offset = signal(0);
 
   private travel = 0;
@@ -82,9 +92,15 @@ export class ScrollStrip {
 
   applyProgress(p: number): void {
     const clamped = Math.min(1, Math.max(0, p));
-    // A progress 0 il calcolo produce -0 (negazione di Math.round(0)): Vitest
-    // confronta con Object.is (a differenza di Jasmine/Karma) e -0 !== 0,
-    // quindi il segnale deve restare in +0 quando il valore e' zero.
+    // Il `|| 0` normalizza due casi, non uno solo:
+    // 1) a progress 0 il calcolo produce -0 (negazione di Math.round(0)): Vitest
+    //    confronta con Object.is (a differenza di Jasmine/Karma) e -0 !== 0,
+    //    quindi il segnale deve restare in +0 quando il valore e' zero;
+    // 2) quando `travel` e' 0 (sezione non ancora misurata), `progress()` divide
+    //    per `box.height - innerHeight`, che vale 0 proprio perche' l'altezza
+    //    della sezione e' `100vh + travel`: il risultato e' NaN, che qui
+    //    diventa `-Math.round(0 * NaN)` = NaN, e `|| 0` lo riporta a 0 — corretto,
+    //    perche' con travel 0 non c'e' nulla da traslare.
     this.offset.set(-Math.round(this.travel * clamped) || 0);
   }
 }
