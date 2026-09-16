@@ -15,12 +15,12 @@
 >
   <header class="cart-drawer-header">
     <h2 class="cart-drawer-title" id="cart-drawer-title">
-      Carrello
+      Cart
       @if (cart.itemCount() > 0) {
         <span class="cart-drawer-count">{{ cart.itemCount() }}</span>
       }
     </h2>
-    <button type="button" class="cart-drawer-close" (click)="cart.close()" aria-label="Chiudi carrello">
+    <button type="button" class="cart-drawer-close" (click)="cart.close()" aria-label="Close cart">
       <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
       </svg>
@@ -52,17 +52,17 @@
         >
           <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 0 0-8 0v4M5 9h14l1 12H4L5 9z" />
         </svg>
-        <p class="empty-title">Il carrello è vuoto</p>
+        <p class="empty-title">Your cart is empty</p>
         <p class="empty-body">
-          Quello che aggiungi resta qui anche se chiudi il sito: lo ritrovi al prossimo accesso.
+          What you add stays here even if you close the site: you'll find it again next time.
         </p>
-        <a routerLink="/products" (click)="cart.close()" class="btn btn-primary mt-3">Scopri la collezione</a>
+        <a routerLink="/products" (click)="cart.close()" class="btn btn-primary mt-3">Shop the Collection</a>
       </div>
     } @else {
       @if (cart.hasIssues()) {
         <p class="flex items-start gap-2 m-4 p-3 bg-warning-wash text-warning text-xs leading-relaxed rounded-sm">
           <i class="fa-solid fa-triangle-exclamation mt-0.5" aria-hidden="true"></i>
-          <span>Alcuni articoli sono cambiati di prezzo o disponibilità. Controlla prima di procedere.</span>
+          <span>Some items have changed in price or availability. Please check before continuing.</span>
         </p>
       }
 
@@ -84,7 +84,7 @@
                 type="button"
                 (click)="remove(item.variantId)"
                 class="shrink-0 -mt-0.5 -mr-1 p-1 text-ink-muted hover:text-danger transition-colors rounded-sm"
-                [attr.aria-label]="'Rimuovi ' + item.productName"
+                [attr.aria-label]="'Remove ' + item.productName"
               >
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
@@ -97,7 +97,7 @@
                 <button
                   type="button"
                   (click)="decreaseQty(item.variantId, item.quantity)"
-                  [attr.aria-label]="'Diminuisci quantità di ' + item.productName"
+                  [attr.aria-label]="'Decrease quantity of ' + item.productName"
                 >
                   &minus;
                 </button>
@@ -105,7 +105,7 @@
                 <button
                   type="button"
                   (click)="increaseQty(item.variantId, item.quantity)"
-                  [attr.aria-label]="'Aumenta quantità di ' + item.productName"
+                  [attr.aria-label]="'Increase quantity of ' + item.productName"
                 >
                   +
                 </button>
@@ -129,20 +129,20 @@
   @if (cart.ready() && cart.items().length > 0) {
     <footer class="cart-drawer-footer">
       <div class="flex items-baseline justify-between">
-        <span class="text-2xs font-bold uppercase tracking-[0.09em] text-ink-2">Subtotale</span>
+        <span class="text-2xs font-bold uppercase tracking-[0.09em] text-ink-2">Subtotal</span>
         <span class="font-display text-2xl font-semibold text-ink tnum">{{ formatPrice(cart.subtotal()) }}</span>
       </div>
-      <p class="text-2xs text-ink-muted -mt-2">Spedizione e sconti calcolati al checkout.</p>
+      <p class="text-2xs text-ink-muted -mt-2">Shipping and discounts calculated at checkout.</p>
       <a
         routerLink="/checkout"
         (click)="cart.close()"
         class="btn btn-primary btn-block btn-lg"
         [attr.data-loading]="cart.isSyncing() ? 'true' : null"
       >
-        Procedi al checkout
+        Proceed to checkout
       </a>
       <button type="button" (click)="cart.close()" class="btn btn-ghost btn-sm btn-block">
-        Continua lo shopping
+        Continue shopping
       </button>
     </footer>
   }

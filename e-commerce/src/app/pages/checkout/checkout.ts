@@ -145,6 +145,16 @@ export class Checkout implements OnInit {
   /** La cifra che comanda: quella del server se c'e', altrimenti la stima. */
   readonly payable = computed(() => this.serverAmountToPay() ?? this.amountToPay());
 
+  /**
+   * Vero dopo la prenotazione dell'ordine. Il riepilogo mostra il codice
+   * promo e la gift card su ogni passo (design: vivono nel pannello grigio,
+   * sempre visibile), ma modificarli dopo la prenotazione cambierebbe uno
+   * sconto che il server ha gia' congelato in `serverAmountToPay` e nel
+   * `clientSecret` di Stripe: l'importo mostrato e quello addebitato
+   * divergerebbero. Da qui in poi i campi restano visibili ma disabilitati.
+   */
+  readonly reserved = computed(() => this.pendingOrderId() !== null);
+
   ngOnInit() {
     // Si aspetta che il carrello sia stato caricato prima di decidere: da quando
     // vive sul server arriva dopo il primo render, e controllarlo subito mandava
@@ -171,7 +181,7 @@ export class Checkout implements OnInit {
       const def = addrs.find(a => a.isDefault) ?? addrs[0];
       if (def) this.selectedAddressId.set(def.id);
     } catch {
-      this.error.set('Impossibile caricare gli indirizzi');
+      this.error.set('Unable to load addresses');
     } finally {
       this.addressLoading.set(false);
     }
@@ -211,7 +221,7 @@ export class Checkout implements OnInit {
       this.showNewAddressForm.set(false);
       this.addressForm.reset({ country: 'IT', isDefault: false });
     } catch {
-      this.addressFormError.set('Impossibile salvare l\'indirizzo');
+      this.addressFormError.set('Unable to save the address');
     } finally {
       this.addressFormLoading.set(false);
     }
@@ -276,9 +286,10 @@ export class Checkout implements OnInit {
       const res = await this.cart.validatePromo(code, this.cart.subtotal());
       this.promoDiscount.set(res.discountValue);
       this.appliedPromoCode.set(code.toUpperCase());
-      this.promoSuccess.set(`Sconto di €${res.discountValue.toFixed(2)} applicato!`);
+      // Formato condiviso (services/format-price.ts), non un toFixed locale.
+      this.promoSuccess.set(`Discount of ${formatPriceShared(res.discountValue)} applied!`);
     } catch (err: any) {
-      this.promoError.set(err?.error?.message ?? 'Codice non valido');
+      this.promoError.set(err?.error?.message ?? 'Invalid code');
       this.promoDiscount.set(0);
       this.appliedPromoCode.set(null);
     } finally {
@@ -322,7 +333,7 @@ export class Checkout implements OnInit {
       }
       return true;
     } catch (err: any) {
-      this.error.set(err?.error?.message ?? 'Errore durante l\'ordine. Riprova.');
+      this.error.set(err?.error?.message ?? 'Something went wrong with the order. Please try again.');
       return false;
     } finally {
       this.loading.set(false);
@@ -352,13 +363,13 @@ export class Checkout implements OnInit {
       } else {
         const result = await this.stripe.confirmPayment();
         if (!result.ok) {
-          this.error.set(result.error ?? 'Pagamento non riuscito');
+          this.error.set(result.error ?? 'Payment failed');
           return;
         }
       }
       this.completeOrder(this.total());
     } catch (err: any) {
-      this.error.set(err?.error?.message ?? 'Pagamento non riuscito. Riprova.');
+      this.error.set(err?.error?.message ?? 'Payment failed. Please try again.');
     } finally {
       this.loading.set(false);
     }
@@ -384,7 +395,7 @@ export class Checkout implements OnInit {
     } catch (err: any) {
       this.appliedGiftCard.set(null);
       this.giftCardBalance.set(0);
-      this.giftCardError.set(err?.error?.message ?? 'Buono non valido.');
+      this.giftCardError.set(err?.error?.message ?? 'Invalid gift card.');
     } finally {
       this.giftCardLoading.set(false);
     }

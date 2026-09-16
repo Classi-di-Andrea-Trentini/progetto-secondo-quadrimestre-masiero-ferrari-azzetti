@@ -15,10 +15,10 @@ export interface StepDescriptor {
 }
 
 const ALL: StepDescriptor[] = [
-  { key: 'address', label: 'Indirizzo' },
-  { key: 'shipping', label: 'Spedizione' },
-  { key: 'payment', label: 'Pagamento' },
-  { key: 'review', label: 'Riepilogo' },
+  { key: 'address', label: 'Address' },
+  { key: 'shipping', label: 'Shipping' },
+  { key: 'payment', label: 'Payment' },
+  { key: 'review', label: 'Review' },
 ];
 
 /**

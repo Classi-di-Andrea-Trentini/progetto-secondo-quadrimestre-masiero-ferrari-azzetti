@@ -1,0 +1,787 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   CHECKOUT — allineamento al design (a2a6d6d2.jpg)
+
+   Due colonne da lg (1024px, lo stesso breakpoint di tutto il sito): a
+   sinistra i passi del wizard, a destra il riepilogo su fondo grigio. Sotto
+   lg il riepilogo diventa un <details> pieghevole in cima alla pagina, aperto
+   di default: il totale si vede senza scorrere, e chi vuole piu' spazio per
+   il modulo puo' richiuderlo. Nessun JavaScript per il breakpoint: le due
+   versioni (pieghevole / fissa in colonna) condividono lo stesso
+   <ng-template> e si alternano solo via display, in CSS.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.checkout-page {
+  min-height: 100vh;
+  background: var(--color-paper);
+}
+
+/* ── Breadcrumb ───────────────────────────────────────────────────────── */
+.checkout-crumb {
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-line);
+  padding: 0.75rem 1rem;
+}
+
+.checkout-crumb-inner {
+  max-width: 80rem;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: var(--text-sm);
+  color: var(--color-ink-muted);
+}
+
+.checkout-crumb-inner a {
+  color: inherit;
+  text-decoration: none;
+}
+.checkout-crumb-inner a:hover {
+  color: var(--color-ink);
+}
+.checkout-crumb-inner .current {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+.checkout-shell {
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+
+/* ── Steps indicator ──────────────────────────────────────────────────── */
+.checkout-steps {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  list-style: none;
+  margin: 0 0 1.75rem;
+  padding: 0;
+}
+
+.checkout-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.checkout-step-dot {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-sm);
+  font-weight: 700;
+  background: var(--color-line);
+  color: var(--color-ink-muted);
+  transition:
+    background-color 160ms var(--ease-out-quart),
+    color 160ms var(--ease-out-quart);
+}
+.checkout-step-dot svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.checkout-step.active .checkout-step-dot {
+  background: var(--color-ink);
+  color: var(--color-surface);
+}
+
+.checkout-step-label {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--color-ink-muted);
+}
+.checkout-step.active .checkout-step-label {
+  color: var(--color-ink);
+}
+
+.checkout-step-rule {
+  flex: 0 0 4rem;
+  height: 1px;
+  background: var(--color-line);
+  margin: 1rem 0.5rem 0;
+  transition: background-color 160ms var(--ease-out-quart);
+}
+.checkout-step-rule.done {
+  background: var(--color-ink);
+}
+
+@media (max-width: 26rem) {
+  .checkout-step-rule {
+    flex-basis: 1.75rem;
+  }
+  .checkout-step-label {
+    display: none;
+  }
+}
+
+/* ── Grid: una colonna sotto lg, due da lg in su ─────────────────────────
+   Stesso breakpoint di product-detail.css e products.css: consolidato in un
+   solo valore invece di inventarne uno nuovo per questa pagina. */
+.checkout-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+  .checkout-grid {
+    display: grid;
+    grid-template-columns: 1fr 23rem;
+    gap: 2.5rem;
+    align-items: start;
+  }
+}
+
+.checkout-main {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+}
+
+/* ── Order summary ────────────────────────────────────────────────────── */
+.order-summary {
+  background: var(--color-sunken);
+  border-radius: 3px;
+}
+
+/* Sotto lg: pieghevole in cima alla pagina. */
+.order-summary--collapsible {
+  padding: 0;
+  margin-bottom: 1.5rem;
+}
+.order-summary--collapsible .order-summary-toggle-body {
+  padding: 0 1.25rem 1.25rem;
+}
+
+.order-summary-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--color-ink);
+  list-style: none;
+}
+.order-summary-toggle::-webkit-details-marker {
+  display: none;
+}
+/* Piccola freccia: ruota quando il pannello e' aperto, senza icone extra. */
+.order-summary-toggle::after {
+  content: '';
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-left: 0.25rem;
+  border-right: 1.5px solid var(--color-ink-muted);
+  border-bottom: 1.5px solid var(--color-ink-muted);
+  transform: rotate(45deg);
+  transition: transform 160ms var(--ease-out-quart);
+}
+.order-summary--collapsible[open] .order-summary-toggle::after {
+  transform: rotate(-135deg);
+}
+
+.order-summary-toggle-total {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 600;
+}
+
+/* Da lg in su: fissa nella colonna di destra, mai pieghevole. */
+.order-summary--pinned {
+  display: none;
+  padding: 1.5rem;
+  position: sticky;
+  top: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+  .order-summary--collapsible {
+    display: none;
+  }
+  .order-summary--pinned {
+    display: block;
+  }
+}
+
+.order-summary-heading {
+  font-weight: 700;
+  color: var(--color-ink);
+  margin: 0 0 1rem;
+}
+
+/* ── Righe prodotto nel riepilogo ─────────────────────────────────────── */
+.order-summary-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+.order-summary-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.order-summary-item-thumb {
+  position: relative;
+  width: 2.75rem;
+  height: 2.75rem;
+  flex-shrink: 0;
+  border-radius: 2px;
+  overflow: hidden;
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 1px var(--color-line);
+}
+.order-summary-item-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.order-summary-item-qty {
+  position: absolute;
+  top: -0.375rem;
+  right: -0.375rem;
+  min-width: 1.125rem;
+  height: 1.125rem;
+  padding: 0 0.25rem;
+  border-radius: 50%;
+  background: var(--color-ink);
+  color: var(--color-surface);
+  font-size: var(--text-2xs);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.order-summary-item-info {
+  flex: 1;
+  min-width: 0;
+}
+.order-summary-item-name {
+  font-size: var(--text-sm);
+  color: var(--color-ink);
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.order-summary-item-meta {
+  font-size: var(--text-xs);
+  color: var(--color-ink-muted);
+  margin: 0.125rem 0 0;
+}
+
+.order-summary-item-price {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-ink);
+  flex-shrink: 0;
+}
+
+/* ── Codice promo / gift card ─────────────────────────────────────────── */
+.order-summary-discount {
+  border-top: 1px solid var(--color-line);
+  padding-top: 1rem;
+  margin-bottom: 0.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.order-summary-discount-row {
+  display: flex;
+  gap: 0.5rem;
+}
+.order-summary-discount-row .field {
+  flex: 1;
+}
+
+.order-summary-applied {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  background: var(--color-success-wash);
+  border-radius: 2px;
+  padding: 0.625rem 0.875rem;
+}
+.order-summary-applied-code {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--color-success);
+  margin: 0;
+}
+.order-summary-applied-note {
+  font-size: var(--text-xs);
+  color: var(--color-success);
+  margin: 0.125rem 0 0;
+}
+
+/* ── Totali ────────────────────────────────────────────────────────────── */
+.order-summary-totals {
+  border-top: 1px solid var(--color-line);
+  padding-top: 0.75rem;
+  margin: 1rem 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  font-size: var(--text-sm);
+}
+
+.order-summary-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.order-summary-row dt,
+.order-summary-row dd {
+  margin: 0;
+  color: var(--color-ink-muted);
+}
+.order-summary-row dd {
+  color: var(--color-ink);
+}
+
+.order-summary-row-success dt,
+.order-summary-row-success dd {
+  color: var(--color-success);
+}
+
+.order-summary-row-total {
+  padding-top: 0.5rem;
+  margin-top: 0.25rem;
+  border-top: 1px solid var(--color-line);
+}
+.order-summary-row-total dt,
+.order-summary-row-total dd {
+  font-weight: 700;
+  font-size: var(--text-base);
+  color: var(--color-ink);
+}
+
+.order-summary-secure {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 1rem 0 0;
+  font-size: var(--text-xs);
+  color: var(--color-ink-muted);
+}
+.order-summary-secure svg {
+  width: 1rem;
+  height: 1rem;
+  color: var(--color-success);
+  flex-shrink: 0;
+}
+
+/* ── Pannelli dei singoli passi ──────────────────────────────────────────
+   Stesso trattamento in tutto il wizard: bordo sottile, angoli quadrati come
+   il resto del sito (2-3px, mai pill), titolo in maiuscoletto discreto. */
+.checkout-panel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: 3px;
+  padding: 1.25rem;
+}
+
+.checkout-panel-title {
+  font-weight: 700;
+  color: var(--color-ink);
+  margin: 0 0 1rem;
+  font-size: var(--text-base);
+}
+
+.checkout-body-text {
+  font-size: var(--text-sm);
+  color: var(--color-ink-2);
+  line-height: 1.6;
+}
+
+.checkout-spinner-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 2rem 0;
+}
+.spinner {
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 3px solid var(--color-line);
+  border-top-color: var(--color-ink);
+  border-radius: 50%;
+  animation: checkout-spin 0.8s linear infinite;
+}
+@keyframes checkout-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.checkout-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: 2px;
+  background: var(--color-danger-wash);
+  color: var(--color-danger);
+  font-size: var(--text-sm);
+}
+.checkout-alert svg {
+  width: 1rem;
+  height: 1rem;
+  margin-top: 0.125rem;
+  flex-shrink: 0;
+}
+.checkout-alert-sm {
+  padding: 0.5rem 0.75rem;
+  font-size: var(--text-xs);
+}
+
+.checkout-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 2px;
+  font-size: var(--text-xs);
+  color: var(--color-ink-muted);
+}
+.checkout-hint svg {
+  width: 0.875rem;
+  height: 0.875rem;
+  margin-top: 0.125rem;
+  flex-shrink: 0;
+}
+.checkout-hint-success {
+  background: var(--color-success-wash);
+  color: var(--color-success);
+}
+.checkout-hint-info {
+  background: var(--color-info-wash);
+  color: var(--color-info);
+}
+
+.checkout-field-error {
+  margin: 0.375rem 0 0;
+  font-size: var(--text-xs);
+  color: var(--color-danger);
+}
+
+.checkout-toggle-btn {
+  align-self: flex-start;
+  margin-bottom: 0.75rem;
+}
+.checkout-toggle-btn svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.checkout-uppercase {
+  text-transform: uppercase;
+}
+.checkout-uppercase::placeholder {
+  text-transform: none;
+}
+
+.checkout-textarea {
+  resize: none;
+}
+
+.checkout-payment-element {
+  min-height: 3rem;
+}
+
+/* ── Selezione: indirizzo esistente / metodo di spedizione ──────────────
+   Stessa forma "radio-card" in entrambi i posti: un bordo che si scurisce
+   alla selezione, un pallino radio disegnato a mano (niente <input
+   type="radio"> perche' tutta la scheda e' l'area cliccabile). */
+.option-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.option-card {
+  width: 100%;
+  text-align: left;
+  padding: 0.875rem 1rem;
+  border: 1px solid var(--color-line);
+  border-radius: 2px;
+  background: var(--color-surface);
+  cursor: pointer;
+  transition:
+    border-color 160ms var(--ease-out-quart),
+    background-color 160ms var(--ease-out-quart);
+}
+.option-card:hover {
+  border-color: var(--color-ink-muted);
+}
+.option-card.selected {
+  border-color: var(--color-ink);
+  background: var(--color-sunken);
+}
+
+.option-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+.option-row.between {
+  justify-content: space-between;
+  align-items: center;
+}
+
+.option-radio {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  border: 2px solid var(--color-line-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+  transition: border-color 160ms var(--ease-out-quart);
+}
+.option-card.selected .option-radio {
+  border-color: var(--color-ink);
+}
+.option-radio-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--color-ink);
+}
+
+.option-title {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-ink);
+  margin: 0;
+}
+.option-meta {
+  font-size: var(--text-xs);
+  color: var(--color-ink-muted);
+  margin: 0.125rem 0 0;
+}
+.option-badge {
+  margin-top: 0.375rem;
+}
+.option-price {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-ink);
+  flex-shrink: 0;
+}
+
+/* ── Nuovo indirizzo — form ───────────────────────────────────────────── */
+.address-form {
+  border: 1px solid var(--color-line);
+  border-radius: 2px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+@media (min-width: 30rem) {
+  .form-row-2 {
+    grid-template-columns: 1fr 1fr;
+  }
+  .form-row-3 {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
+.checkout-checkbox-row {
+  margin-top: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-size: var(--text-sm);
+  color: var(--color-ink);
+}
+.checkout-checkbox-row input {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* ── Riepilogo ordine dentro il passo "review" ───────────────────────────
+   Diverso dal riepilogo di destra: qui conferma indirizzo e metodo scelti,
+   non serve la miniatura con il badge quantita'. */
+.review-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+.review-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.review-item-thumb {
+  width: 3.5rem;
+  height: 3.5rem;
+  flex-shrink: 0;
+  border-radius: 2px;
+  overflow: hidden;
+  background: var(--color-sunken);
+}
+.review-item-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.review-item-info {
+  flex: 1;
+  min-width: 0;
+}
+.review-item-name {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-ink);
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.review-item-meta {
+  font-size: var(--text-xs);
+  color: var(--color-ink-muted);
+  margin: 0;
+}
+.review-item-price {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-ink);
+  flex-shrink: 0;
+  margin: 0;
+}
+
+.review-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-line);
+}
+.review-label {
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+  margin: 0 0 0.375rem;
+}
+.review-value-strong {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-ink);
+  margin: 0;
+}
+.review-value {
+  font-size: var(--text-xs);
+  color: var(--color-ink-muted);
+  margin: 0;
+}
+
+/* ── Navigazione fra i passi ──────────────────────────────────────────── */
+.checkout-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.checkout-nav-spacer {
+  flex: 1;
+}
+.checkout-nav svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* ── Schermata di conferma ────────────────────────────────────────────── */
+.order-success {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-sunken);
+  padding: 1rem;
+}
+.order-success-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: 3px;
+  box-shadow: var(--shadow-raise);
+  max-width: 26rem;
+  width: 100%;
+  padding: 2rem;
+  text-align: center;
+}
+.order-success-icon {
+  width: 4rem;
+  height: 4rem;
+  margin: 0 auto 1.25rem;
+  border-radius: 50%;
+  background: var(--color-success-wash);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.order-success-icon svg {
+  width: 2rem;
+  height: 2rem;
+  color: var(--color-success);
+}
+.order-success-title {
+  font-size: var(--text-2xl);
+  margin: 0 0 0.5rem;
+}
+.order-success-body {
+  font-size: var(--text-sm);
+  color: var(--color-ink-muted);
+  margin: 0 0 0.25rem;
+}
+.order-success-id {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-ink-muted);
+  margin: 0 0 0.25rem;
+}
+.order-success-total {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--color-ink);
+  margin: 0.75rem 0 1.5rem;
+}
+.order-success-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
