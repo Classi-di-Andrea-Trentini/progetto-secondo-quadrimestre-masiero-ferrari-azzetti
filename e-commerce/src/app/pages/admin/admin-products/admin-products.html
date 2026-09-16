@@ -7,7 +7,7 @@
       <p class="text-ink-muted text-sm mt-1">{{ total() }} prodotti nel catalogo</p>
     </div>
     <button (click)="openCreate()"
-      class="flex items-center gap-2 btn btn-primary">
+      class="btn btn-primary">
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
       </svg>
@@ -16,14 +16,14 @@
   </div>
 
   @if (actionSuccess()) {
-    <div class="mb-4 bg-success-wash text-success px-4 py-3 rounded-sm text-sm">{{ actionSuccess() }}</div>
+    <div role="status" class="mb-4 bg-success-wash text-success px-4 py-3 rounded-sm text-sm">{{ actionSuccess() }}</div>
   }
   @if (error()) {
-    <div class="mb-4 bg-danger-wash text-danger px-4 py-3 rounded-sm text-sm">{{ error() }}</div>
+    <div role="alert" class="mb-4 bg-danger-wash text-danger px-4 py-3 rounded-sm text-sm">{{ error() }}</div>
   }
 
   <!-- Filters -->
-  <div class="bg-surface border border-line rounded-sm shadow-sm p-4 mb-6">
+  <div class="panel p-4 mb-6">
     <div class="flex flex-col sm:flex-row gap-3">
       <div class="relative flex-1">
         <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -45,27 +45,27 @@
   <!-- Table -->
   @if (loading()) {
     <div class="flex items-center justify-center h-48">
-      <div class="w-7 h-7 border-4 border-line-strong border-t-gray-900 rounded-full animate-spin"></div>
+      <div class="w-7 h-7 border-4 border-line-strong border-t-ink rounded-full animate-spin"></div>
     </div>
   } @else {
-    <div class="bg-surface border border-line rounded-sm shadow-sm overflow-hidden">
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead class="bg-sunken border-b border-line">
+    <div class="panel overflow-hidden">
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
             <tr>
-              <th class="text-left px-4 py-3 text-2xs font-bold uppercase tracking-[0.09em] text-ink-2">Prodotto</th>
-              <th class="text-left px-4 py-3 text-2xs font-bold uppercase tracking-[0.09em] text-ink-2">Categoria</th>
-              <th class="text-right px-4 py-3 text-2xs font-bold uppercase tracking-[0.09em] text-ink-2">Prezzo</th>
-              <th class="text-right px-4 py-3 text-2xs font-bold uppercase tracking-[0.09em] text-ink-2">Varianti</th>
-              <th class="text-right px-4 py-3 text-2xs font-bold uppercase tracking-[0.09em] text-ink-2">Vendite</th>
-              <th class="text-center px-4 py-3 text-2xs font-bold uppercase tracking-[0.09em] text-ink-2">Stato</th>
-              <th class="text-right px-4 py-3 text-2xs font-bold uppercase tracking-[0.09em] text-ink-2">Azioni</th>
+              <th class="text-left">Prodotto</th>
+              <th class="text-left">Categoria</th>
+              <th class="text-right">Prezzo</th>
+              <th class="text-right">Varianti</th>
+              <th class="text-right">Vendite</th>
+              <th class="text-center">Stato</th>
+              <th class="text-right">Azioni</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-line">
             @for (product of products(); track product.id) {
               <tr class="hover:bg-sunken transition-colors">
-                <td class="px-4 py-3">
+                <td>
                   <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-sm overflow-hidden bg-sunken flex-shrink-0">
                       <app-product-image [src]="product.images[0]?.url" [alt]="product.name" fit="contain" />
@@ -76,25 +76,24 @@
                     </div>
                   </div>
                 </td>
-                <td class="px-4 py-3 text-ink-muted text-xs">{{ product.category?.name ?? '—' }}</td>
-                <td class="px-4 py-3 text-right font-semibold text-ink">{{ formatPrice(product.basePrice) }}</td>
-                <td class="px-4 py-3 text-right text-ink-2">{{ product._count.variants }}</td>
-                <td class="px-4 py-3 text-right text-ink-2">{{ product.soldCount }}</td>
-                <td class="px-4 py-3 text-center">
+                <td class="text-ink-muted text-xs">{{ product.category?.name ?? '—' }}</td>
+                <td class="num font-semibold text-ink">{{ formatPrice(product.basePrice) }}</td>
+                <td class="num text-ink-2">{{ product._count.variants }}</td>
+                <td class="num text-ink-2">{{ product.soldCount }}</td>
+                <td class="text-center">
                   <span class="badge"
-                    [class.bg-success-wash]="product.isActive" [class.text-success]="product.isActive"
-                    [class.bg-sunken]="!product.isActive" [class.text-ink-muted]="!product.isActive">
+                    [class.badge-success]="product.isActive" [class.badge-neutral]="!product.isActive">
                     {{ product.isActive ? 'Attivo' : 'Nascosto' }}
                   </span>
                 </td>
-                <td class="px-4 py-3">
+                <td>
                   <div class="flex items-center justify-end gap-2">
                     <button (click)="openEdit(product)"
-                      class="px-3 py-1.5 text-xs border border-line rounded-sm hover:border-ink hover:text-ink transition-colors">
+                      class="btn btn-outline btn-sm">
                       Modifica
                     </button>
                     <button (click)="requestDelete(product.id)"
-                      class="px-3 py-1.5 text-xs border border-transparent text-danger rounded-sm hover:bg-danger-wash transition-colors">
+                      class="btn btn-ghost btn-sm text-danger">
                       Elimina
                     </button>
                   </div>
@@ -102,7 +101,7 @@
               </tr>
             }
             @empty {
-              <tr><td colspan="7" class="px-4 py-12 text-center text-ink-muted">Nessun prodotto trovato</td></tr>
+              <tr><td colspan="7" class="py-12 text-center text-ink-muted">Nessun prodotto trovato</td></tr>
             }
           </tbody>
         </table>
@@ -115,10 +114,9 @@
         <div class="flex gap-1">
           <button (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() === 1" class="btn btn-outline btn-sm">‹</button>
           @for (p of pagesArray(); track p) {
-            <button (click)="goToPage(p)" class="px-3 py-1.5 text-sm border rounded-sm transition-colors"
-              [class.bg-ink]="p === currentPage()" [class.text-white]="p === currentPage()"
-              [class.border-ink]="p === currentPage()" [class.border-line]="p !== currentPage()"
-              [class.hover:bg-sunken]="p !== currentPage()">{{ p }}</button>
+            <button (click)="goToPage(p)" class="btn btn-sm"
+              [class.btn-primary]="p === currentPage()" [class.btn-outline]="p !== currentPage()"
+              [attr.aria-current]="p === currentPage() ? 'page' : null">{{ p }}</button>
           }
           <button (click)="goToPage(currentPage() + 1)" [disabled]="currentPage() === totalPages()" class="btn btn-outline btn-sm">›</button>
         </div>
@@ -131,8 +129,8 @@
      PRODUCT MODAL (3 tabs: info / variants / images)
 ══════════════════════════════════════════════════════════════════════════ -->
 @if (showModal()) {
-  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-    <div class="absolute inset-0 bg-black/40" (click)="closeModal()"></div>
+  <div class="fixed inset-0 z-modal flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-inverse/40" (click)="closeModal()"></div>
     <div class="relative bg-surface rounded-sm shadow-2xl w-full max-w-2xl max-h-[92vh] flex flex-col">
 
       <!-- Modal header -->
@@ -165,7 +163,7 @@
             [class.border-transparent]="activeTab() !== 'variants'"
             [class.text-ink-muted]="activeTab() !== 'variants'">
             Varianti
-            <span class="ml-1.5 px-1.5 py-0.5 bg-sunken text-ink-2 text-xs rounded-full">
+            <span class="badge badge-neutral ml-1.5">
               {{ editingProduct()!.variants.length }}
             </span>
           </button>
@@ -176,7 +174,7 @@
             [class.border-transparent]="activeTab() !== 'images'"
             [class.text-ink-muted]="activeTab() !== 'images'">
             Immagini
-            <span class="ml-1.5 px-1.5 py-0.5 bg-sunken text-ink-2 text-xs rounded-full">
+            <span class="badge badge-neutral ml-1.5">
               {{ editingProduct()!.images.length }}
             </span>
           </button>
@@ -186,14 +184,14 @@
       <!-- Loading overlay -->
       @if (modalLoading()) {
         <div class="flex items-center justify-center h-64">
-          <div class="w-7 h-7 border-4 border-line-strong border-t-gray-900 rounded-full animate-spin"></div>
+          <div class="w-7 h-7 border-4 border-line-strong border-t-ink rounded-full animate-spin"></div>
         </div>
       } @else {
 
         <div class="overflow-y-auto flex-1 px-6 py-5">
 
           @if (formError()) {
-            <div class="mb-4 bg-danger-wash text-danger px-3 py-2 rounded-sm text-sm">{{ formError() }}</div>
+            <div role="alert" class="mb-4 bg-danger-wash text-danger px-3 py-2 rounded-sm text-sm">{{ formError() }}</div>
           }
 
           <!-- ─── TAB: INFO ──────────────────────────────────────────────────── -->
@@ -262,29 +260,25 @@
                   class="field"/>
               </div>
               <div class="flex items-center gap-3">
-                <input formControlName="isActive" type="checkbox" id="isActive" class="w-4 h-4 accent-gray-900"/>
+                <input formControlName="isActive" type="checkbox" id="isActive" class="w-4 h-4 accent-ink"/>
                 <label for="isActive" class="text-sm text-ink-2">Prodotto attivo (visibile ai clienti)</label>
               </div>
               <div class="flex items-center gap-3">
-                <input formControlName="isNewArrival" type="checkbox" id="isNewArrival" class="w-4 h-4 accent-gray-900"/>
+                <input formControlName="isNewArrival" type="checkbox" id="isNewArrival" class="w-4 h-4 accent-ink"/>
                 <label for="isNewArrival" class="text-sm text-ink-2">Novità (compare fra gli arrivi in home)</label>
               </div>
               <div class="flex items-center gap-3">
-                <input formControlName="isFeatured" type="checkbox" id="isFeatured" class="w-4 h-4 accent-gray-900"/>
+                <input formControlName="isFeatured" type="checkbox" id="isFeatured" class="w-4 h-4 accent-ink"/>
                 <label for="isFeatured" class="text-sm text-ink-2">In evidenza (vetrina della home)</label>
               </div>
               <div class="flex gap-3 pt-2">
                 <button type="button" (click)="closeModal()"
-                  class="btn btn-outline flex-1 transition-colors">
+                  class="btn btn-outline flex-1">
                   Annulla
                 </button>
                 <button type="submit" [disabled]="productForm.invalid || formLoading()"
-                  class="flex-1 px-4 py-2.5 bg-ink text-white rounded-sm text-sm hover:bg-ink-strong transition-colors disabled:opacity-50">
-                  @if (formLoading()) {
-                    <span class="inline-block w-4 h-4 border-2 border-line-strong border-t-white rounded-full animate-spin mx-auto"></span>
-                  } @else {
-                    {{ editingProduct() ? 'Salva modifiche' : 'Crea prodotto' }}
-                  }
+                  class="btn btn-primary flex-1" [attr.data-loading]="formLoading() ? 'true' : null">
+                  {{ editingProduct() ? 'Salva modifiche' : 'Crea prodotto' }}
                 </button>
               </div>
             </form>
@@ -320,9 +314,8 @@
                       }
                       <p class="text-xs text-ink-muted">Stock: {{ v.stockQty }}</p>
                     </div>
-                    <span class="text-xs px-2 py-0.5 rounded-full"
-                      [class.bg-success-wash]="v.isActive" [class.text-success]="v.isActive"
-                      [class.bg-sunken]="!v.isActive" [class.text-ink-muted]="!v.isActive">
+                    <span class="badge"
+                      [class.badge-success]="v.isActive" [class.badge-neutral]="!v.isActive">
                       {{ v.isActive ? 'Attiva' : 'Off' }}
                     </span>
                     <button (click)="openEditVariant(v)"
@@ -388,29 +381,25 @@
                           class="field"/>
                       </div>
                       <div class="flex items-center gap-2 pt-5">
-                        <input formControlName="isActive" type="checkbox" id="variantActive" class="w-4 h-4 accent-gray-900"/>
+                        <input formControlName="isActive" type="checkbox" id="variantActive" class="w-4 h-4 accent-ink"/>
                         <label for="variantActive" class="text-xs text-ink-2">Attiva</label>
                       </div>
                     </div>
                     <div class="flex gap-2 pt-1">
                       <button type="button" (click)="cancelVariantForm()"
-                        class="flex-1 px-3 py-2 border border-line rounded-sm text-xs hover:bg-sunken transition-colors">
+                        class="btn btn-outline btn-sm flex-1">
                         Annulla
                       </button>
                       <button type="submit" [disabled]="variantForm.invalid || variantFormLoading()"
-                        class="flex-1 px-3 py-2 bg-ink text-white rounded-sm text-xs hover:bg-ink-strong transition-colors disabled:opacity-50">
-                        @if (variantFormLoading()) {
-                          <span class="inline-block w-3 h-3 border-2 border-line-strong border-t-white rounded-full animate-spin mx-auto"></span>
-                        } @else {
-                          {{ editingVariant() ? 'Salva' : 'Aggiungi' }}
-                        }
+                        class="btn btn-primary btn-sm flex-1" [attr.data-loading]="variantFormLoading() ? 'true' : null">
+                        {{ editingVariant() ? 'Salva' : 'Aggiungi' }}
                       </button>
                     </div>
                   </form>
                 </div>
               } @else {
                 <button (click)="openAddVariant()"
-                  class="w-full py-2.5 border-2 border-dashed border-line rounded-sm text-sm text-ink-muted hover:border-ink hover:text-ink transition-colors flex items-center justify-center gap-2 mt-2">
+                  class="btn btn-outline btn-block mt-2 border-2 border-dashed text-ink-muted hover:text-ink">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                   </svg>
@@ -437,21 +426,21 @@
                       [class.border-transparent]="!img.isCover">
                       <app-product-image [src]="img.url" [alt]="img.altText ?? ''" fit="contain" />
                       <!-- Overlay actions -->
-                      <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+                      <div class="absolute inset-0 bg-inverse/55 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
                         @if (!img.isCover) {
                           <button (click)="setCover(img.id)"
-                            class="px-3 py-1.5 bg-surface text-ink text-xs rounded-sm font-medium hover:bg-sunken transition-colors">
+                            class="btn btn-outline btn-sm bg-surface">
                             Imposta cover
                           </button>
                         }
                         <button (click)="deleteImage(img.id)"
-                          class="px-3 py-1.5 bg-danger text-white text-xs rounded-sm font-medium hover:bg-danger transition-colors">
+                          class="btn btn-danger btn-sm">
                           Elimina
                         </button>
                       </div>
                       <!-- Cover badge -->
                       @if (img.isCover) {
-                        <div class="absolute top-2 left-2 bg-ink text-white text-xs px-2 py-0.5 rounded-full">
+                        <div class="badge badge-solid absolute top-2 left-2">
                           Cover
                         </div>
                       }
@@ -466,22 +455,22 @@
 
               <!-- Image form: upload o URL -->
               @if (showImageForm()) {
-                <div class="border border-line rounded-sm p-4 bg-surface">
+                <div class="panel p-4">
 
                   <!-- Mode toggle -->
                   <div class="flex rounded-sm border border-line p-0.5 mb-4 w-fit">
                     <button type="button" (click)="imageMode = 'upload'; imagePreview.set(null); imageFile = null; imageUrl = ''"
-                      class="px-3 py-1.5 text-xs rounded-sm transition-colors font-medium"
-                      [class.bg-ink]="imageMode === 'upload'"
-                      [class.text-white]="imageMode === 'upload'"
-                      [class.text-ink-muted]="imageMode !== 'upload'">
+                      class="btn btn-sm"
+                      [class.btn-primary]="imageMode === 'upload'"
+                      [class.btn-ghost]="imageMode !== 'upload'"
+                      [attr.aria-pressed]="imageMode === 'upload'">
                       Carica file
                     </button>
                     <button type="button" (click)="imageMode = 'url'; imagePreview.set(null); imageFile = null"
-                      class="px-3 py-1.5 text-xs rounded-sm transition-colors font-medium"
-                      [class.bg-ink]="imageMode === 'url'"
-                      [class.text-white]="imageMode === 'url'"
-                      [class.text-ink-muted]="imageMode !== 'url'">
+                      class="btn btn-sm"
+                      [class.btn-primary]="imageMode === 'url'"
+                      [class.btn-ghost]="imageMode !== 'url'"
+                      [attr.aria-pressed]="imageMode === 'url'">
                       Via URL
                     </button>
                   </div>
@@ -528,21 +517,19 @@
 
                     <div class="flex gap-2">
                       <button type="button" (click)="cancelImageForm()"
-                        class="flex-1 px-3 py-2 border border-line rounded-sm text-xs hover:bg-sunken transition-colors">
+                        class="btn btn-outline btn-sm flex-1">
                         Annulla
                       </button>
                       <button type="button" (click)="saveImage()" [disabled]="imageFormLoading()"
-                        class="flex-1 px-3 py-2 bg-ink text-white rounded-sm text-xs hover:bg-ink-strong transition-colors disabled:opacity-50">
-                        @if (imageFormLoading()) {
-                          <span class="inline-block w-3 h-3 border-2 border-line-strong border-t-white rounded-full animate-spin mx-auto"></span>
-                        } @else { Aggiungi }
+                        class="btn btn-primary btn-sm flex-1" [attr.data-loading]="imageFormLoading() ? 'true' : null">
+                        Aggiungi
                       </button>
                     </div>
                   </div>
                 </div>
               } @else {
                 <button (click)="openAddImage()"
-                  class="w-full py-2.5 border-2 border-dashed border-line rounded-sm text-sm text-ink-muted hover:border-ink hover:text-ink transition-colors flex items-center justify-center gap-2 mt-2">
+                  class="btn btn-outline btn-block mt-2 border-2 border-dashed text-ink-muted hover:text-ink">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                   </svg>
@@ -560,17 +547,16 @@
 
 <!-- Confirm Delete -->
 @if (confirmDeleteId()) {
-  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-    <div class="absolute inset-0 bg-black/40" (click)="cancelDelete()"></div>
+  <div class="fixed inset-0 z-modal flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-inverse/40" (click)="cancelDelete()"></div>
     <div class="relative bg-surface rounded-sm shadow-2xl max-w-sm w-full p-6">
       <h3 class="text-lg font-bold text-ink mb-2">Elimina prodotto</h3>
       <p class="text-ink-muted text-sm mb-6">Questa azione è irreversibile. Il prodotto e tutte le sue varianti verranno eliminati.</p>
       <div class="flex gap-3">
         <button (click)="cancelDelete()" class="btn btn-outline flex-1">Annulla</button>
-        <button (click)="confirmDelete()" [disabled]="deleteLoading()" class="flex-1 px-4 py-2.5 bg-danger text-white rounded-sm text-sm hover:bg-danger disabled:opacity-50">
-          @if (deleteLoading()) {
-            <span class="inline-block w-4 h-4 border-2 border-danger border-t-white rounded-full animate-spin mx-auto"></span>
-          } @else { Elimina }
+        <button (click)="confirmDelete()" [disabled]="deleteLoading()"
+          class="btn btn-danger flex-1" [attr.data-loading]="deleteLoading() ? 'true' : null">
+          Elimina
         </button>
       </div>
     </div>
