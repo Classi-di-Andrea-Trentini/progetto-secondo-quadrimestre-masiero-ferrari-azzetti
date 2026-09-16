@@ -1,62 +1,77 @@
-# Backend — Products Module
+# Backend — catalogo
 
-Path: `server/src/products/`
+File: `services/ProductService`, `services/PricingService`,
+`controllers/ProductsController`, `dtos/ProductDtos`.
 
-All routes are public. No authentication is required to browse products.
+## Le rotte
 
-## Data model overview
+| Metodo | Percorso | Pubblico | Cosa fa |
+|---|---|---|---|
+| GET | `/products` | si' | lista con filtri, ordinamento, paginazione |
+| GET | `/products/filters` | si' | i valori possibili dei filtri |
+| GET | `/products/by-ids?ids=…` | si' | prodotti per id, per i "visti di recente" |
+| GET | `/products/{slug}` | si' | scheda prodotto + correlati |
 
-A `Product` belongs to one `Category`. It has many `ProductVariant` rows, where each variant represents a specific combination of size and color. It has many `ProductImage` rows, which can be linked to a specific variant or to the product as a whole. It can have an active `Discount`. Variants carry their own `stockQty` and an optional `priceOverride`.
+`/products/filters` deve stare **prima** di `/products/{slug}` per leggibilita', ma
+non e' l'ordine a salvarlo: Spring preferisce comunque il percorso letterale alla
+variabile. Finche' quell'endpoint non esisteva, `/products/filters` finiva su
+`bySlug("filters")` e la barra dei filtri restava vuota per un 404.
 
-The key fields on `Product` used for filtering and display are:
-- `basePrice` — Prisma Decimal, serialized as a string in JSON
-- `isActive` — soft delete flag, false items are never shown publicly
-- `isFeatured` / `isNewArrival` — used to power homepage sections
-- `soldCount` — incremented atomically by the checkout service on each order
-- `avgRating` — recomputed by the reviews service when a review is added or removed
+## Filtri — `ProductService.specification`
 
-## products.service.ts
+Costruiti con le `Specification` di JPA, tutti opzionali e combinabili. Due
+condizioni sono sempre presenti: `is_active = true` e `deleted_at IS NULL`.
 
-**findAll(dto)** — paginated product listing with filtering and sorting. The `where` clause is built dynamically:
+| Parametro | Effetto |
+|---|---|
+| `categoryId` | uguaglianza sulla categoria |
+| `brand` | uguaglianza |
+| `minPrice` / `maxPrice` | confronto su `base_price` |
+| `colors` | `IN` su `product_variants.color_hex`, con join |
+| `sizes` | `IN` su `product_variants.size`, con join |
+| `search` | vedi sotto |
+| `sortBy` | `price_asc`, `price_desc`, `popular` (`sold_count`), `rating` (`avg_rating`); il default e' `newest` (`created_at` discendente) |
+| `page`, `limit` | `limit` ha un tetto a **100**: senza, `?limit=100000` e' un modo gratuito per mettere in ginocchio il database |
 
-- `search` performs a case-insensitive `contains` match on the product name.
-- `categoryId` filters by exact category UUID.
-- `minPrice` / `maxPrice` use Prisma's `gte` / `lte` operators on `basePrice`.
-- `isFeatured` and `isNewArrival` are passed directly as booleans after the DTO transform.
-- `colors` and `sizes` use a `variants.some` subquery — a product matches if at least one of its active variants has a colorHex in the provided list and a size in the provided list.
+Il join sulle varianti duplica il prodotto una volta per variante che combacia:
+serve `query.distinct(true)`, altrimenti la stessa maglietta compare tre volte.
 
-Sorting options: `newest` (default, `createdAt desc`), `price_asc`, `price_desc`, `popular` (`soldCount desc`), `rating` (`avgRating desc`).
+### La ricerca
 
-The query uses `Promise.all` to run the data query and `count` query in parallel, which is the standard pagination pattern with Prisma.
+Attiva da **due caratteri** in su. Il termine viene spezzato in parole e **ogni
+parola deve comparire da qualche parte**: "t-shirt nera" trova la maglietta nera,
+non tutte le t-shirt piu' tutto cio' che e' nero.
 
-Each returned product includes: its category (id, name, slug), all images ordered cover-first, all active variants with only the fields needed for the listing (no material, no barcode), and at most one active discount.
+Per ogni parola si cerca in: nome, marca, descrizione breve, descrizione, nome
+della categoria, e nel **nome ripulito** da tutto cio' che non e' lettera o cifra
+via `regexp_replace` — a catalogo c'e' "T-Shirt" e la gente scrive "tshirt".
 
-**findBySlug(slug)** — loads a single product by slug. Throws a 404 if not found. Also loads up to 4 related products from the same category ordered by popularity. The related products include only the cover image and the first discount.
+> Il backend sa cercare, ma **nel frontend non c'e' nessuna casella di ricerca**:
+> la pagina `/products` legge il parametro `q` dall'URL e nient'altro lo scrive.
+> Vedi [11-what-is-missing.md](./11-what-is-missing.md).
 
-**getFilters()** — returns the data needed to populate the filter sidebar. Uses `Promise.all` to run four queries in parallel:
-- All active categories (for the category filter)
-- Distinct non-null `color` + `colorHex` combinations from active variants (for the color swatches)
-- Distinct non-null `size` values from active variants (for the size filter)
-- `aggregate` min and max on `basePrice` across all active products (for the price range slider)
+## Prezzi — `PricingService`
 
-## products.controller.ts
+`PricingService.of(variant)` restituisce un record `Price(original, unit,
+discountLabel)`: il prezzo pieno, quello effettivamente applicato dopo eventuali
+sconti, e l'etichetta da mostrare. Il prezzo di partenza e' `price_override` della
+variante se c'e', altrimenti `base_price` del prodotto.
 
-Three endpoints:
+**E' l'unico punto che calcola un prezzo.** Il checkout lo richiama invece di
+fidarsi dei numeri mandati dal client: quello che arriva dal browser e' una
+richiesta, non un prezzo.
 
-`GET /products/filters` — must be declared before `GET /products/:slug` in the file, otherwise NestJS would try to match the string `"filters"` as a slug parameter.
+## Risposta
 
-`GET /products` — accepts query parameters matching `GetProductsDto`. Returns the paginated response.
+`GET /products` restituisce `{ data, meta }`, con `meta = { total, page, limit,
+totalPages }`. Ogni elemento e' un `ProductDtos.ProductView` con categoria,
+immagini, varianti e sconti gia' dentro — la conversione avviene nel servizio, in
+transazione, perche' con `open-in-view=false` le associazioni lazy non si possono
+toccare piu' tardi.
 
-`GET /products/:slug` — returns the full product object and the related array.
+`GET /products/{slug}` aggiunge i **correlati**: stessa categoria, i piu' venduti
+per primi, escluso il prodotto stesso.
 
-## dto/get-products.dto.ts
-
-Uses `class-transformer` decorators to coerce incoming query string values. `@Type(() => Number)` on `minPrice`, `maxPrice`, `page`, `limit` converts the string `"24"` to the number `24`. `@Transform` on `isFeatured` and `isNewArrival` converts the string `"true"` to boolean `true`. `colors` and `sizes` can be sent as `colors[]=...&colors[]=...` and come in as arrays.
-
-## Image conventions
-
-`is_cover = true` — the primary image shown on listing cards and as the first image in the gallery.
-
-`sort_order = 1` — conventionally the hover image (shown on mouseover on product cards).
-
-Images can optionally be linked to a specific variant via `variantId`. The frontend can use this to swap images when the user selects a color.
+`GET /products/by-ids` accetta una lista separata da virgole e **ignora in silenzio
+gli id malformati**: la lista arriva dal `localStorage` del browser, e un id storto
+e' roba vecchia o modificata a mano, non un motivo per rispondere 400.

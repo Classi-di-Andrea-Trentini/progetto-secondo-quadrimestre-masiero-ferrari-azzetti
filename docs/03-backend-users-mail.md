@@ -1,78 +1,97 @@
-# Backend — Users and Mail Modules
+# Backend — utenti, privacy e posta
 
-## Users module
+File: `services/UserService`, `services/PrivacyService`, `services/MailService`,
+`controllers/UsersController`.
 
-Path: `server/src/users/`
+## Profilo — `UserService`
 
-All routes are under `/users` and are protected by `JwtAuthGuard` except the two confirmation endpoints that are reached by clicking a link in an email.
+| Metodo | Cosa fa |
+|---|---|
+| `updateProfile` | aggiorna **solo** i campi presenti nel corpo: un campo assente non deve diventare `null` |
+| `changePassword` | richiede la password attuale e **revoca tutte le altre sessioni**, tenendo in vita quella corrente |
+| `requestPasswordReset` | genera un token, lo salva in `password_resets`, manda l'email. Non dice mai se l'indirizzo esiste |
+| `resetPassword` | consuma il token e revoca tutte le sessioni |
+| `sendVerificationEmail` / `confirmVerification` | verifica dell'indirizzo, riga in `email_verifications` |
+| `requestEmailChange` / `confirmEmailChange` | **conferma al nuovo indirizzo** e avviso al vecchio |
 
-### users.service.ts
+Il cambio email chiede la password attuale, manda il link di conferma al **nuovo**
+indirizzo e un avviso al vecchio: se qualcuno entrasse in un account e si spostasse
+l'email addosso, il proprietario lo scoprirebbe.
 
-The service handles all account management operations that go beyond the basic login/register flow.
+## GDPR — `PrivacyService`
 
-**updateProfile(userId, dto)** — patches the user record with only the fields present in the DTO. The update data object is built incrementally so that undefined fields are never passed to Prisma (which would overwrite them with null). The `birthDate` field is converted from a date string to a JavaScript `Date`. Returns the updated user using the `USER_SELECT` constant, which is a shared projection that lists all safe-to-expose fields and excludes `passwordHash`.
+Due diritti, entrambi in `/me` → impostazioni.
 
-**requestEmailChange(userId, dto)** — changing an email is a two-step process because the new address needs to be confirmed before it takes effect. This method verifies the current password first, then checks that the new email is not already taken by another account. It deletes any previous pending verification for this user (so you can only have one pending email change at a time), then creates a JWT signed with `JWT_SECRET` that encodes the userId, the new email, and a `purpose: 'email-change'` claim. This JWT is stored in the `email_verifications` table and also embedded in a confirmation link sent to the new address. The link points to `GET /users/confirm-email/:token`.
+### Export dei dati (art. 20) — `GET /users/me/export`
 
-**confirmEmailChange(token)** — the endpoint hit when the user clicks the confirmation link. Verifies the JWT signature and the `purpose` claim, checks the verification record has not been used and has not expired, verifies the new email is still available, updates the user's email and sets `emailVerifiedAt`, marks the verification record as used, and sends an alert to the old email address.
+Restituisce un JSON con profilo, indirizzi, ordini e righe d'ordine, recensioni,
+wishlist, punti fedelta' e relativi movimenti, scaricato come allegato
+(`Content-Disposition: attachment`) perche' e' un file che la persona deve poter
+conservare o consegnare a un altro fornitore.
 
-**sendVerificationEmail(userId)** — generates a similar JWT with `purpose: 'email-verify'`, stores it, and emails a link to the user's current address. The link points to `GET /users/verify-email/:token`. Multiple calls invalidate previous tokens by deleting them first.
+E' un albero di **record** e non una mappa generica: un record elenca i campi uno
+per uno, quindi il giorno in cui una colonna nuova compare in `users` non finisce
+per sbaglio nell'export solo perche' esiste.
 
-**confirmVerification(token)** — verifies the JWT and the verification record, then sets `emailVerifiedAt` on the user.
+L'intero export sta dentro **una** transazione in sola lettura: con
+`open-in-view=false`, toccare fuori le associazioni lazy esploderebbe con una
+`LazyInitializationException`.
 
-**changePassword(userId, currentSessionId, dto)** — verifies the current password before hashing the new one. After updating the hash, it deletes all sessions for that user except the current one. This logs out all other devices. A `passwordChangedAlert` email is sent as fire-and-forget.
+### Cancellazione dell'account (art. 17) — `DELETE /users/me`
 
-### DTOs
+La cancellazione e' **logica** (`users.deleted_at`), e non e' una scorciatoia:
+`orders.user_id` e' `ON DELETE RESTRICT`, quindi il database rifiuterebbe la
+cancellazione vera, e una fattura emessa va comunque conservata per legge.
 
-`update-profile.dto.ts` — all fields are optional. `fullName` requires minLength 2 if provided. `birthDate` is a date string. `newsletterOptIn` is boolean.
+Cosa succede davvero:
 
-`change-email.dto.ts` — `newEmail` (valid email, max 255), `currentPassword` (required).
+- i campi obbligatori (`email`, `full_name`, `password_hash`) non si possono
+  azzerare, quindi **ci si scrive sopra**. L'email nuova porta un UUID e finisce su
+  un dominio `@anonimo.invalid` — `.invalid` e' riservato dalla RFC 2606 e non si
+  risolve, quindi non esiste il rischio di mandare posta a un indirizzo vero;
+- gli indirizzi stampati su una fattura vengono **svuotati sul posto** e non
+  cancellati: `orders.address_id` e' `ON DELETE SET NULL`, e la fattura in PDF legge
+  il destinatario proprio da li';
+- tutte le sessioni vengono revocate e la risposta porta il cookie svuotato: la
+  sessione da cui si e' chiesta la cancellazione non deve sopravvivere alla
+  richiesta.
 
-`change-password.dto.ts` — `currentPassword`, `newPassword` (min 8, max 72).
+L'operazione richiede la password nel corpo della richiesta: non basta avere un
+cookie valido.
 
-### Endpoints
+## Posta — `MailService`
 
-| Method | Path | Description |
-|--------|------|-------------|
-| PATCH | /users/me | Update profile fields |
-| POST | /users/me/change-email | Request email change (sends confirmation link) |
-| POST | /users/me/send-verification | Resend email verification link |
-| POST | /users/me/change-password | Change password, invalidate other sessions |
-| GET | /users/verify-email/:token | Confirm email verification (public) |
-| GET | /users/confirm-email/:token | Confirm email change (public) |
+Trasporto scelto da `MAIL_PROVIDER`:
 
----
+- `smtp` → `JavaMailSender` configurato da `SMTP_*`;
+- vuoto → **le email vengono solo scritte nei log**, che e' lo stato giusto in
+  sviluppo.
 
-## Mail module
+`JavaMailSender` arriva via `ObjectProvider` e non iniettato direttamente:
+l'autoconfigurazione lo crea solo se `spring.mail.host` e' valorizzato, e
+iniettarlo direttamente farebbe fallire l'avvio quando la posta non e' configurata.
 
-Path: `server/src/mail/`
+Timeout espliciti a 5 secondi su connessione, lettura e scrittura: senza, JavaMail
+aspetta all'infinito e blocca la richiesta HTTP che ha innescato l'invio.
 
-`MailModule` is marked `@Global()` and exports `MailService`, so any other module can inject `MailService` without importing `MailModule`.
+**Un'email che non parte non fa fallire l'operazione che l'ha innescata**: nessuno
+vuole un ordine annullato perche' il server di posta non rispondeva.
 
-### mail.service.ts
+> **Resend non c'e' piu'.** Era il fornitore del backend Node: nel backend Java non
+> esiste una riga di codice che lo usi, e le variabili `RESEND_*` non le legge
+> nessuno.
 
-Sends emails via the Resend API using the native `fetch` function (no SDK). The `send()` private method handles the actual HTTP call. In development mode (when `NODE_ENV` is not `'production'`), it logs the full email content to the console regardless of whether an API key is configured. If the API key is missing, it logs a warning and returns without sending. This means the app works in development with no email configuration — you can read the email bodies from the Docker logs.
+### I messaggi che esistono
 
-All public methods (`sendWelcome`, `sendEmailVerification`, `sendEmailChangeConfirmation`, `sendEmailChangedAlert`, `sendPasswordChangedAlert`, `sendNewsletterConfirmation`) are thin wrappers that call `send()` with the appropriate subject and HTML body from `templates.ts`.
+1. prodotto tornato disponibile
+2. cambio stato di un reso
+3. conferma iscrizione newsletter
+4. verifica dell'indirizzo email
+5. conferma del cambio email
+6. avviso "la tua email e' cambiata" (al vecchio indirizzo)
+7. reimpostazione password
+8. avviso "la tua password e' cambiata"
 
-### mail/templates.ts
-
-Contains one function per email type. Each function takes the required data as parameters and returns an HTML string. The templates are plain HTML strings, not a template engine. They follow a consistent structure: dark header with the brand name, a body area with the message, and a footer.
-
-Emails currently implemented:
-- Welcome email sent after registration
-- Email verification link
-- Email change confirmation link (sent to the new address)
-- Alert sent to old address when email is changed
-- Alert sent when password is changed
-- Newsletter confirmation
-
-### Using MailService in other modules
-
-Because `MailModule` is global, you just inject it:
-
-```typescript
-constructor(private readonly mail: MailService) {}
-```
-
-All calls in the codebase are fire-and-forget with `.catch(() => {})`. A mail failure is never allowed to break the operation that triggered it.
+**Nessuno riguarda un ordine.** Non c'e' conferma d'ordine, non c'e' avviso di
+spedizione, non c'e' avviso di consegna. E' una delle voci piu' pesanti di
+[11-what-is-missing.md](./11-what-is-missing.md).

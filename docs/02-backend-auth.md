@@ -1,49 +1,92 @@
-# Backend — Auth Module
+# Backend — autenticazione
 
-Path: `server/src/auth/`
+File: `security/JwtService`, `security/JwtCookieFilter`, `security/AuthCookie`,
+`security/CurrentUser`, `services/AuthService`, `services/LoginRateLimiterService`,
+`controllers/AuthController`.
 
-## How authentication works
+## Il principio: JWT **piu'** riga di sessione
 
-The system uses JWT tokens stored in an HttpOnly cookie, combined with a server-side session record in the database. The cookie approach means JavaScript on the page cannot read the token at all, which eliminates a whole class of XSS-based token theft.
+Il token da solo non basterebbe. Un JWT firmato resta valido fino alla scadenza,
+anche dopo che l'utente ha fatto logout: senza un secondo controllo, "esci" sarebbe
+una bugia.
 
-When a user logs in, the server creates a row in the `sessions` table and issues a JWT whose payload contains three claims: `sub` (the user's UUID), `sid` (the session's UUID), and `role`. Every subsequent request sends the cookie automatically. The JWT strategy validates the signature, then does a second check against the database to confirm the session still exists and has not expired. This double check means you can invalidate a session immediately by deleting the row, without waiting for the JWT to expire.
+Quindi a ogni richiesta `JwtCookieFilter`:
 
-## auth.service.ts
+1. legge il cookie `access_token`;
+2. verifica firma e scadenza del token (`JwtService.parse`);
+3. cerca la riga in `sessions` per **impronta** del token
+   (`SessionRepository.findByTokenHash(jwt.fingerprint(token))`) e controlla che non
+   sia scaduta;
+4. carica l'utente e controlla che sia `is_active` e non cancellato
+   (`deleted_at IS NULL`);
+5. solo allora mette un `CurrentUser` nel contesto di sicurezza, con l'autorita'
+   `ROLE_<ruolo maiuscolo>`.
 
-**register(dto)** — checks for duplicate email (normalised to lowercase), hashes the password with bcrypt at cost factor 12, creates the user record, and fires off a welcome email as fire-and-forget (errors are swallowed so a mail failure does not break registration). Returns only safe user fields, never the password hash.
+Se uno qualsiasi dei passaggi fallisce, il filtro **non** blocca la richiesta: lascia
+passare senza autenticazione, e sara' `SecurityConfig` a decidere se quella rotta e'
+pubblica o no.
 
-**login(dto, ipAddress, userAgent)** — looks up the user by lowercase email, checks `isActive` and `deletedAt` before comparing passwords. The error message is intentionally generic ("Credenziali non valide") regardless of whether the email exists or the password is wrong, to avoid user enumeration. On success it generates a random 32-byte token (`randomBytes`), hashes it with SHA-256, and stores the hash in the `sessions` table. The raw token is never stored. It also updates `lastLoginAt` on the user. Returns the session ID, user data, and role — the controller uses these to sign the JWT.
+Cancellare la riga in `sessions` invalida la sessione **subito**, senza aspettare la
+scadenza del token.
 
-**validateSession(userId, sessionId)** — called on every authenticated request by the JWT strategy. Loads the session by ID, then checks: does it belong to this user, has it expired, is the user still active and not deleted. Returns the user object if all checks pass, or null.
+## Il cookie — `AuthCookie`
 
-**logout(sessionId)** — deletes the session row. The cookie is cleared by the controller. Uses `.catch(() => {})` to handle the edge case where the session was already deleted.
+| Attributo | Valore | Perche' |
+|---|---|---|
+| nome | `access_token` | lo stesso del backend Node |
+| `HttpOnly` | sempre | un token leggibile da JavaScript e' un token rubabile con una sola XSS |
+| `Secure` | `COOKIE_SECURE` (oggi `false`) | acceso sopra HTTP il browser smette di mandarlo e il login sparisce senza un messaggio d'errore. Va acceso **insieme** al TLS |
+| `SameSite` | `Lax` | e' anche il motivo per cui si puo' disattivare CSRF |
+| `path` | `/` | |
+| durata | `JWT_TTL_DAYS`, 7 giorni | |
 
-**getProfile(userId)** — used by `GET /auth/me`. Returns all user fields including the default address. Called after authentication is confirmed, so no additional auth check is needed.
+Creazione e cancellazione passano dalla stessa classe: un `path` o un `sameSite`
+diverso fra chi scrive il cookie e chi lo cancella lascia nel browser un cookie che
+nessuno riesce piu' a togliere.
 
-## auth.controller.ts
+## `JwtService`
 
-**POST /auth/register** — throttled to 5 requests per IP per 15 minutes to slow down automated registrations.
+- **Nessun default per il segreto.** Se `JWT_SECRET` manca o e' piu' corto di 32
+  caratteri, l'applicazione non parte: un backend che accetta token falsificabili e'
+  peggio di uno spento, perche' sembra funzionare.
+- `issue(userId, sessionId)` → token di sessione, con `sub` e `sid`.
+- `fingerprint(token)` → l'impronta salvata in `sessions.token_hash`: nel database
+  non finisce il token in chiaro.
+- `issuePurposeToken` / `parsePurposeToken` → token **monouso e tipizzati**, con uno
+  scopo dichiarato e una durata propria (verifica email, conferma cambio email). Un
+  token emesso per uno scopo non vale per un altro.
 
-**POST /auth/login** — throttled to 10 requests per IP per 15 minutes. Extracts the real client IP from the `X-Forwarded-For` header (relevant when running behind a proxy). Calls `authService.login()`, then signs a JWT with `JwtService` and sets it as the `access_token` cookie. The cookie options are: `httpOnly: true`, `secure: true` in production, `sameSite: strict`, 7-day `maxAge`.
+## Le rotte — `AuthController`
 
-**POST /auth/logout** — protected by `JwtAuthGuard`. Reads the existing cookie, decodes it to get the `sid`, calls `authService.logout(sid)`, then clears the cookie by setting `maxAge: 0`.
+| Metodo | Percorso | Note |
+|---|---|---|
+| POST | `/auth/register` | crea l'utente, manda l'email di verifica. Non fa login |
+| POST | `/auth/login` | risponde `{ user }` e imposta il cookie |
+| POST | `/auth/logout` | cancella la riga in `sessions` **e** manda un cookie svuotato e gia' scaduto |
+| POST | `/auth/forgot-password` | risposta **sempre uguale**, esista o no l'indirizzo |
+| POST | `/auth/reset-password` | token dall'email + password nuova |
+| GET | `/auth/me` | l'utente della sessione corrente |
 
-**GET /auth/me** — protected by `JwtAuthGuard`. Returns `req.user`, which is the user object attached by the JWT strategy after session validation.
+`/auth/me` rilegge l'utente dal database invece di restituire quello che ha in mano
+il filtro: cosi' una modifica al profilo si vede subito.
 
-## jwt.strategy.ts
+**`forgot-password` risponde sempre lo stesso messaggio** — "se l'indirizzo e'
+registrato, riceverai un'email". Distinguere i due casi regalerebbe a chiunque un
+modo di scoprire chi e' cliente del negozio.
 
-Extends `PassportStrategy(Strategy)` from `passport-jwt`. Configured to extract the JWT from the `access_token` cookie (not from the Authorization header). The `validate()` method receives the decoded payload, calls `validateSession()`, and attaches `sessionId` to the returned user object so that controllers can identify the current session (used in `changePassword` to invalidate all other sessions).
+## Limite sui tentativi di accesso
 
-## Token lifetime
+`LoginRateLimiterService`: **5 tentativi falliti in 15 minuti**, chiave = email, con
+una pulizia periodica delle voci vecchie. Un accesso riuscito azzera il conteggio.
 
-JWT: 7 days (`expiresIn` set on `JwtModule` in `auth.module.ts`)
-Session row: also 7 days, set as `expiresAt` on creation
-Cookie `maxAge`: also 7 days
+`AuthService.login` confronta la password contro un **hash fittizio** quando
+l'utente non esiste, invece di rispondere subito: senza, il tempo di risposta
+direbbe da solo se un indirizzo e' registrato.
 
-All three values are kept in sync. If the JWT is valid but the session row is gone (manual invalidation), `validateSession` returns null and the request gets a 401.
+Due limiti noti, entrambi da superare (vedi
+[11-what-is-missing.md](./11-what-is-missing.md)):
 
-## DTOs
-
-`register.dto.ts` — `fullName` (string, 2–255 chars), `email` (valid email format), `password` (8–72 chars, 72 is bcrypt's max).
-
-`login.dto.ts` — `email`, `password` as plain required strings. No length validation on login since that would leak information about password constraints.
+- il conteggio e' **in memoria**: si azzera a ogni riavvio e non regge piu' di
+  un'istanza del backend;
+- la chiave e' **solo l'email**: mille email diverse dallo stesso IP non vengono
+  fermate. E `POST /auth/login` e' l'**unica** rotta protetta.
