@@ -3,27 +3,27 @@
   <nav class="flex justify-center gap-6 sm:gap-10 border-b border-line mb-12 flex-wrap">
     <a (click)="setTab('profile')"
        class="pb-4 text-sm font-semibold uppercase tracking-wider cursor-pointer transition-colors"
-       [ngClass]="activeTab() === 'profile' ? 'text-black border-b-2 border-black' : 'text-ink-muted hover:text-ink'">
+       [ngClass]="activeTab() === 'profile' ? 'text-ink border-b-2 border-ink' : 'text-ink-muted hover:text-ink'">
       Profilo
     </a>
     <a (click)="setTab('orders')"
        class="pb-4 text-sm font-semibold uppercase tracking-wider cursor-pointer transition-colors"
-       [ngClass]="activeTab() === 'orders' ? 'text-black border-b-2 border-black' : 'text-ink-muted hover:text-ink'">
+       [ngClass]="activeTab() === 'orders' ? 'text-ink border-b-2 border-ink' : 'text-ink-muted hover:text-ink'">
       Ordini
     </a>
     <a (click)="setTab('addresses')"
        class="pb-4 text-sm font-semibold uppercase tracking-wider cursor-pointer transition-colors"
-       [ngClass]="activeTab() === 'addresses' ? 'text-black border-b-2 border-black' : 'text-ink-muted hover:text-ink'">
+       [ngClass]="activeTab() === 'addresses' ? 'text-ink border-b-2 border-ink' : 'text-ink-muted hover:text-ink'">
       Indirizzi
     </a>
     <a (click)="setTab('favorites')"
        class="pb-4 text-sm font-semibold uppercase tracking-wider cursor-pointer transition-colors"
-       [ngClass]="activeTab() === 'favorites' ? 'text-black border-b-2 border-black' : 'text-ink-muted hover:text-ink'">
+       [ngClass]="activeTab() === 'favorites' ? 'text-ink border-b-2 border-ink' : 'text-ink-muted hover:text-ink'">
       Preferiti
     </a>
     <a (click)="setTab('settings')"
        class="pb-4 text-sm font-semibold uppercase tracking-wider cursor-pointer transition-colors"
-       [ngClass]="activeTab() === 'settings' ? 'text-black border-b-2 border-black' : 'text-ink-muted hover:text-ink'">
+       [ngClass]="activeTab() === 'settings' ? 'text-ink border-b-2 border-ink' : 'text-ink-muted hover:text-ink'">
       Impostazioni
     </a>
   </nav>
@@ -41,7 +41,7 @@
                 <h2 class="text-xl font-bold">Dati personali</h2>
                 @if (!isEditing()) {
                   <button (click)="startEditing()"
-                    class="text-sm text-ink-muted hover:text-black underline transition-colors">
+                    class="text-sm text-ink-muted hover:text-ink underline transition-colors">
                     Modifica
                   </button>
                 }
@@ -86,7 +86,7 @@
 
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div class="md:col-span-2">
-                      <label class="block text-xs font-semibold uppercase tracking-widest text-ink-muted mb-1.5">
+                      <label class="label">
                         Nome completo
                       </label>
                       <input type="text" formControlName="fullName"
@@ -98,7 +98,7 @@
                     </div>
 
                     <div>
-                      <label class="block text-xs font-semibold uppercase tracking-widest text-ink-muted mb-1.5">
+                      <label class="label">
                         Phone
                       </label>
                       <input type="tel" formControlName="phone"
@@ -107,7 +107,7 @@
                     </div>
 
                     <div>
-                      <label class="block text-xs font-semibold uppercase tracking-widest text-ink-muted mb-1.5">
+                      <label class="label">
                         Data di nascita
                       </label>
                       <input type="date" formControlName="birthDate"
@@ -115,7 +115,7 @@
                     </div>
 
                     <div>
-                      <label class="block text-xs font-semibold uppercase tracking-widest text-ink-muted mb-1.5">
+                      <label class="label">
                         Gender
                       </label>
                       <select formControlName="gender"
@@ -129,18 +129,18 @@
                   </div>
 
                   @if (saveError()) {
-                    <div class="px-4 py-3 bg-danger-wash text-sm text-danger rounded-sm">
+                    <div role="alert" class="bg-danger-wash text-danger px-4 py-3 rounded-sm text-sm">
                       {{ saveError() }}
                     </div>
                   }
 
                   <div class="flex gap-3 pt-2">
                     <button type="submit" [disabled]="saveLoading()"
-                      class="px-6 py-2.5 bg-black text-white text-sm font-semibold uppercase tracking-widest hover:bg-ink transition disabled:opacity-50">
-                      @if (saveLoading()) { Salvataggio… } @else { Salva }
+                      class="btn btn-primary" [attr.data-loading]="saveLoading() ? 'true' : null">
+                      Salva
                     </button>
                     <button type="button" (click)="cancelEditing()"
-                      class="px-6 py-2.5 border border-line-strong text-sm font-semibold uppercase tracking-widest hover:border-black transition">
+                      class="btn btn-outline">
                       Annulla
                     </button>
                   </div>
@@ -158,10 +158,10 @@
                   @if (user.emailVerifiedAt) {
                     <p class="text-xs text-success mt-0.5">Verificata</p>
                   } @else {
-                    <p class="text-xs text-amber-600 mt-0.5">Non verificata</p>
+                    <p class="text-xs text-warning mt-0.5">Non verificata</p>
                     <button (click)="sendVerification()" [disabled]="verifyLoading()"
-                      class="mt-1.5 text-xs text-black underline hover:no-underline disabled:opacity-50 transition-opacity">
-                      @if (verifyLoading()) { Sending… } @else { Send verification email }
+                      class="link mt-1.5 text-xs disabled:opacity-50">
+                      {{ verifyLoading() ? 'Invio in corso…' : 'Invia email di verifica' }}
                     </button>
                     @if (verifyMessage()) {
                       <p class="mt-1 text-xs text-ink-muted">{{ verifyMessage() }}</p>
@@ -169,7 +169,7 @@
                   }
                 </div>
                 <button (click)="emailChangeVisible.set(!emailChangeVisible())"
-                  class="text-sm text-ink-muted hover:text-black underline transition-colors">
+                  class="text-sm text-ink-muted hover:text-ink underline transition-colors">
                   {{ emailChangeVisible() ? 'Annulla' : 'Cambia email' }}
                 </button>
               </div>
@@ -183,7 +183,7 @@
 
                   <form [formGroup]="emailForm" (ngSubmit)="submitEmailChange()" novalidate class="space-y-4">
                     <div>
-                      <label class="block text-xs font-semibold uppercase tracking-widest text-ink-muted mb-1.5">
+                      <label class="label">
                         New email
                       </label>
                       <input type="email" formControlName="newEmail"
@@ -197,7 +197,7 @@
                     </div>
 
                     <div>
-                      <label class="block text-xs font-semibold uppercase tracking-widest text-ink-muted mb-1.5">
+                      <label class="label">
                         Password attuale
                       </label>
                       <input type="password" formControlName="currentPassword"
@@ -207,19 +207,19 @@
                     </div>
 
                     @if (emailError()) {
-                      <div class="px-4 py-3 bg-danger-wash text-sm text-danger rounded-sm">
+                      <div role="alert" class="bg-danger-wash text-danger px-4 py-3 rounded-sm text-sm">
                         {{ emailError() }}
                       </div>
                     }
                     @if (emailSuccess()) {
-                      <div class="px-4 py-3 bg-success-wash border border-transparent text-sm text-success rounded">
+                      <div role="status" class="bg-success-wash text-success px-4 py-3 rounded-sm text-sm">
                         {{ emailSuccess() }}
                       </div>
                     }
 
                     <button type="submit" [disabled]="emailLoading()"
-                      class="px-6 py-2.5 bg-black text-white text-sm font-semibold uppercase tracking-widest hover:bg-ink transition disabled:opacity-50">
-                      @if (emailLoading()) { Sending… } @else { Send change request }
+                      class="btn btn-primary" [attr.data-loading]="emailLoading() ? 'true' : null">
+                      Invia richiesta di modifica
                     </button>
                   </form>
                 </div>
@@ -291,17 +291,17 @@
                       <span class="font-bold text-ink">{{ formatOrderPrice(order.total) }}</span>
                       @if (canCancelOrder(order.status)) {
                         <button (click)="$event.stopPropagation(); requestCancelOrder(order.id)"
-                          class="px-2 py-1 text-xs border border-transparent text-danger rounded-sm hover:bg-danger-wash transition-colors">
+                          class="btn btn-ghost btn-sm text-danger">
                           Annulla
                         </button>
                       }
                       @if (canRequestReturn(order)) {
                         <button (click)="openReturnModal(order, $event)"
-                          class="px-2 py-1 text-xs border border-line-strong text-ink-2 rounded-sm hover:bg-sunken transition-colors">
+                          class="btn btn-outline btn-sm">
                           Richiedi reso
                         </button>
                       } @else if (returnStatusByOrderId()[order.id]) {
-                        <span class="px-2 py-1 text-xs rounded-sm bg-info-wash text-info border border-transparent">
+                        <span class="badge badge-info">
                           Reso: {{ returnStatusLabels[returnStatusByOrderId()[order.id]] ?? returnStatusByOrderId()[order.id] }}
                         </span>
                       }
@@ -404,10 +404,10 @@
             @if (ordersTotalPages() > 1) {
               <div class="flex justify-center gap-2 mt-6">
                 <button (click)="loadOrders(ordersPage() - 1)" [disabled]="ordersPage() === 1"
-                  class="px-3 py-1.5 text-sm border border-line rounded-sm hover:bg-sunken disabled:opacity-40">‹</button>
+                  class="btn btn-outline btn-sm">‹</button>
                 <span class="px-3 py-1.5 text-sm text-ink-muted">{{ ordersPage() }} / {{ ordersTotalPages() }}</span>
                 <button (click)="loadOrders(ordersPage() + 1)" [disabled]="ordersPage() === ordersTotalPages()"
-                  class="px-3 py-1.5 text-sm border border-line rounded-sm hover:bg-sunken disabled:opacity-40">›</button>
+                  class="btn btn-outline btn-sm">›</button>
               </div>
             }
           }
@@ -419,7 +419,7 @@
           <div class="flex items-center justify-between border-b border-line pb-4 mb-6">
             <h2 class="text-xl font-bold">Indirizzi di spedizione</h2>
             <button (click)="showAddressForm.set(!showAddressForm())"
-              class="flex items-center gap-2 px-4 py-2 bg-ink text-white text-sm rounded-sm hover:bg-ink-strong transition-colors">
+              class="btn btn-primary btn-sm">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
               </svg>
@@ -484,14 +484,12 @@
                 </select>
               </div>
               <div class="flex items-center gap-2">
-                <input formControlName="isDefault" type="checkbox" id="addrDefault" class="w-4 h-4 accent-gray-900"/>
+                <input formControlName="isDefault" type="checkbox" id="addrDefault" class="w-4 h-4 accent-ink"/>
                 <label for="addrDefault" class="text-xs text-ink-2">Imposta come predefinito</label>
               </div>
               <button type="submit" [disabled]="newAddressForm.invalid || addressFormLoading()"
-                class="w-full px-4 py-2.5 bg-ink text-white text-sm rounded-sm hover:bg-ink-strong disabled:opacity-50 transition-colors">
-                @if (addressFormLoading()) {
-                  <span class="inline-block w-4 h-4 border-2 border-line-strong border-t-white rounded-full animate-spin mx-auto"></span>
-                } @else { Salva indirizzo }
+                class="btn btn-primary btn-block" [attr.data-loading]="addressFormLoading() ? 'true' : null">
+                Salva indirizzo
               </button>
             </form>
           }
@@ -517,7 +515,7 @@
                     <div class="flex items-center gap-2 mb-1">
                       <p class="font-semibold text-ink text-sm">{{ addr.fullName }}</p>
                       @if (addr.isDefault) {
-                        <span class="text-xs bg-ink text-white px-2 py-0.5 rounded-full">Predefinito</span>
+                        <span class="badge badge-solid">Predefinito</span>
                       }
                     </div>
                     <p class="text-sm text-ink-2">{{ addr.street }}{{ addr.street2 ? ', ' + addr.street2 : '' }}</p>
@@ -527,12 +525,12 @@
                   <div class="flex flex-col gap-1.5 flex-shrink-0">
                     @if (!addr.isDefault) {
                       <button (click)="setDefaultAddress(addr.id)"
-                        class="text-xs px-3 py-1.5 border border-line rounded-sm hover:border-ink transition-colors text-ink-2">
+                        class="btn btn-outline btn-sm">
                         Imposta predefinito
                       </button>
                     }
                     <button (click)="deleteAddress(addr.id)"
-                      class="text-xs px-3 py-1.5 border border-transparent text-danger rounded-sm hover:bg-danger-wash transition-colors">
+                      class="btn btn-ghost btn-sm text-danger">
                       Elimina
                     </button>
                   </div>
@@ -553,8 +551,8 @@
                 <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
               </svg>
               <p class="text-ink-muted text-sm mb-4">Non hai ancora preferiti.</p>
-              <a routerLink="/products" class="inline-block bg-black text-white text-xs tracking-widest uppercase px-6 py-3 hover:bg-ink-strong transition-colors">
-                Browse the collection
+              <a routerLink="/products" class="btn btn-primary">
+                Sfoglia la collezione
               </a>
             </div>
           } @else {
@@ -597,7 +595,7 @@
             <h3 class="text-sm font-semibold uppercase tracking-widest text-ink-muted mb-5">Cambia password</h3>
             <form [formGroup]="passwordForm" (ngSubmit)="submitPasswordChange()" novalidate class="space-y-4 max-w-sm">
               <div>
-                <label class="block text-xs font-semibold uppercase tracking-widest text-ink-muted mb-1.5">
+                <label class="label">
                   Password attuale
                 </label>
                 <input type="password" formControlName="currentPassword"
@@ -606,7 +604,7 @@
                   class="field" />
               </div>
               <div>
-                <label class="block text-xs font-semibold uppercase tracking-widest text-ink-muted mb-1.5">
+                <label class="label">
                   Nuova password
                 </label>
                 <input type="password" formControlName="newPassword"
@@ -619,7 +617,7 @@
                 }
               </div>
               <div>
-                <label class="block text-xs font-semibold uppercase tracking-widest text-ink-muted mb-1.5">
+                <label class="label">
                   Conferma la nuova password
                 </label>
                 <input type="password" formControlName="confirmPassword"
@@ -633,12 +631,12 @@
               </div>
 
               @if (passwordError()) {
-                <div class="px-4 py-3 bg-danger-wash text-sm text-danger rounded-sm">
+                <div role="alert" class="bg-danger-wash text-danger px-4 py-3 rounded-sm text-sm">
                   {{ passwordError() }}
                 </div>
               }
               @if (passwordSuccess()) {
-                <div class="px-4 py-3 bg-success-wash border border-transparent text-sm text-success rounded">
+                <div role="status" class="bg-success-wash text-success px-4 py-3 rounded-sm text-sm">
                   {{ passwordSuccess() }}
                 </div>
               }
@@ -716,8 +714,8 @@
 
 <!-- Cancel Order Modal -->
 @if (cancelOrderId()) {
-  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-    <div class="absolute inset-0 bg-black/40" (click)="dismissCancelOrder()"></div>
+  <div class="fixed inset-0 z-modal flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-inverse/40" (click)="dismissCancelOrder()"></div>
     <div class="relative bg-surface rounded-sm shadow-2xl max-w-sm w-full p-6">
       <h3 class="text-lg font-bold text-ink mb-2">Annulla ordine</h3>
       <p class="text-ink-muted text-sm mb-6">Sei sicuro di voler annullare questo ordine? L'azione è irreversibile.</p>
@@ -727,10 +725,8 @@
           Indietro
         </button>
         <button (click)="confirmCancelOrder()" [disabled]="cancelOrderLoading()"
-          class="flex-1 px-4 py-2.5 bg-danger text-white rounded-sm text-sm hover:bg-danger disabled:opacity-50">
-          @if (cancelOrderLoading()) {
-            <span class="inline-block w-4 h-4 border-2 border-danger border-t-white rounded-full animate-spin mx-auto"></span>
-          } @else { Annulla ordine }
+          class="btn btn-danger flex-1" [attr.data-loading]="cancelOrderLoading() ? 'true' : null">
+          Annulla ordine
         </button>
       </div>
     </div>
@@ -739,8 +735,8 @@
 
 <!-- Cancellazione account: serve la password, perché non si torna indietro -->
 @if (deleteAccountOpen()) {
-  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-    <div class="absolute inset-0 bg-black/40" (click)="closeDeleteAccount()"></div>
+  <div class="fixed inset-0 z-modal flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-inverse/40" (click)="closeDeleteAccount()"></div>
     <div class="panel relative w-full max-w-sm p-6 shadow-2xl" role="dialog" aria-modal="true"
       aria-labelledby="delete-account-title">
       <h3 id="delete-account-title" class="text-lg font-bold text-ink mb-2">Cancella account</h3>
@@ -749,7 +745,7 @@
         Ordini e fatture restano conservati per obbligo di legge, senza più il tuo nome.
       </p>
 
-      <label class="block text-xs font-semibold uppercase tracking-widest text-ink-muted mb-1.5"
+      <label class="label"
         for="delete-account-password">
         Conferma con la password
       </label>
@@ -779,8 +775,8 @@
 
 <!-- Return Request Modal -->
 @if (returnModalOrder(); as order) {
-  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-    <div class="absolute inset-0 bg-black/40" (click)="closeReturnModal()"></div>
+  <div class="fixed inset-0 z-modal flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-inverse/40" (click)="closeReturnModal()"></div>
     <div class="relative bg-surface rounded-sm shadow-2xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto">
       <h3 class="text-lg font-bold text-ink mb-2">Richiedi reso</h3>
       <p class="text-ink-muted text-sm mb-4">Scegli quali articoli restituire e quanti.</p>
@@ -803,10 +799,10 @@
         }
       </div>
 
-      <label class="block text-sm text-ink-2 mb-1">Motivo del reso</label>
-      <textarea [ngModel]="returnReason()" (ngModelChange)="returnReason.set($event)" rows="3"
+      <label for="returnReason" class="label">Motivo del reso</label>
+      <textarea id="returnReason" [ngModel]="returnReason()" (ngModelChange)="returnReason.set($event)" rows="3"
         placeholder="Descrivi il motivo (almeno 10 caratteri)…"
-        class="w-full border border-line rounded-sm px-3 py-2 text-sm mb-2 resize-none"></textarea>
+        class="field mb-2 resize-none"></textarea>
 
       @if (returnError()) {
         <div class="bg-danger-wash text-danger px-3 py-2 rounded-sm text-sm mb-3">{{ returnError() }}</div>
@@ -818,10 +814,8 @@
           Indietro
         </button>
         <button (click)="submitReturn()" [disabled]="returnLoading() || !returnHasSelection"
-          class="flex-1 px-4 py-2.5 bg-ink text-white rounded-sm text-sm hover:bg-ink-strong disabled:opacity-50">
-          @if (returnLoading()) {
-            <span class="inline-block w-4 h-4 border-2 border-line-strong border-t-white rounded-full animate-spin mx-auto"></span>
-          } @else { Invia richiesta }
+          class="btn btn-primary flex-1" [attr.data-loading]="returnLoading() ? 'true' : null">
+          Invia richiesta
         </button>
       </div>
     </div>

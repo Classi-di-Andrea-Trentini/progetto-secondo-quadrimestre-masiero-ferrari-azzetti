@@ -46,11 +46,11 @@
         />
         <div class="hero-visual-overlay" aria-hidden="true"></div>
         <div class="hero-visual-meta">
-          <p class="text-2xs uppercase tracking-[0.28em] text-white/75">In evidenza</p>
-          <h2 class="mt-2 font-display text-3xl font-semibold text-white">
+          <p class="text-2xs uppercase tracking-[0.28em] text-surface/75">In evidenza</p>
+          <h2 class="mt-2 font-display text-3xl font-semibold text-surface">
             {{ collectionHighlights[0].title }}
           </h2>
-          <p class="mt-1 text-sm text-white/80">{{ collectionHighlights[0].subtitle }}</p>
+          <p class="mt-1 text-sm text-surface/80">{{ collectionHighlights[0].subtitle }}</p>
         </div>
       </a>
     </div>
@@ -73,9 +73,9 @@
           <img [src]="item.image" [alt]="item.title" class="h-full w-full object-cover" loading="lazy" />
           <div class="collection-overlay" aria-hidden="true"></div>
           <div class="collection-meta">
-            <p class="text-2xs uppercase tracking-[0.28em] text-white/75">Look {{ i + 1 }}</p>
-            <h3 class="mt-1.5 font-display text-2xl font-semibold text-white">{{ item.title }}</h3>
-            <p class="mt-0.5 text-sm text-white/80">{{ item.subtitle }}</p>
+            <p class="text-2xs uppercase tracking-[0.28em] text-surface/75">Look {{ i + 1 }}</p>
+            <h3 class="mt-1.5 font-display text-2xl font-semibold text-surface">{{ item.title }}</h3>
+            <p class="mt-0.5 text-sm text-surface/80">{{ item.subtitle }}</p>
           </div>
         </article>
       }
@@ -163,7 +163,8 @@
         <a routerLink="/products" class="link text-sm shrink-0">Tutta la collezione →</a>
       </div>
 
-      <div class="featured-grid">
+      <!-- .animate-rise: l'entrata gia' prevista dai token, finora mai usata. -->
+      <div class="featured-grid animate-rise">
         @for (product of featuredProducts(); track product.id) {
           <a [routerLink]="['/product', product.slug]" class="featured-card">
             <div class="featured-img-wrap">
