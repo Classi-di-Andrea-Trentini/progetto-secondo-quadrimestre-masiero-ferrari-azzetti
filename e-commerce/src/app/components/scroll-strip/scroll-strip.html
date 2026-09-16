@@ -1,0 +1,7 @@
+<section #section class="scroll-strip">
+  <div class="scroll-strip__sticky">
+    <div #strip class="scroll-strip__rail" [style.transform]="'translate3d(' + offset() + 'px,0,0)'">
+      <ng-content />
+    </div>
+  </div>
+</section>
