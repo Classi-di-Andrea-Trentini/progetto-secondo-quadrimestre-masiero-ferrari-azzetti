@@ -56,7 +56,9 @@ export const serverRoutes: ServerRoute[] = [
   { path: 'admin', renderMode: RenderMode.Client },
   { path: 'admin/**', renderMode: RenderMode.Client },
 
-  // Tutto il resto (compresa la 404) sul server: e' pubblico e non si sa in
-  // anticipo cosa sia.
-  { path: '**', renderMode: RenderMode.Server },
+  // Tutto il resto e' la 404. Sul server, e con lo **stato HTTP 404**: senza
+  // `status` la pagina di errore uscirebbe con un 200, e un motore di ricerca
+  // continuerebbe a tenere indicizzato un indirizzo che non esiste piu'. E' anche
+  // l'unico punto dove lo stato si puo' scegliere: dal componente non si arriva.
+  { path: '**', renderMode: RenderMode.Server, status: 404 },
 ];
