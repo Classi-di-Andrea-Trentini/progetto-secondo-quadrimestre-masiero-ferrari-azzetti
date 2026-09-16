@@ -16,6 +16,12 @@ export interface AuthUser {
   gender: string | null;
   newsletterOptIn: boolean;
   emailVerifiedAt: string | null;
+  /**
+   * Falso per chi si e' registrato con Google e non ha mai scelto una password.
+   * L'area personale deve saperlo: altrimenti offrirebbe "cambia password" e
+   * chiederebbe una "password attuale" che non esiste.
+   */
+  hasPassword: boolean;
   createdAt: string;
 }
 

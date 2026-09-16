@@ -101,6 +101,17 @@ public class UserService {
     public String changePassword(UUID userId, UUID currentSessionId, UserDtos.ChangePasswordRequest body) {
         var user = require(userId);
 
+        // Chi e' entrato con Google non ha nessuna "password attuale" da confermare:
+        // senza questo controllo `matches(x, null)` risponderebbe sempre `false` e la
+        // pagina direbbe "Password attuale non corretta" a chi una password non l'ha
+        // mai avuta. La via per impostarne una e' il link di reimpostazione, che
+        // arriva sulla casella — la stessa che Google ha gia' dimostrato essere sua.
+        if (!user.hasPassword()) {
+            throw ApiException.badRequest(
+                    "Il tuo account accede con Google e non ha ancora una password. "
+                            + "Usa \"Password dimenticata\" per impostarne una.");
+        }
+
         if (!encoder.matches(body.currentPassword(), user.getPasswordHash())) {
             throw ApiException.unauthorized("Password attuale non corretta");
         }
@@ -200,6 +211,15 @@ public class UserService {
     @Transactional
     public String requestEmailChange(UUID userId, UserDtos.ChangeEmailRequest body) {
         var user = require(userId);
+
+        // Stesso motivo del cambio password: senza una password non c'e' niente da
+        // confrontare, e cambiare l'indirizzo e' proprio l'operazione che una
+        // conferma la vuole (sposta dove arrivano i link di recupero).
+        if (!user.hasPassword()) {
+            throw ApiException.badRequest(
+                    "Il tuo account accede con Google e non ha ancora una password. "
+                            + "Impostane una da \"Password dimenticata\" prima di cambiare indirizzo email.");
+        }
 
         if (!encoder.matches(body.currentPassword(), user.getPasswordHash())) {
             throw ApiException.unauthorized("Password attuale non corretta");

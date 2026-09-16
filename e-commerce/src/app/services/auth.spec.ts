@@ -17,6 +17,7 @@ const someone: AuthUser = {
   gender: null,
   newsletterOptIn: false,
   emailVerifiedAt: null,
+  hasPassword: true,
   createdAt: '2026-01-01T00:00:00Z',
 };
 

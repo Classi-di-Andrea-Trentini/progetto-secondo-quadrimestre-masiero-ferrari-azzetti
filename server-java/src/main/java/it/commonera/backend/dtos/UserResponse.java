@@ -28,6 +28,14 @@ public record UserResponse(
         String gender,
         Boolean newsletterOptIn,
         LocalDateTime emailVerifiedAt,
+        /**
+         * Se questo account una password ce l'ha. Falso per chi si e' registrato con
+         * Google: senza saperlo, l'area personale gli offrirebbe "cambia password" e
+         * gli chiederebbe una "password attuale" che non esiste, e il dialogo di
+         * cancellazione chiederebbe una conferma che non puo' dare. Non e' un dato
+         * sensibile — e' l'utente stesso a leggerlo sul proprio profilo.
+         */
+        boolean hasPassword,
         LocalDateTime createdAt) {
 
     public static UserResponse from(User user) {
@@ -42,6 +50,7 @@ public record UserResponse(
                 user.getGender(),
                 user.getNewsletterOptIn(),
                 user.getEmailVerifiedAt(),
+                user.hasPassword(),
                 user.getCreatedAt());
     }
 }

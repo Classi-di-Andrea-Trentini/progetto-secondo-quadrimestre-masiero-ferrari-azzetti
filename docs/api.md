@@ -27,9 +27,30 @@ Legenda della colonna "Accesso": **pubblico**, **utente** (serve la sessione),
 | POST | `/auth/forgot-password` | pubblico | `{ email }` | `{ message }` — **sempre lo stesso**, esista o no l'indirizzo |
 | POST | `/auth/reset-password` | pubblico | `{ token, password }` | `{ message }` |
 | GET | `/auth/me` | utente | — | l'utente della sessione |
+| GET | `/config` | pubblico | — | `{ googleAuthEnabled, googleAuthUrl }` |
+| GET | `/auth/oauth2/authorize/google` | pubblico | — | redirect alla schermata di consenso di Google |
+| GET | `/auth/oauth2/callback/google` | pubblico | `?code&state` | cookie di sessione + redirect al frontend |
 
 `login` e' limitato a 5 tentativi falliti in 15 minuti per indirizzo email. E'
 l'**unica** rotta con un limite di richieste.
+
+### Accedi con Google
+
+Le due rotte `/auth/oauth2/**` **esistono solo se** `GOOGLE_CLIENT_ID` e
+`GOOGLE_CLIENT_SECRET` sono configurate; senza, rispondono 404 e `/config` dice
+`googleAuthEnabled: false`, cosi' il frontend non disegna il bottone. Stesso
+trattamento di Stripe: l'applicazione parte comunque.
+
+Il giro e' un authorization code flow **lato server**: l'`id_token` non arriva mai
+al JavaScript della pagina, e al ritorno il backend emette lo **stesso** cookie
+`access_token` del login con password — un solo modello di sessione.
+
+Le regole con cui un'identita' Google viene associata a un account esistente stanno
+in `GoogleAccountService`, che ne e' anche la documentazione. In breve: si accetta
+solo con `email_verified: true`; si riconosce l'utente dal `sub` e non dall'email;
+un indirizzo gia' presente e **verificato** si collega, uno **non verificato** viene
+**rifiutato** (altrimenti chi registra l'indirizzo di un altro senza confermarlo si
+prenderebbe il suo account Google).
 
 ## Catalogo — `/products`
 

@@ -65,7 +65,7 @@ export class Legal {
     // ─── Privacy ───────────────────────────────────────────────────────────
     privacy: {
       title: 'Informativa sulla privacy',
-      updatedAt: '15 settembre 2026',
+      updatedAt: '16 settembre 2026',
       intro:
         'Questa informativa spiega quali dati personali raccogliamo quando usi Common Era, perché li raccogliamo, per quanto tempo li conserviamo e quali diritti puoi esercitare. È resa ai sensi degli articoli 13 e 14 del Regolamento (UE) 2016/679 (GDPR).',
       sections: [
@@ -77,6 +77,7 @@ export class Legal {
           heading: '2. Quali dati trattiamo',
           body:
             'Dati di registrazione e di account: nome e cognome, indirizzo email, password (conservata solo come hash, mai in chiaro), ed eventualmente numero di telefono, data di nascita e genere, se scegli di indicarli.\n\n' +
+            'Dati dell\'accesso con Google, se scegli di usarlo: il tuo indirizzo email, il nome che hai sul profilo Google e l\'identificativo numerico stabile che Google assegna al tuo account. Quell\'identificativo è ciò che ci permette di ritrovare il tuo account anche se cambi indirizzo email, e non dice nulla di te a chi lo legge. Non riceviamo né conserviamo la tua password di Google, e non abbiamo accesso a nessun altro dato del tuo account — non alla posta, non ai contatti, non ai file. Se non usi quel pulsante, a Google non viene comunicato niente.\n\n' +
             'Dati di acquisto: indirizzi di spedizione e fatturazione, contenuto degli ordini, importi, buoni regalo e punti fedeltà utilizzati, numero e data della fattura.\n\n' +
             'Dati di pagamento: i dati della tua carta non transitano né vengono conservati sui nostri sistemi. Sono trattati direttamente da Stripe, che riceve il pagamento; a noi resta solo l\'esito della transazione e il suo identificativo.\n\n' +
             'Contenuti che pubblichi: recensioni, valutazioni e fotografie che decidi di allegare.\n\n' +
@@ -87,7 +88,7 @@ export class Legal {
           body:
             'Eseguire il contratto di vendita — gestire l\'ordine, la spedizione, i resi e l\'assistenza. Base giuridica: articolo 6.1.b GDPR (esecuzione di un contratto di cui sei parte). Il conferimento è necessario: senza questi dati non possiamo concludere l\'ordine.\n\n' +
             'Adempiere agli obblighi di legge — emissione e conservazione delle fatture, obblighi fiscali e contabili. Base giuridica: articolo 6.1.c GDPR (obbligo legale).\n\n' +
-            'Gestire l\'account e la sicurezza degli accessi — mantenere la sessione, verificare l\'indirizzo email, prevenire accessi abusivi e frodi. Base giuridica: articolo 6.1.b e 6.1.f GDPR (legittimo interesse alla sicurezza del servizio).\n\n' +
+            'Gestire l\'account e la sicurezza degli accessi — mantenere la sessione, verificare l\'indirizzo email, prevenire accessi abusivi e frodi. Base giuridica: articolo 6.1.b e 6.1.f GDPR (legittimo interesse alla sicurezza del servizio). Rientra qui anche l\'accesso con Google, se sei tu a sceglierlo: è uno dei modi di eseguire il contratto di cui sei parte, non un trattamento ulteriore, e non usarlo non ti costa niente — l\'accesso con email e password resta sempre disponibile.\n\n' +
             'Inviare la newsletter — solo se la richiedi. Base giuridica: articolo 6.1.a GDPR (consenso), che puoi revocare in qualsiasi momento dalle impostazioni del tuo account o dal link in fondo a ogni email, senza che questo pregiudichi la liceità dell\'invio precedente.\n\n' +
             'Pubblicare le recensioni — su tua iniziativa. Base giuridica: articolo 6.1.a GDPR (consenso).',
         },
@@ -96,6 +97,7 @@ export class Legal {
           body:
             'I tuoi dati non sono venduti né ceduti a terzi per finalità di marketing. Sono comunicati solo a chi ci serve per farti avere quello che hai ordinato:\n\n' +
             '• Stripe Payments Europe, Ltd. — gestione dei pagamenti con carta;\n' +
+            '• Google Ireland Limited — solo se scegli di accedere con Google, e solo nel momento in cui premi quel pulsante. Il tuo browser viene mandato sulla pagina di Google, che ci restituisce indirizzo email, nome e un identificativo del tuo account. Google agisce qui come titolare autonomo del trattamento per quanto riguarda il tuo account Google: la sua informativa è su policies.google.com/privacy. Non gli comunichiamo cosa hai comprato, cosa hai guardato o quanto hai speso;\n' +
             '• il corriere incaricato della consegna — nome, indirizzo, telefono, per consegnare il pacco;\n' +
             '• il fornitore del servizio di posta elettronica transazionale — per inviarti conferme d\'ordine e comunicazioni di servizio;\n' +
             '• il fornitore dell\'infrastruttura su cui il sito è ospitato;\n' +
@@ -152,7 +154,7 @@ export class Legal {
     // ─── Cookie ────────────────────────────────────────────────────────────
     cookies: {
       title: 'Cookie policy',
-      updatedAt: '15 settembre 2026',
+      updatedAt: '16 settembre 2026',
       intro:
         'Questa pagina elenca, uno per uno, i cookie e gli spazi di memoria locale che Common Era utilizza, a cosa servono e quanto durano. Usiamo esclusivamente cookie tecnici: nessun cookie analitico, pubblicitario o di profilazione, di nessun tipo.',
       sections: [
@@ -166,7 +168,7 @@ export class Legal {
         },
         {
           heading: 'I cookie che usiamo',
-          body: 'La tabella elenca tutto ciò che viene salvato nel tuo browser da Common Era e da Stripe, il fornitore che gestisce i pagamenti con carta.',
+          body: 'La tabella elenca tutto ciò che viene salvato nel tuo browser da Common Era e da Stripe, il fornitore che gestisce i pagamenti con carta. Alcune voci compaiono solo in certi momenti: il cookie dell\'accesso con Google esiste per i pochi minuti di quel passaggio, quelli di Stripe solo se arrivi alla pagina di pagamento.',
           cookies: [
             {
               name: 'access_token',
@@ -193,6 +195,14 @@ export class Legal {
               category: 'Tecnico',
             },
             {
+              name: 'oauth2_auth_request',
+              type: 'Cookie HTTP (HttpOnly)',
+              purpose:
+                'Compare solo se premi "Accedi con Google". Conserva, per il tempo di andare su Google e tornare indietro, il codice di controllo con cui il server riconosce che sei tu a essere tornato e non qualcun altro. Senza, l\'accesso non potrebbe concludersi in sicurezza. Viene cancellato appena il giro si chiude, riuscito o no.',
+              duration: '5 minuti',
+              category: 'Tecnico',
+            },
+            {
               name: '__stripe_mid',
               type: 'Cookie HTTP (terza parte: Stripe)',
               purpose:
@@ -216,7 +226,9 @@ export class Legal {
         },
         {
           heading: 'Nessun cookie analitico o pubblicitario',
-          body: 'Common Era non usa Google Analytics, Meta Pixel, circuiti pubblicitari o altri servizi di tracciamento di terze parti. Nessun dato sul tuo comportamento di navigazione viene condiviso con soggetti esterni per finalità commerciali.',
+          body:
+            'Common Era non usa Google Analytics, Meta Pixel, circuiti pubblicitari o altri servizi di tracciamento di terze parti. Nessun dato sul tuo comportamento di navigazione viene condiviso con soggetti esterni per finalità commerciali.\n\n' +
+            'Una precisazione, perché le due cose si confondono facilmente: sul sito è disponibile l\'accesso con Google. Non è tracciamento — è autenticazione, e avviene soltanto se sei tu a premere quel pulsante. Google non riceve nessun dato sulle pagine che visiti, non ci restituisce nessun profilo pubblicitario e non imposta cookie su questo sito: la schermata di consenso si apre sul dominio di Google, e i cookie che vedi lì sono suoi e seguono la sua informativa. Resta però una comunicazione di dati personali a un soggetto esterno, ed è dichiarata come tale nell\'informativa privacy, al punto 4.',
         },
         {
           heading: 'Come cancellare i cookie',

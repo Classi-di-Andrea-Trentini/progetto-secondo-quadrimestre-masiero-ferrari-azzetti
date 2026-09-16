@@ -34,6 +34,13 @@ dependencies {
     // e si sbagliano sui soldi.
     implementation 'com.stripe:stripe-java:33.4.2'
 
+    // Accesso con Google. Sta lato server e non nel browser di proposito: il codice
+    // di autorizzazione viene scambiato con l'id_token qui dentro, cosi' il token di
+    // Google non passa mai per il JavaScript della pagina e al ritorno si emette lo
+    // stesso cookie di sessione del login normale. Senza GOOGLE_CLIENT_ID/SECRET la
+    // libreria resta inerte: non registra nessuna rotta (vedi GoogleOAuthConfig).
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+
     // JWT nel cookie HttpOnly, come fa il backend Node: stesso schema di sessione.
     implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
