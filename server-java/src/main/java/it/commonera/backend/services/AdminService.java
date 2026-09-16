@@ -41,6 +41,12 @@ public class AdminService {
     private final PaymentRepository payments;
     private final PromoCodeRepository promoCodeRepo;
     private final MailService mail;
+    /**
+     * L'annullamento non si riscrive qui: e' lo stesso identico lavoro che fanno
+     * il cliente, il webhook del pagamento fallito e il raccoglitore degli ordini
+     * abbandonati, e quattro copie divergerebbero al primo cambio di formula.
+     */
+    private final OrderCompensationService compensation;
     private final String uploadsDir;
 
     public AdminService(OrderRepository orders, UserRepository users, ProductRepository products,
@@ -48,6 +54,7 @@ public class AdminService {
                         CategoryRepository categories, ReviewRepository reviews,
                         StockAlertRepository stockAlerts, UserAddressRepository addresses,
                         PaymentRepository payments, PromoCodeRepository promoCodeRepo, MailService mail,
+                        OrderCompensationService compensation,
                         @org.springframework.beans.factory.annotation.Value("${app.uploads-dir:uploads}") String uploadsDir) {
         this.orders = orders;
         this.users = users;
@@ -61,6 +68,7 @@ public class AdminService {
         this.payments = payments;
         this.promoCodeRepo = promoCodeRepo;
         this.mail = mail;
+        this.compensation = compensation;
         this.uploadsDir = uploadsDir;
     }
 
@@ -203,12 +211,54 @@ public class AdminService {
         return pending.size();
     }
 
+    /**
+     * Cambio di stato chiesto dall'area amministrativa.
+     *
+     * Il passaggio viene prima verificato contro {@link OrderStatusMachine}: senza,
+     * qualunque valore dell'enum era accettato da qualunque stato, e un ordine gia'
+     * annullato (merce resa, buono ricaricato, punti restituiti) poteva essere
+     * dichiarato consegnato. L'annullamento, poi, non e' un `setStatus`: passa da
+     * {@link OrderCompensationService}, l'unico posto che sa restituire giacenza,
+     * incasso, buono e punti — e l'unico che regge due annullamenti concorrenti.
+     */
     @Transactional
     public Map<String, Object> updateOrderStatus(UUID adminId, UUID orderId, String status, String trackingNumber) {
         var order = orders.findById(orderId)
                 .orElseThrow(() -> ApiException.notFound("Order not found"));
 
+        var current = order.getStatus();
         var next = parseOrderStatus(status);
+
+        // Ripetere lo stato attuale non e' un errore: l'interfaccia lo rimanda
+        // quando cambia solo il numero di tracciatura. Non muove niente, quindi
+        // non deve passare dai controlli del cambio di stato.
+        if (next == current) {
+            if (trackingNumber != null) {
+                order.setTrackingNumber(trackingNumber);
+                orders.save(order);
+            }
+            return Map.of("id", order.getId(), "status", current.name());
+        }
+
+        if (!OrderStatusMachine.allowsAdminDriven(current, next)) {
+            throw ApiException.badRequest("Transizione non ammessa: da '" + current.name()
+                    + "' a '" + next.name() + "'. Ammesse da '" + current.name() + "': "
+                    + describe(OrderStatusMachine.adminTargetsFrom(current)));
+        }
+
+        if (next == OrderStatus.cancelled) {
+            // `allowedFrom` e' ristretto allo stato appena letto: se nel frattempo
+            // qualcun altro ha mosso l'ordine, la transizione atomica non tocca
+            // nessuna riga e qui non si compensa due volte.
+            if (!compensation.releaseAndCancel(order, List.of(current), adminId,
+                    "Annullato dall'amministratore")) {
+                throw ApiException.conflict("L'ordine e' gia' stato chiuso da un'altra operazione");
+            }
+            if (trackingNumber != null) order.setTrackingNumber(trackingNumber);
+            orders.save(order);
+            return Map.of("id", order.getId(), "status", OrderStatus.cancelled.name());
+        }
+
         order.setStatus(next);
         if (trackingNumber != null) order.setTrackingNumber(trackingNumber);
 
@@ -221,6 +271,12 @@ public class AdminService {
 
         orders.save(order);
         return Map.of("id", order.getId(), "status", next.name());
+    }
+
+    /** Elenco leggibile per il messaggio d'errore, o una parola quando non resta nulla. */
+    private static String describe(Set<OrderStatus> targets) {
+        if (targets.isEmpty()) return "nessuna (stato finale)";
+        return targets.stream().map(OrderStatus::name).sorted().collect(java.util.stream.Collectors.joining(", "));
     }
 
     // ─── Utenti ─────────────────────────────────────────────────────────────

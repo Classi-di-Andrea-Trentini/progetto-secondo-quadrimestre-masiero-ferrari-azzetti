@@ -2,6 +2,7 @@ package it.commonera.backend.services;
 
 import it.commonera.backend.entities.Order;
 import it.commonera.backend.entities.OrderStatus;
+import it.commonera.backend.entities.OrderStatusMachine;
 import it.commonera.backend.exceptions.ApiException;
 import it.commonera.backend.repositories.OrderRepository;
 import it.commonera.backend.repositories.PaymentRepository;
@@ -24,8 +25,7 @@ public class OrderService {
      * {@link OrderRepository#updateStatusIfCurrentIn} per provare che la
      * seconda transizione concorrente su uno stesso ordine tocca zero righe.
      */
-    static final Set<OrderStatus> CANCELLABLE =
-            Set.of(OrderStatus.pending, OrderStatus.paid, OrderStatus.processing);
+    static final Set<OrderStatus> CANCELLABLE = OrderStatusMachine.cancellableFrom();
 
     private final OrderRepository orders;
     private final PaymentRepository payments;
