@@ -572,3 +572,6 @@ ALTER TABLE users ALTER COLUMN password_hash DROP NOT NULL;
 -- Postgres un indice unico ammette quanti NULL vuole.
 ALTER TABLE users ADD COLUMN IF NOT EXISTS google_sub VARCHAR(255);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_users_google_sub ON users (google_sub);
+
+-- ⚠️ Anche queste tre righe sono ripetute in `SchemaUpgrades`, per lo stesso
+-- motivo scritto sopra: qui dentro arrivano solo ai database creati da zero.
