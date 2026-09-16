@@ -214,6 +214,16 @@
     pointer-events: none;
   }
 
+  /* Caricamento e disabilitato sono due stati diversi, ma il modo idiomatico di
+     bloccare un submit in Angular e' [disabled]="loading()": senza questa regola
+     il bottone in caricamento erediterebbe l'opacita' 0.42 del disabilitato e
+     l'etichetta diventerebbe illeggibile proprio mentre deve dire cosa sta
+     succedendo. Il caricamento vince: etichetta piena, piu' spinner. */
+  .btn[data-loading='true']:disabled,
+  .btn[data-loading='true'][aria-disabled='true'] {
+    opacity: 1;
+  }
+
   .btn[data-loading='true']::before {
     content: '';
     width: 0.75rem;
