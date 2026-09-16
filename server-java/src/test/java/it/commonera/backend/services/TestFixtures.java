@@ -101,6 +101,28 @@ public class TestFixtures {
                 card == null ? null : card.getId(), balanceBefore);
     }
 
+    /** Un checkout gia' confermato dal fornitore: ordine `paid`, punti accreditati. */
+    public PendingCheckout aPaidCheckout() {
+        var draft = aPendingCheckout();
+        confirmPaid(draft.orderId());
+        return draft;
+    }
+
+    /**
+     * Sposta indietro la data di creazione di un ordine.
+     *
+     * `created_at` e' scritta dal database e mappata {@code insertable=false,
+     * updatable=false}: da JPA non si tocca, e aspettare mezz'ora per provare il
+     * raccoglitore non e' un test.
+     */
+    public void backdateOrder(UUID orderId, LocalDateTime when) {
+        em.createNativeQuery("update orders set created_at = :when where id = :id")
+                .setParameter("when", when)
+                .setParameter("id", orderId)
+                .executeUpdate();
+        em.flush();
+    }
+
     /**
      * Un evento nel formato del {@link SimulatedPaymentGateway}, che e' il
      * fornitore attivo quando non ci sono chiavi. Il formato vero di Stripe e'

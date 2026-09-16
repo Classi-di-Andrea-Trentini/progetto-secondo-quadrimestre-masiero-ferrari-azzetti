@@ -3,6 +3,7 @@ package it.commonera.backend;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * Riscrittura in Java del backend di Common Era.
@@ -17,6 +18,9 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
  *    convenzione di Spring non li indovina tutti.
  */
 @SpringBootApplication
+// Serve al raccoglitore degli ordini abbandonati: senza, la merce riservata
+// da un pagamento mai concluso resterebbe bloccata per sempre.
+@EnableScheduling
 @ConfigurationPropertiesScan
 public class CommonEraApplication {
     public static void main(String[] args) {

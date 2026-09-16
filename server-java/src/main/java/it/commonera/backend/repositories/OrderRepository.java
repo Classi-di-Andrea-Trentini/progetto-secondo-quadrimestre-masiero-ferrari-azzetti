@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -31,6 +32,11 @@ public interface OrderRepository extends JpaRepository<Order, UUID>, JpaSpecific
      * l'ordine non era piu' annullabile), e chi chiama non deve procedere col
      * rimborso.
      */
+    /** Ordini fermi in uno stato oltre la loro finestra: li raccoglie il reaper. */
+    @Query("select o from Order o where o.status = :status and o.createdAt < :before")
+    List<Order> findStaleByStatus(@Param("status") OrderStatus status,
+                                  @Param("before") LocalDateTime before);
+
     @Modifying
     @Query("update Order o set o.status = :newStatus where o.id = :id and o.status in :from")
     int updateStatusIfCurrentIn(@Param("id") UUID id, @Param("newStatus") OrderStatus newStatus,
