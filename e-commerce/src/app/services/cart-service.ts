@@ -318,7 +318,15 @@ export class CartService {
     giftCardCode?: string;
     loyaltyPoints?: number;
     notes?: string;
-  }): Promise<{ orderId: string; total: number; status: string }> {
+  }): Promise<{
+    orderId: string;
+    total: number;
+    /** `pending` finche' il fornitore non conferma, `paid` se non c'era nulla da incassare. */
+    status: string;
+    amountToPay: number;
+    /** Presente solo quando c'e' davvero qualcosa da incassare. */
+    clientSecret?: string;
+  }> {
     return firstValueFrom(
       this.http.post<any>(`${API_URL}/checkout`, payload, { withCredentials: true })
     );

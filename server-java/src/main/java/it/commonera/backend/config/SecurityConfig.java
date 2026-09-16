@@ -65,6 +65,9 @@ public class SecurityConfig {
                         // fornitore, verificata dentro il service. Lasciarlo dietro
                         // authenticated() lo renderebbe irraggiungibile.
                         .requestMatchers(HttpMethod.POST, "/payments/webhook").permitAll()
+                        // Dice solo se l'incasso e' reale e con quale chiave
+                        // **pubblicabile**: serve al browser prima del login.
+                        .requestMatchers(HttpMethod.GET, "/payments/config").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .exceptionHandling(ex -> ex

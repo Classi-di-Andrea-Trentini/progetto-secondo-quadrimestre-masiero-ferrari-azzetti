@@ -38,7 +38,7 @@
 
       <!-- Steps indicator -->
       <div class="flex items-center gap-0 mb-8 justify-center">
-        @for (s of steps; track s.key; let i = $index) {
+        @for (s of steps(); track s.key; let i = $index) {
           <div class="flex items-center gap-0">
             <div class="flex flex-col items-center">
               <div
@@ -58,7 +58,7 @@
               </div>
               <span class="text-xs mt-1.5 font-medium" [class.text-ink]="i <= stepIndex()" [class.text-ink-muted]="i > stepIndex()">{{ s.label }}</span>
             </div>
-            @if (i < steps.length - 1) {
+            @if (i < steps().length - 1) {
               <div class="w-16 sm:w-24 h-px mx-2 mb-4 transition-colors" [class.bg-ink]="i < stepIndex()" [class.bg-line]="i >= stepIndex()"></div>
             }
           </div>
@@ -374,6 +374,35 @@
           }
 
           <!-- ─── STEP: REVIEW ──────────────────────────────────────── -->
+          <!-- Nascosto, non rimosso: `@if` smonterebbe il modulo di Stripe ogni
+               volta che si passa al riepilogo, e al ritorno la carta gia' digitata
+               sarebbe sparita. -->
+          @if (pendingOrderId() && payable() > 0) {
+            <div class="space-y-5" [hidden]="step() !== 'payment'">
+              <h2 class="display text-2xl">Pagamento</h2>
+              <p class="text-sm text-ink-2 measure">
+                Restano da pagare <strong>{{ formatPrice(payable()) }}</strong>.
+                La merce e' gia' riservata per te: se non concludi entro mezz'ora torna disponibile.
+              </p>
+
+              <!-- Qui dentro Stripe monta il proprio modulo. Resta vuoto quando
+                   il negozio gira senza chiavi. -->
+              <div #paymentElement class="min-h-[3rem]"></div>
+
+              @if (simulatedPayment()) {
+                <div class="bg-info-wash rounded-sm p-4 text-sm text-info flex items-start gap-2">
+                  <svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                  <span>
+                    Questo negozio non ha ancora un fornitore di pagamento configurato:
+                    <strong>nessun addebito reale</strong> verra' effettuato.
+                  </span>
+                </div>
+              }
+            </div>
+          }
+
           @if (step() === 'review') {
             <div class="bg-surface rounded-sm border border-line shadow-sm p-5">
               <h2 class="font-bold text-ink mb-4">Riepilogo ordine</h2>
@@ -423,13 +452,6 @@
               }
             </div>
 
-            <!-- Payment note -->
-            <div class="bg-info-wash border border-transparent rounded-sm p-4 text-sm text-info flex items-start gap-2">
-              <svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-              <span>Il pagamento è simulato — nessun addebito reale verrà effettuato. L'ordine verrà creato con stato "pagato".</span>
-            </div>
           }
 
           <!-- Navigation buttons -->
@@ -456,7 +478,7 @@
               </button>
             } @else {
               <button
-                (click)="placeOrder()"
+                (click)="payAndFinish()"
                 [disabled]="loading()"
                 class="flex items-center gap-2 px-6 py-3 bg-ink text-white rounded-sm text-sm font-medium hover:bg-ink-strong disabled:opacity-50 transition-colors"
               >
@@ -464,7 +486,7 @@
                   <span class="inline-block w-4 h-4 border-2 border-line-strong border-t-white rounded-full animate-spin"></span>
                   Elaborazione…
                 } @else {
-                  Conferma ordine
+                  {{ payable() > 0 ? 'Paga ' + formatPrice(payable()) : 'Conferma ordine' }}
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                   </svg>
