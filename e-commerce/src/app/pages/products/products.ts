@@ -47,11 +47,11 @@ export class Products implements OnInit, OnDestroy {
   searchQuery = signal('');
 
   readonly sortOptions = [
-    { value: 'newest',     label: 'Novità' },
-    { value: 'popular',    label: 'Più venduti' },
-    { value: 'rating',     label: 'Più votati' },
-    { value: 'price_asc',  label: 'Prezzo crescente' },
-    { value: 'price_desc', label: 'Prezzo decrescente' },
+    { value: 'newest',     label: 'Newest' },
+    { value: 'popular',    label: 'Best sellers' },
+    { value: 'rating',     label: 'Top rated' },
+    { value: 'price_asc',  label: 'Price: low to high' },
+    { value: 'price_desc', label: 'Price: high to low' },
   ];
 
   ngOnInit() {
@@ -186,14 +186,11 @@ export class Products implements OnInit, OnDestroy {
     return null;
   }
 
-  discountLabel(p: ProductListItem): string | null {
-    const d = p.discounts[0];
-    if (!d) return null;
-    return d.label ?? (d.type === 'percentage' ? `-${d.value}%` : 'SALE');
-  }
-
+  // Formato inglese (€120.00, niente spazio dopo il simbolo): la pagina e'
+  // tutta in inglese, la virgola decimale italiana stonava. Non e' l'unica
+  // formatPrice del progetto — vedi la nota nel report del task 4.
   formatPrice(v: number | string) {
-    return '€ ' + parseFloat(String(v)).toFixed(2).replace('.', ',');
+    return new Intl.NumberFormat('en', { style: 'currency', currency: 'EUR' }).format(parseFloat(String(v)));
   }
 
   uniqueColors(p: ProductListItem) {

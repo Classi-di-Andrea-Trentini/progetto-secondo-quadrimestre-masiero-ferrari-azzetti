@@ -2,8 +2,8 @@
 
   <!-- ── BANNER ──────────────────────────────────────────── -->
   <div class="collection-banner">
-    <h1>Collezione</h1>
-    <p>{{ totalProducts() }} {{ totalProducts() === 1 ? 'capo' : 'capi' }}</p>
+    <h1>Collection</h1>
+    <p>{{ totalProducts() }} {{ totalProducts() === 1 ? 'item' : 'items' }}</p>
   </div>
 
   <!-- ── TOOLBAR ─────────────────────────────────────────── -->
@@ -12,7 +12,7 @@
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="14" y2="12"/><line x1="4" y1="18" x2="10" y2="18"/>
       </svg>
-      Filtri
+      Filters
       @if (activeFiltersCount() > 0) {
         <span class="badge">{{ activeFiltersCount() }}</span>
       }
@@ -21,8 +21,8 @@
     <div class="search-wrap">
       <input
         type="text"
-        placeholder="Cerca fra i capi…"
-        aria-label="Cerca prodotti"
+        placeholder="Search the collection…"
+        aria-label="Search products"
         [ngModel]="searchQuery()"
         (ngModelChange)="onSearchInput($event)"
         class="search-input" />
@@ -50,12 +50,12 @@
       <div class="sidebar-inner">
 
         <div class="sidebar-header">
-          <span>Filtri</span>
+          <span>Filters</span>
           <div class="sidebar-header-actions">
             @if (activeFiltersCount() > 0) {
-              <button class="clear-btn" (click)="clearFilters()">Azzera</button>
+              <button class="clear-btn" (click)="clearFilters()">Clear</button>
             }
-            <button class="sidebar-close" (click)="filtersOpen.set(false)" aria-label="Chiudi i filtri">
+            <button class="sidebar-close" (click)="filtersOpen.set(false)" aria-label="Close filters">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
                 <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
               </svg>
@@ -65,7 +65,7 @@
 
         <!-- Category -->
         <div class="filter-section">
-          <h3>Categoria</h3>
+          <h3>Category</h3>
           <ul class="cat-list">
             @for (cat of rootCategories(); track cat.id) {
               <li>
@@ -96,7 +96,7 @@
 
         <!-- Price -->
         <div class="filter-section">
-          <h3>Prezzo</h3>
+          <h3>Price</h3>
           <div class="price-inputs">
             <div class="price-field">
               <label>Min</label>
@@ -115,7 +115,7 @@
         <!-- Color -->
         @if (filters()?.colors?.length) {
           <div class="filter-section">
-            <h3>Colore</h3>
+            <h3>Color</h3>
             <div class="color-grid">
               @for (c of filters()!.colors; track c.colorHex) {
                 <button
@@ -138,7 +138,7 @@
         <!-- Size -->
         @if (filters()?.sizes?.length) {
           <div class="filter-section">
-            <h3>Taglia</h3>
+            <h3>Size</h3>
             <div class="size-grid">
               @for (s of filters()!.sizes; track s) {
                 <button
@@ -159,7 +159,7 @@
     <main class="grid-area">
 
       @if (loading()) {
-        <div class="product-grid">
+        <div class="product-grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           <app-skeleton type="product-card" [count]="8" />
         </div>
       } @else if (products().length === 0) {
@@ -167,13 +167,15 @@
           <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true">
             <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
           </svg>
-          <p class="empty-title">Nessun capo trovato</p>
-          <p class="empty-body">Nessun articolo soddisfa questa combinazione di filtri. Prova ad allargarla.</p>
-          <button class="btn btn-outline mt-2" (click)="clearFilters()">Azzera i filtri</button>
+          <p class="empty-title">No items found</p>
+          <p class="empty-body">No item matches this filter combination. Try widening it.</p>
+          <button class="btn btn-outline mt-2" (click)="clearFilters()">Clear filters</button>
         </div>
       } @else {
-        <!-- .animate-rise: l'entrata gia' prevista dai token, finora mai usata. -->
-        <div class="product-grid animate-rise">
+        <!-- .animate-rise: l'entrata gia' prevista dai token, finora mai usata.
+             grid-cols-2 lg:grid-cols-3 xl:grid-cols-4: due colonne anche sul telefono, per
+             come si guardano i vestiti — decisione esplicita del proprietario, non del design. -->
+        <div class="product-grid animate-rise grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           @for (p of products(); track p.id) {
             <a
               [routerLink]="['/product', p.slug]"
@@ -185,10 +187,10 @@
                    [style.background]="cardColor(p.id) || 'var(--color-sunken)'">
 
                 <!-- Badges -->
-                @if (discountLabel(p)) {
-                  <span class="badge-pill sale">{{ discountLabel(p) }}</span>
+                @if (discountedPrice(p) !== null) {
+                  <span class="badge-pill sale">Sale</span>
                 } @else if (p.isNewArrival) {
-                  <span class="badge-pill new">Novità</span>
+                  <span class="badge-pill new">New</span>
                 }
 
                 <!-- Wishlist -->
@@ -196,7 +198,7 @@
                   class="heart-btn"
                   [class.saved]="wishlist.isSaved(p.id)"
                   (click)="toggleWishlist($event, p.id)"
-                  [attr.aria-label]="(wishlist.isSaved(p.id) ? 'Togli dai preferiti: ' : 'Salva nei preferiti: ') + p.name"
+                  [attr.aria-label]="(wishlist.isSaved(p.id) ? 'Remove from wishlist: ' : 'Save to wishlist: ') + p.name"
                   [attr.aria-pressed]="wishlist.isSaved(p.id)">
                   <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
@@ -215,7 +217,7 @@
                 @if (hasHoverImage(p)) {
                   <app-product-image
                     [src]="hoverImage(p)"
-                    [alt]="p.name + ' — vista alternativa'"
+                    [alt]="p.name + ' — alternate view'"
                     fit="contain"
                     class="img-hover"
                     [class.fade-in]="hoveredId() === p.id" />
@@ -223,7 +225,7 @@
 
                 <!-- Quick-view hint -->
                 <div class="card-overlay">
-                  <span>Vedi il capo</span>
+                  <span>View item</span>
                 </div>
 
               </div>
@@ -269,12 +271,12 @@
 
         <!-- Pagination -->
         @if (totalPages() > 1) {
-          <nav class="pagination" aria-label="Paginazione">
-            <button [disabled]="currentPage() === 1" (click)="goToPage(currentPage() - 1)" aria-label="Pagina precedente">‹</button>
+          <nav class="pagination" aria-label="Pagination">
+            <button [disabled]="currentPage() === 1" (click)="goToPage(currentPage() - 1)" aria-label="Previous page">‹</button>
             @for (pg of pages(); track pg) {
               <button [class.active]="pg === currentPage()" [attr.aria-current]="pg === currentPage() ? 'page' : null" (click)="goToPage(pg)">{{ pg }}</button>
             }
-            <button [disabled]="currentPage() === totalPages()" (click)="goToPage(currentPage() + 1)" aria-label="Pagina successiva">›</button>
+            <button [disabled]="currentPage() === totalPages()" (click)="goToPage(currentPage() + 1)" aria-label="Next page">›</button>
           </nav>
         }
       }
