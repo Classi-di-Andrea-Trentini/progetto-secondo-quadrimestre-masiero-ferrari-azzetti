@@ -87,6 +87,140 @@
   bottom: 1.375rem;
 }
 
+/* ── VENTAGLIO (fan carousel) ─────────────────────────────────────────────── *
+   Card sovrapposte, quella attiva in primo piano, le due ai lati ruotate.
+   Valori ripresi da CardCarousel.tsx nel design (design-code.txt): rotazione
+   ±5deg (normalizedPosition * 5), scala 0.9 per le card laterali, zIndex 10
+   per quella attiva. La transizione del design e' una molla (framer-motion,
+   stiffness 300 / damping 30): niente di equivalente in CSS puro senza una
+   libreria di animazione che qui non c'e', quindi si riusa il token di
+   easing gia' in uso nel resto del sito (--ease-out-expo) invece di
+   inventare un nuovo valore fuori dal vocabolario.
+
+   La versione precedente di questo blocco fissava le card a `min(72vw, 23rem)`
+   e sbordava davvero a 375px (il vecchio commento lo ammetteva, e teneva a
+   bada il danno solo tagliando la vista con overflow:hidden). Qui invece le
+   dimensioni e gli spostamenti sono in rem fissi per fascia, scelti apposta
+   perche' il bordo della card piu' esterna resti sempre ben dentro il
+   contenitore (verificato fino a 320px): non serve piu' nessun overflow di
+   sicurezza, e la vista non viene piu' ritagliata. */
+
+.fan-shell {
+  --fan-card: 6rem;
+  --fan-offset: 4.25rem;
+  background: var(--color-paper);
+  padding: 0.5rem 0 3rem;
+}
+
+.fan-stage {
+  position: relative;
+  height: calc(var(--fan-card) + 3rem);
+}
+
+.fan-card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--fan-card);
+  height: var(--fan-card);
+  overflow: hidden;
+  border-radius: 0.75rem;
+  border: 3px solid var(--color-surface);
+  background: var(--color-sunken);
+  box-shadow: 0 4px 6px -1px oklch(0.145 0.008 285 / 0.1);
+  transition: transform 460ms var(--ease-out-expo), opacity 460ms var(--ease-out-expo);
+}
+
+.fan-card-active {
+  z-index: 10;
+  opacity: 1;
+  transform: translate(-50%, -50%) rotate(0deg) scale(1);
+  box-shadow: var(--shadow-float);
+}
+
+.fan-card-active .fan-meta {
+  opacity: 1;
+}
+
+.fan-card-left {
+  z-index: 1;
+  opacity: 1;
+  transform: translate(-50%, -50%) translateX(calc(-1 * var(--fan-offset))) rotate(-5deg) scale(0.9);
+}
+
+.fan-card-right {
+  z-index: 1;
+  opacity: 1;
+  transform: translate(-50%, -50%) translateX(var(--fan-offset)) rotate(5deg) scale(0.9);
+}
+
+.fan-card-hidden {
+  z-index: 0;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(0.82);
+}
+
+.fan-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, oklch(0.145 0.008 285 / 0.65), transparent 65%);
+}
+
+.fan-meta {
+  position: absolute;
+  left: 0.75rem;
+  right: 0.75rem;
+  bottom: 0.625rem;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 300ms var(--ease-out-quart);
+}
+
+.fan-controls {
+  margin-top: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.fan-nav-btn {
+  display: inline-flex;
+  height: 2.25rem;
+  width: 2.25rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-line-strong);
+  border-radius: 50%;
+  background: var(--color-surface);
+  color: var(--color-ink-2);
+  cursor: pointer;
+  transition:
+    border-color 180ms var(--ease-out-quart),
+    color 180ms var(--ease-out-quart);
+}
+
+.fan-nav-btn:hover {
+  border-color: var(--color-ink);
+  color: var(--color-ink);
+}
+
+@media (min-width: 640px) {
+  .fan-shell {
+    --fan-card: 8.5rem;
+    --fan-offset: 6.25rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .fan-shell {
+    --fan-card: 11rem;
+    --fan-offset: 8.5rem;
+    padding: 1rem 0 3.5rem;
+  }
+}
+
 /* ── FASCIA PROMO ─────────────────────────────────────────────────────────── */
 
 .promo-shell {
@@ -348,7 +482,9 @@
   .featured-img,
   .hero-visual,
   .hero-visual-image,
-  .promo-cta::after {
+  .promo-cta::after,
+  .fan-card,
+  .fan-meta {
     transition: none;
   }
 }

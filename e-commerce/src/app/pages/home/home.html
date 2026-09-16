@@ -57,6 +57,53 @@
   </div>
 </section>
 
+<!-- ═══ VENTAGLIO (fan carousel) ═══════════════════════════════════════════
+     Voluto da Alessio sopra la striscia di prodotti (design: bd179c77.jpg,
+     CardCarousel.tsx). E' un'interazione diversa da <app-scroll-strip> qui
+     sotto e le due convivono senza confondersi: qui si comanda SOLO con le
+     due frecce (o da tastiera, sono <button> veri), non con lo scroll della
+     pagina — nessuno scroll-jacking, a differenza della striscia che invece
+     si muove SOLO scrollando. -->
+<section class="fan-shell" aria-label="Collection highlights">
+  <div class="mx-auto max-w-6xl px-6 lg:px-8">
+    <div class="fan-stage" role="region" aria-roledescription="carousel" aria-label="Collection highlights carousel">
+      @for (item of collectionHighlights; track item.title; let i = $index) {
+        <article
+          class="fan-card"
+          [class.fan-card-active]="isActive(i)"
+          [class.fan-card-left]="isLeft(i)"
+          [class.fan-card-right]="isRight(i)"
+          [class.fan-card-hidden]="isHidden(i)"
+          role="group"
+          aria-roledescription="slide"
+          [attr.aria-label]="'Slide ' + (i + 1) + ' of ' + collectionHighlights.length"
+          [attr.aria-hidden]="isActive(i) ? null : 'true'"
+        >
+          <img [src]="item.image" [alt]="item.title" class="fan-img" loading="lazy" />
+          <div class="fan-overlay" aria-hidden="true"></div>
+          <div class="fan-meta">
+            <h3 class="font-display text-lg font-semibold text-surface sm:text-xl">{{ item.title }}</h3>
+            <p class="mt-0.5 text-xs text-surface/80 sm:text-sm">{{ item.subtitle }}</p>
+          </div>
+        </article>
+      }
+    </div>
+
+    <div class="fan-controls">
+      <button type="button" (click)="prevSlide()" class="fan-nav-btn" aria-label="Previous slide">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-4 w-4" aria-hidden="true">
+          <path d="M15 6l-6 6 6 6" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </button>
+      <button type="button" (click)="nextSlide()" class="fan-nav-btn" aria-label="Next slide">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-4 w-4" aria-hidden="true">
+          <path d="M9 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </button>
+    </div>
+  </div>
+</section>
+
 <!-- ═══ FEATURED PRODUCTS ══════════════════════════════════════════════════
      Striscia orizzontale (<app-scroll-strip>, task 2): da lg in su la sezione
      resta incollata mentre la riga trasla in orizzontale; sotto lg diventa una

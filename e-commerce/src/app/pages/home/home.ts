@@ -19,15 +19,55 @@ export class Home implements OnInit {
   readonly featuredProducts = signal<ProductListItem[]>([]);
 
   /** Immagine di apertura dell'hero (e-commerce/public/media/catalogo/collezioni):
-      percorso relativo, nessuna dipendenza da CDN esterne. Il fan carousel che
-      un tempo ruotava su sei di queste illustrazioni e' sparito insieme al resto
-      della sua sezione: la striscia di prodotti veri (<app-scroll-strip>) copre
-      lo stesso ruolo editoriale con dati reali invece che segnaposto. */
+      percorso relativo, nessuna dipendenza da CDN esterne. */
   readonly heroHighlight = {
     image: '/media/catalogo/collezioni/capispalla.svg',
     title: 'Outerwear',
     subtitle: 'Layers for the shoulder seasons',
   };
+
+  /** Ventaglio (fan carousel) sopra la striscia di prodotti, come nel design
+      (`bd179c77.jpg`, `CardCarousel.tsx`): sei illustrazioni interne, le
+      stesse gia' usate quando il carosello era stato tolto e poi rivoluto da
+      Alessio. Copy tradotto dall'italiano dell'epoca, non preso dal design
+      (il componente Figma usa immagini segnaposto di Picsum, senza titoli). */
+  readonly collectionHighlights = [
+    {
+      image: '/media/catalogo/collezioni/capispalla.svg',
+      title: 'Outerwear',
+      subtitle: 'Layers for the shoulder seasons',
+    },
+    {
+      image: '/media/catalogo/collezioni/guardaroba-minimo.svg',
+      title: 'Minimal Wardrobe',
+      subtitle: 'Clean lines, pieces that last',
+    },
+    {
+      image: '/media/catalogo/collezioni/neutri-da-sera.svg',
+      title: 'Evening Neutrals',
+      subtitle: 'Quiet tones for the occasion',
+    },
+    {
+      image: '/media/catalogo/collezioni/sartoria-di-strada.svg',
+      title: 'Street Tailoring',
+      subtitle: 'Structured cuts, worn soft',
+    },
+    {
+      image: '/media/catalogo/collezioni/linea-monocroma.svg',
+      title: 'Monochrome Line',
+      subtitle: 'Black and ivory, the two extremes',
+    },
+    {
+      image: '/media/catalogo/collezioni/capsule-weekend.svg',
+      title: 'Weekend Capsule',
+      subtitle: 'What you reach for without thinking',
+    },
+  ];
+
+  /** Indice della card in primo piano. Le frecce lo cambiano; non c'e' nessun
+      collegamento con lo scroll della pagina (a differenza di <app-scroll-strip>
+      qui sotto, che invece si muove SOLO con lo scroll verticale). */
+  readonly activeSlide = signal(0);
 
   /** Le prime due voci sono il copy letterale dei banner del design (design-code.txt,
       blocchi CollectionBanner e SaleBanner). La terza non ha un equivalente nel
@@ -87,5 +127,48 @@ export class Home implements OnInit {
 
   hasDiscount(product: ProductListItem): boolean {
     return product.discounts.length > 0;
+  }
+
+  // ─── Ventaglio (fan carousel) ───────────────────────────────────────────
+  // Stesso schema del design (CardCarousel.tsx): un indice attivo, le due
+  // card immediatamente prima/dopo restano visibili ruotate ai lati, le
+  // altre spariscono. Qui con il wraparound modulo, perche' le voci sono sei
+  // e non tre come nel componente originale.
+
+  prevSlide(): void {
+    const total = this.collectionHighlights.length;
+    this.activeSlide.update((value) => (value - 1 + total) % total);
+  }
+
+  nextSlide(): void {
+    const total = this.collectionHighlights.length;
+    this.activeSlide.update((value) => (value + 1) % total);
+  }
+
+  isActive(index: number): boolean {
+    return this.slideOffset(index) === 0;
+  }
+
+  isLeft(index: number): boolean {
+    return this.slideOffset(index) === -1;
+  }
+
+  isRight(index: number): boolean {
+    return this.slideOffset(index) === 1;
+  }
+
+  isHidden(index: number): boolean {
+    return !this.isActive(index) && !this.isLeft(index) && !this.isRight(index);
+  }
+
+  /** -1/0/+1 rispetto alla card attiva, con wraparound (l'ultima voce e'
+      "a sinistra" della prima). Oltre quel raggio la card e' nascosta:
+      il design ne mostra solo tre insieme, qui idem anche con sei voci. */
+  private slideOffset(index: number): number {
+    const total = this.collectionHighlights.length;
+    let offset = index - this.activeSlide();
+    if (offset > total / 2) offset -= total;
+    if (offset < -total / 2) offset += total;
+    return offset;
   }
 }

@@ -96,4 +96,33 @@ describe('Home', () => {
     expect(text).toContain('Featured Products');
     expect(text).toContain('Wool Overcoat');
   });
+
+  it('moves the fan carousel with the Previous/Next buttons, in english and reachable from real buttons', async () => {
+    fixture.detectChanges();
+    http.expectOne((req) => req.url === `${API_URL}/products`).flush({
+      data: [],
+      meta: { total: 0, page: 1, limit: 8, totalPages: 0 },
+    });
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.textContent).toContain('Outerwear');
+
+    const buttons = Array.from(el.querySelectorAll('button.fan-nav-btn')) as HTMLButtonElement[];
+    const next = buttons.find((b) => b.getAttribute('aria-label') === 'Next slide');
+    const prev = buttons.find((b) => b.getAttribute('aria-label') === 'Previous slide');
+    expect(next).toBeTruthy();
+    expect(prev).toBeTruthy();
+
+    expect(component.activeSlide()).toBe(0);
+    next!.click();
+    fixture.detectChanges();
+    expect(component.activeSlide()).toBe(1);
+    expect(el.textContent).toContain('Minimal Wardrobe');
+
+    prev!.click();
+    fixture.detectChanges();
+    expect(component.activeSlide()).toBe(0);
+  });
 });
