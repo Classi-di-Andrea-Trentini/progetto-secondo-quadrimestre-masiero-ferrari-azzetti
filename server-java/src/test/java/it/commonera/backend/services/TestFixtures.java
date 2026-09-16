@@ -1,5 +1,6 @@
 package it.commonera.backend.services;
 
+import it.commonera.backend.dtos.ReturnDtos;
 import it.commonera.backend.entities.*;
 import it.commonera.backend.repositories.*;
 import jakarta.persistence.EntityManager;
@@ -31,6 +32,8 @@ public class TestFixtures {
     private final PaymentWebhookService webhook;
     private final CartRepository carts;
     private final GiftCardRepository giftCardRepo;
+    private final ReturnService returnService;
+    private final OrderReturnRepository returnRepo;
 
     @PersistenceContext
     private EntityManager em;
@@ -39,7 +42,8 @@ public class TestFixtures {
                         GiftCardService giftCards, LoyaltyEntryRepository loyaltyEntries,
                         CheckoutService checkout, PaymentRepository payments,
                         PaymentWebhookService webhook, CartRepository carts,
-                        GiftCardRepository giftCardRepo) {
+                        GiftCardRepository giftCardRepo, ReturnService returnService,
+                        OrderReturnRepository returnRepo) {
         this.users = users;
         this.addresses = addresses;
         this.orders = orders;
@@ -50,6 +54,8 @@ public class TestFixtures {
         this.webhook = webhook;
         this.carts = carts;
         this.giftCardRepo = giftCardRepo;
+        this.returnService = returnService;
+        this.returnRepo = returnRepo;
     }
 
     /**
@@ -106,6 +112,32 @@ public class TestFixtures {
         var draft = aPendingCheckout();
         confirmPaid(draft.orderId());
         return draft;
+    }
+
+    /**
+     * Un reso gia' registrato su un ordine consegnato, con una riga sola.
+     *
+     * Passa dal servizio vero: costruirlo a mano proverebbe l'inversione di
+     * qualcosa che il negozio non fa davvero.
+     */
+    public OrderReturn aReturnFor(PendingCheckout draft) {
+        var order = orders.findById(draft.orderId()).orElseThrow();
+        var previous = order.getStatus();
+        // Un reso si puo' chiedere solo a merce consegnata.
+        order.setStatus(OrderStatus.delivered);
+        orders.save(order);
+        em.flush();
+
+        var orderItemId = order.getItems().get(0).getId();
+        var view = returnService.create(draft.userId(), new ReturnDtos.CreateRequest(
+                draft.orderId(), "Non mi piace il colore",
+                java.util.List.of(new ReturnDtos.ItemRequest(orderItemId, 1))));
+        em.flush();
+
+        order.setStatus(previous);
+        orders.save(order);
+        em.flush();
+        return returnRepo.findById(view.id()).orElseThrow();
     }
 
     /**

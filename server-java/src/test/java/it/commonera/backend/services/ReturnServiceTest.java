@@ -22,6 +22,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class ReturnServiceTest extends AbstractIntegrationTest {
 
     @Autowired
+    private TestFixtures fixtures;
+
+    @Autowired
     private UserRepository users;
     @Autowired
     private UserAddressRepository addresses;
@@ -89,7 +92,14 @@ class ReturnServiceTest extends AbstractIntegrationTest {
         orderItemId = orderRepository.findById(orderId).orElseThrow().getItems().get(0).getId();
     }
 
+    /**
+     * Porta l'ordine a consegnato passando **davvero** dall'incasso: dalla fase A
+     * in poi il checkout lo lascia `pending`, e un ordine consegnato senza un
+     * pagamento riuscito e' uno stato che non deve esistere — tant'e' che
+     * rimborsarlo, giustamente, viene rifiutato.
+     */
     private void markDelivered() {
+        fixtures.confirmPaid(orderId);
         var order = orderRepository.findById(orderId).orElseThrow();
         order.setStatus(OrderStatus.delivered);
         orderRepository.save(order);

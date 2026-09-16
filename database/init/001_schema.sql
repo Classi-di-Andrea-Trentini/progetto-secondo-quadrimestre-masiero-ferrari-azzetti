@@ -547,3 +547,9 @@ CREATE INDEX IF NOT EXISTS idx_loyalty_entries_user ON loyalty_entries (user_id,
 
 -- Foto allegate alle recensioni.
 ALTER TABLE reviews ADD COLUMN IF NOT EXISTS photos TEXT[] NOT NULL DEFAULT '{}';
+
+-- Un reso puo' restituire una parte di quanto incassato: senza questo valore lo
+-- stato del pagamento dovrebbe mentire, dicendo "rimborsato" per un rimborso
+-- parziale oppure "riuscito" per un incasso di cui una parte e' gia' tornata
+-- indietro. ADD VALUE IF NOT EXISTS lo rende ripetibile su basi dati esistenti.
+ALTER TYPE "PaymentStatus" ADD VALUE IF NOT EXISTS 'partially_refunded';

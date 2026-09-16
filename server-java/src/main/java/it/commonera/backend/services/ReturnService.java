@@ -30,12 +30,15 @@ public class ReturnService {
     private final OrderRepository orders;
     private final UserRepository users;
     private final MailService mail;
+    private final OrderCompensationService compensation;
 
-    public ReturnService(OrderReturnRepository returns, OrderRepository orders, UserRepository users, MailService mail) {
+    public ReturnService(OrderReturnRepository returns, OrderRepository orders, UserRepository users,
+                         MailService mail, OrderCompensationService compensation) {
         this.returns = returns;
         this.orders = orders;
         this.users = users;
         this.mail = mail;
+        this.compensation = compensation;
     }
 
     @Transactional(readOnly = true)
@@ -151,10 +154,23 @@ public class ReturnService {
     public ReturnDtos.View updateStatus(UUID id, ReturnDtos.UpdateStatusRequest dto) {
         var ret = returns.findById(id).orElseThrow(() -> ApiException.notFound("Reso non trovato"));
 
+        var wasAlreadyRefunded = ret.getStatus() == OrderReturn.ReturnStatus.refunded;
+
         ret.setStatus(dto.status());
         if (dto.adminNote() != null) ret.setAdminNote(dto.adminNote());
         if (dto.refundAmount() != null) ret.setRefundAmount(dto.refundAmount());
         if (dto.status() == OrderReturn.ReturnStatus.refunded) ret.setResolvedAt(java.time.LocalDateTime.now());
+
+        // Il rimborso si registra **prima** di salvare: se l'importo supera
+        // l'incasso, `refundCharge` lancia e il reso non deve risultare
+        // rimborsato. E solo alla prima volta: ripassare due volte da `refunded`
+        // restituirebbe l'importo due volte.
+        if (dto.status() == OrderReturn.ReturnStatus.refunded && !wasAlreadyRefunded) {
+            var order = orders.findById(ret.getOrderId())
+                    .orElseThrow(() -> ApiException.notFound("Ordine non trovato"));
+            compensation.refundCharge(order, ret.getRefundAmount(), "Reso " + ret.getId());
+        }
+
         var saved = returns.save(ret);
 
         var user = users.findById(saved.getUserId()).orElse(null);

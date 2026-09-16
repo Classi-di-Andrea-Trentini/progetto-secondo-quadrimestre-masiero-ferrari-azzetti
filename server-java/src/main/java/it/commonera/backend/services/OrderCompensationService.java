@@ -3,11 +3,15 @@ package it.commonera.backend.services;
 import it.commonera.backend.entities.Order;
 import it.commonera.backend.entities.OrderStatus;
 import it.commonera.backend.entities.OrderStatusHistory;
+import it.commonera.backend.entities.Payment;
+import it.commonera.backend.exceptions.ApiException;
 import it.commonera.backend.repositories.OrderRepository;
+import it.commonera.backend.repositories.PaymentRepository;
 import it.commonera.backend.repositories.ProductVariantRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.UUID;
 
@@ -34,13 +38,18 @@ public class OrderCompensationService {
     private final ProductVariantRepository variants;
     private final GiftCardService giftCards;
     private final LoyaltyService loyalty;
+    private final PaymentRepository payments;
+    private final PaymentGateway gateway;
 
     public OrderCompensationService(OrderRepository orders, ProductVariantRepository variants,
-                                    GiftCardService giftCards, LoyaltyService loyalty) {
+                                    GiftCardService giftCards, LoyaltyService loyalty,
+                                    PaymentRepository payments, PaymentGateway gateway) {
         this.orders = orders;
         this.variants = variants;
         this.giftCards = giftCards;
         this.loyalty = loyalty;
+        this.payments = payments;
+        this.gateway = gateway;
     }
 
     /**
@@ -55,10 +64,22 @@ public class OrderCompensationService {
     @Transactional
     public boolean releaseAndCancel(Order order, Collection<OrderStatus> allowedFrom,
                                     UUID actorId, String note) {
+        // Va letto **prima** della transizione: dopo, lo stato e' `cancelled` per
+        // tutti e non si saprebbe piu' se c'era un incasso da restituire.
+        var previous = order.getStatus();
+
         if (orders.updateStatusIfCurrentIn(order.getId(), OrderStatus.cancelled, allowedFrom) == 0) {
             return false;
         }
         order.setStatus(OrderStatus.cancelled);
+
+        // Solo se qualcuno aveva davvero pagato. Un ordine annullato mentre era
+        // ancora `pending` non ha incassi da restituire: rimborsarlo lo stesso
+        // sarebbe denaro regalato.
+        if (previous == OrderStatus.paid) {
+            payments.findByOrderId(order.getId()).ifPresent(payment ->
+                    refundCharge(order, outstanding(payment), "Ordine annullato"));
+        }
 
         // La merce torna a magazzino: compensare senza ripristinare la giacenza
         // significa perdere pezzi che nessuno ha mai comprato.
@@ -82,5 +103,56 @@ public class OrderCompensationService {
         entry.setNote(note);
         order.getStatusHistory().add(entry);
         return true;
+    }
+
+    /**
+     * Registra un rimborso su {@code payments} e, se il fornitore e' reale, lo
+     * esegue davvero.
+     *
+     * Il tetto non e' una formalita': {@code refundAmount} arriva da un campo
+     * che compila l'amministratore, e senza controllo un errore di battitura
+     * restituirebbe piu' di quanto incassato.
+     */
+    @Transactional
+    public void refundCharge(Order order, BigDecimal amount, String reason) {
+        if (amount == null || amount.signum() <= 0) return;
+
+        var payment = payments.findByOrderId(order.getId()).orElse(null);
+        if (payment == null || payment.getAmount().signum() == 0) {
+            // Ordine coperto interamente da buono o da punti: quello che c'era da
+            // restituire lo ha gia' restituito `releaseAndCancel`.
+            return;
+        }
+        if (payment.getStatus() == Payment.PaymentStatus.pending
+                || payment.getStatus() == Payment.PaymentStatus.failed) {
+            throw ApiException.badRequest("Non c'e' nessun incasso da rimborsare per questo ordine");
+        }
+
+        var alreadyRefunded = payment.getRefundedAmount() == null
+                ? BigDecimal.ZERO : payment.getRefundedAmount();
+        var total = alreadyRefunded.add(amount);
+        if (total.compareTo(payment.getAmount()) > 0) {
+            throw ApiException.badRequest("Il rimborso supera l'importo incassato");
+        }
+
+        // Verso il fornitore si va solo se l'incasso era reale. Col doppio non
+        // c'e' niente da restituire fuori di qui, e chiamarlo fingerebbe un
+        // movimento di denaro mai avvenuto.
+        if (gateway.isReal() && payment.getProviderTxId() != null) {
+            gateway.refund(payment.getProviderTxId(), amount);
+        }
+
+        payment.setRefundedAmount(total);
+        payment.setStatus(total.compareTo(payment.getAmount()) == 0
+                ? Payment.PaymentStatus.refunded
+                : Payment.PaymentStatus.partially_refunded);
+        payments.save(payment);
+    }
+
+    /** Quanto resta da restituire di un incasso. */
+    private BigDecimal outstanding(Payment payment) {
+        var alreadyRefunded = payment.getRefundedAmount() == null
+                ? BigDecimal.ZERO : payment.getRefundedAmount();
+        return payment.getAmount().subtract(alreadyRefunded);
     }
 }
