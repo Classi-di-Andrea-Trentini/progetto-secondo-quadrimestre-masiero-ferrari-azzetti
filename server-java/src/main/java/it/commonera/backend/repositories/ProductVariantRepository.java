@@ -61,4 +61,19 @@ public interface ProductVariantRepository extends JpaRepository<ProductVariant, 
            "and v.product.isActive = true and v.product.deletedAt is null " +
            "group by v.size")
     List<Object[]> availableSizes();
+
+    /**
+     * Copertina del prodotto per ogni variante, in **una** query. Le righe degli
+     * ordini fotografano nome e prezzo ma non l'immagine, che deve seguire il
+     * catalogo: se una foto viene sostituita, anche l'ordine di ieri mostra
+     * quella nuova. L'ordinamento mette prima la copertina: chi chiama prende la
+     * prima riga per variante.
+     */
+    @Query("""
+            select v.id, i.url from ProductVariant v
+            join v.product p join p.images i
+            where v.id in :ids
+            order by i.isCover desc, i.sortOrder asc
+            """)
+    List<Object[]> coverUrlsByVariantIds(@Param("ids") java.util.Collection<UUID> ids);
 }

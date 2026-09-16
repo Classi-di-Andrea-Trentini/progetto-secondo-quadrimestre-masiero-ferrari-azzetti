@@ -120,6 +120,8 @@ public class ProductService {
             view.put("name", category.getName());
             view.put("slug", category.getSlug());
             view.put("parentId", category.getParentId());
+            // L'illustrazione di categoria c'era a database e non usciva mai dall'API.
+            view.put("imageUrl", category.getImageUrl());
             view.put("count", rolledUp.getOrDefault(category.getId(), 0L));
             categoryViews.add(view);
         }

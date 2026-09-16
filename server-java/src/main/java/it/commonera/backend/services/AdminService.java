@@ -47,6 +47,7 @@ public class AdminService {
      * abbandonati, e quattro copie divergerebbero al primo cambio di formula.
      */
     private final OrderCompensationService compensation;
+    private final CoverImageService covers;
     private final String uploadsDir;
 
     public AdminService(OrderRepository orders, UserRepository users, ProductRepository products,
@@ -54,7 +55,7 @@ public class AdminService {
                         CategoryRepository categories, ReviewRepository reviews,
                         StockAlertRepository stockAlerts, UserAddressRepository addresses,
                         PaymentRepository payments, PromoCodeRepository promoCodeRepo, MailService mail,
-                        OrderCompensationService compensation,
+                        OrderCompensationService compensation, CoverImageService covers,
                         @org.springframework.beans.factory.annotation.Value("${app.uploads-dir:uploads}") String uploadsDir) {
         this.orders = orders;
         this.users = users;
@@ -69,6 +70,7 @@ public class AdminService {
         this.promoCodeRepo = promoCodeRepo;
         this.mail = mail;
         this.compensation = compensation;
+        this.covers = covers;
         this.uploadsDir = uploadsDir;
     }
 
@@ -106,8 +108,16 @@ public class AdminService {
 
         var topProducts = products.findAll(Sort.by("soldCount").descending()).stream()
                 .limit(5)
-                .map(p -> Map.of("id", p.getId(), "name", p.getName(), "slug", p.getSlug(),
-                        "soldCount", p.getSoldCount(), "basePrice", p.getBasePrice()))
+                .map(p -> {
+                    var row = new LinkedHashMap<String, Object>();
+                    row.put("id", p.getId());
+                    row.put("name", p.getName());
+                    row.put("slug", p.getSlug());
+                    row.put("soldCount", p.getSoldCount());
+                    row.put("basePrice", p.getBasePrice());
+                    row.put("imageUrl", CoverImageService.coverOf(p));
+                    return row;
+                })
                 .toList();
 
         var low = lowStock(null);
@@ -793,9 +803,16 @@ public class AdminService {
         view.put("createdAt", o.getCreatedAt());
         var user = users.findById(o.getUserId()).orElse(null);
         view.put("user", user == null ? null : Map.of("fullName", user.getFullName(), "email", user.getEmail()));
-        view.put("items", o.getItems().stream()
-                .map(i -> Map.of("productName", i.getProductName(), "quantity", i.getQuantity(), "lineTotal", i.getLineTotal()))
-                .toList());
+        var coverByVariant = covers.coverByVariant(o.getItems());
+        view.put("items", o.getItems().stream().map(i -> {
+            var row = new LinkedHashMap<String, Object>();
+            row.put("productName", i.getProductName());
+            row.put("variantLabel", i.getVariantLabel());
+            row.put("quantity", i.getQuantity());
+            row.put("lineTotal", i.getLineTotal());
+            row.put("imageUrl", coverByVariant.get(i.getVariantId()));
+            return row;
+        }).toList());
         return view;
     }
 

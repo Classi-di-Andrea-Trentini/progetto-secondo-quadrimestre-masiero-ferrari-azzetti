@@ -30,12 +30,14 @@ public class OrderService {
     private final OrderRepository orders;
     private final PaymentRepository payments;
     private final OrderCompensationService compensation;
+    private final CoverImageService covers;
 
     public OrderService(OrderRepository orders, PaymentRepository payments,
-                        OrderCompensationService compensation) {
+                        OrderCompensationService compensation, CoverImageService covers) {
         this.orders = orders;
         this.payments = payments;
         this.compensation = compensation;
+        this.covers = covers;
     }
 
     @Transactional(readOnly = true)
@@ -95,16 +97,23 @@ public class OrderService {
         map.put("trackingUrl", order.getTrackingUrl());
         map.put("invoiceNumber", order.getInvoiceNumber());
         map.put("createdAt", order.getCreatedAt());
-        map.put("items", order.getItems().stream().map(item -> Map.of(
-                // Serve al cliente per richiedere un reso su questa riga precisa
-                // (vedi ReturnsController): senza l'id, "restituisci questo articolo"
-                // non ha un bersaglio univoco quando l'ordine ha piu' righe uguali.
-                "id", item.getId(),
-                "productName", item.getProductName(),
-                "variantLabel", String.valueOf(item.getVariantLabel()),
-                "quantity", item.getQuantity(),
-                "unitPrice", item.getUnitPrice(),
-                "lineTotal", item.getLineTotal())).toList());
+        var coverByVariant = covers.coverByVariant(order.getItems());
+        map.put("items", order.getItems().stream().map(item -> {
+            // `LinkedHashMap` e non `Map.of`: l'immagine puo' mancare, e `Map.of`
+            // con un null esplode.
+            var row = new LinkedHashMap<String, Object>();
+            // Serve al cliente per richiedere un reso su questa riga precisa
+            // (vedi ReturnsController): senza l'id, "restituisci questo articolo"
+            // non ha un bersaglio univoco quando l'ordine ha piu' righe uguali.
+            row.put("id", item.getId());
+            row.put("productName", item.getProductName());
+            row.put("variantLabel", String.valueOf(item.getVariantLabel()));
+            row.put("quantity", item.getQuantity());
+            row.put("unitPrice", item.getUnitPrice());
+            row.put("lineTotal", item.getLineTotal());
+            row.put("imageUrl", coverByVariant.get(item.getVariantId()));
+            return row;
+        }).toList());
         // La cronologia serve anche in elenco: la pagina account espande l'ordine li'
         // dentro e non chiama il dettaglio.
         map.put("statusHistory", order.getStatusHistory().stream().map(h -> {

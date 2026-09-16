@@ -31,14 +31,17 @@ public class ReturnService {
     private final UserRepository users;
     private final MailService mail;
     private final OrderCompensationService compensation;
+    private final CoverImageService covers;
 
     public ReturnService(OrderReturnRepository returns, OrderRepository orders, UserRepository users,
-                         MailService mail, OrderCompensationService compensation) {
+                         MailService mail, OrderCompensationService compensation,
+                         CoverImageService covers) {
         this.returns = returns;
         this.orders = orders;
         this.users = users;
         this.mail = mail;
         this.compensation = compensation;
+        this.covers = covers;
     }
 
     @Transactional(readOnly = true)
@@ -138,7 +141,8 @@ public class ReturnService {
         users.findAllById(userIds).forEach(u -> usersById.put(u.getId(), u));
 
         var views = result.getContent().stream()
-                .map(r -> ReturnDtos.View.from(r, ordersById.get(r.getOrderId()), usersById.get(r.getUserId())))
+                .map(r -> ReturnDtos.View.from(r, ordersById.get(r.getOrderId()), usersById.get(r.getUserId()),
+                        covers.coverByVariant(orderItemsOf(r))))
                 .toList();
 
         return Map.of(
@@ -185,7 +189,11 @@ public class ReturnService {
     private ReturnDtos.View view(OrderReturn ret, boolean includeUser) {
         var order = orders.findById(ret.getOrderId()).orElse(null);
         var user = includeUser ? users.findById(ret.getUserId()).orElse(null) : null;
-        return ReturnDtos.View.from(ret, order, user);
+        return ReturnDtos.View.from(ret, order, user, covers.coverByVariant(orderItemsOf(ret)));
+    }
+
+    private static List<it.commonera.backend.entities.OrderItem> orderItemsOf(OrderReturn ret) {
+        return ret.getItems().stream().map(i -> i.getOrderItem()).toList();
     }
 
     private Specification<OrderReturn> specification(OrderReturn.ReturnStatus status, String search,
