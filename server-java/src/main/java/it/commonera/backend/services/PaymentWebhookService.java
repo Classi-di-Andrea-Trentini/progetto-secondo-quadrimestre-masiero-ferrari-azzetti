@@ -7,6 +7,7 @@ import it.commonera.backend.entities.Payment;
 import it.commonera.backend.repositories.CartRepository;
 import it.commonera.backend.repositories.OrderRepository;
 import it.commonera.backend.repositories.PaymentRepository;
+import it.commonera.backend.repositories.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -38,16 +39,21 @@ public class PaymentWebhookService {
     private final CartRepository carts;
     private final LoyaltyService loyalty;
     private final OrderCompensationService compensation;
+    private final UserRepository users;
+    private final MailService mail;
 
     public PaymentWebhookService(PaymentGateway gateway, PaymentRepository payments,
                                  OrderRepository orders, CartRepository carts,
-                                 LoyaltyService loyalty, OrderCompensationService compensation) {
+                                 LoyaltyService loyalty, OrderCompensationService compensation,
+                                 UserRepository users, MailService mail) {
         this.gateway = gateway;
         this.payments = payments;
         this.orders = orders;
         this.carts = carts;
         this.loyalty = loyalty;
         this.compensation = compensation;
+        this.users = users;
+        this.mail = mail;
     }
 
     @Transactional
@@ -95,6 +101,26 @@ public class PaymentWebhookService {
         loyalty.award(order.getUserId(), order.getId(),
                 order.getSubtotal().subtract(order.getDiscountTotal()));
         emptyCart(order);
+        sendConfirmation(order);
+    }
+
+    /**
+     * La conferma parte da qui, a incasso avvenuto: annunciare un ordine che
+     * potrebbe ancora essere annullato per mancato pagamento sarebbe peggio del
+     * silenzio. Un'email fallita non fa fallire l'incasso — `send` cattura e
+     * registra da solo.
+     */
+    private void sendConfirmation(Order order) {
+        users.findById(order.getUserId()).ifPresent(user -> {
+            var lines = order.getItems().stream()
+                    .map(item -> new MailService.Line(item.getProductName(), item.getVariantLabel(),
+                            item.getQuantity(), item.getUnitPrice()))
+                    .toList();
+            var number = order.getInvoiceNumber() != null
+                    ? order.getInvoiceNumber() : order.getId().toString();
+            mail.sendOrderConfirmation(user.getEmail(), user.getFullName(), number,
+                    order.getTotal(), lines);
+        });
     }
 
     private void fail(Payment payment, PaymentGateway.Event event) {

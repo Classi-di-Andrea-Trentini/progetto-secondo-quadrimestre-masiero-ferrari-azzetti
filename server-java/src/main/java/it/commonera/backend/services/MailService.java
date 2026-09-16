@@ -1,5 +1,8 @@
 package it.commonera.backend.services;
 
+import java.math.BigDecimal;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
@@ -115,6 +118,60 @@ public class MailService {
                         + "<p>Se non sei stato tu, reimpostala subito e controlla i tuoi accessi.</p>");
     }
 
+    /**
+     * La conferma d'ordine: il primo messaggio che un cliente si aspetta dopo
+     * aver pagato. Parte dal webhook, cioe' **a incasso confermato**, non alla
+     * prenotazione: annunciare un ordine che potrebbe ancora essere annullato
+     * per mancato pagamento sarebbe peggio del silenzio.
+     */
+    public void sendOrderConfirmation(String to, String fullName, String orderNumber,
+                                      BigDecimal total, List<Line> lines) {
+        send(to, "Il tuo ordine " + orderNumber,
+                renderOrderConfirmation(fullName, orderNumber, total, lines));
+    }
+
+    /**
+     * Statico e senza dipendenze: cosi' il corpo dell'email si puo' provare
+     * senza contesto Spring e senza un server di posta.
+     */
+    static String renderOrderConfirmation(String fullName, String orderNumber,
+                                          BigDecimal total, List<Line> lines) {
+        var rows = new StringBuilder();
+        for (Line line : lines) {
+            rows.append("<tr><td>").append(escape(line.productName()));
+            if (line.variantLabel() != null && !line.variantLabel().isBlank()) {
+                rows.append(" <small>").append(escape(line.variantLabel())).append("</small>");
+            }
+            rows.append("</td><td align=\"center\">").append(line.quantity())
+                .append("</td><td align=\"right\">").append(money(line.unitPrice()))
+                .append("</td></tr>");
+        }
+
+        return "<h1>Grazie, ordine confermato.</h1>"
+                + "<p>Ciao <strong>" + escape(firstNameOf(fullName)) + "</strong>, abbiamo ricevuto"
+                + " il pagamento dell'ordine <strong>" + escape(orderNumber) + "</strong>.</p>"
+                + "<table role=\"presentation\" width=\"100%\" cellpadding=\"6\">"
+                + "<thead><tr><th align=\"left\">Articolo</th><th>Q.ta</th><th align=\"right\">Prezzo</th></tr></thead>"
+                + "<tbody>" + rows + "</tbody>"
+                + "<tfoot><tr><td colspan=\"2\"><strong>Totale</strong></td>"
+                + "<td align=\"right\"><strong>" + money(total) + "</strong></td></tr></tfoot>"
+                + "</table>"
+                + "<p>Ti scriviamo di nuovo quando parte.</p>";
+    }
+
+    /** Virgola decimale: e' un'email a un cliente italiano, non un log. */
+    private static String money(BigDecimal amount) {
+        return amount == null ? "" : amount.setScale(2, java.math.RoundingMode.HALF_UP)
+                .toPlainString().replace('.', ',') + " &euro;";
+    }
+
+    private static String firstNameOf(String fullName) {
+        return fullName == null ? "" : fullName.split(" ")[0];
+    }
+
+    /** Una riga dell'ordine, gia' appiattita: l'email non deve caricare entita'. */
+    public record Line(String productName, String variantLabel, int quantity, BigDecimal unitPrice) {}
+
     private String firstName(String fullName) {
         return fullName == null ? "" : fullName.split(" ")[0];
     }
@@ -143,7 +200,7 @@ public class MailService {
     }
 
     /** Il nome di un prodotto puo' contenere `<`: senza questo l'HTML si rompe. */
-    private String escape(String value) {
+    private static String escape(String value) {
         return value == null ? "" : value.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
     }
 }
