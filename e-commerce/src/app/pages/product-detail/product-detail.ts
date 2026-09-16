@@ -84,11 +84,16 @@ export class ProductDetail implements OnInit, OnDestroy {
   // Testo dei corpi degli accordion: non e' nel file Figma (design-strings.txt
   // non contiene questo paragrafo, solo le etichette dei titoli), quindi e'
   // copy scritto per coerenza col resto del sito, non tradotto da un originale.
+  // Le cifre di spedizione e il termine di reso pero' NON sono inventabili: devono
+  // combaciare con quanto il sito promette altrove (checkout.ts e legal.ts), non con
+  // un valore "ragionevole" scelto qui. Fix review round 1: erano scritti "30 giorni,
+  // reso gratuito" -- legal.ts dichiara ovunque (diritto di recesso, artt. 52-59 Cod.
+  // cons.) quattordici giorni, e le spese di reso a carico del cliente, non gratuite.
   readonly accordionContent: Record<string, string> = {
     sizeguide: 'XS / S / M / L / XL / XXL \u2014 true to standard EU sizing.\n\nIf you are between sizes, we recommend sizing up. Measurements refer to the body, not the garment.',
     fabric: 'Composition and country of origin are printed on the inside label. Materials are chosen for durability, comfort and responsible sourcing.',
     washing: 'Machine or hand wash cold (max 30\u00b0C) on a gentle cycle. Do not bleach. Iron on low heat. Do not tumble dry. Dry flat to keep the garment\u2019s shape.',
-    shipping: 'Standard shipping (3\u20135 business days): free over \u20ac100, otherwise \u20ac4.90.\nExpress shipping (1\u20132 business days): \u20ac9.90.\nFree returns within 30 days of delivery \u2014 the item must be unworn and still have its tag.',
+    shipping: 'Standard shipping (3\u20135 business days): free over \u20ac100, otherwise \u20ac4.90.\nExpress shipping (1\u20132 business days): \u20ac9.90.\nYou have 14 days from delivery to withdraw and return an item, no reason needed \u2014 return shipping costs are at your own expense.',
   };
 
   ngOnInit() {
