@@ -1,22 +1,18 @@
-<div class="min-h-screen flex items-center justify-center px-4 py-16 bg-surface">
+<div class="min-h-screen flex items-center justify-center px-4 py-16 bg-paper">
   <div class="w-full max-w-sm">
 
     <div class="mb-10 text-center">
-      <h1 class="text-2xl font-bold tracking-tight text-ink">Accedi</h1>
+      <h1 class="display text-3xl">Accedi</h1>
       <p class="mt-2 text-sm text-ink-muted">
         Non hai un account?
-        <a routerLink="/register" class="font-medium text-black underline underline-offset-2">
-          Registrati
-        </a>
+        <a routerLink="/register" class="link">Registrati</a>
       </p>
     </div>
 
     <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate class="space-y-5">
 
       <div>
-        <label for="email" class="block text-xs font-semibold uppercase tracking-widest text-ink-muted mb-1.5">
-          Email
-        </label>
+        <label for="email" class="label">Email</label>
         <input
           id="email"
           type="email"
@@ -24,17 +20,16 @@
           autocomplete="email"
           placeholder="nome@esempio.it"
           class="field"
-          [ngClass]="email.invalid && email.touched ? 'border-danger' : 'border-line-strong'"
+          [attr.aria-invalid]="email.invalid && email.touched ? 'true' : null"
+          [attr.aria-describedby]="email.invalid && email.touched ? 'email-error' : null"
         />
         @if (email.invalid && email.touched) {
-          <p class="mt-1 text-xs text-danger">Inserisci un indirizzo email valido</p>
+          <p id="email-error" class="field-error">Inserisci un indirizzo email valido</p>
         }
       </div>
 
       <div>
-        <label for="password" class="block text-xs font-semibold uppercase tracking-widest text-ink-muted mb-1.5">
-          Password
-        </label>
+        <label for="password" class="label">Password</label>
         <div class="relative">
           <input
             id="password"
@@ -42,12 +37,14 @@
             formControlName="password"
             autocomplete="current-password"
             placeholder="••••••••"
-            class="w-full border px-4 py-3 pr-20 text-sm focus:outline-none focus:ring-2 focus:ring-black transition"
-            [ngClass]="password.invalid && password.touched ? 'border-danger' : 'border-line-strong'"
+            class="field pr-24"
+            [attr.aria-invalid]="password.invalid && password.touched ? 'true' : null"
+            [attr.aria-describedby]="password.invalid && password.touched ? 'password-error' : null"
           />
+          <!-- Il toggle vive dentro il campo: btn-ghost btn-sm, non un bottone ricostruito a mano. -->
           <button
             type="button"
-            class="absolute inset-y-0 right-0 px-3 text-xs font-semibold uppercase tracking-wider text-ink-2 hover:text-black"
+            class="btn btn-ghost btn-sm absolute inset-y-0 right-0"
             [attr.aria-pressed]="showPassword()"
             [attr.aria-label]="showPassword() ? 'Nascondi password' : 'Mostra password'"
             (click)="togglePasswordVisibility()"
@@ -56,32 +53,28 @@
           </button>
         </div>
         @if (password.invalid && password.touched) {
-          <p class="mt-1 text-xs text-danger">La password deve essere di almeno 8 caratteri</p>
+          <p id="password-error" class="field-error">La password deve essere di almeno 8 caratteri</p>
         }
       </div>
 
       @if (error()) {
-        <div class="px-4 py-3 bg-danger-wash text-sm text-danger rounded-sm">
+        <div role="alert" class="bg-danger-wash text-danger px-4 py-3 rounded-sm text-sm">
           {{ error() }}
         </div>
       }
 
-      <div class="flex justify-end mb-4">
-        <a routerLink="/forgot-password" class="text-xs text-ink-muted hover:text-black transition underline underline-offset-2">
+      <div class="flex justify-end">
+        <a routerLink="/forgot-password" class="text-xs text-ink-muted hover:text-ink transition">
           Password dimenticata?
         </a>
       </div>
 
       <button
         type="submit"
-        [disabled]="loading()"
-        class="w-full bg-black text-white text-sm font-semibold uppercase tracking-widest py-3.5 hover:bg-ink transition disabled:opacity-50 disabled:cursor-not-allowed"
+        class="btn btn-primary btn-lg btn-block"
+        [attr.data-loading]="loading() ? 'true' : null"
       >
-        @if (loading()) {
-          Accesso in corso...
-        } @else {
-          Accedi
-        }
+        {{ loading() ? 'Accesso in corso' : 'Accedi' }}
       </button>
 
     </form>

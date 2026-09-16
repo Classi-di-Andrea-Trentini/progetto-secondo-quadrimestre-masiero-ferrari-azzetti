@@ -7,7 +7,6 @@ import {
   ValidationErrors,
 } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { NgClass } from '@angular/common';
 import { AuthService } from '../../services/auth';
 
 function passwordComplexity(control: AbstractControl): ValidationErrors | null {
@@ -32,7 +31,7 @@ function passwordMatch(group: AbstractControl): ValidationErrors | null {
 
 @Component({
   selector: 'app-register',
-  imports: [ReactiveFormsModule, RouterLink, NgClass],
+  imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './register.html',
   styleUrl: './register.css',
 })
