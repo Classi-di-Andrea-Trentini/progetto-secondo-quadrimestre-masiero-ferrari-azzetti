@@ -33,6 +33,27 @@
   --color-accent-hover: oklch(0.445 0.14 32);
   --color-accent-wash: oklch(0.965 0.014 32);
 
+  /* ── CTA — Figma: nero pieno su tutto il negozio pubblico. Il valore
+     coincide oggi con --color-ink-strong, ma per scelta, non per legame:
+     rispondono a due domande diverse ("qual e' il testo piu' scuro" contro
+     "di che colore sono le call-to-action") e restano due token distinti
+     apposta, non un alias. Se domani si ritocca la rampa dell'inchiostro per
+     leggibilita' del testo, le CTA non devono spostarsi dietro di riflesso:
+     vanno cambiate qui, di proposito, non come effetto collaterale.
+     19.80:1 su bianco. */
+  --color-cta: oklch(0.145 0.008 285);
+  --color-cta-hover: oklch(0.205 0.009 285);
+
+  /* ── Accent admin — Figma #6CD0D0, solo nell'area /admin: bordo/anello di
+     focus dei campi, bottone primario delle modali. Mai nel negozio pubblico.
+     Testo sempre nero sopra: 10.78:1 contro --color-ink-strong. */
+  --color-accent-admin: oklch(0.795 0.084 195);
+  --color-accent-admin-ring: oklch(0.795 0.084 195 / 0.35);
+
+  /* ── Badge saldi — Figma #C3A88D, solo sul badge "SALE" delle card
+     prodotto. Testo nero sopra: 8.69:1 contro --color-ink-strong. */
+  --color-badge-sale: oklch(0.745 0.045 70);
+
   /* ── Semantic state ────────────────────────────────────────────────────── */
   --color-success: oklch(0.48 0.115 155);
   --color-success-wash: oklch(0.965 0.022 155);
@@ -240,12 +261,15 @@
     }
   }
 
+  /* Figma: CTA nere piene su tutto il negozio pubblico. --color-cta/-hover
+     ripuntano su .btn-primary cosi' ogni bottone primario del sito cambia
+     insieme, senza toccare i 21 template che usano "btn btn-primary". */
   .btn-primary {
-    background: var(--color-ink);
+    background: var(--color-cta);
     color: var(--color-surface);
   }
   .btn-primary:hover:not(:disabled) {
-    background: var(--color-ink-strong);
+    background: var(--color-cta-hover);
   }
   .btn-primary:active:not(:disabled) {
     background: var(--color-ink-2);
