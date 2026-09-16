@@ -1,0 +1,143 @@
+# Common Era — unica origine pubblica.
+#
+# Perche' un `.template` e non un `.conf`: nginx non legge le variabili
+# d'ambiente. L'immagine ufficiale pero' passa i file di questa cartella in
+# `envsubst` all'avvio e scrive il risultato in /etc/nginx/conf.d/. Cosi' il
+# dominio e il percorso del certificato si cambiano dal file .env senza
+# riscrivere la configurazione — che e' quello che distingue un certificato
+# autofirmato in locale da Let's Encrypt in produzione.
+#
+# NGINX_ENVSUBST_FILTER (impostata nel compose) limita la sostituzione alle sole
+# variabili elencate: senza quel filtro `envsubst` mangerebbe anche `$host`,
+# `$uri` e `$remote_addr`, che qui sono variabili di nginx e non dell'ambiente.
+#
+# Il file si chiama `default.conf.template` apposta: il risultato finisce in
+# /etc/nginx/conf.d/default.conf e **sovrascrive** il sito di esempio
+# dell'immagine ufficiale. Con un altro nome resterebbero due blocchi in ascolto
+# sulla porta 80, e la pagina "Welcome to nginx" potrebbe vincere per prima.
+#
+# Perche' nginx davanti a tutto: i cookie di sessione sono `SameSite=Lax`, quindi
+# frontend e backend devono stare sulla **stessa origine** o il login smette di
+# funzionare appena il browser stringe le regole sui cookie di terze parti.
+# Con nginx davanti, il browser vede un solo dominio e una sola porta.
+
+# Gli upstream sono nomi di servizio di Compose, risolti dal DNS interno.
+# `keepalive` tiene aperte le connessioni verso monte: senza, ogni richiesta apre
+# e chiude una TCP, che su un sito con molte immagini si sente.
+upstream commonera_frontend {
+    server frontend:4200;
+    keepalive 16;
+}
+
+upstream commonera_backend {
+    server backend:3000;
+    keepalive 16;
+}
+
+# ─── :80 — solo rinnovo certificati e reindirizzamento ────────────────────────
+server {
+    listen 80;
+    listen [::]:80;
+    server_name ${SERVER_NAME};
+
+    # Verifica di Let's Encrypt in modalita' webroot. Certbot scrive qui un file
+    # che il loro server viene a leggere in http, PRIMA che esista un
+    # certificato: se questa `location` rispondesse 301 come tutto il resto, il
+    # primo rilascio non potrebbe mai riuscire — il classico uovo e gallina del
+    # TLS automatico. `^~` batte le espressioni regolari e garantisce che nessun
+    # altro blocco se la prenda.
+    location ^~ /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+        default_type "text/plain";
+    }
+
+    # Tutto il resto sale in https. 301 e non 302: e' permanente, e i browser la
+    # ricordano senza rifare il giro in chiaro ogni volta.
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+# ─── :443 — il sito ───────────────────────────────────────────────────────────
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    http2 on;
+    server_name ${SERVER_NAME};
+
+    ssl_certificate     ${SSL_CERTIFICATE};
+    ssl_certificate_key ${SSL_CERTIFICATE_KEY};
+
+    # Solo TLS 1.2 e 1.3. 1.0 e 1.1 sono ritirati dal 2021 e non li chiede piu'
+    # nessun browser che possa anche solo caricare Angular.
+    ssl_protocols TLSv1.2 TLSv1.3;
+    # Le suite di TLS 1.3 non si configurano e vanno gia' bene. Queste valgono per
+    # 1.2: solo ECDHE (segretezza in avanti — una chiave privata rubata domani non
+    # decifra il traffico registrato oggi) e solo AEAD, niente CBC.
+    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305;
+    # Lasciamo scegliere al client: i browser moderni preferiscono gia' ChaCha20
+    # sui telefoni senza accelerazione AES, e sanno meglio di noi su cosa girano.
+    ssl_prefer_server_ciphers off;
+
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 1d;
+    # Biglietti di sessione spenti: la chiave che li cifra sta in memoria e non
+    # ruota, quindi chi la ottiene decifra all'indietro tutte le sessioni riprese.
+    # Annulla la segretezza in avanti che le suite ECDHE qui sopra garantiscono.
+    ssl_session_tickets off;
+
+    # OCSP stapling resta spento di proposito: richiede una catena di fiducia
+    # vera, e con il certificato autofirmato di prova nginx riempirebbe i log di
+    # avvisi a ogni avvio. Con Let's Encrypt attivo si accende aggiungendo:
+    #   ssl_stapling on;
+    #   ssl_stapling_verify on;
+    #   ssl_trusted_certificate ${SSL_CERTIFICATE};
+
+    # Una volta sola, a livello di server: vedi la spiegazione nel file stesso.
+    include /etc/nginx/snippets/security-headers.conf;
+
+    # Il backend accetta caricamenti fino a 5 MB
+    # (spring.servlet.multipart.max-file-size). Il valore predefinito di nginx e'
+    # 1 MB: lasciandolo, il caricamento di una foto prodotto morirebbe con un 413
+    # dentro nginx, senza mai arrivare all'applicazione, e il messaggio d'errore
+    # sarebbe quello generico di nginx.
+    client_max_body_size 6m;
+
+    gzip on;
+    gzip_vary on;
+    gzip_proxied any;
+    gzip_min_length 1024;
+    gzip_types text/plain text/css application/javascript application/json image/svg+xml application/manifest+json;
+
+    # ── API ───────────────────────────────────────────────────────────────────
+    # Tutto il backend vive sotto /api: e' il `server.servlet.context-path` di
+    # Spring. Le foto prodotto comprese, quindi /api/uploads/** passa di qui e non
+    # serve un blocco a parte.
+    location /api/ {
+        include /etc/nginx/snippets/proxy-common.conf;
+        proxy_pass http://commonera_backend;
+    }
+
+    # ── /uploads — solo compatibilita' ─────────────────────────────────────────
+    # Il backend Java serve le immagini su /api/uploads/ (context-path). Il
+    # backend Node le serviva su /uploads/ e qualche URL salvato in vecchie righe
+    # del database potrebbe ancora puntare li'. La riscrittura le fa funzionare
+    # invece di restituire un 404 al posto della foto di un prodotto.
+    location /uploads/ {
+        include /etc/nginx/snippets/proxy-common.conf;
+        proxy_pass http://commonera_backend/api/uploads/;
+    }
+
+    # ── Frontend ──────────────────────────────────────────────────────────────
+    # Tutto il resto al server SSR di Angular, che rende le pagine e serve i file
+    # statici del costruito. Non serviamo `dist/` direttamente da nginx proprio
+    # perche' il rendering lato server e' quello che fa indicizzare il catalogo.
+    #
+    # Nota: il proxy verso /api dentro e-commerce/src/server.ts resta al suo
+    # posto, ma qui non viene mai esercitato — nginx intercetta /api prima. Serve
+    # allo sviluppo fuori da Docker, dove nginx non c'e'.
+    location / {
+        include /etc/nginx/snippets/proxy-common.conf;
+        proxy_pass http://commonera_frontend;
+    }
+}

@@ -72,3 +72,12 @@ server-java/.gradle/
 # Foto prodotto caricate dall'admin: quando il backend gira fuori da Docker
 # la cartella nasce dentro il repo (in Docker e' il volume `uploads`).
 server-java/uploads/
+
+# TLS: materiale generato, mai versionato. Le chiavi private non vanno in un
+# repository nemmeno se autofirmate — e i certificati di Let's Encrypt scadono,
+# quindi una copia committata e' solo un file vecchio che confonde.
+nginx/certs/*.pem
+nginx/letsencrypt/*
+!nginx/letsencrypt/.gitkeep
+nginx/acme-webroot/*
+!nginx/acme-webroot/.gitkeep

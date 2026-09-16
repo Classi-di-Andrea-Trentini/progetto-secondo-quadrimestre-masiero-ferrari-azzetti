@@ -1,0 +1,191 @@
+# Sovrapposizione di produzione. Si usa SEMPRE insieme al file base:
+#
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+#
+# Il file base resta quello di sviluppo e non va toccato: porte aperte sull'host,
+# niente TLS, tutto raggiungibile a mano. Qui dentro sta solo cio' che cambia
+# quando il sito e' su Internet, in un posto dove si legge in fila.
+#
+# Le tre cose che fa:
+#   1. mette nginx davanti a tutto, unica porta pubblica (80 e 443);
+#   2. divide la rete in due e toglie dall'host le porte di frontend, backend e
+#      database — in particolare la 5433, che oggi espone Postgres a chiunque
+#      arrivi alla macchina;
+#   3. accende gli interruttori che hanno senso solo dietro a un TLS vero.
+#
+# Variabili richieste: vedi .env.prod.example.
+
+services:
+  # ─── nginx: l'unica cosa che parla con Internet ─────────────────────────────
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
+    environment:
+      # Sostituite dentro i template all'avvio (vedi nginx/templates/).
+      SERVER_NAME: "${SERVER_NAME:-localhost}"
+      # Predefinito: il certificato autofirmato di scripts/gen-self-signed-cert.sh.
+      # Con Let's Encrypt attivo diventano
+      #   /etc/letsencrypt/live/<dominio>/fullchain.pem
+      #   /etc/letsencrypt/live/<dominio>/privkey.pem
+      # e si cambiano dal .env, senza riscrivere la configurazione di nginx.
+      SSL_CERTIFICATE: "${SSL_CERTIFICATE:-/etc/nginx/certs/fullchain.pem}"
+      SSL_CERTIFICATE_KEY: "${SSL_CERTIFICATE_KEY:-/etc/nginx/certs/privkey.pem}"
+      # Senza questo filtro `envsubst` sostituirebbe anche $host, $uri e
+      # $remote_addr, che nei file di nginx sono variabili di nginx: la
+      # configurazione uscirebbe con dei buchi al posto loro e nginx non
+      # partirebbe (o, peggio, partirebbe inoltrando l'Host sbagliato).
+      NGINX_ENVSUBST_FILTER: "^(SERVER_NAME|SSL_CERTIFICATE|SSL_CERTIFICATE_KEY)$$"
+    volumes:
+      - ./nginx/templates:/etc/nginx/templates:ro
+      - ./nginx/snippets:/etc/nginx/snippets:ro
+      # Certificato autofirmato per le prove in locale.
+      - ./nginx/certs:/etc/nginx/certs:ro
+      # Certificati veri di Let's Encrypt: la stessa cartella che scrive certbot.
+      - ./nginx/letsencrypt:/etc/letsencrypt:ro
+      # Radice per la verifica ACME. In scrittura per certbot, in lettura per
+      # nginx: e' lo stesso volume, ed e' tutto il senso della modalita' webroot.
+      - ./nginx/acme-webroot:/var/www/certbot:ro
+    networks:
+      - edge
+    depends_on:
+      - frontend
+      - backend
+    restart: unless-stopped
+
+  # ─── certbot: rilascio e rinnovo del certificato ────────────────────────────
+  # Dietro a un profilo: non parte con `up`, e nemmeno l'immagine viene scaricata
+  # finche' non serve. In locale il certificato lo fa lo script autofirmato, e
+  # chiamare Let's Encrypt da una macchina senza dominio pubblico produrrebbe solo
+  # tentativi falliti — che sono contati e portano a un blocco temporaneo.
+  #
+  # Primo rilascio (con nginx gia' in piedi e il dominio che punta qui):
+  #   docker compose -f docker-compose.yml -f docker-compose.prod.yml \
+  #     --profile certbot run --rm certbot certonly \
+  #     --webroot -w /var/www/certbot \
+  #     -d "$SERVER_NAME" --email "$LETSENCRYPT_EMAIL" \
+  #     --agree-tos --no-eff-email
+  #
+  # Poi si punta SSL_CERTIFICATE / SSL_CERTIFICATE_KEY dentro
+  # /etc/letsencrypt/live/<dominio>/ e si ricarica nginx.
+  #
+  # Rinnovo (da mettere in cron, una volta al giorno: certbot rinnova solo se
+  # mancano meno di 30 giorni, quindi eseguirlo spesso non costa nulla):
+  #   docker compose ... --profile certbot run --rm certbot renew
+  #   docker compose ... exec nginx nginx -s reload
+  certbot:
+    image: certbot/certbot:latest
+    profiles: ["certbot"]
+    volumes:
+      - ./nginx/letsencrypt:/etc/letsencrypt
+      - ./nginx/acme-webroot:/var/www/certbot
+    networks:
+      - edge
+    # `certonly` da solo non fa nulla di utile: i comandi veri stanno nei
+    # commenti qui sopra e si passano a `run`. Questo entrypoint evita che un
+    # `up` distratto avvii qualcosa.
+    entrypoint: ["certbot"]
+    command: ["--help"]
+
+  # ─── frontend ───────────────────────────────────────────────────────────────
+  frontend:
+    # Niente porta sull'host: ci si arriva solo passando da nginx. Lasciarla
+    # aperta significherebbe avere il sito raggiungibile anche in http sulla 4200,
+    # cioe' una seconda porta d'ingresso senza TLS e senza intestazioni di
+    # sicurezza — e i cookie di sessione partirebbero in chiaro.
+    ports: !reset []
+    networks:
+      - edge
+    environment:
+      # Il rendering lato server chiama il backend dalla rete interna, non
+      # passando da nginx: un giro in piu' attraverso il proxy non aggiungerebbe
+      # niente e aggiungerebbe un punto di rottura.
+      BACKEND_URL: http://backend:3000
+    restart: unless-stopped
+
+  # ─── backend ────────────────────────────────────────────────────────────────
+  backend:
+    # Stessa ragione del frontend: l'API era raggiungibile in chiaro sulla 3000,
+    # scavalcando TLS, intestazioni e limiti di nginx.
+    ports: !reset []
+    networks:
+      # Su `edge` perche' nginx deve raggiungerlo, su `internal` perche' lui deve
+      # raggiungere il database. E' l'unico servizio su entrambe: e' il confine.
+      - edge
+      - internal
+    environment:
+      # Ora il sito e' in https, quindi il cookie di sessione puo' — e deve —
+      # essere `Secure`. Con questo acceso il browser smette di mandarlo su
+      # http://, che e' precisamente cio' che si vuole: un cookie di sessione
+      # intercettato in chiaro e' un account rubato. Letto da
+      # application.properties -> app.cookie.secure -> AuthCookie.
+      # Non si accende nel file base, dove il sito gira in http e il login
+      # smetterebbe di funzionare senza nessun messaggio d'errore.
+      COOKIE_SECURE: "true"
+      # L'equivalente Spring di TRUST_PROXY. Con `framework` Spring monta il
+      # ForwardedHeaderFilter, che legge X-Forwarded-For, -Proto, -Host e -Port
+      # (impostate da nginx in nginx/snippets/proxy-common.conf) e le applica alla
+      # richiesta: da quel momento `getRemoteAddr()` restituisce l'IP del client
+      # invece di quello di nginx, e `isSecure()` dice https invece di http.
+      #
+      # Onesta': oggi nessuna riga di server-java/ legge l'IP del chiamante — il
+      # limitatore dei tentativi di accesso usa l'email, non l'indirizzo — quindi
+      # accendere questa non cambia niente di visibile. Va accesa lo stesso, e
+      # adesso: e' cio' che rende corretta la richiesta che il resto
+      # dell'applicazione vede, e senza di essa il primo pezzo di codice che
+      # guardera' l'IP o lo schema (un log, un limite per indirizzo, un URL
+      # assoluto costruito dalla richiesta) sara' sbagliato in un modo che non da'
+      # errore e si nota solo quando serve.
+      #
+      # Perche' proprio questo nome: Spring Boot mappa da solo le variabili
+      # d'ambiente sulle sue proprieta', quindi SERVER_FORWARD_HEADERS_STRATEGY
+      # arriva su `server.forward-headers-strategy` senza toccare una riga di Java.
+      # Non e' un numero come il TRUST_PROXY di Express: i valori ammessi sono
+      # `none`, `native` e `framework`.
+      #
+      # Acceso SOLO qui, mai nel file base: fidarsi di X-Forwarded-* quando davanti
+      # non c'e' nessun proxy significa lasciare che sia il client a dichiarare il
+      # proprio indirizzo e il proprio schema, cioe' rendere falsificabile proprio
+      # cio' che questa variabile serve a rendere attendibile.
+      SERVER_FORWARD_HEADERS_STRATEGY: framework
+      # Origine pubblica vera. Serve alla lista CORS di SecurityConfig e ai link
+      # nelle email: con `http://localhost:4200` ereditato dal file base, i link
+      # di conferma indirizzo arriverebbero agli utenti puntando al computer loro.
+      FRONTEND_URL: "https://${SERVER_NAME:-localhost}"
+      BACKEND_URL: "https://${SERVER_NAME:-localhost}"
+    restart: unless-stopped
+
+  # ─── database ───────────────────────────────────────────────────────────────
+  db:
+    # Il punto piu' importante di questo file. Nel file base c'e' "5433:5432":
+    # Postgres e' in ascolto su ogni interfaccia dell'host, quindi chiunque
+    # raggiunga la macchina puo' provare ad autenticarsi contro il database che
+    # contiene ordini, indirizzi e hash delle password. `!reset` cancella la voce
+    # ereditata invece di aggiungersi (le liste di Compose si sommano: `ports: []`
+    # non toglierebbe niente).
+    #
+    # Per interrogare il database in produzione si passa dal container:
+    #   docker compose ... exec db psql -U user -d mydb
+    ports: !reset []
+    networks:
+      # Solo `internal`. Combinato con `internal: true` piu' sotto, il container
+      # non ha proprio una via verso l'esterno: nemmeno in uscita.
+      - internal
+    restart: unless-stopped
+
+networks:
+  # Il lato pubblico: nginx, frontend e backend. Qui passa il traffico che
+  # arriva da fuori.
+  edge:
+    driver: bridge
+  # Il lato privato: backend e database, e nessun altro. `internal: true` fa
+  # creare la rete senza gateway verso l'esterno — non e' solo una questione di
+  # porte non pubblicate, e' proprio il fatto che il database non ha una strada
+  # per uscire, ne' qualcuno ha una strada per entrare se non passando dal
+  # backend. Il frontend non e' qui dentro: non ha nessuna ragione di parlare
+  # con Postgres, e tenerlo fuori vuol dire che una falla nel rendering lato
+  # server non arriva comunque ai dati.
+  internal:
+    driver: bridge
+    internal: true
