@@ -2,6 +2,7 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule, DatePipe, CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminService, AdminOrderSummary, AdminOrderDetail } from '../../../services/admin.service';
+import { formatPrice as formatPriceShared } from '../../../services/format-price';
 
 @Component({
   selector: 'app-admin-orders',
@@ -157,8 +158,9 @@ export class AdminOrders implements OnInit {
     window.open(url, '_blank');
   }
 
+  // Formato inglese (€120.00), centralizzato in services/format-price.ts.
   formatPrice(v: string | number): string {
-    return '€ ' + parseFloat(String(v)).toFixed(2).replace('.', ',');
+    return formatPriceShared(v);
   }
 
   pagesArray(): number[] {

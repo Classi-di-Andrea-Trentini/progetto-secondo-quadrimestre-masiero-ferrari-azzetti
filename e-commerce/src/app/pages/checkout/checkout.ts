@@ -6,6 +6,7 @@ import { CartService, AddressData } from '../../services/cart-service';
 import { AuthService } from '../../services/auth';
 import { StripeService } from '../../services/stripe.service';
 import { CheckoutStep, nextStepFrom, stepsFor } from './checkout-steps';
+import { formatPrice as formatPriceShared } from '../../services/format-price';
 
 @Component({
   selector: 'app-checkout',
@@ -400,8 +401,10 @@ export class Checkout implements OnInit {
     return this.addresses().find(a => a.id === this.selectedAddressId());
   }
 
+  // Formato inglese (€120.00), centralizzato in services/format-price.ts:
+  // vedi il commento li' per il perche'.
   formatPrice(v: number): string {
-    return '€ ' + v.toFixed(2).replace('.', ',');
+    return formatPriceShared(v);
   }
 
   steps(): { key: CheckoutStep; label: string }[] {

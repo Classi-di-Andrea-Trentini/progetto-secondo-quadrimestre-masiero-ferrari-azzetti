@@ -12,6 +12,7 @@ import {
 } from '../../../services/admin.service';
 import { firstValueFrom } from 'rxjs';
 import { ProductImageComponent } from '../../../components/product-image/product-image';
+import { formatPrice as formatPriceShared } from '../../../services/format-price';
 
 type ModalTab = 'info' | 'variants' | 'images';
 
@@ -492,8 +493,9 @@ export class AdminProducts implements OnInit {
 
   // ─── Helpers ──────────────────────────────────────────────────────────────
 
+  // Formato inglese (€120.00), centralizzato in services/format-price.ts.
   formatPrice(v: string | number): string {
-    return '€ ' + parseFloat(String(v)).toFixed(2).replace('.', ',');
+    return formatPriceShared(v);
   }
 
   variantLabel(v: ProductVariant): string {

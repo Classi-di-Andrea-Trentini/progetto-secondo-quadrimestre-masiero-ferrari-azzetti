@@ -13,6 +13,7 @@ import { SeoService } from '../../services/seo';
 import { ToastService } from '../../services/toast.service';
 import { RecentlyViewedService } from '../../services/recently-viewed';
 import { AuthService } from '../../services/auth';
+import { formatPrice as formatPriceShared } from '../../services/format-price';
 import { CartService } from '../../services/cart-service';
 import { ReviewsService, Review } from '../../services/reviews.service';
 import { ProductImageComponent } from '../../components/product-image/product-image';
@@ -340,11 +341,10 @@ export class ProductDetail implements OnInit, OnDestroy {
   }
 
   // ─── Helpers ─────────────────────────────────────────────
-  // Formato inglese (€120.00, niente spazio dopo il simbolo): la pagina e'
-  // tutta in inglese, la virgola decimale italiana stonava. Non e' l'unica
-  // formatPrice del progetto — vedi la nota nel report del task 4.
+  // Formato inglese (€120.00), ora centralizzato in services/format-price.ts:
+  // era una delle nove copie duplicate della stessa funzione (task 3-bis).
   formatPrice(v: number | string) {
-    return new Intl.NumberFormat('en', { style: 'currency', currency: 'EUR' }).format(parseFloat(String(v)));
+    return formatPriceShared(v);
   }
 
   coverImageOf(p: ProductListItem) {

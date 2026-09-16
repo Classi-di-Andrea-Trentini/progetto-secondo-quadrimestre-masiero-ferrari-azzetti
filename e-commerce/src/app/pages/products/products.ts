@@ -9,6 +9,7 @@ import { WishlistService } from '../../services/wishlist.service';
 import { SkeletonComponent } from '../../components/skeleton/skeleton';
 import { AuthService } from '../../services/auth';
 import { ProductImageComponent } from '../../components/product-image/product-image';
+import { formatPrice as formatPriceShared } from '../../services/format-price';
 
 @Component({
   selector: 'app-products',
@@ -186,11 +187,10 @@ export class Products implements OnInit, OnDestroy {
     return null;
   }
 
-  // Formato inglese (€120.00, niente spazio dopo il simbolo): la pagina e'
-  // tutta in inglese, la virgola decimale italiana stonava. Non e' l'unica
-  // formatPrice del progetto — vedi la nota nel report del task 4.
+  // Formato inglese (€120.00), ora centralizzato in services/format-price.ts:
+  // era una delle nove copie duplicate della stessa funzione (task 3-bis).
   formatPrice(v: number | string) {
-    return new Intl.NumberFormat('en', { style: 'currency', currency: 'EUR' }).format(parseFloat(String(v)));
+    return formatPriceShared(v);
   }
 
   uniqueColors(p: ProductListItem) {

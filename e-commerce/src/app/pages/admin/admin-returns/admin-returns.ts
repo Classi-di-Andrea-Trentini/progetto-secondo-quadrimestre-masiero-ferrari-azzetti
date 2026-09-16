@@ -2,6 +2,7 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminService, AdminReturn } from '../../../services/admin.service';
+import { formatPrice as formatPriceShared } from '../../../services/format-price';
 
 @Component({
   selector: 'app-admin-returns',
@@ -110,9 +111,12 @@ export class AdminReturns implements OnInit {
     });
   }
 
+  // Formato inglese (€120.00), centralizzato in services/format-price.ts;
+  // il caso null/0 resta qui perche' e' una scelta di questa pagina (mostrare
+  // un trattino), non della formattazione in se'.
   formatPrice(v: string | number | null): string {
     if (!v) return '—';
-    return '€ ' + parseFloat(String(v)).toFixed(2).replace('.', ',');
+    return formatPriceShared(v);
   }
 
   pagesArray(): number[] {

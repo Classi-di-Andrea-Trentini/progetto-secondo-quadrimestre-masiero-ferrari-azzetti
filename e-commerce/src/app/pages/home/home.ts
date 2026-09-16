@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth';
 import { ProductsService, ProductListItem } from '../../services/products.service';
 import { ScrollStrip } from '../../components/scroll-strip/scroll-strip';
+import { formatPrice as formatPriceShared } from '../../services/format-price';
 
 @Component({
   selector: 'app-home',
@@ -116,13 +117,16 @@ export class Home implements OnInit {
     return product.images.find((i) => i.isCover)?.url ?? product.images[0]?.url ?? '';
   }
 
+  // Il calcolo del prezzo scontato resta qui (e' logica della card prodotto,
+  // non formattazione); la resa in stringa (€120.00) e' centralizzata in
+  // services/format-price.ts.
   formatPrice(product: ProductListItem): string {
     const base = parseFloat(String(product.basePrice));
     const d = product.discounts[0];
-    if (!d) return '€ ' + base.toFixed(2).replace('.', ',');
+    if (!d) return formatPriceShared(base);
     const val = parseFloat(String(d.value));
     const eff = d.type === 'percentage' ? base * (1 - val / 100) : base - val;
-    return '€ ' + eff.toFixed(2).replace('.', ',');
+    return formatPriceShared(eff);
   }
 
   hasDiscount(product: ProductListItem): boolean {

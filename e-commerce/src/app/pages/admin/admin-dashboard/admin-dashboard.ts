@@ -3,6 +3,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AdminService, AdminStats } from '../../../services/admin.service';
 import { SkeletonComponent } from '../../../components/skeleton/skeleton';
+import { formatPrice as formatPriceShared } from '../../../services/format-price';
 
 declare var Chart: any;
 
@@ -92,8 +93,9 @@ export class AdminDashboard implements OnInit, OnDestroy {
     if (this.donutChart) { this.donutChart.destroy(); }
   }
 
+  // Formato inglese (€120.00), centralizzato in services/format-price.ts.
   formatPrice(v: string | number): string {
-    return '€ ' + parseFloat(String(v)).toFixed(2).replace('.', ',');
+    return formatPriceShared(v);
   }
 
   statusLabel(s: string): string {
