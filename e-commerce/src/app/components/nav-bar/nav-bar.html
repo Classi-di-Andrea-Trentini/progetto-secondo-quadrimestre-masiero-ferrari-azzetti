@@ -2,15 +2,18 @@
   <div class="px-3 sm:px-6 lg:px-8">
     <div class="relative flex h-16 items-center justify-between gap-2">
       <!-- ── Sinistra: menu mobile / link desktop ─────────────────────────── -->
-      <div class="flex items-center sm:flex-1">
+      <!-- Sotto `md` la nav diventa un menu a scomparsa: `sm` (640px) lasciava un
+           intervallo di schermi stretti (tablet in verticale, telefoni grandi) con
+           i link desktop compressi invece che nel menu. -->
+      <div class="flex items-center md:flex-1">
         <button
           type="button"
           (click)="menuOpen.set(!menuOpen())"
-          class="sm:hidden inline-flex items-center justify-center p-2 -ml-2 text-ink-2 hover:text-ink hover:bg-sunken rounded-sm transition-colors"
+          class="md:hidden inline-flex items-center justify-center p-2 -ml-2 text-ink-2 hover:text-ink hover:bg-sunken rounded-sm transition-colors"
           [attr.aria-expanded]="menuOpen()"
           aria-controls="nav-mobile-menu"
         >
-          <span class="sr-only">{{ menuOpen() ? 'Chiudi menu' : 'Apri menu' }}</span>
+          <span class="sr-only">{{ menuOpen() ? 'Close menu' : 'Open menu' }}</span>
           @if (!menuOpen()) {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="size-6" aria-hidden="true">
               <path d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" stroke-linecap="round" stroke-linejoin="round" />
@@ -22,14 +25,14 @@
           }
         </button>
 
-        <div class="hidden sm:flex items-center gap-1">
+        <div class="hidden md:flex items-center gap-1">
           <a
             routerLink="/products"
             routerLinkActive="text-ink after:scale-x-100"
             class="relative px-3 py-2 text-xs font-bold uppercase tracking-[0.09em] text-ink-2 hover:text-ink transition-colors
                    after:absolute after:left-3 after:right-3 after:bottom-1 after:h-px after:bg-ink
                    after:origin-left after:scale-x-0 after:transition-transform after:duration-200 hover:after:scale-x-100"
-            >Collezione</a
+            >Shop</a
           >
           <a
             routerLink="/about"
@@ -37,7 +40,7 @@
             class="relative px-3 py-2 text-xs font-bold uppercase tracking-[0.09em] text-ink-2 hover:text-ink transition-colors
                    after:absolute after:left-3 after:right-3 after:bottom-1 after:h-px after:bg-ink
                    after:origin-left after:scale-x-0 after:transition-transform after:duration-200 hover:after:scale-x-100"
-            >Chi siamo</a
+            >About</a
           >
         </div>
       </div>
@@ -52,11 +55,11 @@
       </a>
 
       <!-- ── Destra: admin, account, carrello ─────────────────────────────── -->
-      <div class="flex items-center justify-end gap-3 sm:gap-5 sm:flex-1">
+      <div class="flex items-center justify-end gap-3 sm:gap-5 md:flex-1">
         @if (isAdmin()) {
           <a
             routerLink="/admin"
-            class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 text-2xs font-bold uppercase tracking-[0.09em]
+            class="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 text-2xs font-bold uppercase tracking-[0.09em]
                    border border-line-strong text-ink-2 hover:border-ink hover:text-ink rounded-sm transition-colors"
           >
             <i class="fa-solid fa-sliders text-[0.65rem]" aria-hidden="true"></i>
@@ -67,7 +70,7 @@
         <a
           routerLink="/me"
           class="flex min-h-10 min-w-10 items-center justify-center rounded-sm"
-          [attr.aria-label]="initials() ? 'Il mio account' : 'Accedi'"
+          [attr.aria-label]="initials() ? 'My account' : 'Sign in'"
         >
           @if (initials()) {
             <span
@@ -89,7 +92,7 @@
           (click)="cart.toggle()"
           class="relative flex min-h-10 min-w-10 items-center justify-center rounded-sm cursor-pointer text-ink-2 hover:text-ink transition-colors"
           [attr.aria-label]="
-            cart.itemCount() > 0 ? 'Apri carrello, ' + cart.itemCount() + ' articoli' : 'Apri carrello, vuoto'
+            cart.itemCount() > 0 ? 'Open cart, ' + cart.itemCount() + ' items' : 'Open cart, empty'
           "
         >
           <i class="fa-solid fa-bag-shopping transition-transform duration-300 ease-out-expo hover:scale-110" aria-hidden="true"></i>
@@ -108,21 +111,21 @@
 
   <!-- ── Menu mobile ─────────────────────────────────────────────────────── -->
   @if (menuOpen()) {
-    <div id="nav-mobile-menu" class="sm:hidden border-t border-line bg-surface">
+    <div id="nav-mobile-menu" class="md:hidden border-t border-line bg-surface">
       <div class="px-3 py-2">
         <a
           routerLink="/products"
           (click)="menuOpen.set(false)"
           routerLinkActive="text-ink"
           class="block px-2 py-3 text-sm font-semibold text-ink-2 hover:text-ink border-b border-line transition-colors"
-          >Collezione</a
+          >Shop</a
         >
         <a
           routerLink="/about"
           (click)="menuOpen.set(false)"
           routerLinkActive="text-ink"
           class="block px-2 py-3 text-sm font-semibold text-ink-2 hover:text-ink border-b border-line transition-colors"
-          >Chi siamo</a
+          >About</a
         >
         <a
           routerLink="/me"
@@ -131,7 +134,7 @@
           class="block px-2 py-3 text-sm font-semibold text-ink-2 hover:text-ink transition-colors"
           [class.border-b]="isAdmin()"
           [class.border-line]="isAdmin()"
-          >Il mio account</a
+          >My account</a
         >
         @if (isAdmin()) {
           <a
@@ -140,7 +143,7 @@
             class="flex items-center gap-2 px-2 py-3 text-sm font-semibold text-ink transition-colors"
           >
             <i class="fa-solid fa-sliders text-xs" aria-hidden="true"></i>
-            Pannello admin
+            Admin panel
           </a>
         }
       </div>

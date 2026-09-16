@@ -4,27 +4,27 @@
     <a (click)="setTab('profile')"
        class="pb-4 text-sm font-semibold uppercase tracking-wider cursor-pointer transition-colors"
        [ngClass]="activeTab() === 'profile' ? 'text-ink border-b-2 border-ink' : 'text-ink-muted hover:text-ink'">
-      Profilo
+      Profile
     </a>
     <a (click)="setTab('orders')"
        class="pb-4 text-sm font-semibold uppercase tracking-wider cursor-pointer transition-colors"
        [ngClass]="activeTab() === 'orders' ? 'text-ink border-b-2 border-ink' : 'text-ink-muted hover:text-ink'">
-      Ordini
+      Orders
     </a>
     <a (click)="setTab('addresses')"
        class="pb-4 text-sm font-semibold uppercase tracking-wider cursor-pointer transition-colors"
        [ngClass]="activeTab() === 'addresses' ? 'text-ink border-b-2 border-ink' : 'text-ink-muted hover:text-ink'">
-      Indirizzi
+      Addresses
     </a>
     <a (click)="setTab('favorites')"
        class="pb-4 text-sm font-semibold uppercase tracking-wider cursor-pointer transition-colors"
        [ngClass]="activeTab() === 'favorites' ? 'text-ink border-b-2 border-ink' : 'text-ink-muted hover:text-ink'">
-      Preferiti
+      Favorites
     </a>
     <a (click)="setTab('settings')"
        class="pb-4 text-sm font-semibold uppercase tracking-wider cursor-pointer transition-colors"
        [ngClass]="activeTab() === 'settings' ? 'text-ink border-b-2 border-ink' : 'text-ink-muted hover:text-ink'">
-      Impostazioni
+      Settings
     </a>
   </nav>
 
@@ -38,18 +38,18 @@
             <!-- Personal information -->
             <div class="mb-12">
               <div class="flex justify-between items-center border-b border-line pb-4 mb-6">
-                <h2 class="text-xl font-bold">Dati personali</h2>
+                <h2 class="text-xl font-bold">Personal information</h2>
                 @if (!isEditing()) {
                   <button (click)="startEditing()"
                     class="text-sm text-ink-muted hover:text-ink underline transition-colors">
-                    Modifica
+                    Edit
                   </button>
                 }
               </div>
 
               @if (saveSuccess()) {
                 <div class="mb-6 px-4 py-3 bg-success-wash border border-transparent text-sm text-success rounded">
-                  Profilo aggiornato.
+                  Profile updated.
                 </div>
               }
 
@@ -57,25 +57,25 @@
                 <!-- Read view -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div>
-                    <p class="text-xs text-ink-muted uppercase tracking-widest mb-1">Nome completo</p>
+                    <p class="text-xs text-ink-muted uppercase tracking-widest mb-1">Full name</p>
                     <p class="font-medium">{{ user.fullName }}</p>
                   </div>
                   <div>
-                    <p class="text-xs text-ink-muted uppercase tracking-widest mb-1">Telefono</p>
+                    <p class="text-xs text-ink-muted uppercase tracking-widest mb-1">Phone</p>
                     <p class="font-medium">{{ user.phone ?? '—' }}</p>
                   </div>
                   <div>
-                    <p class="text-xs text-ink-muted uppercase tracking-widest mb-1">Data di nascita</p>
+                    <p class="text-xs text-ink-muted uppercase tracking-widest mb-1">Date of birth</p>
                     <p class="font-medium">
                       {{ user.birthDate ? (user.birthDate | date: 'longDate') : '—' }}
                     </p>
                   </div>
                   <div>
-                    <p class="text-xs text-ink-muted uppercase tracking-widest mb-1">Genere</p>
+                    <p class="text-xs text-ink-muted uppercase tracking-widest mb-1">Gender</p>
                     <p class="font-medium">{{ user.gender ?? '—' }}</p>
                   </div>
                   <div>
-                    <p class="text-xs text-ink-muted uppercase tracking-widest mb-1">Cliente dal</p>
+                    <p class="text-xs text-ink-muted uppercase tracking-widest mb-1">Customer since</p>
                     <p class="font-medium">{{ user.createdAt | date: 'MMMM y' }}</p>
                   </div>
                 </div>
@@ -87,13 +87,13 @@
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div class="md:col-span-2">
                       <label class="label">
-                        Nome completo
+                        Full name
                       </label>
                       <input type="text" formControlName="fullName"
                         class="field"
                         [ngClass]="fullName.invalid && fullName.touched ? 'border-danger' : 'border-line-strong'" />
                       @if (fullName.invalid && fullName.touched) {
-                        <p class="mt-1 text-xs text-danger">Almeno 2 caratteri</p>
+                        <p class="mt-1 text-xs text-danger">At least 2 characters</p>
                       }
                     </div>
 
@@ -108,7 +108,7 @@
 
                     <div>
                       <label class="label">
-                        Data di nascita
+                        Date of birth
                       </label>
                       <input type="date" formControlName="birthDate"
                         class="field" />
@@ -120,10 +120,10 @@
                       </label>
                       <select formControlName="gender"
                         class="field bg-surface">
-                        <option value="">Non specificato</option>
-                        <option value="male">Uomo</option>
-                        <option value="female">Donna</option>
-                        <option value="other">Altro</option>
+                        <option value="">Not specified</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
                       </select>
                     </div>
                   </div>
@@ -137,11 +137,11 @@
                   <div class="flex gap-3 pt-2">
                     <button type="submit" [disabled]="saveLoading()"
                       class="btn btn-primary" [attr.data-loading]="saveLoading() ? 'true' : null">
-                      Salva
+                      Save
                     </button>
                     <button type="button" (click)="cancelEditing()"
                       class="btn btn-outline">
-                      Annulla
+                      Cancel
                     </button>
                   </div>
 
@@ -156,12 +156,12 @@
                   <p class="text-xs text-ink-muted uppercase tracking-widest mb-1">Email</p>
                   <p class="font-medium">{{ user.email }}</p>
                   @if (user.emailVerifiedAt) {
-                    <p class="text-xs text-success mt-0.5">Verificata</p>
+                    <p class="text-xs text-success mt-0.5">Verified</p>
                   } @else {
-                    <p class="text-xs text-warning mt-0.5">Non verificata</p>
+                    <p class="text-xs text-warning mt-0.5">Not verified</p>
                     <button (click)="sendVerification()" [disabled]="verifyLoading()"
                       class="link mt-1.5 text-xs disabled:opacity-50">
-                      {{ verifyLoading() ? 'Invio in corso…' : 'Invia email di verifica' }}
+                      {{ verifyLoading() ? 'Sending…' : 'Send verification email' }}
                     </button>
                     @if (verifyMessage()) {
                       <p class="mt-1 text-xs text-ink-muted">{{ verifyMessage() }}</p>
@@ -171,12 +171,12 @@
                 @if (hasPassword()) {
                   <button (click)="emailChangeVisible.set(!emailChangeVisible())"
                     class="text-sm text-ink-muted hover:text-ink underline transition-colors">
-                    {{ emailChangeVisible() ? 'Annulla' : 'Cambia email' }}
+                    {{ emailChangeVisible() ? 'Cancel' : 'Change email' }}
                   </button>
                 } @else {
                   <!-- Il cambio email si conferma con la password, e questo account non
                        ne ha: mostrare il bottone porterebbe solo a un errore. -->
-                  <a routerLink="/forgot-password" class="link text-sm">Imposta una password</a>
+                  <a routerLink="/forgot-password" class="link text-sm">Set a password</a>
                 }
               </div>
 
@@ -198,13 +198,13 @@
                         class="field"
                         [ngClass]="newEmail.invalid && newEmail.touched ? 'border-danger' : 'border-line-strong'" />
                       @if (newEmail.invalid && newEmail.touched) {
-                        <p class="mt-1 text-xs text-danger">Inserisci un indirizzo email valido</p>
+                        <p class="mt-1 text-xs text-danger">Enter a valid email address</p>
                       }
                     </div>
 
                     <div>
                       <label class="label">
-                        Password attuale
+                        Current password
                       </label>
                       <input type="password" formControlName="currentPassword"
                         autocomplete="current-password"
@@ -225,7 +225,7 @@
 
                     <button type="submit" [disabled]="emailLoading()"
                       class="btn btn-primary" [attr.data-loading]="emailLoading() ? 'true' : null">
-                      Invia richiesta di modifica
+                      Send change request
                     </button>
                   </form>
                 </div>
@@ -239,9 +239,9 @@
       @case ('orders') {
         <section>
           <div class="flex items-center justify-between border-b border-line pb-4 mb-6">
-            <h2 class="text-xl font-bold">Storico ordini</h2>
+            <h2 class="text-xl font-bold">Order history</h2>
             @if (ordersTotal() > 0) {
-              <span class="text-sm text-ink-muted">{{ ordersTotal() }} ordini</span>
+              <span class="text-sm text-ink-muted">{{ ordersTotal() }} {{ ordersTotal() === 1 ? 'order' : 'orders' }}</span>
             }
           </div>
 
@@ -265,9 +265,9 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                 </svg>
               </div>
-              <p class="text-ink-muted text-sm">Nessun ordine ancora.</p>
+              <p class="text-ink-muted text-sm">No orders yet.</p>
               <a routerLink="/products" class="btn btn-primary">
-                Inizia a fare shopping
+                Start shopping
               </a>
             </div>
           } @else {
@@ -290,7 +290,7 @@
                         </span>
                       </div>
                       <div>
-                        <p class="text-xs text-ink-muted">{{ order.items.length }} articol{{ order.items.length !== 1 ? 'i' : 'o' }}</p>
+                        <p class="text-xs text-ink-muted">{{ order.items.length }} {{ order.items.length !== 1 ? 'items' : 'item' }}</p>
                       </div>
                     </div>
                     <div class="flex items-center gap-3">
@@ -298,17 +298,17 @@
                       @if (canCancelOrder(order.status)) {
                         <button (click)="$event.stopPropagation(); requestCancelOrder(order.id)"
                           class="btn btn-ghost btn-sm text-danger">
-                          Annulla
+                          Cancel
                         </button>
                       }
                       @if (canRequestReturn(order)) {
                         <button (click)="openReturnModal(order, $event)"
                           class="btn btn-outline btn-sm">
-                          Richiedi reso
+                          Request a return
                         </button>
                       } @else if (returnStatusByOrderId()[order.id]) {
                         <span class="badge badge-info">
-                          Reso: {{ returnStatusLabels[returnStatusByOrderId()[order.id]] ?? returnStatusByOrderId()[order.id] }}
+                          Return: {{ returnStatusLabels[returnStatusByOrderId()[order.id]] ?? returnStatusByOrderId()[order.id] }}
                         </span>
                       }
                       <svg class="w-4 h-4 text-ink-muted transition-transform" [class.rotate-180]="expandedOrderId() === order.id" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -330,17 +330,17 @@
                       </div>
                       <div class="border-t border-line pt-3 space-y-1 text-sm">
                         <div class="flex justify-between text-ink-muted">
-                          <span>Spedizione</span>
-                          <span>{{ formatOrderPrice(order.shippingCost) === '€ 0,00' ? 'Gratuita' : formatOrderPrice(order.shippingCost) }}</span>
+                          <span>Shipping</span>
+                          <span>{{ formatOrderPrice(order.shippingCost) === '€0.00' ? 'Free' : formatOrderPrice(order.shippingCost) }}</span>
                         </div>
-                        @if (formatOrderPrice(order.discountTotal) !== '€ 0,00') {
+                        @if (formatOrderPrice(order.discountTotal) !== '€0.00') {
                           <div class="flex justify-between text-success">
-                            <span>Sconto</span>
+                            <span>Discount</span>
                             <span>–{{ formatOrderPrice(order.discountTotal) }}</span>
                           </div>
                         }
                         <div class="flex justify-between font-bold text-ink border-t border-line pt-2 mt-1">
-                          <span>Totale</span>
+                          <span>Total</span>
                           <span>{{ formatOrderPrice(order.total) }}</span>
                         </div>
                       </div>
@@ -348,7 +348,7 @@
                       <!-- Cronologia degli stati: il backend la restituiva gia', non si vedeva -->
                       @if (order.statusHistory?.length) {
                         <div class="border-t border-line mt-4 pt-4">
-                          <p class="text-sm font-semibold text-ink mb-3">Stato dell'ordine</p>
+                          <p class="text-sm font-semibold text-ink mb-3">Order status</p>
                           <ol class="space-y-3">
                             @for (step of order.statusHistory; track $index; let last = $last) {
                               <li class="flex gap-3">
@@ -379,7 +379,7 @@
 
                       @if (order.trackingNumber) {
                         <div class="border-t border-line mt-4 pt-4 text-sm">
-                          <span class="text-ink-muted">Spedizione:</span>
+                          <span class="text-ink-muted">Shipment:</span>
                           @if (order.trackingUrl) {
                             <a [href]="order.trackingUrl" target="_blank" rel="noopener"
                                class="ml-1 font-medium text-ink underline">{{ order.trackingNumber }}</a>
@@ -394,9 +394,9 @@
                                 [disabled]="invoiceLoadingId() === order.id"
                                 class="text-sm font-medium text-ink underline disabled:opacity-40">
                           @if (invoiceLoadingId() === order.id) {
-                            Preparazione…
+                            Preparing…
                           } @else {
-                            Scarica la fattura (PDF)
+                            Download invoice (PDF)
                           }
                         </button>
                       </div>
@@ -423,13 +423,13 @@
       @case ('addresses') {
         <section>
           <div class="flex items-center justify-between border-b border-line pb-4 mb-6">
-            <h2 class="text-xl font-bold">Indirizzi di spedizione</h2>
+            <h2 class="text-xl font-bold">Shipping addresses</h2>
             <button (click)="showAddressForm.set(!showAddressForm())"
               class="btn btn-primary btn-sm">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
               </svg>
-              {{ showAddressForm() ? 'Annulla' : 'Nuovo indirizzo' }}
+              {{ showAddressForm() ? 'Cancel' : 'New address' }}
             </button>
           </div>
 
@@ -442,35 +442,35 @@
 
           @if (showAddressForm()) {
             <form [formGroup]="newAddressForm" (ngSubmit)="saveAddress()" class="border border-line rounded-sm p-5 mb-6 space-y-3 bg-sunken">
-              <h3 class="font-semibold text-ink text-sm mb-2">Nuovo indirizzo</h3>
+              <h3 class="font-semibold text-ink text-sm mb-2">New address</h3>
               @if (addressFormError()) {
                 <div class="bg-danger-wash text-danger px-3 py-2 rounded-sm text-xs">{{ addressFormError() }}</div>
               }
               <div class="grid grid-cols-2 gap-3">
                 <div>
-                  <label class="block text-xs font-medium text-ink-2 mb-1">Nome completo *</label>
+                  <label class="block text-xs font-medium text-ink-2 mb-1">Full name *</label>
                   <input formControlName="fullName" type="text" class="field"/>
                 </div>
                 <div>
-                  <label class="block text-xs font-medium text-ink-2 mb-1">Telefono</label>
+                  <label class="block text-xs font-medium text-ink-2 mb-1">Phone</label>
                   <input formControlName="phone" type="tel" class="field"/>
                 </div>
               </div>
               <div>
-                <label class="block text-xs font-medium text-ink-2 mb-1">Via e numero civico *</label>
-                <input formControlName="street" type="text" placeholder="es. Via Roma 12" class="field"/>
+                <label class="block text-xs font-medium text-ink-2 mb-1">Street and number *</label>
+                <input formControlName="street" type="text" placeholder="e.g. 12 High Street" class="field"/>
               </div>
               <div>
-                <label class="block text-xs font-medium text-ink-2 mb-1">Interno / scala</label>
+                <label class="block text-xs font-medium text-ink-2 mb-1">Apartment / floor</label>
                 <input formControlName="street2" type="text" class="field"/>
               </div>
               <div class="grid grid-cols-3 gap-3">
                 <div>
-                  <label class="block text-xs font-medium text-ink-2 mb-1">CAP *</label>
+                  <label class="block text-xs font-medium text-ink-2 mb-1">Postal code *</label>
                   <input formControlName="postalCode" type="text" class="field"/>
                 </div>
                 <div>
-                  <label class="block text-xs font-medium text-ink-2 mb-1">Città *</label>
+                  <label class="block text-xs font-medium text-ink-2 mb-1">City *</label>
                   <input formControlName="city" type="text" class="field"/>
                 </div>
                 <div>
@@ -479,23 +479,23 @@
                 </div>
               </div>
               <div>
-                <label class="block text-xs font-medium text-ink-2 mb-1">Paese *</label>
+                <label class="block text-xs font-medium text-ink-2 mb-1">Country *</label>
                 <select formControlName="country" class="field">
-                  <option value="IT">Italia</option>
-                  <option value="DE">Germania</option>
-                  <option value="FR">Francia</option>
-                  <option value="ES">Spagna</option>
-                  <option value="GB">Regno Unito</option>
-                  <option value="US">Stati Uniti</option>
+                  <option value="IT">Italy</option>
+                  <option value="DE">Germany</option>
+                  <option value="FR">France</option>
+                  <option value="ES">Spain</option>
+                  <option value="GB">United Kingdom</option>
+                  <option value="US">United States</option>
                 </select>
               </div>
               <div class="flex items-center gap-2">
                 <input formControlName="isDefault" type="checkbox" id="addrDefault" class="w-4 h-4 accent-ink"/>
-                <label for="addrDefault" class="text-xs text-ink-2">Imposta come predefinito</label>
+                <label for="addrDefault" class="text-xs text-ink-2">Set as default</label>
               </div>
               <button type="submit" [disabled]="newAddressForm.invalid || addressFormLoading()"
                 class="btn btn-primary btn-block" [attr.data-loading]="addressFormLoading() ? 'true' : null">
-                Salva indirizzo
+                Save address
               </button>
             </form>
           }
@@ -510,7 +510,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
               </svg>
-              <p class="text-ink-muted text-sm">Nessun indirizzo salvato.</p>
+              <p class="text-ink-muted text-sm">No saved addresses.</p>
             </div>
           } @else {
             <div class="space-y-3">
@@ -521,7 +521,7 @@
                     <div class="flex items-center gap-2 mb-1">
                       <p class="font-semibold text-ink text-sm">{{ addr.fullName }}</p>
                       @if (addr.isDefault) {
-                        <span class="badge badge-solid">Predefinito</span>
+                        <span class="badge badge-solid">Default</span>
                       }
                     </div>
                     <p class="text-sm text-ink-2">{{ addr.street }}{{ addr.street2 ? ', ' + addr.street2 : '' }}</p>
@@ -532,12 +532,12 @@
                     @if (!addr.isDefault) {
                       <button (click)="setDefaultAddress(addr.id)"
                         class="btn btn-outline btn-sm">
-                        Imposta predefinito
+                        Set as default
                       </button>
                     }
                     <button (click)="deleteAddress(addr.id)"
                       class="btn btn-ghost btn-sm text-danger">
-                      Elimina
+                      Delete
                     </button>
                   </div>
                 </div>
@@ -549,16 +549,16 @@
 
       @case ('favorites') {
         <section>
-          <h2 class="text-xl font-bold border-b border-line pb-4 mb-6">Preferiti</h2>
+          <h2 class="text-xl font-bold border-b border-line pb-4 mb-6">Favorites</h2>
 
           @if (wishlist.items().length === 0) {
             <div class="text-center py-16">
               <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" class="mx-auto mb-4 text-line-strong">
                 <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
               </svg>
-              <p class="text-ink-muted text-sm mb-4">Non hai ancora preferiti.</p>
+              <p class="text-ink-muted text-sm mb-4">You have no favorites yet.</p>
               <a routerLink="/products" class="btn btn-primary">
-                Sfoglia la collezione
+                Browse the collection
               </a>
             </div>
           } @else {
@@ -594,12 +594,12 @@
 
       @case ('settings') {
         <section>
-          <h2 class="text-xl font-bold border-b border-line pb-4 mb-6">Impostazioni dell'account</h2>
+          <h2 class="text-xl font-bold border-b border-line pb-4 mb-6">Account settings</h2>
 
           <!-- Cambia password -->
           <div class="mb-10">
             <h3 class="text-sm font-semibold uppercase tracking-widest text-ink-muted mb-5">
-              {{ hasPassword() ? 'Cambia password' : 'Imposta una password' }}
+              {{ hasPassword() ? 'Change password' : 'Set a password' }}
             </h3>
 
             @if (!hasPassword()) {
@@ -611,11 +611,11 @@
               -->
               <div class="panel p-5 max-w-sm">
                 <p class="text-sm text-ink-2 leading-relaxed">
-                  Accedi con Google e non hai ancora una password. Puoi impostarne una
-                  quando vuoi: ti mandiamo un link alla tua email. Da quel momento potrai
-                  entrare in entrambi i modi.
+                  You signed in with Google and don't have a password yet. You can set one
+                  whenever you like: we'll send a link to your email. From that point on
+                  you'll be able to sign in either way.
                 </p>
-                <a routerLink="/forgot-password" class="btn btn-outline mt-4">Imposta una password</a>
+                <a routerLink="/forgot-password" class="btn btn-outline mt-4">Set a password</a>
               </div>
             }
 
@@ -624,7 +624,7 @@
               class="space-y-4 max-w-sm">
               <div>
                 <label class="label">
-                  Password attuale
+                  Current password
                 </label>
                 <input type="password" formControlName="currentPassword"
                   autocomplete="current-password"
@@ -633,7 +633,7 @@
               </div>
               <div>
                 <label class="label">
-                  Nuova password
+                  New password
                 </label>
                 <input type="password" formControlName="newPassword"
                   autocomplete="new-password"
@@ -641,12 +641,12 @@
                   class="field"
                   [ngClass]="newPassword.invalid && newPassword.touched ? 'border-danger' : 'border-line-strong'" />
                 @if (newPassword.invalid && newPassword.touched) {
-                  <p class="mt-1 text-xs text-danger">Almeno 8 caratteri</p>
+                  <p class="mt-1 text-xs text-danger">At least 8 characters</p>
                 }
               </div>
               <div>
                 <label class="label">
-                  Conferma la nuova password
+                  Confirm the new password
                 </label>
                 <input type="password" formControlName="confirmPassword"
                   autocomplete="new-password"
@@ -654,7 +654,7 @@
                   class="field"
                   [ngClass]="passwordForm.hasError('mismatch') && confirmPassword.touched ? 'border-danger' : 'border-line-strong'" />
                 @if (passwordForm.hasError('mismatch') && confirmPassword.touched) {
-                  <p class="mt-1 text-xs text-danger">Le password non coincidono</p>
+                  <p class="mt-1 text-xs text-danger">Passwords do not match</p>
                 }
               </div>
 
@@ -671,7 +671,7 @@
 
               <button type="submit" class="btn btn-primary" [disabled]="passwordLoading()"
                 [attr.data-loading]="passwordLoading() ? 'true' : null">
-                {{ passwordLoading() ? 'Salvataggio…' : 'Aggiorna password' }}
+                {{ passwordLoading() ? 'Saving…' : 'Update password' }}
               </button>
             </form>
             }
@@ -680,15 +680,15 @@
           <!-- ── I tuoi dati (GDPR) ───────────────────────────────────── -->
           <div class="border-t border-line pt-6 mb-10">
             <h3 class="text-sm font-semibold uppercase tracking-widest text-ink-muted mb-4">
-              I tuoi dati
+              Your data
             </h3>
 
             <div class="panel p-5 max-w-xl">
-              <p class="text-sm font-semibold text-ink">Scarica i tuoi dati</p>
+              <p class="text-sm font-semibold text-ink">Download your data</p>
               <p class="mt-1.5 text-sm text-ink-2 leading-relaxed">
-                Un file con tutto quello che conserviamo su di te: profilo, indirizzi, ordini,
-                recensioni, lista dei desideri e punti fedeltà. È il diritto di portabilità
-                previsto dall'articolo 20 del GDPR.
+                A file with everything we keep about you: profile, addresses, orders,
+                reviews, wishlist and loyalty points. This is the right to data portability
+                set out in Article 20 of the GDPR.
               </p>
 
               @if (exportError()) {
@@ -697,39 +697,39 @@
 
               <button type="button" class="btn btn-outline mt-4" [disabled]="exportLoading()"
                 [attr.data-loading]="exportLoading() ? 'true' : null" (click)="exportMyData()">
-                {{ exportLoading() ? 'Preparazione…' : 'Scarica i tuoi dati' }}
+                {{ exportLoading() ? 'Preparing…' : 'Download your data' }}
               </button>
             </div>
           </div>
 
           <div class="border-t border-line pt-6 mb-10">
             <h3 class="text-sm font-semibold uppercase tracking-widest text-ink-muted mb-4">
-              Sessione
+              Session
             </h3>
-            <button type="button" class="btn btn-outline" (click)="logout()">Esci</button>
+            <button type="button" class="btn btn-outline" (click)="logout()">Sign out</button>
           </div>
 
           <!-- ── Zona irreversibile ─────────────────────────────────────── -->
           <div class="border-t border-line pt-6">
             <h3 class="text-sm font-semibold uppercase tracking-widest text-danger mb-4">
-              Cancella account
+              Delete account
             </h3>
 
             <div class="panel p-5 max-w-xl">
               <p class="text-sm text-ink-2 leading-relaxed">
-                Cancelliamo il tuo profilo e anonimizziamo nome, email, telefono e indirizzi.
-                Recensioni, lista dei desideri e punti fedeltà vengono eliminati.
+                We delete your profile and anonymise your name, email, phone and addresses.
+                Reviews, wishlist and loyalty points are removed.
               </p>
               <p class="mt-3 text-sm text-ink-2 leading-relaxed">
-                Ordini e fatture già emessi restano invece conservati, senza più alcun dato che
-                ti identifichi: la legge impone di tenerli per dieci anni
-                (art. 2220 c.c.), e l'articolo 17.3.b del GDPR lo prevede espressamente.
-                Li puoi scaricare adesso, prima di procedere.
+                Orders and invoices already issued are instead kept, with no data that
+                identifies you: the law requires keeping them for ten years
+                (art. 2220 c.c.), and article 17.3.b of the GDPR expressly allows for this.
+                You can download them now, before proceeding.
               </p>
-              <p class="mt-3 text-sm font-semibold text-ink">L'operazione è irreversibile.</p>
+              <p class="mt-3 text-sm font-semibold text-ink">This action is irreversible.</p>
 
               <button type="button" class="btn btn-danger mt-4" (click)="openDeleteAccount()">
-                Cancella il mio account
+                Delete my account
               </button>
             </div>
           </div>
@@ -746,16 +746,16 @@
   <div class="fixed inset-0 z-modal flex items-center justify-center p-4">
     <div class="absolute inset-0 bg-inverse/40" (click)="dismissCancelOrder()"></div>
     <div class="relative bg-surface rounded-sm shadow-2xl max-w-sm w-full p-6">
-      <h3 class="text-lg font-bold text-ink mb-2">Annulla ordine</h3>
-      <p class="text-ink-muted text-sm mb-6">Sei sicuro di voler annullare questo ordine? L'azione è irreversibile.</p>
+      <h3 class="text-lg font-bold text-ink mb-2">Cancel order</h3>
+      <p class="text-ink-muted text-sm mb-6">Are you sure you want to cancel this order? This action is irreversible.</p>
       <div class="flex gap-3">
         <button (click)="dismissCancelOrder()"
           class="btn btn-outline flex-1">
-          Indietro
+          Back
         </button>
         <button (click)="confirmCancelOrder()" [disabled]="cancelOrderLoading()"
           class="btn btn-danger flex-1" [attr.data-loading]="cancelOrderLoading() ? 'true' : null">
-          Annulla ordine
+          Cancel order
         </button>
       </div>
     </div>
@@ -768,10 +768,10 @@
     <div class="absolute inset-0 bg-inverse/40" (click)="closeDeleteAccount()"></div>
     <div class="panel relative w-full max-w-sm p-6 shadow-2xl" role="dialog" aria-modal="true"
       aria-labelledby="delete-account-title">
-      <h3 id="delete-account-title" class="text-lg font-bold text-ink mb-2">Cancella account</h3>
+      <h3 id="delete-account-title" class="text-lg font-bold text-ink mb-2">Delete account</h3>
       <p class="text-sm text-ink-2 mb-4 leading-relaxed">
-        I tuoi dati personali vengono anonimizzati subito e non si possono recuperare.
-        Ordini e fatture restano conservati per obbligo di legge, senza più il tuo nome.
+        Your personal data is anonymised immediately and cannot be recovered.
+        Orders and invoices are kept as required by law, with no name attached.
       </p>
 
       <!--
@@ -781,7 +781,7 @@
         e il diritto all'oblio non e' facoltativo.
       -->
       <label class="label" for="delete-account-password">
-        {{ hasPassword() ? 'Conferma con la password' : 'Conferma digitando la tua email' }}
+        {{ hasPassword() ? 'Confirm with your password' : 'Confirm by typing your email' }}
       </label>
       @if (hasPassword()) {
         <input id="delete-account-password" type="password" class="field"
@@ -802,12 +802,12 @@
       <div class="flex gap-3 mt-5">
         <button type="button" class="btn btn-outline flex-1" [disabled]="deleteAccountLoading()"
           (click)="closeDeleteAccount()">
-          Annulla
+          Cancel
         </button>
         <button type="button" class="btn btn-danger flex-1" [disabled]="deleteAccountLoading()"
           [attr.data-loading]="deleteAccountLoading() ? 'true' : null"
           (click)="confirmDeleteAccount()">
-          {{ deleteAccountLoading() ? 'Cancellazione…' : 'Cancella per sempre' }}
+          {{ deleteAccountLoading() ? 'Deleting…' : 'Delete forever' }}
         </button>
       </div>
     </div>
@@ -819,15 +819,15 @@
   <div class="fixed inset-0 z-modal flex items-center justify-center p-4">
     <div class="absolute inset-0 bg-inverse/40" (click)="closeReturnModal()"></div>
     <div class="relative bg-surface rounded-sm shadow-2xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto">
-      <h3 class="text-lg font-bold text-ink mb-2">Richiedi reso</h3>
-      <p class="text-ink-muted text-sm mb-4">Scegli quali articoli restituire e quanti.</p>
+      <h3 class="text-lg font-bold text-ink mb-2">Request a return</h3>
+      <p class="text-ink-muted text-sm mb-4">Choose which items to return and how many.</p>
 
       <div class="space-y-3 mb-4">
         @for (item of order.items; track item.id) {
           <div class="flex items-center justify-between gap-3 border border-line rounded-sm px-3 py-2">
             <div class="text-sm">
               <p class="text-ink">{{ item.productName }}</p>
-              <p class="text-ink-muted text-xs">Acquistati: {{ item.quantity }}</p>
+              <p class="text-ink-muted text-xs">Purchased: {{ item.quantity }}</p>
             </div>
             <div class="flex items-center gap-2">
               <button type="button" (click)="setReturnQuantity(item.id, (returnQuantities()[item.id] ?? 0) - 1, item.quantity)"
@@ -840,9 +840,9 @@
         }
       </div>
 
-      <label for="returnReason" class="label">Motivo del reso</label>
+      <label for="returnReason" class="label">Reason for the return</label>
       <textarea id="returnReason" [ngModel]="returnReason()" (ngModelChange)="returnReason.set($event)" rows="3"
-        placeholder="Descrivi il motivo (almeno 10 caratteri)…"
+        placeholder="Describe the reason (at least 10 characters)…"
         class="field mb-2 resize-none"></textarea>
 
       @if (returnError()) {
@@ -852,11 +852,11 @@
       <div class="flex gap-3 mt-2">
         <button (click)="closeReturnModal()"
           class="btn btn-outline flex-1">
-          Indietro
+          Back
         </button>
         <button (click)="submitReturn()" [disabled]="returnLoading() || !returnHasSelection"
           class="btn btn-primary flex-1" [attr.data-loading]="returnLoading() ? 'true' : null">
-          Invia richiesta
+          Send request
         </button>
       </div>
     </div>

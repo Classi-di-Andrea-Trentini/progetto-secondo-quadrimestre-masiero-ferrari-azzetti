@@ -26,7 +26,7 @@ export class ForgotPassword {
       await this.http.post(`${API_URL}/auth/forgot-password`, { email: this.email }, { withCredentials: true }).toPromise();
       this.sent.set(true);
     } catch {
-      this.error.set('Errore nell\'invio. Riprova tra qualche minuto.');
+      this.error.set('Something went wrong while sending it. Please try again shortly.');
     } finally {
       this.loading.set(false);
     }

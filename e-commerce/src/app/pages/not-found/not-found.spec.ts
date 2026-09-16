@@ -32,7 +32,7 @@ describe('NotFound', () => {
 
     const el = harness.routeNativeElement as HTMLElement;
     expect(el.textContent).toContain('404');
-    expect(el.textContent).toContain('Questa pagina non esiste');
+    expect(el.textContent).toContain("This page doesn't exist");
     // L'indirizzo richiesto va mostrato: senza, resta il dubbio su dove sia il refuso.
     expect(el.textContent).toContain('/indirizzo-che-non-esiste');
   });
@@ -57,7 +57,7 @@ describe('NotFound', () => {
 
     // Una 404 indicizzata e' un risultato di ricerca che porta su un errore.
     expect(TestBed.inject(Meta).getTag('name="robots"')?.content).toContain('noindex');
-    expect(TestBed.inject(Title).getTitle()).toContain('Pagina non trovata');
+    expect(TestBed.inject(Title).getTitle()).toContain('Page not found');
   });
 
   it('does not escape the page as HTML when the URL carries markup', async () => {

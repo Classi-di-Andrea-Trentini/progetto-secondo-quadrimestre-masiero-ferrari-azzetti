@@ -18,7 +18,7 @@ export class VerifyEmail implements OnInit {
     const token = this.route.snapshot.paramMap.get('token');
     if (!token) {
       this.status.set('error');
-      this.message.set('Link non valido.');
+      this.message.set('Invalid link.');
       return;
     }
 

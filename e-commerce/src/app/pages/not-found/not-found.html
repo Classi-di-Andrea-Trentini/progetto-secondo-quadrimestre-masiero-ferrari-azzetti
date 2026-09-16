@@ -2,27 +2,27 @@
   <div class="mx-auto flex max-w-3xl flex-col items-center text-center">
     <!-- Il numero non è un'illustrazione: è il primo pezzo di informazione, e
          resta leggibile anche a chi arriva con lo screen reader. -->
-    <p class="text-2xs font-bold uppercase tracking-[0.28em] text-ink-muted">Errore 404</p>
+    <p class="text-2xs font-bold uppercase tracking-[0.28em] text-ink-muted">Error 404</p>
 
-    <h1 class="display text-d1 sm:text-d2 mt-4">Questa pagina non esiste</h1>
+    <h1 class="display text-d1 sm:text-d2 mt-4">This page doesn't exist</h1>
 
     <p class="measure text-ink-2 mt-5 text-lg">
-      L'indirizzo che hai aperto non corrisponde a nessuna pagina di Common Era. Può
-      essere un link vecchio, un refuso, o un prodotto che non è più in catalogo.
+      The address you opened doesn't match any page on Common Era. It could be
+      an old link, a typo, or a product that's no longer in the catalogue.
     </p>
 
     <p class="text-ink-muted mt-4 font-mono text-sm break-all">{{ requestedUrl }}</p>
 
     <div class="mt-10 flex flex-wrap items-center justify-center gap-3">
-      <a routerLink="/products" class="btn btn-primary">Vai al catalogo</a>
-      <a routerLink="/home" class="btn btn-outline">Torna alla home</a>
+      <a routerLink="/products" class="btn btn-primary">Go to the catalogue</a>
+      <a routerLink="/home" class="btn btn-outline">Back to home</a>
     </div>
 
     <hr class="rule mt-14 w-full" />
 
-    <nav class="mt-8" aria-label="Pagine principali">
+    <nav class="mt-8" aria-label="Main pages">
       <p class="text-2xs text-ink-muted font-bold tracking-[0.18em] uppercase">
-        Oppure riparti da qui
+        Or start again from here
       </p>
       <ul class="mt-4 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm">
         <li>
@@ -32,24 +32,24 @@
         </li>
         <li>
           <a routerLink="/products" class="text-ink-2 hover:text-ink underline underline-offset-4"
-            >Catalogo</a
+            >Catalogue</a
           >
         </li>
         <li>
           <a routerLink="/about" class="text-ink-2 hover:text-ink underline underline-offset-4"
-            >Chi siamo</a
+            >About us</a
           >
         </li>
         <li>
           <a routerLink="/me" class="text-ink-2 hover:text-ink underline underline-offset-4"
-            >Il mio account</a
+            >My account</a
           >
         </li>
         <li>
           <a
             routerLink="/legal/spedizioni-e-resi"
             class="text-ink-2 hover:text-ink underline underline-offset-4"
-            >Spedizioni e resi</a
+            >Shipping &amp; Returns</a
           >
         </li>
       </ul>

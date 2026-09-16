@@ -2,22 +2,22 @@
   <div class="mx-auto max-w-4xl">
     <!-- routerLink, non href: con href ogni passaggio fra le pagine legali
          ricaricava l'intera applicazione da zero. -->
-    <nav class="legal-nav mb-8 flex flex-wrap gap-2" aria-label="Pagine legali">
+    <nav class="legal-nav mb-8 flex flex-wrap gap-2" aria-label="Legal pages">
       <a routerLink="/legal/privacy" routerLinkActive="is-current" class="legal-chip">Privacy</a>
-      <a routerLink="/legal/cookies" routerLinkActive="is-current" class="legal-chip">Cookie</a>
+      <a routerLink="/legal/cookies" routerLinkActive="is-current" class="legal-chip">Cookies</a>
       <a routerLink="/legal/terms" routerLinkActive="is-current" class="legal-chip">
-        Condizioni di vendita
+        Terms &amp; Conditions
       </a>
-      <a routerLink="/legal/recesso" routerLinkActive="is-current" class="legal-chip">Recesso</a>
+      <a routerLink="/legal/recesso" routerLinkActive="is-current" class="legal-chip">Right of Withdrawal</a>
       <a routerLink="/legal/spedizioni-e-resi" routerLinkActive="is-current" class="legal-chip">
-        Spedizioni e resi
+        Shipping &amp; Returns
       </a>
     </nav>
 
     @if (doc; as doc) {
       <header class="legal-header mb-10">
         <h1 class="legal-title">{{ doc.title }}</h1>
-        <p class="legal-updated mt-2">Ultimo aggiornamento: {{ doc.updatedAt }}</p>
+        <p class="legal-updated mt-2">Last updated: {{ doc.updatedAt }}</p>
         <p class="legal-intro mt-5">{{ doc.intro }}</p>
       </header>
 
@@ -32,11 +32,11 @@
                 <table class="cookie-table">
                   <thead>
                     <tr>
-                      <th>Nome</th>
-                      <th>Tipo</th>
-                      <th>Finalità</th>
-                      <th>Durata</th>
-                      <th>Categoria</th>
+                      <th>Name</th>
+                      <th>Type</th>
+                      <th>Purpose</th>
+                      <th>Duration</th>
+                      <th>Category</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -62,11 +62,11 @@
            sbagliato URL. -->
       <div class="legal-missing" role="alert">
         <p class="legal-missing-code">404</p>
-        <h1 class="legal-title">Questa pagina non esiste</h1>
+        <h1 class="legal-title">This page doesn't exist</h1>
         <p class="legal-intro mt-4">
-          L'indirizzo che hai aperto non corrisponde a nessuno dei nostri documenti legali.
-          Forse il link era vecchio, o c'è un refuso. Qui sopra trovi tutte le pagine
-          disponibili.
+          The address you opened doesn't match any of our legal documents.
+          Maybe the link was old, or there's a typo. You'll find all the available
+          pages above.
         </p>
       </div>
     }

@@ -66,7 +66,7 @@ describe('Legal', () => {
     expect(el.querySelector('.legal-missing')).toBeTruthy();
     expect(el.textContent).toContain('404');
     // E soprattutto: nessuna traccia del documento su cui si ricadeva prima.
-    expect(el.textContent).not.toContain('Informativa sulla privacy');
+    expect(el.textContent).not.toContain('Privacy notice');
   });
 
   it('goes back to a real document when the key becomes valid again', async () => {
@@ -77,7 +77,7 @@ describe('Legal', () => {
     await fixture.whenStable();
 
     expect(el.querySelector('.legal-missing')).toBeNull();
-    expect(el.textContent).toContain('Informativa sulla privacy');
+    expect(el.textContent).toContain('Privacy notice');
   });
 
   // ─── Il contenuto ───────────────────────────────────────────────────────
@@ -118,11 +118,11 @@ describe('Legal', () => {
 
     // Gli elementi degli artt. 13-14 GDPR, piu' il reclamo all'autorita'.
     for (const required of [
-      'titolare del trattamento',
-      'base giuridica',
-      'destinatari',
-      'conserviamo',
-      'portabilità',
+      'data controller',
+      'legal basis',
+      'who we share data with',
+      'how long we keep it',
+      'portability',
       'garante per la protezione dei dati personali',
     ]) {
       expect(privacy).toContain(required);
@@ -149,8 +149,8 @@ describe('Legal', () => {
 
     // Le cifre vengono da CheckoutService: una pagina che dichiara un prezzo di
     // spedizione diverso da quello addebitato e' pubblicita' ingannevole.
-    expect(page).toContain('4,90');
-    expect(page).toContain('9,90');
+    expect(page).toContain('4.90');
+    expect(page).toContain('9.90');
     expect(page).toContain('100');
   });
 
@@ -158,9 +158,9 @@ describe('Legal', () => {
     const { fixture } = await render('recesso');
     const recesso = JSON.stringify(fixture.componentInstance.docs.recesso).toLowerCase();
 
-    expect(recesso).toContain('quattordici giorni');
+    expect(recesso).toContain('fourteen days');
     // Il modulo tipo dell'allegato I parte B del Codice del consumo.
-    expect(recesso).toContain('modulo tipo');
-    expect(recesso).toContain('cancellare la dicitura inutile');
+    expect(recesso).toContain('withdrawal form');
+    expect(recesso).toContain('delete as appropriate');
   });
 });

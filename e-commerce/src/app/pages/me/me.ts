@@ -9,6 +9,7 @@ import { WishlistService, WishlistItem } from '../../services/wishlist.service';
 import { CartService, AddressData } from '../../services/cart-service';
 import { API_URL } from '../../services/api.config';
 import { ProductImageComponent } from '../../components/product-image/product-image';
+import { formatPrice } from '../../services/format-price';
 
 interface OrderSummary {
   id: string;
@@ -81,8 +82,8 @@ export class MeComponent {
   returnSuccess = signal<string | null>(null);
 
   readonly returnStatusLabels: Record<string, string> = {
-    requested: 'Richiesto', approved: 'Approvato', rejected: 'Rifiutato',
-    received: 'Ricevuto', refunded: 'Rimborsato',
+    requested: 'Requested', approved: 'Approved', rejected: 'Rejected',
+    received: 'Received', refunded: 'Refunded',
   };
 
   // -- Indirizzi --
@@ -112,7 +113,7 @@ export class MeComponent {
     try {
       this.addresses.set(await this.cart.getAddresses());
     } catch {
-      this.addressesError.set('Impossibile caricare gli indirizzi');
+      this.addressesError.set('Unable to load addresses');
     } finally {
       this.addressesLoading.set(false);
     }
@@ -136,11 +137,11 @@ export class MeComponent {
       });
       this.newAddressForm.reset({ country: 'IT', isDefault: false });
       this.showAddressForm.set(false);
-      this.addressAction.set('Indirizzo salvato!');
+      this.addressAction.set('Address saved!');
       await this.loadAddresses();
       setTimeout(() => this.addressAction.set(null), 3000);
     } catch {
-      this.addressFormError.set('Impossibile salvare l\'indirizzo');
+      this.addressFormError.set('Unable to save the address');
     } finally {
       this.addressFormLoading.set(false);
     }
@@ -152,10 +153,10 @@ export class MeComponent {
         this.http.delete(`${API_URL}/addresses/${id}`, { withCredentials: true })
       );
       this.addresses.update(list => list.filter(a => a.id !== id));
-      this.addressAction.set('Indirizzo eliminato');
+      this.addressAction.set('Address deleted');
       setTimeout(() => this.addressAction.set(null), 3000);
     } catch {
-      this.addressesError.set('Impossibile eliminare l\'indirizzo');
+      this.addressesError.set('Unable to delete the address');
     }
   }
 
@@ -166,19 +167,19 @@ export class MeComponent {
       );
       await this.loadAddresses();
     } catch {
-      this.addressesError.set('Impossibile impostare l\'indirizzo predefinito');
+      this.addressesError.set('Unable to set the default address');
     }
   }
 
   readonly orderStatusLabels: Record<string, string> = {
-    pending: 'In attesa',
-    paid: 'Pagato',
-    processing: 'In lavorazione',
-    shipped: 'Spedito',
-    delivered: 'Consegnato',
-    completed: 'Completato',
-    cancelled: 'Annullato',
-    refunded: 'Rimborsato',
+    pending: 'Pending',
+    paid: 'Paid',
+    processing: 'Processing',
+    shipped: 'Shipped',
+    delivered: 'Delivered',
+    completed: 'Completed',
+    cancelled: 'Cancelled',
+    refunded: 'Refunded',
   };
 
   readonly orderStatusColors: Record<string, string> = {
@@ -284,7 +285,7 @@ export class MeComponent {
       this.ordersTotalPages.set(res.meta.totalPages);
       this.ordersTotal.set(res.meta.total);
     } catch {
-      this.ordersError.set('Impossibile caricare gli ordini');
+      this.ordersError.set('Unable to load your orders');
     } finally {
       this.ordersLoading.set(false);
     }
@@ -302,18 +303,18 @@ export class MeComponent {
     this.invoiceLoadingId.set(orderId);
     try {
       const res = await fetch(`${API_URL}/orders/${orderId}/invoice`, { credentials: 'include' });
-      if (!res.ok) throw new Error('Fattura non disponibile');
+      if (!res.ok) throw new Error('Invoice not available');
 
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
       link.download = res.headers.get('Content-Disposition')?.match(/filename="(.+?)"/)?.[1]
-        ?? `fattura-${orderId}.pdf`;
+        ?? `invoice-${orderId}.pdf`;
       link.click();
       URL.revokeObjectURL(url);
     } catch {
-      this.ordersError.set('Non è stato possibile scaricare la fattura.');
+      this.ordersError.set('The invoice could not be downloaded.');
     } finally {
       this.invoiceLoadingId.set(null);
     }
@@ -324,7 +325,7 @@ export class MeComponent {
   }
 
   formatOrderPrice(v: string | number): string {
-    return '€ ' + parseFloat(String(v)).toFixed(2).replace('.', ',');
+    return formatPrice(v);
   }
 
   orderStatusLabel(s: string): string { return this.orderStatusLabels[s] ?? s; }
@@ -342,10 +343,10 @@ export class MeComponent {
       await firstValueFrom(this.http.patch(`${API_URL}/orders/${id}/cancel`, {}, { withCredentials: true }));
       this.orders.update(list => list.map(o => o.id === id ? { ...o, status: 'cancelled' } : o));
       this.cancelOrderId.set(null);
-      this.cancelOrderSuccess.set('Ordine annullato con successo.');
+      this.cancelOrderSuccess.set('Order cancelled successfully.');
       setTimeout(() => this.cancelOrderSuccess.set(null), 4000);
     } catch {
-      this.ordersError.set('Impossibile annullare l\'ordine. Contatta il supporto.');
+      this.ordersError.set('Unable to cancel the order. Please contact support.');
     } finally {
       this.cancelOrderLoading.set(false);
     }
@@ -401,14 +402,14 @@ export class MeComponent {
 
     const reason = this.returnReason().trim();
     if (reason.length < 10) {
-      this.returnError.set('Descrivi il motivo del reso in almeno 10 caratteri.');
+      this.returnError.set('Describe the reason for the return in at least 10 characters.');
       return;
     }
     const items = Object.entries(this.returnQuantities())
       .filter(([, qty]) => qty > 0)
       .map(([orderItemId, quantity]) => ({ orderItemId, quantity }));
     if (items.length === 0) {
-      this.returnError.set('Seleziona almeno un articolo da restituire.');
+      this.returnError.set('Select at least one item to return.');
       return;
     }
 
@@ -420,10 +421,10 @@ export class MeComponent {
       );
       this.returnStatusByOrderId.update(map => ({ ...map, [order.id]: created.status }));
       this.returnModalOrder.set(null);
-      this.returnSuccess.set('Richiesta di reso inviata.');
+      this.returnSuccess.set('Return request sent.');
       setTimeout(() => this.returnSuccess.set(null), 4000);
     } catch (err: any) {
-      this.returnError.set(err?.error?.message ?? 'Impossibile inviare la richiesta di reso.');
+      this.returnError.set(err?.error?.message ?? 'Unable to send the return request.');
     } finally {
       this.returnLoading.set(false);
     }
@@ -438,7 +439,7 @@ export class MeComponent {
   wishlistPrice(item: WishlistItem): string {
     const price = parseFloat(String(item.basePrice));
     if (!Number.isFinite(price)) return '';
-    return '€ ' + price.toFixed(2).replace('.', ',');
+    return formatPrice(price);
   }
 
   startEditing() {
@@ -541,7 +542,7 @@ export class MeComponent {
 
     try {
       const res = await fetch(`${API_URL}/users/me/export`, { credentials: 'include' });
-      if (!res.ok) throw new Error('Export non disponibile');
+      if (!res.ok) throw new Error('Export not available');
 
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
@@ -549,11 +550,11 @@ export class MeComponent {
       link.href = url;
       link.download =
         res.headers.get('Content-Disposition')?.match(/filename="?([^";]+)"?/)?.[1]
-        ?? 'common-era-dati-personali.json';
+        ?? 'common-era-personal-data.json';
       link.click();
       URL.revokeObjectURL(url);
     } catch {
-      this.exportError.set('Non è stato possibile scaricare i tuoi dati. Riprova fra poco.');
+      this.exportError.set('Your data could not be downloaded. Please try again shortly.');
     } finally {
       this.exportLoading.set(false);
     }
@@ -590,7 +591,7 @@ export class MeComponent {
 
     const password = this.deleteAccountPassword();
     if (!password) {
-      this.deleteAccountError.set('Inserisci la password per confermare.');
+      this.deleteAccountError.set('Enter your password to confirm.');
       return;
     }
 

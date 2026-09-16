@@ -38,8 +38,8 @@ export class NotFound {
 
   constructor() {
     this.seo.setPage(
-      'Pagina non trovata — Common Era',
-      "L'indirizzo che hai aperto non esiste su Common Era.",
+      'Page not found — Common Era',
+      'The address you opened doesn\'t exist on Common Era.',
     );
     this.meta.updateTag({ name: 'robots', content: 'noindex, follow' });
   }

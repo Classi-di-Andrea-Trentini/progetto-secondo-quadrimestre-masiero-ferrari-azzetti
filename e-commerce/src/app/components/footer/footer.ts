@@ -52,7 +52,7 @@ export class Footer {
           this.subscribing.set(false);
         },
         error: (err) => {
-          const msg = err?.error?.message ?? 'Qualcosa è andato storto. Riprova.';
+          const msg = err?.error?.message ?? 'Something went wrong. Please try again.';
           this.subscribeError.set(msg);
           this.subscribing.set(false);
         },

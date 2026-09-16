@@ -64,89 +64,89 @@ export class Legal {
   readonly docs: Record<LegalKey, LegalDoc> = {
     // ─── Privacy ───────────────────────────────────────────────────────────
     privacy: {
-      title: 'Informativa sulla privacy',
-      updatedAt: '16 settembre 2026',
+      title: 'Privacy notice',
+      updatedAt: '16 September 2026',
       intro:
-        'Questa informativa spiega quali dati personali raccogliamo quando usi Common Era, perché li raccogliamo, per quanto tempo li conserviamo e quali diritti puoi esercitare. È resa ai sensi degli articoli 13 e 14 del Regolamento (UE) 2016/679 (GDPR).',
+        'This notice explains what personal data we collect when you use Common Era, why we collect it, how long we keep it, and what rights you can exercise. It is provided under Articles 13 and 14 of Regulation (EU) 2016/679 (GDPR).',
       sections: [
         {
-          heading: '1. Titolare del trattamento',
-          body: 'Il titolare del trattamento è [RAGIONE SOCIALE], con sede legale in [SEDE LEGALE], partita IVA [P.IVA], iscritta al Registro delle Imprese con numero REA [REA].\n\nPer qualsiasi questione relativa ai tuoi dati personali puoi scrivere a [PEC].\n\nNon abbiamo nominato un Responsabile della protezione dei dati (DPO), non ricorrendo i casi previsti dall\'articolo 37 del GDPR.',
+          heading: '1. Data controller',
+          body: 'The data controller is [RAGIONE SOCIALE], with registered office in [SEDE LEGALE], VAT number [P.IVA], registered with the Companies Register under REA number [REA].\n\nFor any question about your personal data you can write to [PEC].\n\nWe have not appointed a Data Protection Officer (DPO), as the cases set out in Article 37 of the GDPR do not apply to us.',
         },
         {
-          heading: '2. Quali dati trattiamo',
+          heading: '2. What data we process',
           body:
-            'Dati di registrazione e di account: nome e cognome, indirizzo email, password (conservata solo come hash, mai in chiaro), ed eventualmente numero di telefono, data di nascita e genere, se scegli di indicarli.\n\n' +
-            'Dati dell\'accesso con Google, se scegli di usarlo: il tuo indirizzo email, il nome che hai sul profilo Google e l\'identificativo numerico stabile che Google assegna al tuo account. Quell\'identificativo è ciò che ci permette di ritrovare il tuo account anche se cambi indirizzo email, e non dice nulla di te a chi lo legge. Non riceviamo né conserviamo la tua password di Google, e non abbiamo accesso a nessun altro dato del tuo account — non alla posta, non ai contatti, non ai file. Se non usi quel pulsante, a Google non viene comunicato niente.\n\n' +
-            'Dati di acquisto: indirizzi di spedizione e fatturazione, contenuto degli ordini, importi, buoni regalo e punti fedeltà utilizzati, numero e data della fattura.\n\n' +
-            'Dati di pagamento: i dati della tua carta non transitano né vengono conservati sui nostri sistemi. Sono trattati direttamente da Stripe, che riceve il pagamento; a noi resta solo l\'esito della transazione e il suo identificativo.\n\n' +
-            'Contenuti che pubblichi: recensioni, valutazioni e fotografie che decidi di allegare.\n\n' +
-            'Dati tecnici: indirizzo IP e tipo di browser associati alla sessione di accesso, per motivi di sicurezza.',
+            'Registration and account data: first and last name, email address, password (stored only as a hash, never in plain text), and optionally phone number, date of birth and gender, if you choose to provide them.\n\n' +
+            'Google sign-in data, if you choose to use it: your email address, the name on your Google profile, and the stable numeric identifier Google assigns to your account. That identifier is what lets us find your account again even if you change your email address, and it tells anyone reading it nothing about you. We never receive or store your Google password, and we have no access to any other data in your Google account — not your mail, not your contacts, not your files. If you don\'t use that button, nothing is shared with Google.\n\n' +
+            'Purchase data: shipping and billing addresses, order contents, amounts, gift cards and loyalty points used, invoice number and date.\n\n' +
+            'Payment data: your card details never pass through or are stored on our systems. They are processed directly by Stripe, which receives the payment; we only keep the outcome of the transaction and its identifier.\n\n' +
+            'Content you publish: reviews, ratings and photos you choose to attach.\n\n' +
+            'Technical data: IP address and browser type associated with the login session, for security purposes.',
         },
         {
-          heading: '3. Perché li trattiamo e con quale base giuridica',
+          heading: '3. Why we process it and on what legal basis',
           body:
-            'Eseguire il contratto di vendita — gestire l\'ordine, la spedizione, i resi e l\'assistenza. Base giuridica: articolo 6.1.b GDPR (esecuzione di un contratto di cui sei parte). Il conferimento è necessario: senza questi dati non possiamo concludere l\'ordine.\n\n' +
-            'Adempiere agli obblighi di legge — emissione e conservazione delle fatture, obblighi fiscali e contabili. Base giuridica: articolo 6.1.c GDPR (obbligo legale).\n\n' +
-            'Gestire l\'account e la sicurezza degli accessi — mantenere la sessione, verificare l\'indirizzo email, prevenire accessi abusivi e frodi. Base giuridica: articolo 6.1.b e 6.1.f GDPR (legittimo interesse alla sicurezza del servizio). Rientra qui anche l\'accesso con Google, se sei tu a sceglierlo: è uno dei modi di eseguire il contratto di cui sei parte, non un trattamento ulteriore, e non usarlo non ti costa niente — l\'accesso con email e password resta sempre disponibile.\n\n' +
-            'Inviare la newsletter — solo se la richiedi. Base giuridica: articolo 6.1.a GDPR (consenso), che puoi revocare in qualsiasi momento dalle impostazioni del tuo account o dal link in fondo a ogni email, senza che questo pregiudichi la liceità dell\'invio precedente.\n\n' +
-            'Pubblicare le recensioni — su tua iniziativa. Base giuridica: articolo 6.1.a GDPR (consenso).',
+            'To perform the sales contract — managing the order, shipping, returns and customer support. Legal basis: Article 6(1)(b) GDPR (performance of a contract to which you are a party). Providing this data is necessary: without it we cannot complete the order.\n\n' +
+            'To comply with legal obligations — issuing and retaining invoices, tax and accounting obligations. Legal basis: Article 6(1)(c) GDPR (legal obligation).\n\n' +
+            'To manage the account and login security — keeping the session active, verifying the email address, preventing abuse and fraud. Legal basis: Article 6(1)(b) and 6(1)(f) GDPR (legitimate interest in the security of the service). This also covers Google sign-in, if you choose it: it is one of the ways of performing the contract you are a party to, not a further processing activity, and not using it costs you nothing — signing in with email and password always remains available.\n\n' +
+            'To send the newsletter — only if you request it. Legal basis: Article 6(1)(a) GDPR (consent), which you can withdraw at any time from your account settings or the link at the bottom of every email, without affecting the lawfulness of processing carried out before the withdrawal.\n\n' +
+            'To publish reviews — on your own initiative. Legal basis: Article 6(1)(a) GDPR (consent).',
         },
         {
-          heading: '4. A chi comunichiamo i dati',
+          heading: '4. Who we share data with',
           body:
-            'I tuoi dati non sono venduti né ceduti a terzi per finalità di marketing. Sono comunicati solo a chi ci serve per farti avere quello che hai ordinato:\n\n' +
-            '• Stripe Payments Europe, Ltd. — gestione dei pagamenti con carta;\n' +
-            '• Google Ireland Limited — solo se scegli di accedere con Google, e solo nel momento in cui premi quel pulsante. Il tuo browser viene mandato sulla pagina di Google, che ci restituisce indirizzo email, nome e un identificativo del tuo account. Google agisce qui come titolare autonomo del trattamento per quanto riguarda il tuo account Google: la sua informativa è su policies.google.com/privacy. Non gli comunichiamo cosa hai comprato, cosa hai guardato o quanto hai speso;\n' +
-            '• il corriere incaricato della consegna — nome, indirizzo, telefono, per consegnare il pacco;\n' +
-            '• il fornitore del servizio di posta elettronica transazionale — per inviarti conferme d\'ordine e comunicazioni di servizio;\n' +
-            '• il fornitore dell\'infrastruttura su cui il sito è ospitato;\n' +
-            '• il consulente fiscale e contabile, per gli adempimenti di legge;\n' +
-            '• autorità pubbliche, quando la legge lo impone.\n\n' +
-            'I fornitori che trattano dati per nostro conto agiscono come responsabili del trattamento, nominati ai sensi dell\'articolo 28 GDPR.\n\n' +
-            'Trasferimenti extra UE: alcuni fornitori possono trattare dati al di fuori dello Spazio economico europeo. In tal caso il trasferimento avviene sulla base di una decisione di adeguatezza della Commissione europea oppure delle Clausole contrattuali standard di cui all\'articolo 46.2.c GDPR.',
+            'Your data is never sold or passed on to third parties for marketing purposes. It is shared only with those who help us get you what you ordered:\n\n' +
+            '• Stripe Payments Europe, Ltd. — card payment processing;\n' +
+            '• Google Ireland Limited — only if you choose to sign in with Google, and only the moment you press that button. Your browser is sent to Google\'s page, which returns your email address, your Google profile name and an identifier for your account. Google acts here as an independent controller for your Google account: its notice is at policies.google.com/privacy. We do not tell it what you bought, what you looked at, or how much you spent;\n' +
+            '• the courier responsible for delivery — name, address, phone number, to deliver the parcel;\n' +
+            '• our transactional email provider — to send you order confirmations and service communications;\n' +
+            '• the provider of the infrastructure hosting the site;\n' +
+            '• our tax and accounting advisor, for statutory compliance;\n' +
+            '• public authorities, when required by law.\n\n' +
+            'Providers who process data on our behalf act as data processors, appointed under Article 28 GDPR.\n\n' +
+            'Transfers outside the EU: some providers may process data outside the European Economic Area. In that case the transfer relies on an adequacy decision of the European Commission or on the Standard Contractual Clauses under Article 46(2)(c) GDPR.',
         },
         {
-          heading: '5. Per quanto tempo li conserviamo',
+          heading: '5. How long we keep it',
           body:
-            'Dati dell\'account: finché l\'account resta attivo. Se lo cancelli, i dati personali sono anonimizzati immediatamente.\n\n' +
-            'Fatture, ordini e documenti contabili: dieci anni dalla registrazione, come impone l\'articolo 2220 del Codice civile. Questo periodo non è riducibile su richiesta: è un obbligo di legge e prevale sulla richiesta di cancellazione, come previsto dall\'articolo 17.3.b GDPR.\n\n' +
-            'Dati di navigazione e sessioni di accesso: fino alla scadenza della sessione, al massimo sette giorni.\n\n' +
-            'Recensioni: finché restano pubblicate; sono rimosse se cancelli l\'account.\n\n' +
-            'Indirizzo email per la newsletter: fino alla revoca del consenso.',
+            'Account data: for as long as the account stays active. If you delete it, your personal data is anonymised immediately.\n\n' +
+            'Invoices, orders and accounting records: ten years from the date of registration, as required by Article 2220 of the Codice civile. This period cannot be shortened on request: it is a legal obligation and takes precedence over an erasure request, as allowed under Article 17(3)(b) GDPR.\n\n' +
+            'Browsing data and login sessions: until the session expires, seven days at most.\n\n' +
+            'Reviews: for as long as they remain published; they are removed if you delete your account.\n\n' +
+            'Email address for the newsletter: until you withdraw consent.',
         },
         {
-          heading: '6. I tuoi diritti',
+          heading: '6. Your rights',
           body:
-            'Puoi esercitare in qualunque momento i diritti previsti dagli articoli da 15 a 22 del GDPR:\n\n' +
-            '• accesso: sapere quali dati trattiamo e ottenerne copia;\n' +
-            '• rettifica: correggere dati inesatti o incompleti;\n' +
-            '• cancellazione: ottenere la rimozione dei dati, salvo quelli che dobbiamo conservare per legge;\n' +
-            '• limitazione: chiedere che il trattamento sia sospeso in attesa di una verifica;\n' +
-            '• portabilità: ricevere i tuoi dati in un formato strutturato e leggibile da un computer;\n' +
-            '• opposizione: opporti al trattamento fondato sul nostro legittimo interesse;\n' +
-            '• revoca del consenso: ritirare il consenso dove è la base giuridica del trattamento.\n\n' +
-            'Due di questi diritti li eserciti da solo, subito, senza dover scrivere a nessuno: nella sezione Impostazioni del tuo account trovi "Scarica i tuoi dati", che ti restituisce un file con tutto quello che conserviamo su di te, e "Cancella account", che anonimizza i tuoi dati personali.\n\n' +
-            'Per gli altri diritti scrivi a [PEC]. Rispondiamo entro un mese dalla richiesta, prorogabile di due mesi in casi complessi, dandotene conto.\n\n' +
-            'Non effettuiamo processi decisionali automatizzati né profilazione ai sensi dell\'articolo 22 GDPR.',
+            'You can exercise the rights set out in Articles 15 to 22 of the GDPR at any time:\n\n' +
+            '• access: find out what data we process and get a copy of it;\n' +
+            '• rectification: correct inaccurate or incomplete data;\n' +
+            '• erasure: have your data removed, except what we must keep by law;\n' +
+            '• restriction: ask that processing be suspended while something is being checked;\n' +
+            '• portability: receive your data in a structured, machine-readable format;\n' +
+            '• objection: object to processing based on our legitimate interest;\n' +
+            '• withdrawal of consent: withdraw consent wherever it is the legal basis for processing.\n\n' +
+            'Two of these rights you can exercise yourself, right away, without writing to anyone: the Settings section of your account has "Download your data", which gives you a file with everything we keep about you, and "Delete account", which anonymises your personal data.\n\n' +
+            'For the other rights, write to [PEC]. We reply within one month of the request, extendable by two months for complex cases, in which case we will let you know.\n\n' +
+            'We do not carry out automated decision-making or profiling under Article 22 GDPR.',
         },
         {
-          heading: '7. Reclamo al Garante',
+          heading: '7. Complaints to the supervisory authority',
           body:
-            'Se ritieni che il trattamento dei tuoi dati violi il GDPR hai diritto di proporre reclamo all\'autorità di controllo.\n\n' +
-            'In Italia è il Garante per la protezione dei dati personali, Piazza Venezia 11, 00187 Roma — telefono +39 06 696771, email protocollo@gpdp.it, PEC protocollo@pec.gpdp.it, sito www.garanteprivacy.it.\n\n' +
-            'Puoi in alternativa rivolgerti all\'autorità di controllo dello Stato membro in cui risiedi o lavori, oppure adire l\'autorità giudiziaria.',
+            'If you believe our processing of your data breaches the GDPR, you have the right to lodge a complaint with a supervisory authority.\n\n' +
+            'In Italy this is the Garante per la protezione dei dati personali (the Italian Data Protection Authority), Piazza Venezia 11, 00187 Roma — phone +39 06 696771, email protocollo@gpdp.it, PEC protocollo@pec.gpdp.it, website www.garanteprivacy.it.\n\n' +
+            'You may alternatively contact the supervisory authority of the Member State where you live or work, or bring the matter before the courts.',
         },
         {
-          heading: '8. Sicurezza',
+          heading: '8. Security',
           body:
-            'Adottiamo misure tecniche e organizzative adeguate al rischio: password conservate solo come hash con algoritmo BCrypt, connessioni cifrate in HTTPS, cookie di sessione HttpOnly non leggibili da JavaScript, limitazione dei tentativi di accesso ripetuti e accesso ai dati limitato a chi ne ha bisogno.\n\n' +
-            'Nessuna misura elimina del tutto il rischio. In caso di violazione dei dati personali che comporti un rischio elevato per i tuoi diritti, ti informeremo senza ingiustificato ritardo, come prevede l\'articolo 34 GDPR.',
+            'We adopt technical and organisational measures appropriate to the risk: passwords stored only as BCrypt hashes, HTTPS-encrypted connections, HttpOnly session cookies not readable by JavaScript, rate-limiting on repeated login attempts, and access to data restricted to those who need it.\n\n' +
+            'No measure removes the risk entirely. In the event of a personal data breach that poses a high risk to your rights, we will inform you without undue delay, as required by Article 34 GDPR.',
         },
         {
-          heading: '9. Modifiche a questa informativa',
+          heading: '9. Changes to this notice',
           body:
-            'Se cambiano le finalità, le basi giuridiche o i destinatari, aggiorniamo questa pagina e ne modifichiamo la data in alto. Quando le modifiche sono sostanziali te lo comunichiamo via email prima che diventino efficaci.',
+            'If the purposes, legal bases or recipients change, we update this page and change the date shown at the top. When changes are material, we tell you by email before they take effect.',
         },
       ],
     },
@@ -154,230 +154,230 @@ export class Legal {
     // ─── Cookie ────────────────────────────────────────────────────────────
     cookies: {
       title: 'Cookie policy',
-      updatedAt: '16 settembre 2026',
+      updatedAt: '16 September 2026',
       intro:
-        'Questa pagina elenca, uno per uno, i cookie e gli spazi di memoria locale che Common Era utilizza, a cosa servono e quanto durano. Usiamo esclusivamente cookie tecnici: nessun cookie analitico, pubblicitario o di profilazione, di nessun tipo.',
+        'This page lists, one by one, the cookies and local storage entries that Common Era uses, what they are for, and how long they last. We use technical cookies only: no analytics, advertising or profiling cookies of any kind.',
       sections: [
         {
-          heading: 'Che cosa sono i cookie',
-          body: 'I cookie sono piccoli file di testo che un sito salva nel tuo browser. Servono al sito per ricordare qualcosa fra una pagina e l\'altra — per esempio che hai fatto l\'accesso. Il "local storage" funziona in modo simile, ma resta nel browser indipendentemente dai cookie. Entrambi si possono cancellare in qualsiasi momento dalle impostazioni del browser.',
+          heading: 'What cookies are',
+          body: 'Cookies are small text files a site saves in your browser. They let the site remember something from one page to the next — for example that you\'re signed in. "Local storage" works in a similar way, but it stays in the browser independently of cookies. Both can be cleared at any time from your browser settings.',
         },
         {
-          heading: 'Perché non ti chiediamo il consenso',
-          body: 'L\'articolo 122 del Codice privacy italiano, che recepisce la direttiva ePrivacy, richiede il consenso preventivo solo per i cookie non tecnici — quelli analitici non anonimizzati, quelli pubblicitari e quelli di profilazione. Per i cookie tecnici, cioè quelli senza i quali il servizio che hai chiesto non funziona, è sufficiente informarti: ed è quello che fa questa pagina.\n\nTutti i cookie elencati qui sotto sono tecnici. Per questo l\'avviso che vedi alla prima visita non ha un pulsante "Rifiuta": non ci sarebbe niente da rifiutare, e un rifiuto che non rifiuta nulla sarebbe solo una finzione. Se un giorno introdurremo cookie non tecnici, questa pagina sarà aggiornata prima e l\'avviso tornerà a chiederti una scelta vera.',
+          heading: 'Why we don\'t ask for your consent',
+          body: 'Article 122 of the Italian Codice Privacy, which transposes the ePrivacy Directive, requires prior consent only for non-technical cookies — non-anonymised analytics, advertising and profiling cookies. For technical cookies, meaning those without which the service you asked for doesn\'t work, it is enough to inform you: which is what this page does.\n\nEvery cookie listed below is technical. That\'s why the notice you see on your first visit has no "Reject" button: there would be nothing to reject, and a rejection that rejects nothing would just be a fiction. If we ever introduce non-technical cookies, this page will be updated first and the notice will go back to asking you for a real choice.',
         },
         {
-          heading: 'I cookie che usiamo',
-          body: 'La tabella elenca tutto ciò che viene salvato nel tuo browser da Common Era e da Stripe, il fornitore che gestisce i pagamenti con carta. Alcune voci compaiono solo in certi momenti: il cookie dell\'accesso con Google esiste per i pochi minuti di quel passaggio, quelli di Stripe solo se arrivi alla pagina di pagamento.',
+          heading: 'The cookies we use',
+          body: 'The table lists everything saved in your browser by Common Era and by Stripe, the provider that handles card payments. Some entries appear only at certain times: the Google sign-in cookie exists only for the few minutes of that step, and Stripe\'s only if you reach the payment page.',
           cookies: [
             {
               name: 'access_token',
-              type: 'Cookie HTTP (HttpOnly)',
+              type: 'HTTP cookie (HttpOnly)',
               purpose:
-                'Mantiene la sessione di accesso sotto forma di token firmato. Viene inviato a ogni richiesta per tenerti collegato anche dopo un ricaricamento della pagina. Essendo HttpOnly non è leggibile da JavaScript, ma solo dal server.',
-              duration: '7 giorni (eliminato all\'uscita)',
-              category: 'Tecnico',
+                'Keeps the login session alive as a signed token. It is sent with every request to keep you signed in even after reloading the page. Being HttpOnly, it cannot be read by JavaScript, only by the server.',
+              duration: '7 days (removed on sign-out)',
+              category: 'Technical',
             },
             {
               name: 'common_era_cookie_consent',
               type: 'localStorage',
               purpose:
-                'Ricorda che hai già letto l\'informativa cookie, così l\'avviso non ricompare a ogni pagina. Contiene solo la data di lettura.',
-              duration: 'Permanente (finché non svuoti i dati del browser)',
-              category: 'Tecnico',
+                'Remembers that you have already read the cookie notice, so it doesn\'t reappear on every page. It only holds the date it was read.',
+              duration: 'Permanent (until you clear your browser data)',
+              category: 'Technical',
             },
             {
               name: 'commonera_cart',
               type: 'localStorage',
               purpose:
-                'Conserva il carrello quando navighi senza aver effettuato l\'accesso, così non perdi quello che hai scelto cambiando pagina. Al momento del login viene unito al carrello del tuo account.',
-              duration: 'Permanente (finché non svuoti i dati del browser)',
-              category: 'Tecnico',
+                'Keeps your cart when you browse without signing in, so you don\'t lose what you chose when changing page. It is merged into your account cart when you sign in.',
+              duration: 'Permanent (until you clear your browser data)',
+              category: 'Technical',
             },
             {
               name: 'oauth2_auth_request',
-              type: 'Cookie HTTP (HttpOnly)',
+              type: 'HTTP cookie (HttpOnly)',
               purpose:
-                'Compare solo se premi "Accedi con Google". Conserva, per il tempo di andare su Google e tornare indietro, il codice di controllo con cui il server riconosce che sei tu a essere tornato e non qualcun altro. Senza, l\'accesso non potrebbe concludersi in sicurezza. Viene cancellato appena il giro si chiude, riuscito o no.',
-              duration: '5 minuti',
-              category: 'Tecnico',
+                'Appears only if you press "Sign in with Google". It keeps, for the time it takes to go to Google and back, the check code the server uses to recognise that it\'s you coming back and not someone else. Without it, sign-in couldn\'t be completed securely. It is deleted as soon as the round trip ends, whether it succeeds or not.',
+              duration: '5 minutes',
+              category: 'Technical',
             },
             {
               name: '__stripe_mid',
-              type: 'Cookie HTTP (terza parte: Stripe)',
+              type: 'HTTP cookie (third party: Stripe)',
               purpose:
-                'Impostato da Stripe durante il pagamento per prevenire le frodi. Identifica il dispositivo attraverso più sessioni e permette a Stripe di riconoscere tentativi di pagamento anomali. Necessario per eseguire in sicurezza il pagamento che hai richiesto.',
-              duration: '1 anno',
-              category: 'Tecnico',
+                'Set by Stripe during payment to prevent fraud. It identifies the device across multiple sessions and lets Stripe recognise abnormal payment attempts. Necessary to securely process the payment you requested.',
+              duration: '1 year',
+              category: 'Technical',
             },
             {
               name: '__stripe_sid',
-              type: 'Cookie HTTP (terza parte: Stripe)',
+              type: 'HTTP cookie (third party: Stripe)',
               purpose:
-                'Impostato da Stripe durante il pagamento, con la stessa funzione antifrode di __stripe_mid, ma limitato alla singola sessione di pagamento.',
-              duration: '30 minuti',
-              category: 'Tecnico',
+                'Set by Stripe during payment, with the same anti-fraud function as __stripe_mid, but limited to a single payment session.',
+              duration: '30 minutes',
+              category: 'Technical',
             },
           ],
         },
         {
-          heading: 'I cookie di Stripe',
-          body: 'I cookie __stripe_mid e __stripe_sid sono impostati da Stripe Payments Europe, Ltd., che agisce come titolare autonomo del trattamento per le finalità di prevenzione delle frodi. Vengono impostati soltanto quando raggiungi la pagina di pagamento: se navighi il catalogo senza acquistare, non compaiono mai.\n\nServono a eseguire il servizio di pagamento che sei tu a chiedere, quindi rientrano fra i cookie tecnici e non richiedono consenso. L\'informativa privacy di Stripe è consultabile su stripe.com/privacy.',
+          heading: 'Stripe\'s cookies',
+          body: 'The cookies __stripe_mid and __stripe_sid are set by Stripe Payments Europe, Ltd., which acts as an independent controller for fraud-prevention purposes. They are set only when you reach the payment page: if you browse the catalogue without buying anything, they never appear.\n\nThey serve to carry out the payment service you asked for, so they count as technical cookies and don\'t require consent. Stripe\'s privacy notice is available at stripe.com/privacy.',
         },
         {
-          heading: 'Nessun cookie analitico o pubblicitario',
+          heading: 'No analytics or advertising cookies',
           body:
-            'Common Era non usa Google Analytics, Meta Pixel, circuiti pubblicitari o altri servizi di tracciamento di terze parti. Nessun dato sul tuo comportamento di navigazione viene condiviso con soggetti esterni per finalità commerciali.\n\n' +
-            'Una precisazione, perché le due cose si confondono facilmente: sul sito è disponibile l\'accesso con Google. Non è tracciamento — è autenticazione, e avviene soltanto se sei tu a premere quel pulsante. Google non riceve nessun dato sulle pagine che visiti, non ci restituisce nessun profilo pubblicitario e non imposta cookie su questo sito: la schermata di consenso si apre sul dominio di Google, e i cookie che vedi lì sono suoi e seguono la sua informativa. Resta però una comunicazione di dati personali a un soggetto esterno, ed è dichiarata come tale nell\'informativa privacy, al punto 4.',
+            'Common Era does not use Google Analytics, Meta Pixel, ad networks or any other third-party tracking service. No data about your browsing behaviour is shared with outside parties for commercial purposes.\n\n' +
+            'One clarification, because the two things are easily confused: the site offers sign-in with Google. That isn\'t tracking — it\'s authentication, and it only happens if you press that button yourself. Google receives no data about the pages you visit, gives us no advertising profile, and sets no cookies on this site: the consent screen opens on Google\'s own domain, and the cookies you see there are Google\'s and follow Google\'s notice. It is nonetheless a disclosure of personal data to an outside party, and it is declared as such in the privacy notice, at point 4.',
         },
         {
-          heading: 'Come cancellare i cookie',
+          heading: 'How to delete cookies',
           body:
-            'Puoi eliminare cookie e local storage in qualsiasi momento:\n' +
-            '• Chrome ed Edge: Impostazioni → Privacy e sicurezza → Cancella dati di navigazione\n' +
-            '• Firefox: Impostazioni → Privacy e sicurezza → Cookie e dati dei siti web → Elimina dati\n' +
-            '• Safari: Impostazioni → Avanzate → Dati dei siti web → Rimuovi tutti\n\n' +
-            'Eliminando access_token verrai disconnesso. Eliminando common_era_cookie_consent l\'avviso ricomparirà alla visita successiva. Puoi comunque rileggere l\'informativa quando vuoi, dal link "Gestisci cookie" in fondo a ogni pagina.',
+            'You can delete cookies and local storage at any time:\n' +
+            '• Chrome and Edge: Settings → Privacy and security → Clear browsing data\n' +
+            '• Firefox: Settings → Privacy & Security → Cookies and Site Data → Clear Data\n' +
+            '• Safari: Settings → Advanced → Website Data → Remove All\n\n' +
+            'Deleting access_token will sign you out. Deleting common_era_cookie_consent will make the notice reappear on your next visit. You can re-read this notice whenever you like from the "Manage cookies" link at the bottom of every page.',
         },
         {
-          heading: 'Modifiche a questa pagina',
-          body: 'Se introdurremo nuovi cookie, questa pagina sarà aggiornata prima della messa in esercizio. Se si trattasse di cookie non tecnici, l\'avviso ricomparirà per raccogliere un consenso vero, granulare e revocabile.',
+          heading: 'Changes to this page',
+          body: 'If we introduce new cookies, this page will be updated before they go live. If they turned out to be non-technical cookies, the notice would reappear to collect real, granular, revocable consent.',
         },
       ],
     },
 
     // ─── Condizioni di vendita ─────────────────────────────────────────────
     terms: {
-      title: 'Condizioni generali di vendita',
-      updatedAt: '15 settembre 2026',
+      title: 'Terms & Conditions of Sale',
+      updatedAt: '15 September 2026',
       intro:
-        'Queste condizioni regolano i contratti di vendita conclusi a distanza attraverso il sito Common Era. Formano parte integrante di ogni ordine: accettarle è il presupposto per acquistare. Ti consigliamo di salvarne o stamparne una copia.',
+        'These terms govern distance sales contracts concluded through the Common Era site. They form an integral part of every order: accepting them is a condition of purchase. We recommend saving or printing a copy.',
       sections: [
         {
-          heading: '1. Il venditore',
-          body: 'Il venditore è [RAGIONE SOCIALE], con sede legale in [SEDE LEGALE], partita IVA [P.IVA], iscritta al Registro delle Imprese con numero REA [REA], PEC [PEC].',
+          heading: '1. The seller',
+          body: 'The seller is [RAGIONE SOCIALE], with registered office in [SEDE LEGALE], VAT number [P.IVA], registered with the Companies Register under REA number [REA], PEC [PEC].',
         },
         {
-          heading: '2. Ambito di applicazione',
-          body: 'Le presenti condizioni si applicano alle vendite effettuate nei confronti di consumatori ai sensi dell\'articolo 3 del Codice del consumo (D.Lgs. 206/2005), cioè persone fisiche che agiscono per scopi estranei alla propria attività imprenditoriale o professionale.\n\nSe acquisti indicando una partita IVA agisci come professionista: in questo caso non si applicano le norme sul diritto di recesso e sulla garanzia legale di conformità riservate ai consumatori.',
+          heading: '2. Scope',
+          body: 'These terms apply to sales made to consumers under Article 3 of the Codice del consumo (Legislative Decree 206/2005), meaning natural persons acting for purposes outside their trade, business or profession.\n\nIf you purchase using a VAT number you are acting as a business: in that case the rules on the right of withdrawal and the statutory conformity guarantee reserved for consumers do not apply.',
         },
         {
-          heading: '3. Prodotti e disponibilità',
-          body: 'Le immagini e le descrizioni dei prodotti hanno lo scopo di rappresentarli il più fedelmente possibile. Differenze di colore dovute alla resa dello schermo o lievi variazioni nei materiali naturali non costituiscono difetto di conformità.\n\nLa disponibilità indicata è aggiornata in tempo reale, ma può cambiare fra il momento in cui aggiungi un articolo al carrello e quello in cui concludi l\'ordine. Se un articolo risultasse indisponibile dopo la conclusione dell\'ordine, ti avviseremo e rimborseremo integralmente l\'importo corrispondente.',
+          heading: '3. Products and availability',
+          body: 'Product images and descriptions are intended to represent the items as faithfully as possible. Colour differences due to screen rendering or slight variations in natural materials do not constitute a lack of conformity.\n\nThe availability shown is updated in real time, but it can change between the moment you add an item to your cart and the moment you complete the order. If an item turns out to be unavailable after the order is placed, we will notify you and refund the corresponding amount in full.',
         },
         {
-          heading: '4. Prezzi',
-          body: 'Tutti i prezzi sono espressi in euro e si intendono comprensivi di IVA. Le spese di spedizione sono indicate separatamente prima della conferma dell\'ordine e sommate al totale.\n\nIl prezzo applicabile è quello esposto al momento dell\'invio dell\'ordine. Ci riserviamo di modificare i prezzi in qualsiasi momento, senza che ciò abbia effetto sugli ordini già confermati.\n\nIn caso di errore materiale evidente nell\'indicazione del prezzo — un importo palesemente incongruo rispetto al valore del bene — ti contatteremo prima di dare corso all\'ordine, e potrai confermarlo al prezzo corretto o annullarlo senza alcun costo.',
+          heading: '4. Prices',
+          body: 'All prices are in euro and include VAT. Shipping costs are shown separately before the order is confirmed and added to the total.\n\nThe applicable price is the one shown when the order is submitted. We reserve the right to change prices at any time, without affecting orders already confirmed.\n\nIn the event of an obvious pricing error — an amount plainly inconsistent with the value of the item — we will contact you before proceeding with the order, and you may confirm it at the correct price or cancel it at no cost.',
         },
         {
-          heading: '5. Come si conclude il contratto',
+          heading: '5. How the contract is formed',
           body:
-            'La presentazione dei prodotti sul sito è un invito a proporre. Il contratto si conclude quando ti inviamo la conferma d\'ordine via email, non al momento dell\'invio dell\'ordine.\n\n' +
-            'Prima di inviare l\'ordine ti viene mostrato un riepilogo completo con prodotti, quantità, prezzo unitario, spese di spedizione e totale da pagare, e hai la possibilità di correggere eventuali errori di inserimento.\n\n' +
-            'La conferma d\'ordine riepiloga tutte le informazioni previste dall\'articolo 51 del Codice del consumo e vale come conferma su supporto durevole.',
+            'The presentation of products on the site is an invitation to treat. The contract is formed when we send you the order confirmation by email, not when the order is submitted.\n\n' +
+            'Before submitting the order you are shown a complete summary with products, quantities, unit price, shipping costs and total due, and you can correct any input errors.\n\n' +
+            'The order confirmation summarises all the information required by Article 51 of the Codice del consumo and counts as confirmation on a durable medium.',
         },
         {
-          heading: '6. Pagamenti',
-          body: 'I pagamenti con carta sono gestiti da Stripe Payments Europe, Ltd. su connessione cifrata. I dati della tua carta non transitano né sono conservati sui nostri server: li tratta direttamente Stripe.\n\nPuoi inoltre utilizzare buoni regalo emessi da noi e punti fedeltà accumulati con gli acquisti precedenti, a scomputo totale o parziale del prezzo. L\'importo residuo, se presente, va saldato con carta.\n\nL\'ordine viene lavorato solo dopo la conferma dell\'avvenuto pagamento. Un pagamento non riuscito comporta l\'annullamento dell\'ordine e il ripristino della disponibilità degli articoli.',
+          heading: '6. Payments',
+          body: 'Card payments are handled by Stripe Payments Europe, Ltd. over an encrypted connection. Your card details never pass through or are stored on our servers: Stripe processes them directly.\n\nYou can also use gift cards we have issued and loyalty points from previous purchases, to offset the price in full or in part. Any remaining balance must be paid by card.\n\nThe order is processed only after payment is confirmed. A failed payment results in the order being cancelled and the items becoming available again.',
         },
         {
-          heading: '7. Fatturazione',
-          body: 'Per ogni ordine viene emessa fattura, scaricabile in PDF dalla sezione "I miei ordini" del tuo account. I dati di fatturazione sono quelli che hai indicato al momento dell\'ordine: non è possibile modificarli dopo l\'emissione del documento.',
+          heading: '7. Invoicing',
+          body: 'An invoice is issued for every order, downloadable as a PDF from the "My orders" section of your account. The billing details are the ones you provided when placing the order: they cannot be changed once the document has been issued.',
         },
         {
-          heading: '8. Consegna',
-          body: 'Tempi, costi e modalità di consegna sono descritti nella pagina Spedizioni e resi, che forma parte integrante di queste condizioni.\n\nAi sensi dell\'articolo 61 del Codice del consumo, la consegna avviene entro trenta giorni dalla conclusione del contratto, salvo diverso termine concordato. Il rischio di perdita o danneggiamento dei beni passa a te nel momento in cui tu, o un terzo da te designato diverso dal vettore, entri materialmente in possesso della merce.',
+          heading: '8. Delivery',
+          body: 'Delivery times, costs and methods are described on the Shipping & Returns page, which forms an integral part of these terms.\n\nUnder Article 61 of the Codice del consumo, delivery takes place within thirty days of the contract being formed, unless a different time has been agreed. The risk of loss or damage to the goods passes to you when you, or a third party you designate other than the carrier, take physical possession of the goods.',
         },
         {
-          heading: '9. Diritto di recesso',
-          body: 'Se sei un consumatore hai quattordici giorni per recedere dall\'acquisto senza doverne indicare il motivo. Modalità, termini e modulo tipo sono descritti nella pagina Diritto di recesso, che forma parte integrante di queste condizioni.',
+          heading: '9. Right of withdrawal',
+          body: 'If you are a consumer you have fourteen days to withdraw from the purchase without giving a reason. The procedure, time limits and model form are described on the Right of Withdrawal page, which forms an integral part of these terms.',
         },
         {
-          heading: '10. Garanzia legale di conformità',
+          heading: '10. Statutory conformity guarantee',
           body:
-            'Tutti i prodotti sono coperti dalla garanzia legale di conformità prevista dagli articoli da 128 a 135-septies del Codice del consumo: se il bene consegnato risulta difettoso o non conforme a quanto ordinato, hai diritto al ripristino della conformità, mediante riparazione o sostituzione senza spese, e in subordine alla riduzione del prezzo o alla risoluzione del contratto.\n\n' +
-            'La garanzia dura due anni dalla consegna. Il difetto va denunciato entro due mesi dalla scoperta. Per i primi dodici mesi si presume che il difetto esistesse già al momento della consegna, salvo prova contraria.\n\n' +
-            'La garanzia non copre i danni derivanti da uso improprio, negligenza, urti o normale usura.',
+            'All products are covered by the statutory conformity guarantee set out in Articles 128 to 135-septies of the Codice del consumo: if the item delivered is defective or does not match what was ordered, you are entitled to have conformity restored, through free repair or replacement, and failing that to a price reduction or termination of the contract.\n\n' +
+            'The guarantee lasts two years from delivery. The defect must be reported within two months of discovery. For the first twelve months the defect is presumed to have already existed at the time of delivery, unless proven otherwise.\n\n' +
+            'The guarantee does not cover damage resulting from misuse, negligence, impact or normal wear.',
         },
         {
-          heading: '11. Reclami e risoluzione delle controversie',
+          heading: '11. Complaints and dispute resolution',
           body:
-            'Per qualsiasi reclamo puoi scrivere a [PEC]. Rispondiamo entro quindici giorni lavorativi.\n\n' +
-            'Se non trovassimo un accordo, in quanto consumatore puoi ricorrere alla piattaforma europea di risoluzione delle controversie online (ODR) predisposta dalla Commissione europea, oppure attivare una procedura di mediazione ai sensi del D.Lgs. 28/2010. Il ricorso a tali procedure è facoltativo e non pregiudica il diritto di adire l\'autorità giudiziaria.',
+            'For any complaint you can write to [PEC]. We reply within fifteen business days.\n\n' +
+            'If we cannot reach an agreement, as a consumer you can turn to the European Online Dispute Resolution (ODR) platform set up by the European Commission, or start a mediation procedure under Legislative Decree 28/2010. Using these procedures is optional and does not affect your right to go to court.',
         },
         {
-          heading: '12. Legge applicabile e foro competente',
-          body: 'I contratti sono regolati dalla legge italiana. Se sei un consumatore, resta ferma l\'applicazione delle disposizioni inderogabili più favorevoli previste dalla legge del tuo Paese di residenza, e il foro competente è quello del tuo luogo di residenza o domicilio elettivo, ai sensi dell\'articolo 66-bis del Codice del consumo.',
+          heading: '12. Governing law and jurisdiction',
+          body: 'These contracts are governed by Italian law. If you are a consumer, the mandatory provisions more favourable to you under the law of your country of residence still apply, and the competent court is that of your place of residence or elected domicile, under Article 66-bis of the Codice del consumo.',
         },
         {
-          heading: '13. Modifiche',
-          body: 'Possiamo modificare queste condizioni in qualunque momento. Alle vendite già concluse si applica sempre la versione in vigore al momento dell\'invio dell\'ordine, di cui la conferma d\'ordine dà atto.',
+          heading: '13. Changes',
+          body: 'We may change these terms at any time. Sales already concluded are always governed by the version in force when the order was submitted, as recorded in the order confirmation.',
         },
       ],
     },
 
     // ─── Recesso ───────────────────────────────────────────────────────────
     recesso: {
-      title: 'Diritto di recesso',
-      updatedAt: '15 settembre 2026',
+      title: 'Right of Withdrawal',
+      updatedAt: '15 September 2026',
       intro:
-        'Se acquisti come consumatore hai quattordici giorni per cambiare idea e restituire quello che hai comprato, senza dover spiegare il perché e senza penalità. È un diritto previsto dagli articoli da 52 a 59 del Codice del consumo (D.Lgs. 206/2005) e non può esserti tolto.',
+        'If you buy as a consumer you have fourteen days to change your mind and return what you bought, with no need to explain why and no penalty. It is a right set out in Articles 52 to 59 of the Codice del consumo (Legislative Decree 206/2005) and it cannot be taken away from you.',
       sections: [
         {
-          heading: 'Quanto tempo hai',
-          body: 'Quattordici giorni di calendario, che decorrono dal giorno in cui tu, o un terzo da te designato diverso dal vettore, ricevi materialmente la merce.\n\nSe un unico ordine comprende più beni consegnati separatamente, il termine decorre dal giorno in cui ricevi l\'ultimo bene.\n\nPer rispettare il termine è sufficiente che tu invii la comunicazione di recesso prima della scadenza: non serve che la merce sia già tornata da noi.',
+          heading: 'How much time you have',
+          body: 'Fourteen calendar days, running from the day you, or a third party you designate other than the carrier, take physical delivery of the goods.\n\nIf a single order includes several goods delivered separately, the period runs from the day you receive the last item.\n\nTo meet the deadline it is enough to send the withdrawal notice before it expires: the goods do not need to have already come back to us.',
         },
         {
-          heading: 'Come comunicare il recesso',
+          heading: 'How to notify us of your withdrawal',
           body:
-            'Puoi farlo in due modi, a tua scelta.\n\n' +
-            'Dal sito: apri la sezione "I miei ordini" del tuo account, seleziona l\'ordine e usa il pulsante "Richiedi reso" indicando gli articoli da restituire. La richiesta viene registrata con data e ora, e ne ricevi conferma via email.\n\n' +
-            'Per iscritto: invia una dichiarazione esplicita a [PEC], utilizzando il modulo tipo riportato più sotto oppure una qualsiasi altra dichiarazione chiara in cui manifesti la volontà di recedere. L\'uso del modulo non è obbligatorio.\n\n' +
-            'Ti invieremo senza indugio una conferma di ricevimento della richiesta su supporto durevole.',
+            'You can do this in two ways, whichever you prefer.\n\n' +
+            'From the site: open the "My orders" section of your account, select the order and use the "Request a return" button, indicating the items to return. The request is logged with date and time, and you receive confirmation by email.\n\n' +
+            'In writing: send an explicit statement to [PEC], using the model withdrawal form below or any other clear statement expressing your wish to withdraw. Using the form is not mandatory.\n\n' +
+            'We will send you, without delay, an acknowledgement of receipt of the request on a durable medium.',
         },
         {
-          heading: 'Come restituire la merce',
+          heading: 'How to return the goods',
           body:
-            'Dopo aver comunicato il recesso devi restituire i beni entro quattordici giorni, all\'indirizzo che ti indicheremo nell\'email di conferma.\n\n' +
-            'I beni vanno restituiti integri, completi di ogni parte e accessorio, con le etichette originali ancora applicate e nella confezione di origine, quando possibile.\n\n' +
-            'Puoi maneggiare e provare i beni solo quanto basta per stabilirne natura, caratteristiche e funzionamento, esattamente come faresti in un negozio fisico. Sei responsabile della diminuzione di valore che derivi da una manipolazione diversa: in tal caso potremo trattenere dal rimborso un importo corrispondente alla perdita di valore.',
+            'After notifying us of your withdrawal you must return the goods within fourteen days, to the address we will give you in the confirmation email.\n\n' +
+            'Goods must be returned intact, complete with every part and accessory, with the original tags still attached and in their original packaging where possible.\n\n' +
+            'You may handle and try the goods only as much as is needed to establish their nature, characteristics and how they work, exactly as you would in a physical shop. You are liable for any decrease in value resulting from handling beyond that: in that case we may deduct an amount corresponding to the loss in value from the refund.',
         },
         {
-          heading: 'Chi paga il reso',
-          body: 'Il costo diretto della restituzione è a tuo carico, come consentito dall\'articolo 57 del Codice del consumo, e questa pagina te ne informa prima dell\'acquisto come la legge richiede.\n\nFa eccezione il caso in cui il bene sia difettoso, non conforme o diverso da quello ordinato: in quel caso il reso non ti costa nulla e le spese sono a nostro carico.\n\nTi consigliamo di conservare la ricevuta di spedizione: fino a quando la merce non ci arriva, il rischio del trasporto resta tuo.',
+          heading: 'Who pays for the return',
+          body: 'The direct cost of returning the goods is at your expense, as allowed by Article 57 of the Codice del consumo, and this page informs you of that before purchase as the law requires.\n\nThe exception is when the item is defective, non-conforming or different from what was ordered: in that case the return costs you nothing and the expense is ours.\n\nWe recommend keeping the shipping receipt: until the goods reach us, the risk of transport remains yours.',
         },
         {
-          heading: 'Quando e come ti rimborsiamo',
+          heading: 'When and how we refund you',
           body:
-            'Ti rimborsiamo tutti i pagamenti ricevuti, comprese le spese di consegna standard, entro quattordici giorni dal momento in cui siamo informati del recesso.\n\n' +
-            'Possiamo però trattenere il rimborso finché non riceviamo i beni, oppure finché non dimostri di averli spediti, a seconda di quale evento si verifichi per primo.\n\n' +
-            'Il rimborso avviene con lo stesso mezzo di pagamento che hai usato per l\'acquisto, salvo tuo diverso accordo espresso, e non comporta in nessun caso costi per te. Buoni regalo e punti fedeltà utilizzati sono ricreditati sul tuo account.\n\n' +
-            'Se avevi scelto una spedizione più rapida di quella standard, ti rimborsiamo l\'importo della spedizione standard: la differenza resta a tuo carico.',
+            'We refund all payments received, including standard delivery costs, within fourteen days of being informed of your withdrawal.\n\n' +
+            'We may, however, withhold the refund until we receive the goods, or until you provide proof of having shipped them, whichever happens first.\n\n' +
+            'The refund is made using the same payment method you used for the purchase, unless you expressly agree otherwise, and it never involves any cost to you. Gift cards and loyalty points used are credited back to your account.\n\n' +
+            'If you had chosen a faster shipping method than standard, we refund the amount of standard shipping: the difference remains at your expense.',
         },
         {
-          heading: 'Quando il recesso non si applica',
+          heading: 'When the right of withdrawal does not apply',
           body:
-            'L\'articolo 59 del Codice del consumo esclude il diritto di recesso in alcuni casi. Fra quelli che possono riguardare questo negozio:\n\n' +
-            '• beni confezionati su misura o chiaramente personalizzati su tua richiesta;\n' +
-            '• beni sigillati che non si prestano a essere restituiti per motivi igienici, se sono stati aperti dopo la consegna;\n' +
-            '• beni che, dopo la consegna, risultino inscindibilmente mescolati con altri.\n\n' +
-            'Quando un prodotto rientra in una di queste categorie, l\'esclusione è indicata nella scheda prodotto prima dell\'acquisto.',
+            'Article 59 of the Codice del consumo excludes the right of withdrawal in some cases. Among those that can apply to this shop:\n\n' +
+            '• goods made to measure or clearly personalised at your request;\n' +
+            '• sealed goods that are not suitable for return for hygiene reasons, if they were unsealed after delivery;\n' +
+            '• goods that, after delivery, become inseparably mixed with other items.\n\n' +
+            'When a product falls into one of these categories, the exclusion is stated on the product page before purchase.',
         },
         {
-          heading: 'Modulo tipo di recesso',
+          heading: 'Model withdrawal form',
           body:
-            'Compila e restituisci questo modulo solo se desideri recedere dal contratto. Il suo utilizzo non è obbligatorio.\n\n' +
+            'Complete and return this form only if you wish to withdraw from the contract. Using it is not mandatory.\n\n' +
             '— — — — — — — — — — — — — — — — — — — — — — — — — — — — — —\n\n' +
-            'Destinatario: [RAGIONE SOCIALE], [SEDE LEGALE], PEC [PEC]\n\n' +
-            'Con la presente io/noi (*) notifico/notifichiamo (*) il recesso dal mio/nostro (*) contratto di vendita dei seguenti beni (*):\n\n' +
+            'To: [RAGIONE SOCIALE], [SEDE LEGALE], PEC [PEC]\n\n' +
+            'I/We (*) hereby give notice (*) that I/we (*) withdraw from my/our (*) contract of sale of the following goods (*):\n\n' +
             '____________________________________________\n\n' +
-            'Ordinato il (*) / ricevuto il (*): ____________________\n\n' +
-            'Numero dell\'ordine: ____________________\n\n' +
-            'Nome del/dei consumatore/i: ____________________\n\n' +
-            'Indirizzo del/dei consumatore/i: ____________________\n\n' +
-            'Firma del/dei consumatore/i (solo se il presente modulo è notificato in versione cartacea): ____________________\n\n' +
-            'Data: ____________________\n\n' +
-            '(*) Cancellare la dicitura inutile.\n\n' +
+            'Ordered on (*) / received on (*): ____________________\n\n' +
+            'Order number: ____________________\n\n' +
+            'Name of consumer(s): ____________________\n\n' +
+            'Address of consumer(s): ____________________\n\n' +
+            'Signature of consumer(s) (only if this form is notified on paper): ____________________\n\n' +
+            'Date: ____________________\n\n' +
+            '(*) Delete as appropriate.\n\n' +
             '— — — — — — — — — — — — — — — — — — — — — — — — — — — — — —',
         },
       ],
@@ -385,64 +385,64 @@ export class Legal {
 
     // ─── Spedizioni e resi ─────────────────────────────────────────────────
     'spedizioni-e-resi': {
-      title: 'Spedizioni e resi',
-      updatedAt: '15 settembre 2026',
+      title: 'Shipping & Returns',
+      updatedAt: '15 September 2026',
       intro:
-        'Quanto costa la spedizione, quanto tempo serve perché il pacco arrivi, e cosa fare se quello che hai ricevuto non va bene. Le cifre riportate qui sono le stesse che il carrello applica al momento dell\'ordine.',
+        'How much shipping costs, how long it takes for the parcel to arrive, and what to do if what you received isn\'t right. The figures given here are the same ones the cart applies when you place an order.',
       sections: [
         {
-          heading: 'Dove spediamo',
-          body: 'Spediamo in tutta Italia, isole comprese. Per le consegne al di fuori del territorio italiano scrivici prima dell\'ordine a [PEC]: tempi e costi vengono concordati caso per caso.',
+          heading: 'Where we ship',
+          body: 'We ship throughout Italy, islands included. For deliveries outside Italian territory, write to us at [PEC] before ordering: timing and costs are agreed case by case.',
         },
         {
-          heading: 'Costi di spedizione',
+          heading: 'Shipping costs',
           body:
-            'Spedizione standard: 4,90 €.\n' +
-            'Spedizione express: 9,90 €.\n\n' +
-            'La spedizione standard è gratuita per gli ordini che, dopo l\'applicazione di eventuali sconti e codici promozionali, raggiungono i 100 €. La soglia si calcola sull\'importo effettivamente scontato, non sul prezzo di listino.\n\n' +
-            'Il costo esatto ti viene mostrato nel riepilogo prima della conferma dell\'ordine, e compare come voce separata in fattura.',
+            'Standard shipping: €4.90.\n' +
+            'Express shipping: €9.90.\n\n' +
+            'Standard shipping is free for orders that, after any discounts and promo codes are applied, reach €100. The threshold is calculated on the amount actually charged after discount, not on the list price.\n\n' +
+            'The exact cost is shown in the summary before the order is confirmed, and appears as a separate line on the invoice.',
         },
         {
-          heading: 'Tempi di consegna',
+          heading: 'Delivery times',
           body:
-            'Spedizione standard: 3-5 giorni lavorativi dalla presa in carico del corriere.\n' +
-            'Spedizione express: 1-2 giorni lavorativi dalla presa in carico del corriere.\n\n' +
-            'Gli ordini ricevuti e pagati entro le 13:00 di un giorno lavorativo vengono di norma affidati al corriere lo stesso giorno; quelli successivi il primo giorno lavorativo utile. Sabato, domenica e festivi non sono giorni lavorativi.\n\n' +
-            'Nei periodi di saldi e nelle settimane prima delle festività i tempi possono allungarsi di uno o due giorni. In ogni caso, ai sensi dell\'articolo 61 del Codice del consumo, la consegna avviene entro trenta giorni dalla conclusione del contratto.',
+            'Standard shipping: 3-5 business days from when the courier takes the parcel.\n' +
+            'Express shipping: 1-2 business days from when the courier takes the parcel.\n\n' +
+            'Orders received and paid for by 1:00 pm on a business day are normally handed to the courier the same day; later orders go out the next business day. Saturdays, Sundays and public holidays are not business days.\n\n' +
+            'During sales periods and in the weeks before holidays, times can stretch by a day or two. In any case, under Article 61 of the Codice del consumo, delivery takes place within thirty days of the contract being formed.',
         },
         {
-          heading: 'Come seguire la spedizione',
-          body: 'Appena il pacco parte ricevi un\'email con il numero di tracciamento. Lo stesso numero, con il link al sito del corriere, è sempre visibile nella sezione "I miei ordini" del tuo account, insieme alla cronologia completa degli stati dell\'ordine.',
+          heading: 'How to track your shipment',
+          body: 'As soon as the parcel is sent you receive an email with the tracking number. The same number, with a link to the courier\'s site, is always visible in the "My orders" section of your account, along with the full history of the order\'s status.',
         },
         {
-          heading: 'Se il pacco non arriva o arriva danneggiato',
+          heading: 'If the parcel doesn\'t arrive or arrives damaged',
           body:
-            'Al momento della consegna controlla che l\'imballo sia integro. Se è visibilmente danneggiato o manomesso, accetta il pacco con riserva scritta sul documento del corriere e segnalacelo entro sette giorni: senza la riserva la contestazione al vettore diventa molto più difficile.\n\n' +
-            'Se il pacco risulta consegnato ma non lo hai ricevuto, scrivici a [PEC]: apriamo noi la pratica con il corriere. Fino alla consegna il rischio di perdita o danneggiamento resta a nostro carico.',
+            'When the parcel is delivered, check that the packaging is intact. If it is visibly damaged or tampered with, accept the parcel with a written note on the courier\'s document and report it to us within seven days: without that note, a claim against the carrier becomes much harder.\n\n' +
+            'If the parcel is marked as delivered but you never received it, write to us at [PEC]: we will open the case with the courier ourselves. Until delivery, the risk of loss or damage remains ours.',
         },
         {
-          heading: 'Resi: due strade diverse',
+          heading: 'Returns: two different paths',
           body:
-            'Ripensamento — hai quattordici giorni per restituire l\'acquisto senza dare spiegazioni. È il diritto di recesso: modalità, termini e modulo tipo stanno nella pagina dedicata. Le spese di restituzione sono a tuo carico.\n\n' +
-            'Prodotto difettoso o sbagliato — se quello che hai ricevuto è difettoso, non conforme o diverso da quello ordinato, si applica la garanzia legale di conformità, che dura due anni dalla consegna. In questo caso la restituzione non ti costa nulla e hai diritto alla riparazione o alla sostituzione senza spese, e in subordine alla riduzione del prezzo o alla risoluzione del contratto.',
+            'Change of mind — you have fourteen days to return your purchase without giving a reason. This is the right of withdrawal: the procedure, time limits and model form are on the dedicated page. Return shipping costs are at your expense.\n\n' +
+            'Defective or wrong product — if what you received is defective, non-conforming or different from what you ordered, the statutory conformity guarantee applies, lasting two years from delivery. In this case the return costs you nothing and you are entitled to free repair or replacement, and failing that to a price reduction or termination of the contract.',
         },
         {
-          heading: 'Come aprire un reso',
+          heading: 'How to open a return',
           body:
-            '1. Entra nella sezione "I miei ordini" del tuo account. La richiesta si può aprire sugli ordini già consegnati o completati.\n' +
-            '2. Premi "Richiedi reso" sull\'ordine, scegli quali articoli restituire e in che quantità, e descrivi il motivo in almeno dieci caratteri.\n' +
-            '3. Ricevi via email la conferma della richiesta con l\'indirizzo a cui spedire e le istruzioni.\n' +
-            '4. Spedisci la merce entro quattordici giorni dalla comunicazione, conservando la ricevuta.\n' +
-            '5. Al ricevimento verifichiamo lo stato dei beni e procediamo al rimborso.\n\n' +
-            'Puoi seguire lo stato della richiesta nella stessa pagina: richiesto, approvato, ricevuto, rimborsato — oppure rifiutato, con la motivazione.',
+            '1. Go to the "My orders" section of your account. A request can be opened on orders that are already delivered or completed.\n' +
+            '2. Press "Request a return" on the order, choose which items to return and in what quantity, and describe the reason in at least ten characters.\n' +
+            '3. You receive the request confirmation by email, with the address to ship to and instructions.\n' +
+            '4. Ship the goods within fourteen days of the request, keeping the receipt.\n' +
+            '5. On receipt we check the condition of the goods and process the refund.\n\n' +
+            'You can follow the status of the request on the same page: requested, approved, received, refunded — or rejected, with the reason given.',
         },
         {
-          heading: 'Tempi di rimborso',
-          body: 'Il rimborso viene disposto entro quattordici giorni dal momento in cui riceviamo la comunicazione di recesso, fermo restando che possiamo attenderne la merce o la prova della spedizione.\n\nL\'accredito sul tuo metodo di pagamento dipende poi dai tempi tecnici dell\'emittente della carta, di norma da tre a cinque giorni lavorativi. Buoni regalo e punti fedeltà tornano immediatamente disponibili sul tuo account.',
+          heading: 'Refund times',
+          body: 'The refund is issued within fourteen days of when we receive the withdrawal notice, though we may wait for the goods or proof of shipment first.\n\nWhen the amount reaches your payment method then depends on your card issuer\'s own processing times, normally three to five business days. Gift cards and loyalty points become available on your account again immediately.',
         },
         {
-          heading: 'Cambi',
-          body: 'Non gestiamo il cambio diretto di taglia o colore: la disponibilità cambia troppo in fretta perché possiamo garantirti l\'articolo per il tempo del viaggio di ritorno. Apri un reso per l\'articolo che non va bene e ordina separatamente quello che vuoi: è più rapido e ti assicura di prendere la taglia finché c\'è.',
+          heading: 'Exchanges',
+          body: 'We do not offer direct size or colour exchanges: availability changes too quickly for us to guarantee you the item for the time it takes the return to travel back to us. Open a return for the item that doesn\'t work and order what you want separately: it\'s faster and it ensures you get the size while it\'s still in stock.',
         },
       ],
     },

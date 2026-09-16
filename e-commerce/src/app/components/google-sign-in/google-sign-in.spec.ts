@@ -59,7 +59,7 @@ describe('GoogleSignInButton', () => {
     const link: HTMLAnchorElement | null = fixture.nativeElement.querySelector('a');
     expect(link).not.toBeNull();
     expect(link!.getAttribute('href')).toBe('http://localhost:3000/api/auth/oauth2/authorize/google');
-    expect(link!.textContent).toContain('Accedi con Google');
+    expect(link!.textContent).toContain('Sign in with Google');
   });
 
   it('uses the design system button, not a hand-built one', async () => {

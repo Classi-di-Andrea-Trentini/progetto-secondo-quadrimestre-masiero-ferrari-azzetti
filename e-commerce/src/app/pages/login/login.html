@@ -2,10 +2,10 @@
   <div class="w-full max-w-sm">
 
     <div class="mb-10 text-center">
-      <h1 class="display text-3xl">Accedi</h1>
+      <h1 class="display text-3xl">Sign in</h1>
       <p class="mt-2 text-sm text-ink-muted">
-        Non hai un account?
-        <a routerLink="/register" class="link">Registrati</a>
+        Don't have an account?
+        <a routerLink="/register" class="link">Sign up</a>
       </p>
     </div>
 
@@ -18,13 +18,13 @@
           type="email"
           formControlName="email"
           autocomplete="email"
-          placeholder="nome@esempio.it"
+          placeholder="name@example.com"
           class="field"
           [attr.aria-invalid]="email.invalid && email.touched ? 'true' : null"
           [attr.aria-describedby]="email.invalid && email.touched ? 'email-error' : null"
         />
         @if (email.invalid && email.touched) {
-          <p id="email-error" class="field-error">Inserisci un indirizzo email valido</p>
+          <p id="email-error" class="field-error">Enter a valid email address</p>
         }
       </div>
 
@@ -46,14 +46,14 @@
             type="button"
             class="btn btn-ghost btn-sm absolute inset-y-0 right-0"
             [attr.aria-pressed]="showPassword()"
-            [attr.aria-label]="showPassword() ? 'Nascondi password' : 'Mostra password'"
+            [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
             (click)="togglePasswordVisibility()"
           >
-            {{ showPassword() ? 'Nascondi' : 'Mostra' }}
+            {{ showPassword() ? 'Hide' : 'Show' }}
           </button>
         </div>
         @if (password.invalid && password.touched) {
-          <p id="password-error" class="field-error">La password deve essere di almeno 8 caratteri</p>
+          <p id="password-error" class="field-error">Password must be at least 8 characters</p>
         }
       </div>
 
@@ -65,7 +65,7 @@
 
       <div class="flex justify-end">
         <a routerLink="/forgot-password" class="text-xs text-ink-muted hover:text-ink transition">
-          Password dimenticata?
+          Forgot your password?
         </a>
       </div>
 
@@ -74,7 +74,7 @@
         class="btn btn-primary btn-lg btn-block"
         [attr.data-loading]="loading() ? 'true' : null"
       >
-        {{ loading() ? 'Accesso in corso' : 'Accedi' }}
+        {{ loading() ? 'Signing in' : 'Sign in' }}
       </button>
 
     </form>

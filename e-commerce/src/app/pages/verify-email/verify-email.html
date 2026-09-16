@@ -1,12 +1,12 @@
 <div class="min-h-screen bg-paper flex items-center justify-center px-4 py-16">
-  <div class="w-full max-w-md panel px-12 py-14 text-center">
+  <div class="w-full max-w-md panel px-6 py-10 sm:px-12 sm:py-14 text-center">
 
     @switch (status()) {
 
       @case ('loading') {
         <div class="flex flex-col items-center gap-4">
           <div class="w-8 h-8 border-2 border-ink border-t-transparent rounded-full animate-spin"></div>
-          <p class="label mb-0">Verifica in corso...</p>
+          <p class="label mb-0">Verifying...</p>
         </div>
       }
 
@@ -17,11 +17,11 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <h1 class="display text-3xl mb-4">Email verificata.</h1>
+        <h1 class="display text-3xl mb-4">Email verified.</h1>
         <p class="text-sm text-ink-muted mb-10">
-          Il tuo indirizzo email è stato confermato con successo.
+          Your email address has been successfully confirmed.
         </p>
-        <a routerLink="/me" class="btn btn-primary btn-lg">Vai al profilo</a>
+        <a routerLink="/me" class="btn btn-primary btn-lg">Go to profile</a>
       }
 
       @case ('error') {
@@ -31,11 +31,11 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </div>
-        <h1 class="display text-3xl mb-4">Link non valido.</h1>
+        <h1 class="display text-3xl mb-4">Invalid link.</h1>
         <p class="text-sm text-ink-muted mb-10">
-          {{ message() ?? 'Il link è scaduto o è già stato utilizzato.' }}
+          {{ message() ?? 'The link has expired or has already been used.' }}
         </p>
-        <a routerLink="/me" class="btn btn-outline btn-lg">Torna al profilo</a>
+        <a routerLink="/me" class="btn btn-outline btn-lg">Back to profile</a>
       }
 
     }
