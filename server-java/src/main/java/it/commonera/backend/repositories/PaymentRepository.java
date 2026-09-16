@@ -16,4 +16,10 @@ public interface PaymentRepository extends JpaRepository<Payment, UUID> {
      * `provider_tx_id` UNIQUE.
      */
     Optional<Payment> findByOrderId(UUID orderId);
+
+    /**
+     * La colonna e' UNIQUE a schema: e' gia' la chiave di idempotenza del
+     * webhook, non ce n'e' bisogno di un'altra.
+     */
+    Optional<Payment> findByProviderTxId(String providerTxId);
 }

@@ -322,7 +322,10 @@ public class CheckoutService {
                             }
                         });
             }
-            carts.save(cart);
+            // Niente `save()`: il carrello e' gia' gestito dalla sessione e le
+            // modifiche vengono scritte al flush. Chiamarlo farebbe un merge, e
+            // il merge prova a cancellare la riga **staccata** appena rimossa
+            // dalla collezione, andando in DetachedObjectException.
         });
     }
 

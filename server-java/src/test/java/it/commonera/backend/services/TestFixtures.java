@@ -28,7 +28,9 @@ public class TestFixtures {
     private final LoyaltyEntryRepository loyaltyEntries;
     private final CheckoutService checkout;
     private final PaymentRepository payments;
-    private final LoyaltyService loyaltyService;
+    private final PaymentWebhookService webhook;
+    private final CartRepository carts;
+    private final GiftCardRepository giftCardRepo;
 
     @PersistenceContext
     private EntityManager em;
@@ -36,7 +38,8 @@ public class TestFixtures {
     public TestFixtures(UserRepository users, UserAddressRepository addresses, OrderRepository orders,
                         GiftCardService giftCards, LoyaltyEntryRepository loyaltyEntries,
                         CheckoutService checkout, PaymentRepository payments,
-                        LoyaltyService loyaltyService) {
+                        PaymentWebhookService webhook, CartRepository carts,
+                        GiftCardRepository giftCardRepo) {
         this.users = users;
         this.addresses = addresses;
         this.orders = orders;
@@ -44,8 +47,95 @@ public class TestFixtures {
         this.loyaltyEntries = loyaltyEntries;
         this.checkout = checkout;
         this.payments = payments;
-        this.loyaltyService = loyaltyService;
+        this.webhook = webhook;
+        this.carts = carts;
+        this.giftCardRepo = giftCardRepo;
     }
+
+    /**
+     * Un checkout fermo in attesa dell'incasso: ordine `pending`, merce
+     * riservata, carrello ancora pieno. E' lo stato su cui lavora il webhook.
+     */
+    public PendingCheckout aPendingCheckout() {
+        return pendingCheckout(null);
+    }
+
+    /** Come sopra, ma con un buono che copre **in parte**: resta qualcosa da incassare. */
+    public PendingCheckout aPendingCheckoutWithGiftCard() {
+        return pendingCheckout(new BigDecimal("20.00"));
+    }
+
+    private PendingCheckout pendingCheckout(BigDecimal giftCardBalance) {
+        var buyer = aUser();
+        var address = anAddressFor(buyer);
+        var variant = aVariantWithStock(10);
+        int quantity = 2;
+
+        // Il carrello va riempito davvero: il webhook deve svuotarlo, e un
+        // carrello gia' vuoto farebbe passare il test senza provare niente.
+        var cart = new Cart();
+        cart.setUserId(buyer.getId());
+        var cartItem = new CartItem();
+        cartItem.setCart(cart);
+        cartItem.setVariant(variant);
+        cartItem.setQuantity(quantity);
+        cart.getItems().add(cartItem);
+        carts.save(cart);
+
+        GiftCard card = giftCardBalance == null ? null
+                : giftCards.issue(buyer.getId(), giftCardBalance, "buono di prova", null);
+        em.flush();
+        // Fotografato **prima** del checkout: dopo il riscatto sarebbe il saldo
+        // gia' scalato, e il confronto dopo il rimborso non proverebbe niente.
+        BigDecimal balanceBefore = card == null ? null : giftCardBalanceOf(card.getId());
+
+        var request = new CheckoutService.Request(address.getId(),
+                java.util.List.of(new CheckoutService.Line(variant.getId(), quantity)),
+                "standard", null, card == null ? null : card.getCode(), null, null);
+        var result = checkout.placeOrder(buyer.getId(), request);
+        em.flush();
+
+        var orderId = (UUID) result.get("orderId");
+        var intentId = payments.findByOrderId(orderId).orElseThrow().getProviderTxId();
+        return new PendingCheckout(orderId, buyer.getId(), variant.getId(), quantity, intentId,
+                card == null ? null : card.getId(), balanceBefore);
+    }
+
+    /**
+     * Un evento nel formato del {@link SimulatedPaymentGateway}, che e' il
+     * fornitore attivo quando non ci sono chiavi. Il formato vero di Stripe e'
+     * annidato e firmato: qui non serve, perche' cio' che si vuole provare e'
+     * cosa fa il negozio **dopo** aver riconosciuto l'evento.
+     */
+    public String succeededEvent(String intentId) {
+        return "{\"type\":\"payment_intent.succeeded\",\"intent\":\"" + intentId + "\"}";
+    }
+
+    public String failedEvent(String intentId) {
+        return "{\"type\":\"payment_intent.payment_failed\",\"intent\":\"" + intentId + "\"}";
+    }
+
+    public Cart cartOf(UUID userId) {
+        return carts.findByUserId(userId).orElseThrow();
+    }
+
+    /**
+     * Giacenza e saldo letti con query scalari: si muovono con UPDATE atomici,
+     * che **non** aggiornano le entita' gia' in sessione. Letti da `findById`
+     * darebbero il valore di prima, preso dalla cache.
+     */
+    public int stockOf(UUID variantId) {
+        return em.createQuery("select v.stockQty from ProductVariant v where v.id = :id", Integer.class)
+                .setParameter("id", variantId).getSingleResult();
+    }
+
+    public BigDecimal giftCardBalanceOf(UUID giftCardId) {
+        return em.createQuery("select g.currentBalance from GiftCard g where g.id = :id", BigDecimal.class)
+                .setParameter("id", giftCardId).getSingleResult();
+    }
+
+    public record PendingCheckout(UUID orderId, UUID userId, UUID variantId, int quantity,
+                                  String intentId, UUID giftCardId, BigDecimal giftCardBalanceBefore) {}
 
     /**
      * Porta a `paid` un ordine appena prenotato, come fara' il webhook del
@@ -58,19 +148,11 @@ public class TestFixtures {
      * si dichiarava pagato senza che nessuno avesse pagato.
      */
     public void confirmPaid(UUID orderId) {
-        var order = orders.findById(orderId).orElseThrow();
-        payments.findByOrderId(orderId).ifPresent(payment -> {
-            payment.setStatus(Payment.PaymentStatus.succeeded);
-            payment.setPaidAt(LocalDateTime.now());
-            payments.save(payment);
-        });
-        order.setStatus(OrderStatus.paid);
-        orders.save(order);
-        // L'accredito passa dal servizio vero, non da una formula ricopiata qui:
-        // una copia diverge al primo cambiamento e i test smetterebbero di
-        // descrivere quello che fa il negozio.
-        loyaltyService.award(order.getUserId(), order.getId(),
-                order.getSubtotal().subtract(order.getDiscountTotal()));
+        // Passa dal webhook vero, non da una scorciatoia: cosi' i test che
+        // guardano un ordine pagato provano anche la strada per cui ci e'
+        // arrivato, invece di una copia che puo' divergere.
+        var intentId = payments.findByOrderId(orderId).orElseThrow().getProviderTxId();
+        webhook.handle(succeededEvent(intentId), null);
         em.flush();
     }
 

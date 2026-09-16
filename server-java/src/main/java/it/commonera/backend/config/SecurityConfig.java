@@ -61,6 +61,10 @@ public class SecurityConfig {
                         // Chiunque puo' iscriversi, anche senza account: stesso comportamento
                         // pubblico del backend Node (nessun JwtAuthGuard su questa rotta).
                         .requestMatchers("/newsletter/subscribe").permitAll()
+                        // Il webhook non ha sessione: lo autentica la firma del
+                        // fornitore, verificata dentro il service. Lasciarlo dietro
+                        // authenticated() lo renderebbe irraggiungibile.
+                        .requestMatchers(HttpMethod.POST, "/payments/webhook").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .exceptionHandling(ex -> ex
