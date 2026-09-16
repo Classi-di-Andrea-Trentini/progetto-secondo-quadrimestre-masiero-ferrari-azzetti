@@ -77,7 +77,7 @@ public class OrderService {
         // OrderCompensationService, perche' la fanno identica anche il webhook del
         // pagamento fallito e il raccoglitore degli ordini abbandonati. Il falso
         // significa che un'altra richiesta ha gia' chiuso questo ordine.
-        if (!compensation.releaseAndCancel(order, CANCELLABLE, userId, "Annullato dal cliente")) {
+        if (!compensation.releaseAndCancel(order, CANCELLABLE, userId, "Cancelled by customer")) {
             throw ApiException.badRequest("Order can no longer be cancelled");
         }
 
