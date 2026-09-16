@@ -3,6 +3,7 @@ package it.commonera.backend.services;
 import it.commonera.backend.entities.Order;
 import it.commonera.backend.entities.OrderStatus;
 import it.commonera.backend.entities.OrderStatusHistory;
+import it.commonera.backend.entities.OrderStatusMachine;
 import it.commonera.backend.entities.Payment;
 import it.commonera.backend.exceptions.ApiException;
 import it.commonera.backend.repositories.OrderRepository;
@@ -150,11 +151,40 @@ public class OrderCompensationService {
             gateway.refund(payment.getProviderTxId(), amount);
         }
 
+        boolean fullyRefunded = total.compareTo(payment.getAmount()) == 0;
         payment.setRefundedAmount(total);
-        payment.setStatus(total.compareTo(payment.getAmount()) == 0
+        payment.setStatus(fullyRefunded
                 ? Payment.PaymentStatus.refunded
                 : Payment.PaymentStatus.partially_refunded);
         payments.save(payment);
+
+        if (fullyRefunded) {
+            closeAsRefunded(order);
+        }
+    }
+
+    /**
+     * Restituito tutto, l'ordine deve dirlo. Prima il pagamento passava a
+     * `refunded` e l'ordine restava `delivered`: chi guardava l'elenco vedeva
+     * merce consegnata e pagata mentre il denaro era gia' tornato indietro.
+     *
+     * Un ordine **annullato** resta annullato: `cancelled` e' terminale, e
+     * `releaseAndCancel` arriva qui dopo averlo gia' scritto. La transizione
+     * usa la stessa guardia atomica di tutte le altre, cosi' due rimborsi
+     * concorrenti non se la contendono.
+     */
+    private void closeAsRefunded(Order order) {
+        var refundable = OrderStatusMachine.refundableFrom();
+        if (!refundable.contains(order.getStatus())) return;
+
+        if (orders.updateStatusIfCurrentIn(order.getId(), OrderStatus.refunded, refundable) > 0) {
+            order.setStatus(OrderStatus.refunded);
+            var entry = new OrderStatusHistory();
+            entry.setOrder(order);
+            entry.setStatus(OrderStatus.refunded);
+            entry.setNote("Rimborsato per intero");
+            order.getStatusHistory().add(entry);
+        }
     }
 
     /** Quanto resta da restituire di un incasso. */

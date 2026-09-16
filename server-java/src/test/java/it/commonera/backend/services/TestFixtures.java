@@ -33,6 +33,7 @@ public class TestFixtures {
     private final CartRepository carts;
     private final GiftCardRepository giftCardRepo;
     private final ReturnService returnService;
+    private final OrderService orderService;
     private final OrderReturnRepository returnRepo;
 
     @PersistenceContext
@@ -43,7 +44,7 @@ public class TestFixtures {
                         CheckoutService checkout, PaymentRepository payments,
                         PaymentWebhookService webhook, CartRepository carts,
                         GiftCardRepository giftCardRepo, ReturnService returnService,
-                        OrderReturnRepository returnRepo) {
+                        OrderReturnRepository returnRepo, OrderService orderService) {
         this.users = users;
         this.addresses = addresses;
         this.orders = orders;
@@ -55,6 +56,7 @@ public class TestFixtures {
         this.carts = carts;
         this.giftCardRepo = giftCardRepo;
         this.returnService = returnService;
+        this.orderService = orderService;
         this.returnRepo = returnRepo;
     }
 
@@ -138,6 +140,12 @@ public class TestFixtures {
         orders.save(order);
         em.flush();
         return returnRepo.findById(view.id()).orElseThrow();
+    }
+
+    /** L'annullamento chiesto dal cliente, dal servizio vero. */
+    public void cancelAsCustomer(PendingCheckout draft) {
+        orderService.cancel(draft.userId(), draft.orderId());
+        em.flush();
     }
 
     /** Forza lo stato di un ordine scavalcando ogni controllo: serve ai casi limite. */

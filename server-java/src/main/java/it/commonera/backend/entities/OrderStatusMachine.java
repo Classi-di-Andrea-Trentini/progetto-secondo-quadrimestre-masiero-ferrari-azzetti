@@ -92,6 +92,17 @@ public final class OrderStatusMachine {
      * invece che riscritti a mano: una seconda lista finirebbe per divergere, e
      * divergerebbe proprio sul passaggio che restituisce i soldi.
      */
+    /**
+     * Gli stati dai quali un ordine puo' passare a `refunded`. Derivati dal
+     * grafo, non riscritti a mano: una seconda lista divergerebbe alla prima
+     * modifica delle transizioni.
+     */
+    public static Set<OrderStatus> refundableFrom() {
+        return java.util.Arrays.stream(OrderStatus.values())
+                .filter(from -> allows(from, OrderStatus.refunded))
+                .collect(java.util.stream.Collectors.toUnmodifiableSet());
+    }
+
     public static Set<OrderStatus> cancellableFrom() {
         var result = EnumSet.noneOf(OrderStatus.class);
         ALLOWED.forEach((from, targets) -> {
