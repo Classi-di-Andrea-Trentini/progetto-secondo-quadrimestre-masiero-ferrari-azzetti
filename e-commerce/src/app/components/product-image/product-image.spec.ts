@@ -36,6 +36,13 @@ describe('ProductImageComponent', () => {
     expect(host().querySelector('.ce-fallback')).toBeTruthy();
   });
 
+  it('labels the placeholder in english when no alt text is given', async () => {
+    fixture.componentRef.setInput('src', '   ');
+    await fixture.whenStable();
+
+    expect(host().querySelector('.ce-fallback')!.getAttribute('aria-label')).toBe('Image not available');
+  });
+
   it('falls back to the placeholder when the image fails to load', async () => {
     fixture.componentRef.setInput('src', '/media/catalogo/prodotti/non-esiste.svg');
     await fixture.whenStable();
