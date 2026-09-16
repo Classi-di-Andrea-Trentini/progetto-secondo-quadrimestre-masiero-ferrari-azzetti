@@ -221,8 +221,14 @@ public class AdminService {
      * {@link OrderCompensationService}, l'unico posto che sa restituire giacenza,
      * incasso, buono e punti — e l'unico che regge due annullamenti concorrenti.
      */
+    /** La nota dell'amministratore se l'ha scritta, altrimenti quella di sistema. */
+    private static String noteOr(String fallback, String note) {
+        return note == null || note.isBlank() ? fallback : note;
+    }
+
     @Transactional
-    public Map<String, Object> updateOrderStatus(UUID adminId, UUID orderId, String status, String trackingNumber) {
+    public Map<String, Object> updateOrderStatus(UUID adminId, UUID orderId, String status,
+                                                String trackingNumber, String note) {
         var order = orders.findById(orderId)
                 .orElseThrow(() -> ApiException.notFound("Order not found"));
 
@@ -251,7 +257,7 @@ public class AdminService {
             // qualcun altro ha mosso l'ordine, la transizione atomica non tocca
             // nessuna riga e qui non si compensa due volte.
             if (!compensation.releaseAndCancel(order, List.of(current), adminId,
-                    "Annullato dall'amministratore")) {
+                    noteOr("Annullato dall'amministratore", note))) {
                 throw ApiException.conflict("L'ordine e' gia' stato chiuso da un'altra operazione");
             }
             if (trackingNumber != null) order.setTrackingNumber(trackingNumber);
@@ -266,7 +272,7 @@ public class AdminService {
         entry.setOrder(order);
         entry.setStatus(next);
         entry.setChangedBy(adminId);
-        entry.setNote("Aggiornato dall'amministratore");
+        entry.setNote(noteOr("Aggiornato dall'amministratore", note));
         order.getStatusHistory().add(entry);
 
         orders.save(order);

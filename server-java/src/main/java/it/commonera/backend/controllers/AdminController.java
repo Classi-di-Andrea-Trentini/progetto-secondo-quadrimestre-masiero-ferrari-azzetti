@@ -64,7 +64,7 @@ public class AdminController {
     public Map<String, Object> orderStatus(@AuthenticationPrincipal CurrentUser user,
                                            @PathVariable UUID id,
                                            @RequestBody OrderStatusUpdate body) {
-        return admin.updateOrderStatus(user.id(), id, body.status(), body.trackingNumber());
+        return admin.updateOrderStatus(user.id(), id, body.status(), body.trackingNumber(), body.note());
     }
 
     @GetMapping("/gift-cards")
@@ -310,7 +310,13 @@ public class AdminController {
 
     public record StockAdjustment(Integer delta, Integer set, String reason) {}
 
-    public record OrderStatusUpdate(String status, String trackingNumber) {}
+    /**
+     * `note` e' la spiegazione che l'amministratore scrive nel modulo e che
+     * finisce nello storico dell'ordine. Non c'era: il frontend la mandava da
+     * sempre e il backend la buttava in silenzio, quindi ogni passaggio di stato
+     * si leggeva "Aggiornato dall'amministratore" e basta.
+     */
+    public record OrderStatusUpdate(String status, String trackingNumber, String note) {}
 
     public record ReviewStatusUpdate(String status) {}
 

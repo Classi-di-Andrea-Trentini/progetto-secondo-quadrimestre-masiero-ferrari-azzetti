@@ -66,7 +66,7 @@ class AdminOrderTransitionTest extends AbstractIntegrationTest {
         orderService.cancel(draft.userId(), draft.orderId());
         reload();
 
-        assertThatThrownBy(() -> admin.updateOrderStatus(adminId, draft.orderId(), "delivered", null))
+        assertThatThrownBy(() -> admin.updateOrderStatus(adminId, draft.orderId(), "delivered", null, null))
                 .isInstanceOf(ApiException.class)
                 .hasMessageContaining("cancelled");
 
@@ -84,7 +84,7 @@ class AdminOrderTransitionTest extends AbstractIntegrationTest {
         var draft = fixtures.aPendingCheckout();
         reload();
 
-        assertThatThrownBy(() -> admin.updateOrderStatus(adminId, draft.orderId(), "paid", null))
+        assertThatThrownBy(() -> admin.updateOrderStatus(adminId, draft.orderId(), "paid", null, null))
                 .isInstanceOf(ApiException.class);
 
         assertThat(statusOf(draft.orderId())).isEqualTo(OrderStatus.pending);
@@ -95,10 +95,10 @@ class AdminOrderTransitionTest extends AbstractIntegrationTest {
     void aShippedOrderCannotGoBackToProcessing() {
         var draft = fixtures.aPaidCheckout();
         reload();
-        admin.updateOrderStatus(adminId, draft.orderId(), "shipped", "TRACK-1");
+        admin.updateOrderStatus(adminId, draft.orderId(), "shipped", "TRACK-1", null);
         reload();
 
-        assertThatThrownBy(() -> admin.updateOrderStatus(adminId, draft.orderId(), "processing", null))
+        assertThatThrownBy(() -> admin.updateOrderStatus(adminId, draft.orderId(), "processing", null, null))
                 .isInstanceOf(ApiException.class);
 
         assertThat(statusOf(draft.orderId())).isEqualTo(OrderStatus.shipped);
@@ -111,7 +111,7 @@ class AdminOrderTransitionTest extends AbstractIntegrationTest {
         reload();
 
         for (String next : new String[]{"processing", "shipped", "delivered", "completed"}) {
-            assertThatCode(() -> admin.updateOrderStatus(adminId, draft.orderId(), next, null))
+            assertThatCode(() -> admin.updateOrderStatus(adminId, draft.orderId(), next, null, null))
                     .doesNotThrowAnyException();
             reload();
         }
@@ -131,7 +131,7 @@ class AdminOrderTransitionTest extends AbstractIntegrationTest {
         reload();
         int reserved = fixtures.stockOf(draft.variantId());
 
-        admin.updateOrderStatus(adminId, draft.orderId(), "cancelled", null);
+        admin.updateOrderStatus(adminId, draft.orderId(), "cancelled", null, null);
         reload();
 
         assertThat(statusOf(draft.orderId())).isEqualTo(OrderStatus.cancelled);
@@ -144,7 +144,7 @@ class AdminOrderTransitionTest extends AbstractIntegrationTest {
         var draft = fixtures.aPendingCheckout();
         reload();
 
-        assertThatThrownBy(() -> admin.updateOrderStatus(adminId, draft.orderId(), "teleported", null))
+        assertThatThrownBy(() -> admin.updateOrderStatus(adminId, draft.orderId(), "teleported", null, null))
                 .isInstanceOf(ApiException.class)
                 .hasMessageContaining("Invalid order status");
     }
@@ -160,5 +160,18 @@ class AdminOrderTransitionTest extends AbstractIntegrationTest {
 
     private OrderStatus statusOf(UUID orderId) {
         return orders.findById(orderId).map(Order::getStatus).orElseThrow();
+    }
+
+    @Test
+    void theAdminNoteReachesTheOrderHistory() {
+        // Il frontend la manda da sempre; il backend non la dichiarava nel DTO e
+        // la buttava in silenzio, lasciando ogni passaggio con la nota di sistema.
+        var draft = fixtures.aPaidCheckout();
+
+        admin.updateOrderStatus(adminId, draft.orderId(), "shipped", "TRACK-9", "Ritirato dal corriere alle 9");
+
+        var order = orders.findById(draft.orderId()).orElseThrow();
+        var last = order.getStatusHistory().get(order.getStatusHistory().size() - 1);
+        assertThat(last.getNote()).isEqualTo("Ritirato dal corriere alle 9");
     }
 }
