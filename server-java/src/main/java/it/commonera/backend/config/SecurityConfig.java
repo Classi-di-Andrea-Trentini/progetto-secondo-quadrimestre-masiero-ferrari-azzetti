@@ -37,7 +37,9 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, JwtCookieFilter jwtFilter) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, JwtCookieFilter jwtFilter,
+                                           it.commonera.backend.security.GoogleLoginCustomizer googleLogin)
+            throws Exception {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 // Niente CSRF token: l'autenticazione e' un cookie SameSite=Lax e
@@ -54,6 +56,12 @@ public class SecurityConfig {
                         // resta una rotta /admin/**.
                         .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
                         .requestMatchers("/auth/register", "/auth/login").permitAll()
+                        // Accesso con Google e configurazione pubblica: l'andata verso
+                        // Google e il ritorno avvengono per definizione senza sessione,
+                        // e /config e' cio' che il frontend legge per sapere se il
+                        // bottone esiste. Registrate qui anche quando Google e' spento:
+                        // in quel caso le rotte non esistono e rispondono 404.
+                        .requestMatchers(HttpMethod.GET, "/config", "/auth/oauth2/**").permitAll()
                         // Password dimenticata e conferma dell'indirizzo email: ci si
                         // arriva **senza** essere collegati, e' tutto il loro senso.
                         .requestMatchers("/auth/forgot-password", "/auth/reset-password").permitAll()
@@ -76,6 +84,11 @@ public class SecurityConfig {
                         .accessDeniedHandler((request, response, denied) ->
                                 writeError(response, 403, "Forbidden")))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+
+        // "Accedi con Google", se e solo se le credenziali ci sono: senza, questa
+        // chiamata non fa niente (vedi GoogleOAuthConfig). Tutta la configurazione
+        // OAuth vive li', non qui.
+        googleLogin.applyTo(http);
 
         return http.build();
     }

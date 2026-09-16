@@ -66,19 +66,49 @@ public class AuthService {
         var found = users.findByEmailIgnoreCase(email)
                 .filter(u -> u.getDeletedAt() == null && Boolean.TRUE.equals(u.getIsActive()));
 
-        String hash = found.map(User::getPasswordHash).orElse(DUMMY_HASH);
+        // `password_hash` puo' essere NULL da quando esiste l'accesso con Google. Il
+        // confronto si fa comunque, contro l'hash fittizio: saltarlo accorcerebbe la
+        // risposta e direbbe a chi prova che quell'account non ha una password.
+        String hash = found.filter(User::hasPassword).map(User::getPasswordHash).orElse(DUMMY_HASH);
         boolean ok = encoder.matches(password, hash);
 
-        if (found.isEmpty() || !ok) {
+        if (found.isEmpty() || (found.get().hasPassword() && !ok)) {
             rateLimiter.recordFailure(email);
             throw ApiException.unauthorized("Credenziali non valide");
         }
 
         var user = found.get();
+
+        if (!user.hasPassword()) {
+            // Messaggio esplicito e non "Credenziali non valide": una password che non
+            // esiste non si indovina, e la persona resterebbe a riprovare per sempre.
+            // Sull'enumerazione degli indirizzi non si perde niente, perche'
+            // /auth/register risponde gia' "Email gia' registrata" a chi ci prova.
+            rateLimiter.recordFailure(email);
+            throw ApiException.unauthorized(
+                    "Questo account accede con Google. Usa il bottone \"Accedi con Google\", "
+                            + "oppure imposta una password da \"Password dimenticata\".");
+        }
+
         if (!user.isEmailVerified()) {
             throw ApiException.unauthorized("Account non verificato");
         }
 
+        rateLimiter.recordSuccess(email);
+        return issueSession(user, userAgent);
+    }
+
+    /**
+     * Apre una sessione e firma il token, senza chiedersi come si e' entrati.
+     *
+     * Vive qui e non dentro {@link #login} perche' l'accesso con Google deve emettere
+     * **esattamente** la stessa sessione: stesso cookie, stessa riga in `sessions`,
+     * stessa scadenza. Due modi di entrare, un solo modello di sessione — altrimenti
+     * logout, scadenza e {@code JwtCookieFilter} avrebbero due comportamenti da tenere
+     * allineati a mano.
+     */
+    @Transactional
+    public Issued issueSession(User user, String userAgent) {
         var session = new Session();
         session.setUserId(user.getId());
         session.setExpiresAt(LocalDateTime.now().plusSeconds(jwt.ttlSeconds()));
@@ -94,7 +124,6 @@ public class AuthService {
         sessions.save(saved);
 
         user.setLastLoginAt(LocalDateTime.now());
-        rateLimiter.recordSuccess(email);
         return new Issued(user, token);
     }
 
