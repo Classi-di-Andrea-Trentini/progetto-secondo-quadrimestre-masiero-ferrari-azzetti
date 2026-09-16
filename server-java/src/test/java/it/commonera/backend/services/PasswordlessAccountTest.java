@@ -96,7 +96,7 @@ class PasswordlessAccountTest extends AbstractIntegrationTest {
         assertThatThrownBy(() -> profiles.changePassword(id, null,
                 new UserDtos.ChangePasswordRequest("qualsiasi", "Password123!")))
                 .isInstanceOf(ApiException.class)
-                .hasMessageContaining("Password dimenticata")
+                .hasMessageContaining("Forgot password")
                 .extracting(ex -> ((ApiException) ex).getStatus())
                 .isEqualTo(HttpStatus.BAD_REQUEST);
     }

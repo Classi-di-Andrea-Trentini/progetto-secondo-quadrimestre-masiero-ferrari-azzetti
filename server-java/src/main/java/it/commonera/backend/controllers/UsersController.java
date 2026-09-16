@@ -105,8 +105,8 @@ public class UsersController {
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, AuthCookie.cleared(secureCookies).toString())
-                .body(Map.of("message", "Account cancellato. I dati personali sono stati rimossi; "
-                        + "gli ordini gia' emessi restano conservati come documenti fiscali."));
+                .body(Map.of("message", "Account deleted. Your personal data has been removed; "
+                        + "orders already placed remain stored as tax documents."));
     }
 
     /** Pubblica: ci si arriva cliccando il link nell'email, senza essere collegati. */

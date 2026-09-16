@@ -56,7 +56,7 @@ public class ReviewService {
                 .orElseThrow(() -> ApiException.notFound("Review not found"));
 
         if (reviews.insertHelpfulVote(reviewId, userId) == 0) {
-            throw ApiException.conflict("Hai gia' votato questa recensione");
+            throw ApiException.conflict("You've already voted for this review");
         }
         reviews.incrementHelpfulCount(reviewId);
 
@@ -69,7 +69,7 @@ public class ReviewService {
         // Una recensione per prodotto e per persona: il vincolo unico c'e' anche sul
         // database, ma dirlo qui da' un messaggio comprensibile invece di un 500.
         if (reviews.existsByUserIdAndProductId(userId, productId)) {
-            throw ApiException.badRequest("Hai gia' recensito questo prodotto");
+            throw ApiException.badRequest("You've already reviewed this product");
         }
 
         var review = new Review();

@@ -98,7 +98,7 @@ public class CheckoutService {
         try {
             intent = gateway.createIntent(draft.toCharge(), "EUR", draft.orderId());
         } catch (RuntimeException e) {
-            release(draft.orderId(), userId, "Apertura del pagamento fallita");
+            release(draft.orderId(), userId, "Payment initiation failed");
             throw e;
         }
 
@@ -109,7 +109,7 @@ public class CheckoutService {
             // fallisse dopo aver liberato la merce, resterebbe aperta la
             // possibilita' di incassare per un ordine ormai annullato.
             cancelQuietly(intent.id());
-            release(draft.orderId(), userId, "Registrazione del pagamento fallita");
+            release(draft.orderId(), userId, "Payment registration failed");
             throw e;
         }
 
@@ -270,7 +270,7 @@ public class CheckoutService {
         payments.save(payment);
 
         order.setStatus(OrderStatus.paid);
-        addHistory(order, OrderStatus.paid, userId, "Coperto interamente da buono");
+        addHistory(order, OrderStatus.paid, userId, "Fully covered by gift card");
 
         emptyCart(userId, draft.items());
         awardPoints(order);

@@ -65,7 +65,7 @@ class AdminServiceTest extends AbstractIntegrationTest {
     void anAdminCannotDeleteTheirOwnAccount() {
         assertThatThrownBy(() -> admin.deleteUser(onlyAdmin.getId(), onlyAdmin.getId()))
                 .isInstanceOf(ApiException.class)
-                .hasMessageContaining("tuo stesso account");
+                .hasMessageContaining("your own account");
     }
 
     @Test
@@ -94,7 +94,7 @@ class AdminServiceTest extends AbstractIntegrationTest {
 
         assertThatThrownBy(() -> admin.deleteUser(secondAdmin.getId(), plainUser.getId()))
                 .isInstanceOf(ApiException.class)
-                .hasMessageContaining("ultimo amministratore");
+                .hasMessageContaining("administrator");
     }
 
     @Test
@@ -107,7 +107,7 @@ class AdminServiceTest extends AbstractIntegrationTest {
         em.flush();
 
         var result = admin.deleteUser(plainUser.getId(), onlyAdmin.getId());
-        assertThat(result.get("message")).isEqualTo("Utente eliminato");
+        assertThat(result.get("message")).isEqualTo("User deleted");
 
         em.flush();
         em.clear();
@@ -120,7 +120,7 @@ class AdminServiceTest extends AbstractIntegrationTest {
     void demotingTheLastAdminToUserIsRejected() {
         assertThatThrownBy(() -> admin.updateUserRole(onlyAdmin.getId(), "user", onlyAdmin.getId()))
                 .isInstanceOf(ApiException.class)
-                .hasMessageContaining("tuo stesso account");
+                .hasMessageContaining("your own account");
     }
 
     @Test
@@ -166,7 +166,7 @@ class AdminServiceTest extends AbstractIntegrationTest {
         assertThat(updatedVariants.get(0).get("stockQty")).isEqualTo(3);
 
         var deleted = admin.deleteProduct(productId);
-        assertThat(deleted.get("message")).isEqualTo("Prodotto eliminato");
+        assertThat(deleted.get("message")).isEqualTo("Product deleted");
 
         // Cancellazione logica: non compare piu' nella lista attiva.
         var list = admin.getProducts(null, null, 1, 50);

@@ -33,7 +33,7 @@ public class AuthService {
     @Transactional
     public User register(String email, String password, String fullName) {
         if (users.existsByEmailIgnoreCase(email)) {
-            throw ApiException.badRequest("Email gia' registrata");
+            throw ApiException.badRequest("Email already registered");
         }
 
         var user = new User();
@@ -74,7 +74,7 @@ public class AuthService {
 
         if (found.isEmpty() || (found.get().hasPassword() && !ok)) {
             rateLimiter.recordFailure(email);
-            throw ApiException.unauthorized("Credenziali non valide");
+            throw ApiException.unauthorized("Invalid credentials");
         }
 
         var user = found.get();
@@ -86,12 +86,12 @@ public class AuthService {
             // /auth/register risponde gia' "Email gia' registrata" a chi ci prova.
             rateLimiter.recordFailure(email);
             throw ApiException.unauthorized(
-                    "Questo account accede con Google. Usa il bottone \"Accedi con Google\", "
-                            + "oppure imposta una password da \"Password dimenticata\".");
+                    "This account signs in with Google. Use the \"Sign in with Google\" button, "
+                            + "or set a password from \"Forgot password\".");
         }
 
         if (!user.isEmailVerified()) {
-            throw ApiException.unauthorized("Account non verificato");
+            throw ApiException.unauthorized("Account not verified");
         }
 
         rateLimiter.recordSuccess(email);

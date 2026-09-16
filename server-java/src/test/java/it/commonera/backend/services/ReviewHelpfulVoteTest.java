@@ -47,7 +47,7 @@ class ReviewHelpfulVoteTest extends AbstractIntegrationTest {
 
         assertThatThrownBy(() -> reviews.voteHelpful(voter.getId(), review.getId()))
                 .isInstanceOf(ApiException.class)
-                .hasMessageContaining("gia' votato");
+                .hasMessageContaining("already voted");
 
         em.flush();
         em.clear();

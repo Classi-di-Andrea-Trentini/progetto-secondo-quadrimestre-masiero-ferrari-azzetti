@@ -91,7 +91,7 @@ public class UserService {
             // ISO completo: si tiene la sola parte della data.
             return LocalDate.parse(raw.length() > 10 ? raw.substring(0, 10) : raw);
         } catch (DateTimeParseException e) {
-            throw ApiException.badRequest("Data di nascita non valida");
+            throw ApiException.badRequest("Invalid date of birth");
         }
     }
 
@@ -108,12 +108,12 @@ public class UserService {
         // arriva sulla casella — la stessa che Google ha gia' dimostrato essere sua.
         if (!user.hasPassword()) {
             throw ApiException.badRequest(
-                    "Il tuo account accede con Google e non ha ancora una password. "
-                            + "Usa \"Password dimenticata\" per impostarne una.");
+                    "Your account signs in with Google and doesn't have a password yet. "
+                            + "Use \"Forgot password\" to set one.");
         }
 
         if (!encoder.matches(body.currentPassword(), user.getPasswordHash())) {
-            throw ApiException.unauthorized("Password attuale non corretta");
+            throw ApiException.unauthorized("Current password is incorrect");
         }
 
         user.setPasswordHash(encoder.encode(body.newPassword()));
@@ -129,7 +129,7 @@ public class UserService {
         }
 
         mail.sendPasswordChangedAlert(user.getEmail(), user.getFullName());
-        return "Password aggiornata con successo";
+        return "Password updated successfully";
     }
 
     /**
@@ -162,7 +162,7 @@ public class UserService {
     public String resetPassword(String token, String newPassword) {
         var reset = resets.findByTokenHashAndUsedAtIsNull(jwt.fingerprint(token))
                 .filter(r -> r.getExpiresAt().isAfter(LocalDateTime.now()))
-                .orElseThrow(() -> ApiException.badRequest("Token non valido o scaduto"));
+                .orElseThrow(() -> ApiException.badRequest("Invalid or expired token"));
 
         var user = require(reset.getUserId());
         user.setPasswordHash(encoder.encode(newPassword));
@@ -176,7 +176,7 @@ public class UserService {
         sessions.deleteByUserId(user.getId());
 
         mail.sendPasswordChangedAlert(user.getEmail(), user.getFullName());
-        return "Password reimpostata con successo";
+        return "Password reset successfully";
     }
 
     // ─── Email ────────────────────────────────────────────────────────────────
@@ -185,19 +185,19 @@ public class UserService {
     public String sendVerificationEmail(UUID userId) {
         var user = require(userId);
         if (user.getEmailVerifiedAt() != null) {
-            throw ApiException.badRequest("Email gia' verificata");
+            throw ApiException.badRequest("Email already verified");
         }
 
         String token = issueVerificationToken(user, "email-verify", Map.of());
         mail.sendEmailVerification(user.getEmail(), user.getFullName(),
                 frontendUrl + "/verify-email/" + token);
-        return "Email di verifica inviata. Hai 24 ore per confermare.";
+        return "Verification email sent. You have 24 hours to confirm.";
     }
 
     @Transactional
     public String confirmVerification(String token) {
         var claims = jwt.parsePurposeToken(token, "email-verify");
-        if (claims == null) throw ApiException.unauthorized("Link non valido o scaduto");
+        if (claims == null) throw ApiException.unauthorized("Invalid or expired link");
 
         var row = consume(token);
         var user = require(claims.userId());
@@ -205,7 +205,7 @@ public class UserService {
         users.save(user);
         verifications.save(row);
 
-        return "Email verificata con successo";
+        return "Email verified successfully";
     }
 
     @Transactional
@@ -217,20 +217,20 @@ public class UserService {
         // conferma la vuole (sposta dove arrivano i link di recupero).
         if (!user.hasPassword()) {
             throw ApiException.badRequest(
-                    "Il tuo account accede con Google e non ha ancora una password. "
-                            + "Impostane una da \"Password dimenticata\" prima di cambiare indirizzo email.");
+                    "Your account signs in with Google and doesn't have a password yet. "
+                            + "Set one from \"Forgot password\" before changing your email address.");
         }
 
         if (!encoder.matches(body.currentPassword(), user.getPasswordHash())) {
-            throw ApiException.unauthorized("Password attuale non corretta");
+            throw ApiException.unauthorized("Current password is incorrect");
         }
 
         String newEmail = body.newEmail().trim().toLowerCase();
         if (newEmail.equalsIgnoreCase(user.getEmail())) {
-            throw ApiException.badRequest("E' gia' il tuo indirizzo");
+            throw ApiException.badRequest("This is already your address");
         }
         if (users.findByEmailIgnoreCase(newEmail).filter(other -> !other.getId().equals(userId)).isPresent()) {
-            throw ApiException.badRequest("Email gia' in uso");
+            throw ApiException.badRequest("Email already in use");
         }
 
         String token = issueVerificationToken(user, "email-change", Map.of("newEmail", newEmail));
@@ -238,14 +238,14 @@ public class UserService {
         mail.sendEmailChangeConfirmation(newEmail, user.getFullName(),
                 backendUrl + "/api/users/confirm-email/" + token);
 
-        return "Ti abbiamo inviato un link di conferma alla nuova email. Hai 24 ore per confermarlo.";
+        return "We've sent a confirmation link to your new email. You have 24 hours to confirm it.";
     }
 
     @Transactional
     public String confirmEmailChange(String token) {
         var claims = jwt.parsePurposeToken(token, "email-change");
         if (claims == null || claims.newEmail() == null) {
-            throw ApiException.unauthorized("Link non valido o scaduto");
+            throw ApiException.unauthorized("Invalid or expired link");
         }
 
         var row = consume(token);
@@ -255,7 +255,7 @@ public class UserService {
         // possono essere passate ore, e l'indirizzo puo' essere stato preso.
         if (users.findByEmailIgnoreCase(claims.newEmail())
                 .filter(other -> !other.getId().equals(user.getId())).isPresent()) {
-            throw ApiException.badRequest("Email gia' in uso da un altro account");
+            throw ApiException.badRequest("Email already in use by another account");
         }
 
         String previousEmail = user.getEmail();
@@ -265,7 +265,7 @@ public class UserService {
         verifications.save(row);
 
         mail.sendEmailChangedAlert(previousEmail, user.getFullName(), claims.newEmail());
-        return "Email confermata e aggiornata con successo";
+        return "Email confirmed and updated successfully";
     }
 
     // ─── Utilita' ─────────────────────────────────────────────────────────────
@@ -292,9 +292,9 @@ public class UserService {
      */
     private EmailVerification consume(String token) {
         var row = verifications.findByToken(token)
-                .orElseThrow(() -> ApiException.unauthorized("Link gia' utilizzato o non trovato"));
-        if (row.getUsedAt() != null) throw ApiException.unauthorized("Link gia' utilizzato");
-        if (row.getExpiresAt().isBefore(LocalDateTime.now())) throw ApiException.unauthorized("Link scaduto");
+                .orElseThrow(() -> ApiException.unauthorized("Link already used or not found"));
+        if (row.getUsedAt() != null) throw ApiException.unauthorized("Link already used");
+        if (row.getExpiresAt().isBefore(LocalDateTime.now())) throw ApiException.unauthorized("Link expired");
         row.setUsedAt(LocalDateTime.now());
         return row;
     }

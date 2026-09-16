@@ -55,7 +55,7 @@ public class GoogleLoginSuccessHandler implements AuthenticationSuccessHandler {
             // esso nessun id_token verificato. Sarebbe un errore di configurazione, non
             // dell'utente: si ferma qui invece di accontentarsi di attributi non firmati.
             log.error("Ritorno da Google senza id_token: controllare che lo scope 'openid' sia richiesto.");
-            redirect(response, "/login", "Accesso con Google non riuscito");
+            redirect(response, "/login", "Google sign-in failed");
             return;
         }
 

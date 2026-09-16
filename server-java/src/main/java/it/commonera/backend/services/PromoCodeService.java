@@ -129,7 +129,7 @@ public class PromoCodeService {
     @Transactional
     public PromoCodeDtos.View create(PromoCodeDtos.CreateRequest dto) {
         String code = dto.code().trim().toUpperCase();
-        if (codes.existsByCodeIgnoreCase(code)) throw ApiException.badRequest("Codice già esistente");
+        if (codes.existsByCodeIgnoreCase(code)) throw ApiException.badRequest("Code already exists");
 
         var promo = new PromoCode();
         promo.setCode(code);
@@ -149,7 +149,7 @@ public class PromoCodeService {
 
     @Transactional
     public PromoCodeDtos.View update(UUID id, PromoCodeDtos.UpdateRequest dto) {
-        var promo = codes.findById(id).orElseThrow(() -> ApiException.notFound("Codice promozionale non trovato"));
+        var promo = codes.findById(id).orElseThrow(() -> ApiException.notFound("Promo code not found"));
         if (dto.isActive() != null) promo.setIsActive(dto.isActive());
         if (dto.maxUses() != null) promo.setMaxUses(dto.maxUses());
         if (dto.expiresAt() != null) promo.setExpiresAt(dto.expiresAt());
@@ -159,9 +159,9 @@ public class PromoCodeService {
 
     @Transactional
     public Map<String, String> delete(UUID id) {
-        var promo = codes.findById(id).orElseThrow(() -> ApiException.notFound("Codice promozionale non trovato"));
+        var promo = codes.findById(id).orElseThrow(() -> ApiException.notFound("Promo code not found"));
         codes.delete(promo);
-        return Map.of("message", "Codice eliminato");
+        return Map.of("message", "Code deleted");
     }
 
     private Specification<PromoCode> specification(Boolean isActive, PromoCode.DiscountType type, String search) {

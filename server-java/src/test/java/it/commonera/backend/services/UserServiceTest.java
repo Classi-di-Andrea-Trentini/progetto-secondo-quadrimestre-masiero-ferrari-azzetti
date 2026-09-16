@@ -84,7 +84,7 @@ class UserServiceTest extends AbstractIntegrationTest {
         assertThatThrownBy(() -> profiles.changePassword(user.getId(), null,
                 new UserDtos.ChangePasswordRequest("Sbagliata1", "NuovaPassword1")))
                 .isInstanceOf(ApiException.class)
-                .hasMessageContaining("Password attuale");
+                .hasMessageContaining("Current password");
     }
 
     @Test
@@ -112,7 +112,7 @@ class UserServiceTest extends AbstractIntegrationTest {
 
         assertThatThrownBy(() -> profiles.resetPassword(token, "Ancora1234"))
                 .isInstanceOf(ApiException.class)
-                .hasMessageContaining("non valido o scaduto");
+                .hasMessageContaining("Invalid or expired token");
     }
 
     @Test
@@ -164,7 +164,7 @@ class UserServiceTest extends AbstractIntegrationTest {
         assertThatThrownBy(() -> profiles.requestEmailChange(user.getId(),
                 new UserDtos.ChangeEmailRequest(other.getEmail(), "Password123")))
                 .isInstanceOf(ApiException.class)
-                .hasMessageContaining("gia' in uso");
+                .hasMessageContaining("already in use");
     }
 
     private Session session() {

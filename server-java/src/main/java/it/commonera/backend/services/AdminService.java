@@ -262,8 +262,8 @@ public class AdminService {
         }
 
         if (!OrderStatusMachine.allowsAdminDriven(current, next)) {
-            throw ApiException.badRequest("Transizione non ammessa: da '" + current.name()
-                    + "' a '" + next.name() + "'. Ammesse da '" + current.name() + "': "
+            throw ApiException.badRequest("Transition not allowed: from '" + current.name()
+                    + "' to '" + next.name() + "'. Allowed from '" + current.name() + "': "
                     + describe(OrderStatusMachine.adminTargetsFrom(current)));
         }
 
@@ -272,8 +272,8 @@ public class AdminService {
             // qualcun altro ha mosso l'ordine, la transizione atomica non tocca
             // nessuna riga e qui non si compensa due volte.
             if (!compensation.releaseAndCancel(order, List.of(current), adminId,
-                    noteOr("Annullato dall'amministratore", note))) {
-                throw ApiException.conflict("L'ordine e' gia' stato chiuso da un'altra operazione");
+                    noteOr("Cancelled by administrator", note))) {
+                throw ApiException.conflict("The order has already been closed by another operation");
             }
             if (trackingNumber != null) order.setTrackingNumber(trackingNumber);
             orders.save(order);
@@ -287,7 +287,7 @@ public class AdminService {
         entry.setOrder(order);
         entry.setStatus(next);
         entry.setChangedBy(adminId);
-        entry.setNote(noteOr("Aggiornato dall'amministratore", note));
+        entry.setNote(noteOr("Updated by administrator", note));
         order.getStatusHistory().add(entry);
 
         orders.save(order);
@@ -296,7 +296,7 @@ public class AdminService {
 
     /** Elenco leggibile per il messaggio d'errore, o una parola quando non resta nulla. */
     private static String describe(Set<OrderStatus> targets) {
-        if (targets.isEmpty()) return "nessuna (stato finale)";
+        if (targets.isEmpty()) return "none (final state)";
         return targets.stream().map(OrderStatus::name).sorted().collect(java.util.stream.Collectors.joining(", "));
     }
 
@@ -339,22 +339,22 @@ public class AdminService {
      */
     private void assertNotLastAdmin(UUID targetUserId, UUID adminId, String action) {
         if (targetUserId.equals(adminId)) {
-            throw ApiException.badRequest("Non puoi " + action + " il tuo stesso account");
+            throw ApiException.badRequest("You can't " + action + " your own account");
         }
         var target = users.findById(targetUserId).orElse(null);
         if (target == null || target.getRole() != User.Role.admin) return;
 
         long admins = users.countByRoleAndDeletedAtIsNullAndIsActiveTrue(User.Role.admin);
         if (admins <= 1) {
-            throw ApiException.badRequest("Non puoi " + action + " l'ultimo amministratore rimasto");
+            throw ApiException.badRequest("You can't " + action + " the last remaining administrator");
         }
     }
 
     @Transactional
     public Map<String, Object> updateUserRole(UUID id, String role, UUID adminId) {
-        var user = users.findById(id).orElseThrow(() -> ApiException.notFound("Utente non trovato"));
+        var user = users.findById(id).orElseThrow(() -> ApiException.notFound("User not found"));
         var next = parseUserRole(role);
-        if (next != User.Role.admin) assertNotLastAdmin(id, adminId, "declassare");
+        if (next != User.Role.admin) assertNotLastAdmin(id, adminId, "demote");
         user.setRole(next);
         users.save(user);
         return Map.of("id", user.getId(), "email", user.getEmail(), "fullName", user.getFullName(),
@@ -369,12 +369,12 @@ public class AdminService {
      */
     @Transactional
     public Map<String, String> deleteUser(UUID id, UUID adminId) {
-        var user = users.findById(id).orElseThrow(() -> ApiException.notFound("Utente non trovato"));
-        assertNotLastAdmin(id, adminId, "cancellare");
+        var user = users.findById(id).orElseThrow(() -> ApiException.notFound("User not found"));
+        assertNotLastAdmin(id, adminId, "delete");
         user.setDeletedAt(LocalDateTime.now());
         user.setIsActive(false);
         users.save(user);
-        return Map.of("message", "Utente eliminato");
+        return Map.of("message", "User deleted");
     }
 
     @Transactional(readOnly = true)
@@ -455,7 +455,7 @@ public class AdminService {
 
     @Transactional
     public Map<String, Object> createProduct(AdminDtos.CreateProductRequest dto) {
-        if (products.existsBySlug(dto.slug())) throw ApiException.badRequest("Slug già in uso");
+        if (products.existsBySlug(dto.slug())) throw ApiException.badRequest("Slug already in use");
         if (dto.categoryId() == null) throw ApiException.badRequest("categoryId is required");
         var category = categories.findById(dto.categoryId())
                 .orElseThrow(() -> ApiException.badRequest("Category not found"));
@@ -477,7 +477,7 @@ public class AdminService {
 
     @Transactional
     public Map<String, Object> updateProduct(UUID id, AdminDtos.UpdateProductRequest dto) {
-        var product = products.findById(id).orElseThrow(() -> ApiException.notFound("Prodotto non trovato"));
+        var product = products.findById(id).orElseThrow(() -> ApiException.notFound("Product not found"));
         if (dto.name() != null) product.setName(dto.name());
         if (dto.description() != null) product.setDescription(dto.description());
         if (dto.shortDesc() != null) product.setShortDesc(blankToNull(dto.shortDesc()));
@@ -521,11 +521,11 @@ public class AdminService {
 
     @Transactional
     public Map<String, Object> createCategory(AdminDtos.CreateCategoryRequest dto) {
-        if (dto.name() == null || dto.name().isBlank()) throw ApiException.badRequest("Il nome e' obbligatorio");
+        if (dto.name() == null || dto.name().isBlank()) throw ApiException.badRequest("Name is required");
 
         String slug = dto.slug() == null || dto.slug().isBlank() ? slugify(dto.name()) : dto.slug().trim().toLowerCase();
-        if (!slug.matches("^[a-z0-9-]+$")) throw ApiException.badRequest("Slug non valido");
-        if (categories.existsBySlugIgnoreCase(slug)) throw ApiException.badRequest("Slug gia' in uso");
+        if (!slug.matches("^[a-z0-9-]+$")) throw ApiException.badRequest("Invalid slug");
+        if (categories.existsBySlugIgnoreCase(slug)) throw ApiException.badRequest("Slug already in use");
 
         if (dto.parentId() != null && categories.findById(dto.parentId()).isEmpty()) {
             throw ApiException.badRequest("Category not found");
@@ -555,22 +555,22 @@ public class AdminService {
                 .toLowerCase()
                 .replaceAll("[^a-z0-9]+", "-")
                 .replaceAll("^-|-$", "");
-        if (slug.isBlank()) throw ApiException.badRequest("Dal nome non esce uno slug valido: scrivilo a mano");
+        if (slug.isBlank()) throw ApiException.badRequest("Couldn't generate a valid slug from the name: enter one manually");
         return slug;
     }
 
     @Transactional
     public Map<String, String> deleteProduct(UUID id) {
-        var product = products.findById(id).orElseThrow(() -> ApiException.notFound("Prodotto non trovato"));
-        if (product.getDeletedAt() != null) throw ApiException.notFound("Prodotto non trovato");
+        var product = products.findById(id).orElseThrow(() -> ApiException.notFound("Product not found"));
+        if (product.getDeletedAt() != null) throw ApiException.notFound("Product not found");
         product.setDeletedAt(LocalDateTime.now());
         products.save(product);
-        return Map.of("message", "Prodotto eliminato");
+        return Map.of("message", "Product deleted");
     }
 
     @Transactional(readOnly = true)
     public Map<String, Object> getProductDetail(UUID id) {
-        var product = products.findById(id).orElseThrow(() -> ApiException.notFound("Prodotto non trovato"));
+        var product = products.findById(id).orElseThrow(() -> ApiException.notFound("Product not found"));
         var view = new LinkedHashMap<>(productListView(product));
         view.put("category", product.getCategory() == null ? null
                 : Map.of("id", product.getCategory().getId(), "name", product.getCategory().getName()));
@@ -636,8 +636,8 @@ public class AdminService {
 
     @Transactional
     public Map<String, Object> createVariant(UUID productId, AdminDtos.CreateVariantRequest dto) {
-        var product = products.findById(productId).orElseThrow(() -> ApiException.notFound("Prodotto non trovato"));
-        if (variants.existsBySkuIgnoreCase(dto.sku())) throw ApiException.badRequest("SKU già in uso");
+        var product = products.findById(productId).orElseThrow(() -> ApiException.notFound("Product not found"));
+        if (variants.existsBySkuIgnoreCase(dto.sku())) throw ApiException.badRequest("SKU already in use");
 
         var variant = new ProductVariant();
         variant.setProduct(product);
@@ -656,9 +656,9 @@ public class AdminService {
     @Transactional
     public Map<String, Object> updateVariant(UUID productId, UUID variantId, AdminDtos.UpdateVariantRequest dto) {
         var variant = variants.findByIdAndProductId(variantId, productId)
-                .orElseThrow(() -> ApiException.notFound("Variante non trovata"));
+                .orElseThrow(() -> ApiException.notFound("Variant not found"));
         if (dto.sku() != null && !dto.sku().equalsIgnoreCase(variant.getSku())) {
-            if (variants.existsBySkuIgnoreCase(dto.sku())) throw ApiException.badRequest("SKU già in uso");
+            if (variants.existsBySkuIgnoreCase(dto.sku())) throw ApiException.badRequest("SKU already in use");
             variant.setSku(dto.sku());
         }
         if (dto.size() != null) variant.setSize(dto.size().isBlank() ? null : dto.size());
@@ -675,9 +675,9 @@ public class AdminService {
     @Transactional
     public Map<String, String> deleteVariant(UUID productId, UUID variantId) {
         var variant = variants.findByIdAndProductId(variantId, productId)
-                .orElseThrow(() -> ApiException.notFound("Variante non trovata"));
+                .orElseThrow(() -> ApiException.notFound("Variant not found"));
         variants.delete(variant);
-        return Map.of("message", "Variante eliminata");
+        return Map.of("message", "Variant deleted");
     }
 
     // ─── Immagini ───────────────────────────────────────────────────────────
@@ -690,7 +690,7 @@ public class AdminService {
 
     @Transactional
     public Map<String, Object> addImage(UUID productId, String url, String altText, Integer sortOrder, Boolean isCover) {
-        var product = products.findById(productId).orElseThrow(() -> ApiException.notFound("Prodotto non trovato"));
+        var product = products.findById(productId).orElseThrow(() -> ApiException.notFound("Product not found"));
         long count = images.countByProductId(productId);
         boolean shouldBeCover = Boolean.TRUE.equals(isCover) || count == 0;
         if (shouldBeCover) images.clearCover(productId);
@@ -718,10 +718,10 @@ public class AdminService {
      */
     @Transactional
     public Map<String, Object> uploadImage(UUID productId, org.springframework.web.multipart.MultipartFile file) {
-        if (file == null || file.isEmpty()) throw ApiException.badRequest("Nessun file ricevuto");
+        if (file == null || file.isEmpty()) throw ApiException.badRequest("No file received");
         String contentType = file.getContentType();
         if (contentType == null || !ALLOWED_IMAGE_TYPES.contains(contentType)) {
-            throw ApiException.badRequest("Solo file immagine sono consentiti (jpeg, png, gif, webp)");
+            throw ApiException.badRequest("Only image files are allowed (jpeg, png, gif, webp)");
         }
 
         String extension = switch (contentType) {
@@ -741,7 +741,7 @@ public class AdminService {
             var target = dir.resolve(filename);
             file.transferTo(target);
         } catch (java.io.IOException e) {
-            throw ApiException.badRequest("Impossibile salvare il file: " + e.getMessage());
+            throw ApiException.badRequest("Could not save the file: " + e.getMessage());
         }
 
         // URL **relativo**, non `backendUrl + ...`: l'indirizzo del backend finirebbe
@@ -755,7 +755,7 @@ public class AdminService {
     @Transactional
     public Map<String, String> deleteImage(UUID productId, UUID imageId) {
         var image = images.findByIdAndProductId(imageId, productId)
-                .orElseThrow(() -> ApiException.notFound("Immagine non trovata"));
+                .orElseThrow(() -> ApiException.notFound("Image not found"));
         boolean wasCover = Boolean.TRUE.equals(image.getIsCover());
         images.delete(image);
         if (wasCover) {
@@ -764,17 +764,17 @@ public class AdminService {
                 images.save(next);
             });
         }
-        return Map.of("message", "Immagine eliminata");
+        return Map.of("message", "Image deleted");
     }
 
     @Transactional
     public Map<String, String> setCoverImage(UUID productId, UUID imageId) {
         var image = images.findByIdAndProductId(imageId, productId)
-                .orElseThrow(() -> ApiException.notFound("Immagine non trovata"));
+                .orElseThrow(() -> ApiException.notFound("Image not found"));
         images.clearCover(productId);
         image.setIsCover(true);
         images.save(image);
-        return Map.of("message", "Cover aggiornata");
+        return Map.of("message", "Cover updated");
     }
 
     // ─── Ordini ─────────────────────────────────────────────────────────────
@@ -835,7 +835,7 @@ public class AdminService {
 
     @Transactional(readOnly = true)
     public Map<String, Object> getOrderDetail(UUID id) {
-        var order = orders.findById(id).orElseThrow(() -> ApiException.notFound("Ordine non trovato"));
+        var order = orders.findById(id).orElseThrow(() -> ApiException.notFound("Order not found"));
         var view = new LinkedHashMap<>(orderSummaryView(order));
         view.put("subtotal", order.getSubtotal());
         view.put("discountTotal", order.getDiscountTotal());
@@ -980,9 +980,9 @@ public class AdminService {
 
     @Transactional
     public Map<String, String> deleteReview(UUID id) {
-        var review = reviews.findById(id).orElseThrow(() -> ApiException.notFound("Recensione non trovata"));
+        var review = reviews.findById(id).orElseThrow(() -> ApiException.notFound("Review not found"));
         reviews.delete(review);
-        return Map.of("message", "Recensione eliminata");
+        return Map.of("message", "Review deleted");
     }
 
     private Specification<Review> reviewSpecification(Review.ReviewStatus status) {

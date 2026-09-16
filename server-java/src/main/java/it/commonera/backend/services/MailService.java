@@ -45,47 +45,47 @@ public class MailService {
     public void sendBackInStock(String to, String fullName, String productName, String label, String slug) {
         String firstName = fullName == null ? "" : fullName.split(" ")[0];
         String variant = label == null || "null".equals(label) ? "" : " (" + label + ")";
-        send(to, productName + " e' tornato disponibile",
-                "<h1>E' tornato disponibile.</h1>"
-                        + "<p>Ciao <strong>" + escape(firstName) + "</strong>, <strong>"
+        send(to, productName + " is back in stock",
+                "<h1>It's back in stock.</h1>"
+                        + "<p>Hi <strong>" + escape(firstName) + "</strong>, <strong>"
                         + escape(productName) + "</strong>" + escape(variant)
-                        + " che stavi aspettando e' di nuovo in magazzino.</p>"
-                        + "<p><a href=\"" + frontendUrl + "/product/" + slug + "\">Vai al prodotto</a></p>");
+                        + " you were waiting for is back in stock.</p>"
+                        + "<p><a href=\"" + frontendUrl + "/product/" + slug + "\">View product</a></p>");
     }
 
     public void sendReturnStatusUpdate(String to, String fullName, String returnId, String status, String adminNote) {
         String firstName = fullName == null ? "" : fullName.split(" ")[0];
         String note = adminNote == null || adminNote.isBlank() ? "" : "<p>" + escape(adminNote) + "</p>";
-        send(to, "Aggiornamento sul tuo reso",
-                "<h1>Il tuo reso e' stato aggiornato.</h1>"
-                        + "<p>Ciao <strong>" + escape(firstName) + "</strong>, il reso <strong>"
-                        + escape(returnId) + "</strong> e' ora: <strong>" + escape(status) + "</strong>.</p>"
+        send(to, "Update on your return",
+                "<h1>Your return has been updated.</h1>"
+                        + "<p>Hi <strong>" + escape(firstName) + "</strong>, return <strong>"
+                        + escape(returnId) + "</strong> is now: <strong>" + escape(status) + "</strong>.</p>"
                         + note);
     }
 
     public void sendNewsletterConfirmation(String to, String name) {
         String firstName = name == null ? "" : name.split(" ")[0];
-        send(to, "Iscrizione confermata",
-                "<h1>Sei dentro.</h1>"
-                        + "<p>Ciao <strong>" + escape(firstName) + "</strong>, la tua iscrizione alla newsletter e' confermata.</p>");
+        send(to, "Subscription confirmed",
+                "<h1>You're in.</h1>"
+                        + "<p>Hi <strong>" + escape(firstName) + "</strong>, your newsletter subscription is confirmed.</p>");
     }
 
     public void sendEmailVerification(String to, String fullName, String verificationUrl) {
-        send(to, "Conferma il tuo indirizzo email",
-                "<h1>Un ultimo passaggio.</h1>"
-                        + "<p>Ciao <strong>" + escape(firstName(fullName)) + "</strong>, conferma il tuo"
-                        + " indirizzo per completare l'iscrizione.</p>"
-                        + "<p><a href=\"" + verificationUrl + "\">Conferma l'indirizzo</a></p>"
-                        + "<p>Il link vale 24 ore.</p>");
+        send(to, "Confirm your email address",
+                "<h1>One last step.</h1>"
+                        + "<p>Hi <strong>" + escape(firstName(fullName)) + "</strong>, confirm your"
+                        + " address to complete your registration.</p>"
+                        + "<p><a href=\"" + verificationUrl + "\">Confirm address</a></p>"
+                        + "<p>This link is valid for 24 hours.</p>");
     }
 
     public void sendEmailChangeConfirmation(String to, String fullName, String confirmationUrl) {
-        send(to, "Conferma il tuo nuovo indirizzo email",
-                "<h1>Confermi il cambio?</h1>"
-                        + "<p>Ciao <strong>" + escape(firstName(fullName)) + "</strong>, hai chiesto di usare"
-                        + " questo indirizzo per il tuo account.</p>"
-                        + "<p><a href=\"" + confirmationUrl + "\">Conferma il nuovo indirizzo</a></p>"
-                        + "<p>Il link vale 24 ore. Se non sei stato tu, ignora questa email.</p>");
+        send(to, "Confirm your new email address",
+                "<h1>Confirm the change?</h1>"
+                        + "<p>Hi <strong>" + escape(firstName(fullName)) + "</strong>, you asked to use"
+                        + " this address for your account.</p>"
+                        + "<p><a href=\"" + confirmationUrl + "\">Confirm new address</a></p>"
+                        + "<p>This link is valid for 24 hours. If this wasn't you, ignore this email.</p>");
     }
 
     /**
@@ -93,29 +93,29 @@ public class MailService {
      * l'unica casella dove puo' ancora accorgersene e' quella che sta per perdere.
      */
     public void sendEmailChangedAlert(String to, String fullName, String newEmail) {
-        send(to, "Il tuo indirizzo email e' stato cambiato",
-                "<h1>Indirizzo aggiornato.</h1>"
-                        + "<p>Ciao <strong>" + escape(firstName(fullName)) + "</strong>, l'account ora usa"
+        send(to, "Your email address has been changed",
+                "<h1>Address updated.</h1>"
+                        + "<p>Hi <strong>" + escape(firstName(fullName)) + "</strong>, your account now uses"
                         + " <strong>" + escape(newEmail) + "</strong>.</p>"
-                        + "<p>Se non sei stato tu, scrivici subito.</p>");
+                        + "<p>If this wasn't you, contact us right away.</p>");
     }
 
     public void sendPasswordResetEmail(String to, String fullName, String token) {
         String url = frontendUrl + "/reset-password?token=" + token;
-        send(to, "Reimposta la tua password",
-                "<h1>Password dimenticata.</h1>"
-                        + "<p>Ciao <strong>" + escape(firstName(fullName)) + "</strong>, da qui puoi sceglierne"
-                        + " una nuova.</p>"
-                        + "<p><a href=\"" + url + "\">Reimposta la password</a></p>"
-                        + "<p>Il link vale un'ora. Se non l'hai chiesto tu, la password resta quella di prima.</p>");
+        send(to, "Reset your password",
+                "<h1>Forgot your password?</h1>"
+                        + "<p>Hi <strong>" + escape(firstName(fullName)) + "</strong>, you can choose a new"
+                        + " one from here.</p>"
+                        + "<p><a href=\"" + url + "\">Reset password</a></p>"
+                        + "<p>This link is valid for one hour. If you didn't request this, your password stays the same.</p>");
     }
 
     public void sendPasswordChangedAlert(String to, String fullName) {
-        send(to, "La tua password e' stata cambiata",
-                "<h1>Password aggiornata.</h1>"
-                        + "<p>Ciao <strong>" + escape(firstName(fullName)) + "</strong>, la password del tuo"
-                        + " account e' stata cambiata poco fa.</p>"
-                        + "<p>Se non sei stato tu, reimpostala subito e controlla i tuoi accessi.</p>");
+        send(to, "Your password has been changed",
+                "<h1>Password updated.</h1>"
+                        + "<p>Hi <strong>" + escape(firstName(fullName)) + "</strong>, your account password"
+                        + " was changed a moment ago.</p>"
+                        + "<p>If this wasn't you, reset it right away and check your recent logins.</p>");
     }
 
     /**
@@ -126,7 +126,7 @@ public class MailService {
      */
     public void sendOrderConfirmation(String to, String fullName, String orderNumber,
                                       BigDecimal total, List<Line> lines) {
-        send(to, "Il tuo ordine " + orderNumber,
+        send(to, "Your order " + orderNumber,
                 renderOrderConfirmation(fullName, orderNumber, total, lines));
     }
 
@@ -147,22 +147,21 @@ public class MailService {
                 .append("</td></tr>");
         }
 
-        return "<h1>Grazie, ordine confermato.</h1>"
-                + "<p>Ciao <strong>" + escape(firstNameOf(fullName)) + "</strong>, abbiamo ricevuto"
-                + " il pagamento dell'ordine <strong>" + escape(orderNumber) + "</strong>.</p>"
+        return "<h1>Thank you, order confirmed.</h1>"
+                + "<p>Hi <strong>" + escape(firstNameOf(fullName)) + "</strong>, we've received"
+                + " payment for order <strong>" + escape(orderNumber) + "</strong>.</p>"
                 + "<table role=\"presentation\" width=\"100%\" cellpadding=\"6\">"
-                + "<thead><tr><th align=\"left\">Articolo</th><th>Q.ta</th><th align=\"right\">Prezzo</th></tr></thead>"
+                + "<thead><tr><th align=\"left\">Item</th><th>Qty</th><th align=\"right\">Price</th></tr></thead>"
                 + "<tbody>" + rows + "</tbody>"
-                + "<tfoot><tr><td colspan=\"2\"><strong>Totale</strong></td>"
+                + "<tfoot><tr><td colspan=\"2\"><strong>Total</strong></td>"
                 + "<td align=\"right\"><strong>" + money(total) + "</strong></td></tr></tfoot>"
                 + "</table>"
-                + "<p>Ti scriviamo di nuovo quando parte.</p>";
+                + "<p>We'll email you again once it ships.</p>";
     }
 
-    /** Virgola decimale: e' un'email a un cliente italiano, non un log. */
+    /** Punto decimale e non virgola: il sito e' ora in inglese, non piu' rivolto solo a clienti italiani. */
     private static String money(BigDecimal amount) {
-        return amount == null ? "" : amount.setScale(2, java.math.RoundingMode.HALF_UP)
-                .toPlainString().replace('.', ',') + " &euro;";
+        return amount == null ? "" : "&euro;" + amount.setScale(2, java.math.RoundingMode.HALF_UP).toPlainString();
     }
 
     private static String firstNameOf(String fullName) {

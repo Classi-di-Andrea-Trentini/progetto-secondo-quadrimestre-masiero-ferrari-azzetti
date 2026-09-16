@@ -21,7 +21,7 @@ public class UserDtos {
             @NotBlank
             @Size(min = 8, max = 72, message = "must be longer than or equal to 8 characters")
             @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).*$",
-                    message = "La nuova password deve contenere almeno una lettera minuscola, una maiuscola e un numero")
+                    message = "The new password must contain at least one lowercase letter, one uppercase letter and one number")
             String newPassword) {}
 
     public record ChangeEmailRequest(
@@ -36,6 +36,6 @@ public class UserDtos {
             @NotBlank
             @Size(min = 8, max = 72, message = "must be longer than or equal to 8 characters")
             @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).*$",
-                    message = "La password deve contenere almeno una lettera minuscola, una maiuscola e un numero")
+                    message = "The password must contain at least one lowercase letter, one uppercase letter and one number")
             String password) {}
 }

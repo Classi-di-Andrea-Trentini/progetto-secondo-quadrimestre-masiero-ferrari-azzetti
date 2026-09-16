@@ -76,7 +76,7 @@ public class AbandonedOrderReaper {
                     .ifPresent(this::cancelIntentQuietly);
 
             if (compensation.releaseAndCancel(order, List.of(OrderStatus.pending), null,
-                    "Pagamento non completato entro i termini")) {
+                    "Payment not completed in time")) {
                 done++;
             }
         }

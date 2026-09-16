@@ -77,7 +77,7 @@ public class GoogleOAuthConfig {
                     // una persona. Il messaggio tecnico resta nel log, non nell'URL.
                     log.info("Giro OAuth con Google non riuscito: {}", exception.getMessage());
                     response.sendRedirect(loginPage + "?error=" + URLEncoder.encode(
-                            "Accesso con Google non riuscito. Riprova, oppure entra con email e password.",
+                            "Google sign-in failed. Try again, or sign in with email and password.",
                             StandardCharsets.UTF_8));
                 }));
     }

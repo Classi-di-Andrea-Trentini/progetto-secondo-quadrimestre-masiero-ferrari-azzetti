@@ -87,7 +87,7 @@ public class OrderCompensationService {
                     .filter(payment -> payment.getStatus() == Payment.PaymentStatus.succeeded
                             || payment.getStatus() == Payment.PaymentStatus.partially_refunded)
                     .ifPresent(payment ->
-                            refundCharge(order, outstanding(payment), "Ordine annullato"));
+                            refundCharge(order, outstanding(payment), "Order cancelled"));
         }
 
         // La merce torna a magazzino: compensare senza ripristinare la giacenza
@@ -134,14 +134,14 @@ public class OrderCompensationService {
         }
         if (payment.getStatus() == Payment.PaymentStatus.pending
                 || payment.getStatus() == Payment.PaymentStatus.failed) {
-            throw ApiException.badRequest("Non c'e' nessun incasso da rimborsare per questo ordine");
+            throw ApiException.badRequest("There's no payment to refund for this order");
         }
 
         var alreadyRefunded = payment.getRefundedAmount() == null
                 ? BigDecimal.ZERO : payment.getRefundedAmount();
         var total = alreadyRefunded.add(amount);
         if (total.compareTo(payment.getAmount()) > 0) {
-            throw ApiException.badRequest("Il rimborso supera l'importo incassato");
+            throw ApiException.badRequest("The refund exceeds the amount charged");
         }
 
         // Verso il fornitore si va solo se l'incasso era reale. Col doppio non
@@ -182,7 +182,7 @@ public class OrderCompensationService {
             var entry = new OrderStatusHistory();
             entry.setOrder(order);
             entry.setStatus(OrderStatus.refunded);
-            entry.setNote("Rimborsato per intero");
+            entry.setNote("Fully refunded");
             order.getStatusHistory().add(entry);
         }
     }

@@ -39,7 +39,7 @@ public class AddressesController {
     @DeleteMapping("/{id}")
     public Map<String, String> delete(@AuthenticationPrincipal CurrentUser user, @PathVariable UUID id) {
         addresses.delete(user.id(), id);
-        return Map.of("message", "Indirizzo eliminato");
+        return Map.of("message", "Address deleted");
     }
 
     @PatchMapping("/{id}/set-default")

@@ -65,11 +65,11 @@ public class PaymentsController {
         // L'ordine dev'essere di chi chiama: altrimenti basterebbe conoscere un
         // id per confermare l'ordine di qualcun altro.
         var order = orders.findByIdAndUserId(orderId, user.id())
-                .orElseThrow(() -> ApiException.notFound("Ordine non trovato"));
+                .orElseThrow(() -> ApiException.notFound("Order not found"));
         var payment = payments.findByOrderId(order.getId())
-                .orElseThrow(() -> ApiException.badRequest("Nessun pagamento da confermare"));
+                .orElseThrow(() -> ApiException.badRequest("No payment to confirm"));
         if (payment.getProviderTxId() == null) {
-            throw ApiException.badRequest("Questo ordine non aspetta nessun incasso");
+            throw ApiException.badRequest("This order isn't waiting on any payment");
         }
 
         webhook.handle("{\"type\":\"payment_intent.succeeded\",\"intent\":\""

@@ -72,17 +72,17 @@ public class InvoiceService {
         var bold = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 11);
 
         document.add(new Paragraph("Common Era", title));
-        document.add(new Paragraph("Fattura / Invoice", small));
+        document.add(new Paragraph("Invoice", small));
         document.add(Chunk.NEWLINE);
 
-        document.add(new Paragraph("Numero: " + order.getInvoiceNumber(), normal));
-        document.add(new Paragraph("Data: " + order.getCreatedAt().format(DATE), normal));
-        document.add(new Paragraph("Ordine: " + order.getId(), normal));
-        document.add(new Paragraph("Stato: " + order.getStatus().name(), normal));
+        document.add(new Paragraph("Number: " + order.getInvoiceNumber(), normal));
+        document.add(new Paragraph("Date: " + order.getCreatedAt().format(DATE), normal));
+        document.add(new Paragraph("Order: " + order.getId(), normal));
+        document.add(new Paragraph("Status: " + order.getStatus().name(), normal));
         document.add(Chunk.NEWLINE);
 
         users.findById(order.getUserId()).ifPresent(user -> {
-            document.add(new Paragraph("Intestatario", small));
+            document.add(new Paragraph("Ship to", small));
             document.add(new Paragraph(user.getFullName(), normal));
             document.add(new Paragraph(user.getEmail(), normal));
         });
@@ -99,10 +99,10 @@ public class InvoiceService {
 
         var table = new PdfPTable(new float[]{5, 1, 2, 2});
         table.setWidthPercentage(100);
-        header(table, "Articolo");
-        header(table, "Qta");
-        header(table, "Prezzo");
-        header(table, "Totale");
+        header(table, "Item");
+        header(table, "Qty");
+        header(table, "Price");
+        header(table, "Total");
 
         for (var item : order.getItems()) {
             String label = item.getVariantLabel() == null
@@ -116,18 +116,18 @@ public class InvoiceService {
         document.add(table);
         document.add(Chunk.NEWLINE);
 
-        totals(document, "Subtotale", euro(order.getSubtotal()), normal);
+        totals(document, "Subtotal", euro(order.getSubtotal()), normal);
         if (order.getDiscountTotal().signum() > 0) {
-            totals(document, "Sconto", "- " + euro(order.getDiscountTotal()), normal);
+            totals(document, "Discount", "- " + euro(order.getDiscountTotal()), normal);
         }
         if (order.getGiftCardAmount() != null && order.getGiftCardAmount().signum() > 0) {
             totals(document, "Gift card", "- " + euro(order.getGiftCardAmount()), normal);
         }
-        totals(document, "Spedizione", euro(order.getShippingCost()), normal);
-        totals(document, "Totale", euro(order.getTotal()), bold);
+        totals(document, "Shipping", euro(order.getShippingCost()), normal);
+        totals(document, "Total", euro(order.getTotal()), bold);
 
         document.add(Chunk.NEWLINE);
-        document.add(new Paragraph("Documento generato automaticamente, non valido ai fini fiscali.", small));
+        document.add(new Paragraph("This document is generated automatically and is not valid for tax purposes.", small));
         document.close();
 
         return out.toByteArray();

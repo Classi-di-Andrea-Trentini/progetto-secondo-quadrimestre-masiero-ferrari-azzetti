@@ -63,7 +63,7 @@ public class PrivacyService {
      * segnaposto non puo' finire per sbaglio nella casella di qualcuno.
      */
     private static final String ANONYMOUS_EMAIL_DOMAIN = "@anonimo.invalid";
-    private static final String ANONYMOUS_NAME = "Utente cancellato";
+    private static final String ANONYMOUS_NAME = "Deleted user";
     private static final String BLANKED = "—";
     private static final SecureRandom RANDOM = new SecureRandom();
 
@@ -184,15 +184,15 @@ public class PrivacyService {
 
         if (!confirmed) {
             throw ApiException.unauthorized(user.hasPassword()
-                    ? "Password non corretta"
-                    : "Per confermare, digita l'indirizzo email del tuo account");
+                    ? "Incorrect password"
+                    : "To confirm, type your account's email address");
         }
 
         // Un negozio senza nessun amministratore attivo non si recupera dal browser:
         // prima se ne nomina un altro, poi si chiude questo.
         if (user.isAdmin() && users.countByRoleAndDeletedAtIsNullAndIsActiveTrue(User.Role.admin) <= 1) {
             throw ApiException.badRequest(
-                    "Sei l'ultimo amministratore attivo: nomina un altro amministratore prima di cancellare l'account.");
+                    "You're the last active administrator: appoint another administrator before deleting the account.");
         }
 
         anonymiseAddresses(userId);

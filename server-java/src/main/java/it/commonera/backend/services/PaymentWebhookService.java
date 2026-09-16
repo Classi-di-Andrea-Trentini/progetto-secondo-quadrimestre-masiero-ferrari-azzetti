@@ -94,7 +94,7 @@ public class PaymentWebhookService {
         payment.setProviderPayload(event.rawJson());
         payments.save(payment);
 
-        addHistory(order, OrderStatus.paid, "Pagamento confermato dal fornitore");
+        addHistory(order, OrderStatus.paid, "Payment confirmed by provider");
 
         // Punti sull'imponibile davvero scontato, e carrello svuotato: le due
         // cose che seguono l'incasso, non la prenotazione.
@@ -131,7 +131,7 @@ public class PaymentWebhookService {
 
         orders.findById(payment.getOrderId()).ifPresent(order ->
                 compensation.releaseAndCancel(order, List.of(OrderStatus.pending), null,
-                        "Pagamento non riuscito"));
+                        "Payment failed"));
     }
 
     /**

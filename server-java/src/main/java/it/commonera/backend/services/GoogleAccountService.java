@@ -62,14 +62,14 @@ public class GoogleAccountService {
     @Transactional
     public AuthService.Issued signIn(GoogleIdentity identity, String userAgent) {
         if (identity == null || identity.sub() == null || identity.sub().isBlank()) {
-            throw ApiException.unauthorized("Risposta di Google incompleta");
+            throw ApiException.unauthorized("Incomplete response from Google");
         }
         if (!identity.emailVerified()) {
             throw ApiException.unauthorized(
-                    "Google non ha confermato questo indirizzo email: non possiamo usarlo per accedere.");
+                    "Google hasn't confirmed this email address: we can't use it to sign in.");
         }
         if (identity.email() == null || identity.email().isBlank()) {
-            throw ApiException.unauthorized("Google non ha comunicato nessun indirizzo email");
+            throw ApiException.unauthorized("Google didn't provide an email address");
         }
 
         String email = identity.email().trim().toLowerCase();
@@ -91,13 +91,13 @@ public class GoogleAccountService {
 
             if (existing.hasGoogleIdentity()) {
                 throw ApiException.conflict(
-                        "Questo indirizzo e' gia' collegato a un altro account Google. "
-                                + "Accedi con la password e controlla i collegamenti dal tuo profilo.");
+                        "This address is already linked to another Google account. "
+                                + "Sign in with your password and check your linked accounts from your profile.");
             }
             if (!existing.isEmailVerified()) {
                 throw ApiException.conflict(
-                        "Esiste gia' un account con questo indirizzo, ma l'indirizzo non e' mai stato confermato. "
-                                + "Accedi con la password e collega Google dal tuo profilo.");
+                        "An account with this address already exists, but the address has never been confirmed. "
+                                + "Sign in with your password and link Google from your profile.");
             }
 
             existing.setGoogleSub(identity.sub());
@@ -140,7 +140,7 @@ public class GoogleAccountService {
     /** Lo stesso filtro del login con password: cancellato o sospeso non entra. */
     private static User usable(User user) {
         if (user.getDeletedAt() != null || !Boolean.TRUE.equals(user.getIsActive())) {
-            throw ApiException.unauthorized("Account non disponibile");
+            throw ApiException.unauthorized("Account not available");
         }
         return user;
     }

@@ -160,7 +160,7 @@ public class ReturnService {
 
     @Transactional
     public ReturnDtos.View updateStatus(UUID id, ReturnDtos.UpdateStatusRequest dto) {
-        var ret = returns.findById(id).orElseThrow(() -> ApiException.notFound("Reso non trovato"));
+        var ret = returns.findById(id).orElseThrow(() -> ApiException.notFound("Return not found"));
 
         var wasAlreadyRefunded = ret.getStatus() == OrderReturn.ReturnStatus.refunded;
 
@@ -175,7 +175,7 @@ public class ReturnService {
         // restituirebbe l'importo due volte.
         if (dto.status() == OrderReturn.ReturnStatus.refunded && !wasAlreadyRefunded) {
             var order = orders.findById(ret.getOrderId())
-                    .orElseThrow(() -> ApiException.notFound("Ordine non trovato"));
+                    .orElseThrow(() -> ApiException.notFound("Order not found"));
             compensation.refundCharge(order, ret.getRefundAmount(), "Reso " + ret.getId());
         }
 

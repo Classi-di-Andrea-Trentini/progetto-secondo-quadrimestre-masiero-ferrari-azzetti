@@ -65,7 +65,7 @@ public class LoyaltyService {
         entry.setUserId(userId);
         entry.setOrderId(orderId);
         entry.setPoints(points);
-        entry.setReason("Acquisto");
+        entry.setReason("Purchase");
         entries.save(entry);
         return points;
     }
@@ -97,7 +97,7 @@ public class LoyaltyService {
         entry.setUserId(userId);
         entry.setOrderId(orderId);
         entry.setPoints(-usable);
-        entry.setReason("Sconto punti");
+        entry.setReason("Points discount");
         entries.save(entry);
 
         return new Redeemed(usable, BigDecimal.valueOf(usable / POINTS_PER_EURO_DISCOUNT));
@@ -119,7 +119,7 @@ public class LoyaltyService {
         entry.setUserId(userId);
         entry.setOrderId(orderId);
         entry.setPoints(-net);
-        entry.setReason("Annullamento ordine");
+        entry.setReason("Order cancellation");
         entries.save(entry);
         return -net;
     }

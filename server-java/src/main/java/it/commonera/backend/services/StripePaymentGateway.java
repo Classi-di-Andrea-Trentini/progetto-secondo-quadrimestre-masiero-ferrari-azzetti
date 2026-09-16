@@ -51,7 +51,7 @@ public class StripePaymentGateway implements PaymentGateway {
             PaymentIntent intent = client.paymentIntents().create(params);
             return new Intent(intent.getId(), intent.getClientSecret());
         } catch (StripeException e) {
-            throw ApiException.badRequest("Stripe ha rifiutato la creazione del pagamento: " + e.getMessage());
+            throw ApiException.badRequest("Stripe declined to create the payment: " + e.getMessage());
         }
     }
 
@@ -60,7 +60,7 @@ public class StripePaymentGateway implements PaymentGateway {
         try {
             client.paymentIntents().cancel(intentId);
         } catch (StripeException e) {
-            throw ApiException.badRequest("Stripe ha rifiutato l'annullamento del pagamento: " + e.getMessage());
+            throw ApiException.badRequest("Stripe declined to cancel the payment: " + e.getMessage());
         }
     }
 
@@ -73,7 +73,7 @@ public class StripePaymentGateway implements PaymentGateway {
         try {
             return client.refunds().create(params).getId();
         } catch (StripeException e) {
-            throw ApiException.badRequest("Stripe ha rifiutato il rimborso: " + e.getMessage());
+            throw ApiException.badRequest("Stripe declined the refund: " + e.getMessage());
         }
     }
 

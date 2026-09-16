@@ -200,8 +200,8 @@ public class RateLimitFilter extends OncePerRequestFilter {
         // Standard e non decorativo: dice al chiamante onesto quando riprovare,
         // invece di lasciarlo martellare fino a fine finestra.
         response.setHeader("Retry-After", String.valueOf(retryAfterSeconds));
-        response.getWriter().write("{\"message\":\"Troppe richieste, riprova fra "
-                + retryAfterSeconds + " secondi\",\"error\":\"Too Many Requests\",\"statusCode\":429}");
+        response.getWriter().write("{\"message\":\"Too many requests, try again in "
+                + retryAfterSeconds + " seconds\",\"error\":\"Too Many Requests\",\"statusCode\":429}");
     }
 
     /** Percorsi gia' compilati una volta sola: ricompilarli a ogni richiesta sarebbe lavoro inutile. */

@@ -43,7 +43,7 @@ public class AuthController {
     @PostMapping("/register")
     public Map<String, Object> register(@Valid @RequestBody AuthDtos.RegisterRequest body) {
         var user = auth.register(body.email(), body.password(), body.fullName());
-        return Map.of("message", "Registrazione completata", "user", UserResponse.from(user));
+        return Map.of("message", "Registration completed", "user", UserResponse.from(user));
     }
 
     @PostMapping("/login")
@@ -66,7 +66,7 @@ public class AuthController {
         // continua a mandarlo.
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, AuthCookie.cleared(secureCookies).toString())
-                .body(Map.of("message", "Logout effettuato"));
+                .body(Map.of("message", "Logged out"));
     }
 
     /**
@@ -78,7 +78,7 @@ public class AuthController {
     @PostMapping("/forgot-password")
     public Map<String, Object> forgotPassword(@Valid @RequestBody UserDtos.ForgotPasswordRequest body) {
         profiles.requestPasswordReset(body.email());
-        return Map.of("message", "Se l'indirizzo e' registrato, riceverai un'email con le istruzioni.");
+        return Map.of("message", "If this address is registered, you'll receive an email with instructions.");
     }
 
     @PostMapping("/reset-password")

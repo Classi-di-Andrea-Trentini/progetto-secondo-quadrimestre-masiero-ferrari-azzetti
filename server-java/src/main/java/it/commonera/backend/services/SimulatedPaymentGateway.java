@@ -47,13 +47,13 @@ public class SimulatedPaymentGateway implements PaymentGateway {
             String type = root.path("type").asString(null);
             String intentId = root.path("intent").asString(null);
             if (type == null || intentId == null) {
-                throw ApiException.badRequest("Webhook simulato senza 'type' o 'intent'");
+                throw ApiException.badRequest("Simulated webhook missing 'type' or 'intent'");
             }
             return new Event(type, intentId, payload);
         } catch (ApiException e) {
             throw e;
         } catch (Exception e) {
-            throw ApiException.badRequest("Webhook simulato illeggibile");
+            throw ApiException.badRequest("Unreadable simulated webhook");
         }
     }
 

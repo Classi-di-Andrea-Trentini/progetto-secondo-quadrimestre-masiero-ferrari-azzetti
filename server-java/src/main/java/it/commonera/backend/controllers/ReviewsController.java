@@ -41,7 +41,7 @@ public class ReviewsController {
     @DeleteMapping("/{id}")
     public Map<String, String> delete(@AuthenticationPrincipal CurrentUser user, @PathVariable UUID id) {
         reviews.delete(user.id(), id);
-        return Map.of("message", "Recensione eliminata");
+        return Map.of("message", "Review deleted");
     }
 
     public record CreateRequest(UUID productId, short rating, String title, String body) {}
