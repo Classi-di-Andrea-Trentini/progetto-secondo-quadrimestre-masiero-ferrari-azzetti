@@ -179,7 +179,7 @@
 
         <a
           [routerLink]="block.loginLink ? (auth.isAuthenticated() ? block.link : block.loginLink) : block.link"
-          class="promo-cta"
+          class="btn btn-outline promo-cta"
         >
           @if (block.loginLink && auth.isAuthenticated()) {
             Go to account

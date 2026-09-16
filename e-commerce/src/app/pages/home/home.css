@@ -337,35 +337,32 @@
   color: oklch(1 0 0 / 0.6);
 }
 
+/* Il design le vuole bottoni bordati (border: 1px solid #111 in
+   SaleBanner/CollectionBanner), non piu' link sottolineati con freccia:
+   l'aspetto arriva dal vocabolario (.btn .btn-outline), qui resta solo il
+   posizionamento nella card (spinto in fondo alla colonna flex). */
 .promo-cta {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  /* .promo-article e' una colonna flex con align-items:flex-start: basta
+     spingere il bottone in fondo, l'allineamento orizzontale arriva gia'
+     dal genitore. */
   margin-top: auto;
-  padding-top: 1.75rem;
-  font-size: var(--text-xs);
-  font-weight: 700;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-  color: var(--color-ink);
-  border-bottom: 1px solid transparent;
-  transition:
-    color 180ms var(--ease-out-quart),
-    border-color 180ms var(--ease-out-quart);
 }
 
-.promo-cta::after {
-  content: '→';
-  margin-left: 0.5rem;
-  transition: transform 220ms var(--ease-out-expo);
-}
-
-.promo-cta:hover::after {
-  transform: translateX(0.25rem);
-}
-
-.promo-article-lead .promo-cta {
+/* Il pannello dei saldi e' invertito (sfondo quasi nero): .btn-outline di
+   base disegna un bordo chiaro e testo scuro, illeggibili li' sopra. Stessa
+   idea di .promo-label/.promo-tag qui sotto, spostata sul bottone. */
+.promo-article-lead .btn-outline {
+  border-color: var(--color-surface);
   color: var(--color-surface);
+}
+
+.promo-article-lead .btn-outline:hover:not(:disabled) {
+  border-color: var(--color-surface);
+  background: oklch(1 0 0 / 0.12);
+}
+
+.promo-article-lead .btn-outline:active:not(:disabled) {
+  background: oklch(1 0 0 / 0.2);
 }
 
 /* ── NUOVI ARRIVI ─────────────────────────────────────────────────────────── */
@@ -482,7 +479,6 @@
   .featured-img,
   .hero-visual,
   .hero-visual-image,
-  .promo-cta::after,
   .fan-card,
   .fan-meta {
     transition: none;
