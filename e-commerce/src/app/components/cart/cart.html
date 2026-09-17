@@ -96,6 +96,7 @@
               <div class="qty">
                 <button
                   type="button"
+                  class="qty-btn"
                   (click)="decreaseQty(item.variantId, item.quantity)"
                   [attr.aria-label]="'Decrease quantity of ' + item.productName"
                 >
@@ -104,6 +105,7 @@
                 <span class="qty-value" aria-live="polite">{{ item.quantity }}</span>
                 <button
                   type="button"
+                  class="qty-btn"
                   (click)="increaseQty(item.variantId, item.quantity)"
                   [attr.aria-label]="'Increase quantity of ' + item.productName"
                 >

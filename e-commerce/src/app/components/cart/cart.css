@@ -149,51 +149,7 @@
 }
 
 /* ── Stepper quantita' — stessa forma ovunque compaia nell'app. ───────────── */
-.qty {
-  display: inline-flex;
-  align-items: stretch;
-  border: 1px solid var(--color-line-strong);
-  border-radius: 2px;
-  overflow: hidden;
-}
-
-.qty button {
-  width: 1.875rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  border: none;
-  color: var(--color-ink-2);
-  cursor: pointer;
-  font-size: var(--text-sm);
-  line-height: 1;
-  transition:
-    background-color 140ms var(--ease-out-quart),
-    color 140ms var(--ease-out-quart);
-}
-
-.qty button:hover:not(:disabled) {
-  background: var(--color-sunken);
-  color: var(--color-ink);
-}
-
-.qty button:disabled {
-  color: var(--color-line-strong);
-  cursor: not-allowed;
-}
-
-.qty-value {
-  min-width: 2rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: var(--text-sm);
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  color: var(--color-ink);
-  padding: 0.375rem 0;
-}
+/* .qty / .qty-btn / .qty-value: vocabolario condiviso in styles.css. */
 
 @media (prefers-reduced-motion: reduce) {
   .cart-drawer,

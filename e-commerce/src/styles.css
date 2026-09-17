@@ -560,6 +560,61 @@
     text-transform: none;
   }
 
+  /* ── Quantity stepper ──────────────────────────────────────────────────────
+     Il cassetto carrello e il modale "Richiedi reso" di me.html avevano lo
+     stesso controllo -/valore/+ scritto due volte: il cassetto con
+     .qty/.qty button/.qty-value (prima in cart.css, con aria-label per
+     pulsante) e il modale con utility Tailwind grezze (w-7 h-7) senza
+     nessuna etichetta — uno screen reader annunciava solo "−"/"+" senza
+     dire di cosa. Unica voce qui, min-height/min-width 44px per il target
+     tattile: nel cassetto erano ~30px, sotto la soglia anche li'. */
+  .qty {
+    display: inline-flex;
+    align-items: stretch;
+    border: 1px solid var(--color-line-strong);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .qty-btn {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    color: var(--color-ink-2);
+    cursor: pointer;
+    font-size: var(--text-sm);
+    line-height: 1;
+    transition:
+      background-color 140ms var(--ease-out-quart),
+      color 140ms var(--ease-out-quart);
+  }
+
+  .qty-btn:hover:not(:disabled) {
+    background: var(--color-sunken);
+    color: var(--color-ink);
+  }
+
+  .qty-btn:disabled {
+    color: var(--color-line-strong);
+    cursor: not-allowed;
+  }
+
+  .qty-value {
+    min-width: 2rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-ink);
+    padding: 0.375rem 0.5rem;
+  }
+
   /* ── Badges ────────────────────────────────────────────────────────────── */
   .badge {
     display: inline-flex;

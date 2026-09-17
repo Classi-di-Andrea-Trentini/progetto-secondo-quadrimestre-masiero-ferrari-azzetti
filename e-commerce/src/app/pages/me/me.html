@@ -474,8 +474,8 @@
                   <input formControlName="city" type="text" class="field"/>
                 </div>
                 <div>
-                  <label class="label">Province</label>
-                  <input formControlName="province" type="text" maxlength="2" class="field input-uppercase"/>
+                  <label class="label">Province (2-letter code)</label>
+                  <input formControlName="province" type="text" placeholder="e.g. RM" maxlength="2" class="field input-uppercase"/>
                 </div>
               </div>
               <div>
@@ -580,7 +580,8 @@
                   </a>
                   <button
                     (click)="removeFromWishlist(item.id)"
-                    class="absolute top-2 right-2 bg-surface/85 backdrop-blur w-8 h-8 rounded-full flex items-center justify-center text-danger hover:scale-110 transition-transform shadow-sm">
+                    [attr.aria-label]="'Remove ' + item.name + ' from wishlist'"
+                    class="heart-btn heart-btn-float backdrop-blur hover:scale-110 transition-transform shadow-sm">
                     <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" stroke="currentColor" stroke-width="1.6" class="text-accent">
                       <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
                     </svg>
@@ -829,12 +830,12 @@
               <p class="text-ink">{{ item.productName }}</p>
               <p class="text-ink-muted text-xs">Purchased: {{ item.quantity }}</p>
             </div>
-            <div class="flex items-center gap-2">
+            <div class="qty">
               <button type="button" (click)="setReturnQuantity(item.id, (returnQuantities()[item.id] ?? 0) - 1, item.quantity)"
-                class="w-7 h-7 border border-line rounded-sm text-ink-2 hover:bg-sunken">−</button>
-              <span class="w-6 text-center text-sm">{{ returnQuantities()[item.id] ?? 0 }}</span>
+                class="qty-btn" [attr.aria-label]="'Decrease return quantity of ' + item.productName">&minus;</button>
+              <span class="qty-value" aria-live="polite">{{ returnQuantities()[item.id] ?? 0 }}</span>
               <button type="button" (click)="setReturnQuantity(item.id, (returnQuantities()[item.id] ?? 0) + 1, item.quantity)"
-                class="w-7 h-7 border border-line rounded-sm text-ink-2 hover:bg-sunken">+</button>
+                class="qty-btn" [attr.aria-label]="'Increase return quantity of ' + item.productName">+</button>
             </div>
           </div>
         }

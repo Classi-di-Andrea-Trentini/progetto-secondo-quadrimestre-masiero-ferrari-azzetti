@@ -35,7 +35,7 @@
       <!-- Steps indicator -->
       <ol class="checkout-steps" aria-label="Checkout progress">
         @for (s of steps(); track s.key; let i = $index) {
-          <li class="checkout-step" [class.active]="i <= stepIndex()">
+          <li class="checkout-step" [class.active]="i <= stepIndex()" [class.done]="i < stepIndex()">
             <span class="checkout-step-dot">
               @if (i < stepIndex()) {
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
@@ -47,9 +47,6 @@
             </span>
             <span class="checkout-step-label">{{ s.label }}</span>
           </li>
-          @if (i < steps().length - 1) {
-            <li class="checkout-step-rule" [class.done]="i < stepIndex()" aria-hidden="true"></li>
-          }
         }
       </ol>
 
@@ -454,6 +451,7 @@
             (keyup.enter)="applyPromo()"
             type="text"
             placeholder="Discount code"
+            aria-label="Discount code"
             [disabled]="reserved()"
             class="field input-uppercase"
           />
@@ -487,6 +485,7 @@
             (keyup.enter)="applyGiftCard()"
             type="text"
             placeholder="Gift card"
+            aria-label="Gift card code"
             [disabled]="reserved()"
             class="field input-uppercase"
           />
