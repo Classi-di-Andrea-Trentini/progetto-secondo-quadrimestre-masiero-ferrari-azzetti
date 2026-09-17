@@ -163,7 +163,7 @@
                   </span>
                 </td>
                 <td class="num font-semibold text-ink">{{ formatPrice(order.total) }}</td>
-                <td class="num text-ink-muted text-xs">{{ order.createdAt | date: 'dd/MM/yy' }}</td>
+                <td class="num text-ink-muted text-xs">{{ order.createdAt | date: 'd MMM y' }}</td>
               </tr>
             }
             @empty {
@@ -194,7 +194,7 @@
               </div>
               <div>
                 <dt class="label !mb-0.5">Date</dt>
-                <dd class="text-ink">{{ order.createdAt | date: 'dd/MM/yy' }}</dd>
+                <dd class="text-ink">{{ order.createdAt | date: 'd MMM y' }}</dd>
               </div>
             </dl>
           </div>

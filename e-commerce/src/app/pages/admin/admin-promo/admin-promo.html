@@ -78,7 +78,7 @@
                   {{ promo._count.uses }}{{ promo.maxUses ? ' / ' + promo.maxUses : '' }}
                 </td>
                 <td class="text-ink-muted text-xs">
-                  {{ promo.expiresAt ? (promo.expiresAt | date: 'dd/MM/yyyy') : 'None' }}
+                  {{ promo.expiresAt ? (promo.expiresAt | date: 'd MMM y') : 'None' }}
                 </td>
                 <td class="text-center">
                   <button (click)="toggleActive(promo)"
@@ -132,7 +132,7 @@
             </div>
             <div>
               <dt class="label !mb-0.5">Expires</dt>
-              <dd class="text-ink">{{ promo.expiresAt ? (promo.expiresAt | date: 'dd/MM/yyyy') : 'None' }}</dd>
+              <dd class="text-ink">{{ promo.expiresAt ? (promo.expiresAt | date: 'd MMM y') : 'None' }}</dd>
             </div>
           </dl>
           <div class="mt-3 pt-3 border-t border-line">

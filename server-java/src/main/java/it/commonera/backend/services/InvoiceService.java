@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 import java.util.UUID;
 
 /**
@@ -30,7 +31,9 @@ import java.util.UUID;
 @Service
 public class InvoiceService {
 
-    private static final DateTimeFormatter DATE = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    // "d MMM y" (es. "5 Sep 2026"): stesso pattern usato dal frontend, non ambiguo
+    // in nessuna delle due convenzioni giorno/mese, a differenza di un formato numerico.
+    private static final DateTimeFormatter DATE = DateTimeFormatter.ofPattern("d MMM y", Locale.ENGLISH);
 
     private final OrderRepository orders;
     private final UserRepository users;
@@ -71,7 +74,7 @@ public class InvoiceService {
         var normal = FontFactory.getFont(FontFactory.HELVETICA, 11);
         var bold = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 11);
 
-        document.add(new Paragraph("Common Era", title));
+        document.add(new Paragraph("CommonEra", title));
         document.add(new Paragraph("Invoice", small));
         document.add(Chunk.NEWLINE);
 

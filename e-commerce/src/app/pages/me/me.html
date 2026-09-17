@@ -67,7 +67,7 @@
                   <div>
                     <p class="text-xs text-ink-muted uppercase tracking-widest mb-1">Date of birth</p>
                     <p class="font-medium">
-                      {{ user.birthDate ? (user.birthDate | date: 'longDate') : '—' }}
+                      {{ user.birthDate ? (user.birthDate | date: 'd MMM y') : '—' }}
                     </p>
                   </div>
                   <div>
@@ -76,7 +76,7 @@
                   </div>
                   <div>
                     <p class="text-xs text-ink-muted uppercase tracking-widest mb-1">Customer since</p>
-                    <p class="font-medium">{{ user.createdAt | date: 'MMMM y' }}</p>
+                    <p class="font-medium">{{ user.createdAt | date: 'd MMM y' }}</p>
                   </div>
                 </div>
 
@@ -282,7 +282,7 @@
                     <div class="flex items-center gap-4 text-left">
                       <div>
                         <p class="font-mono text-xs text-ink-muted">{{ order.id.slice(0, 8) }}…</p>
-                        <p class="text-xs text-ink-muted mt-0.5">{{ order.createdAt | date: 'dd/MM/yyyy' }}</p>
+                        <p class="text-xs text-ink-muted mt-0.5">{{ order.createdAt | date: 'd MMM y' }}</p>
                       </div>
                       <div>
                         <span class="badge" [ngClass]="orderStatusColor(order.status)">

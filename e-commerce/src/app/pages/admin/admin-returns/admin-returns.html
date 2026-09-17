@@ -71,7 +71,7 @@
                   </span>
                 </td>
                 <td class="num text-xs text-ink-2">{{ formatPrice(r.refundAmount) }}</td>
-                <td class="num text-ink-muted text-xs">{{ r.createdAt | date: 'dd/MM/yy' }}</td>
+                <td class="num text-ink-muted text-xs">{{ r.createdAt | date: 'd MMM y' }}</td>
                 <td class="text-right">
                   <button (click)="openDetail(r)" class="btn btn-outline btn-sm">
                     Manage
@@ -112,7 +112,7 @@
             </div>
             <div>
               <dt class="label !mb-0.5">Date</dt>
-              <dd class="text-ink">{{ r.createdAt | date: 'dd/MM/yy' }}</dd>
+              <dd class="text-ink">{{ r.createdAt | date: 'd MMM y' }}</dd>
             </div>
           </dl>
           <div class="mt-3 pt-3 border-t border-line">

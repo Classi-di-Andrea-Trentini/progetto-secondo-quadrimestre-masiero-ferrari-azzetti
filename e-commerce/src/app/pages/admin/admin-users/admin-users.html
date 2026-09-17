@@ -116,7 +116,7 @@
                   }
                 </td>
                 <td class="text-ink font-medium">{{ user._count.orders }}</td>
-                <td class="text-ink-muted text-xs">{{ user.createdAt | date: 'dd/MM/yyyy' }}</td>
+                <td class="text-ink-muted text-xs">{{ user.createdAt | date: 'd MMM y' }}</td>
                 <td>
                   <div class="flex items-center justify-end gap-2">
                     @if (!isCurrentUser(user.id)) {
@@ -185,7 +185,7 @@
             </div>
             <div class="col-span-2">
               <dt class="label !mb-0.5">Joined</dt>
-              <dd class="text-ink">{{ user.createdAt | date: 'dd/MM/yyyy' }}</dd>
+              <dd class="text-ink">{{ user.createdAt | date: 'd MMM y' }}</dd>
             </div>
           </dl>
           @if (!isCurrentUser(user.id)) {

@@ -82,7 +82,7 @@
                   </span>
                 </td>
                 <td class="num font-semibold text-ink">{{ formatPrice(order.total) }}</td>
-                <td class="num text-ink-muted text-xs">{{ order.createdAt | date: 'dd/MM/yy' }}</td>
+                <td class="num text-ink-muted text-xs">{{ order.createdAt | date: 'd MMM y' }}</td>
                 <td class="text-right">
                   <button (click)="openDetail(order.id)" class="btn btn-outline btn-sm">
                     Detail
@@ -119,7 +119,7 @@
             </div>
             <div>
               <dt class="label !mb-0.5">Date</dt>
-              <dd class="text-ink">{{ order.createdAt | date: 'dd/MM/yy' }}</dd>
+              <dd class="text-ink">{{ order.createdAt | date: 'd MMM y' }}</dd>
             </div>
             <div class="col-span-2">
               <dt class="label !mb-0.5">Products</dt>
@@ -188,7 +188,7 @@
           <div class="flex items-start justify-between">
             <div>
               <p class="text-xs text-ink-muted font-mono">{{ selectedOrder()!.id }}</p>
-              <p class="text-sm text-ink-muted mt-1">{{ selectedOrder()!.createdAt | date: 'dd/MM/yyyy HH:mm' }}</p>
+              <p class="text-sm text-ink-muted mt-1">{{ selectedOrder()!.createdAt | date: 'd MMM y, HH:mm' }}</p>
             </div>
             <span class="badge" [class]="statusColor(selectedOrder()!.status)">
               {{ statusLabel(selectedOrder()!.status) }}
@@ -264,7 +264,7 @@
                 @for (h of selectedOrder()!.statusHistory; track $index) {
                   <div class="flex items-start gap-2 text-xs text-ink-muted">
                     <span class="badge" [class]="statusColor(h.status)">{{ statusLabel(h.status) }}</span>
-                    <span>{{ h.createdAt | date: 'dd/MM/yy HH:mm' }}</span>
+                    <span>{{ h.createdAt | date: 'd MMM y, HH:mm' }}</span>
                     @if (h.note) { <span class="text-ink-muted">· {{ h.note }}</span> }
                   </div>
                 }
