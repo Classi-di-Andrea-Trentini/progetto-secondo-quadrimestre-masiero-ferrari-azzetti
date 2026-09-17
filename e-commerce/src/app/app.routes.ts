@@ -23,39 +23,58 @@ import { NotFound } from './pages/not-found/not-found';
 import { authGuardGuard } from './guards/auth-guard-guard';
 import { adminGuardGuard } from './guards/admin-guard-guard';
 
+// `title` su ogni rotta e' cio' che aggiorna `document.title` a ogni
+// navigazione lato client: senza, il `Title` di Angular non lo tocca mai da
+// solo, e la scheda resta bloccata sul titolo dell'ultima pagina che lo
+// impostava esplicitamente (solo product-detail e la 404 lo fanno). La
+// pagina prodotto sovrascrive comunque questo valore in `ngOnInit` una volta
+// caricati i dati (nome vero del prodotto), quindi qui basta un fallback.
 export const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
-  { path: 'home', component: Home },
+  { path: 'home', component: Home, title: 'Common Era' },
   // `About` era importato ma la rotta non era mai stata registrata: il link "About us"
   // nella barra in alto cadeva nel jolly e riportava alla home.
-  { path: 'about', component: About },
-  { path: 'login', component: Login },
-  { path: 'register', component: Register },
-  { path: 'products', component: Products },
-  { path: 'product/:slug', component: ProductDetail },
-  { path: 'me', component: MeComponent, canActivate: [authGuardGuard] },
-  { path: 'checkout', component: Checkout, canActivate: [authGuardGuard] },
-  { path: 'forgot-password', component: ForgotPassword },
-  { path: 'reset-password', component: ResetPassword },
-  { path: 'verify-email/:token', component: VerifyEmail },
-  { path: 'legal/:pagina', component: Legal },
+  { path: 'about', component: About, title: 'About Us — Common Era' },
+  { path: 'login', component: Login, title: 'Sign In — Common Era' },
+  { path: 'register', component: Register, title: 'Create Account — Common Era' },
+  { path: 'products', component: Products, title: 'Shop — Common Era' },
+  { path: 'product/:slug', component: ProductDetail, title: 'Product — Common Era' },
+  {
+    path: 'me',
+    component: MeComponent,
+    canActivate: [authGuardGuard],
+    title: 'My Account — Common Era',
+  },
+  {
+    path: 'checkout',
+    component: Checkout,
+    canActivate: [authGuardGuard],
+    title: 'Checkout — Common Era',
+  },
+  { path: 'forgot-password', component: ForgotPassword, title: 'Forgot Password — Common Era' },
+  { path: 'reset-password', component: ResetPassword, title: 'Reset Password — Common Era' },
+  { path: 'verify-email/:token', component: VerifyEmail, title: 'Verify Email — Common Era' },
+  { path: 'legal/:pagina', component: Legal, title: 'Legal — Common Era' },
   {
     path: 'admin',
     component: Admin,
     canActivate: [adminGuardGuard],
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-      { path: 'dashboard', component: AdminDashboard },
-      { path: 'products', component: AdminProducts },
-      { path: 'orders', component: AdminOrders },
-      { path: 'users', component: AdminUsers },
-      { path: 'promo', component: AdminPromo },
-      { path: 'reviews', component: AdminReviews },
-      { path: 'returns', component: AdminReturns },
+      { path: 'dashboard', component: AdminDashboard, title: 'Admin Dashboard — Common Era' },
+      { path: 'products', component: AdminProducts, title: 'Admin Products — Common Era' },
+      { path: 'orders', component: AdminOrders, title: 'Admin Orders — Common Era' },
+      { path: 'users', component: AdminUsers, title: 'Admin Users — Common Era' },
+      { path: 'promo', component: AdminPromo, title: 'Admin Promotions — Common Era' },
+      { path: 'reviews', component: AdminReviews, title: 'Admin Reviews — Common Era' },
+      { path: 'returns', component: AdminReturns, title: 'Admin Returns — Common Era' },
     ],
   },
   // Il jolly rende una 404 vera e non reindirizza piu' in home: un indirizzo
   // sbagliato deve dirlo, non fingere che vada tutto bene. Lo stato HTTP 404 lo
   // mette `app.routes.server.ts`, che e' l'unico punto in cui si puo' scegliere.
+  // Niente `title` qui: `NotFound` imposta il proprio nel costruttore (via
+  // `SeoService`), che gira PRIMA che il router applichi il titolo statico di
+  // rotta — un `title` qui lo sovrascriverebbe subito dopo, silenziosamente.
   { path: '**', component: NotFound },
 ];
