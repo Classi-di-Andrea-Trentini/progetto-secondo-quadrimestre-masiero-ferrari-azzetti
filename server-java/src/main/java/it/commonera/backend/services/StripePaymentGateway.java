@@ -11,6 +11,8 @@ import com.stripe.param.PaymentIntentCreateParams;
 import com.stripe.param.RefundCreateParams;
 import it.commonera.backend.config.StripeProperties;
 import it.commonera.backend.exceptions.ApiException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -26,6 +28,7 @@ import java.util.UUID;
  */
 public class StripePaymentGateway implements PaymentGateway {
 
+    private static final Logger log = LoggerFactory.getLogger(StripePaymentGateway.class);
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private final StripeClient client;
@@ -51,7 +54,12 @@ public class StripePaymentGateway implements PaymentGateway {
             PaymentIntent intent = client.paymentIntents().create(params);
             return new Intent(intent.getId(), intent.getClientSecret());
         } catch (StripeException e) {
-            throw ApiException.badRequest("Stripe declined to create the payment: " + e.getMessage());
+            // Il messaggio di Stripe resta nei log: al client va un testo stabile,
+            // il suo puo' contenere dettagli interni (codici carta, causali del
+            // fornitore) che non deve vedere.
+            log.error("Stripe ha rifiutato la creazione del payment intent per l'ordine {}: {}",
+                    orderId, e.getMessage(), e);
+            throw ApiException.badRequest("We couldn't start the payment. Please try again.");
         }
     }
 
@@ -60,7 +68,9 @@ public class StripePaymentGateway implements PaymentGateway {
         try {
             client.paymentIntents().cancel(intentId);
         } catch (StripeException e) {
-            throw ApiException.badRequest("Stripe declined to cancel the payment: " + e.getMessage());
+            log.error("Stripe ha rifiutato l'annullamento del payment intent {}: {}",
+                    intentId, e.getMessage(), e);
+            throw ApiException.badRequest("We couldn't cancel the payment. Please try again.");
         }
     }
 
@@ -73,7 +83,9 @@ public class StripePaymentGateway implements PaymentGateway {
         try {
             return client.refunds().create(params).getId();
         } catch (StripeException e) {
-            throw ApiException.badRequest("Stripe declined the refund: " + e.getMessage());
+            log.error("Stripe ha rifiutato il rimborso per il payment intent {}: {}",
+                    intentId, e.getMessage(), e);
+            throw ApiException.badRequest("We couldn't process the refund. Please try again.");
         }
     }
 
