@@ -136,7 +136,9 @@
         <h2 class="font-semibold text-ink">Recent Orders</h2>
         <a routerLink="/admin/orders" class="text-sm text-ink-muted hover:text-ink">View all →</a>
       </div>
-      <div class="table-wrap">
+
+      <!-- Table: md and up (stessa soglia delle altre 6 liste admin) -->
+      <div class="table-wrap hidden md:block">
         <table class="table">
           <thead>
             <tr>
@@ -169,6 +171,37 @@
             }
           </tbody>
         </table>
+      </div>
+
+      <!-- Cards: below md — stesso pattern delle altre 6 liste admin (es. admin-orders.html) -->
+      <div class="md:hidden space-y-3">
+        @for (order of stats()!.recentOrders; track order.id) {
+          <div class="panel p-4">
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0">
+                <p class="font-medium text-ink truncate">{{ order.user.fullName }}</p>
+                <p class="text-xs text-ink-muted truncate">{{ order.user.email }}</p>
+                <p class="text-xs text-ink-muted font-mono mt-0.5">{{ order.id.slice(0, 8) }}…</p>
+              </div>
+              <span class="badge flex-shrink-0" [class]="statusColor(order.status)">
+                {{ statusLabel(order.status) }}
+              </span>
+            </div>
+            <dl class="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 text-xs">
+              <div>
+                <dt class="label !mb-0.5">Total</dt>
+                <dd class="text-ink font-semibold">{{ formatPrice(order.total) }}</dd>
+              </div>
+              <div>
+                <dt class="label !mb-0.5">Date</dt>
+                <dd class="text-ink">{{ order.createdAt | date: 'dd/MM/yy' }}</dd>
+              </div>
+            </dl>
+          </div>
+        }
+        @empty {
+          <div class="panel p-8 text-center text-ink-muted text-sm">No recent orders</div>
+        }
       </div>
     </div>
   }
