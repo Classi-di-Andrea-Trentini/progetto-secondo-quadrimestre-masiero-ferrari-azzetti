@@ -277,6 +277,13 @@
    4 o a 2 colonne sotto nessun breakpoint. */
 .size-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
 .size-btn {
+  /* min-height 44px = il minimo per un target tattile (prima ~38px reali,
+     dati da 13px*2 di padding + line-height): la griglia 3x2 resta fissa,
+     cambia solo l'altezza di ogni cella. */
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 13px 8px;
   border: 1px solid var(--color-line);
   background: none;

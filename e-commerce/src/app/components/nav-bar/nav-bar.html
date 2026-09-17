@@ -9,7 +9,7 @@
         <button
           type="button"
           (click)="menuOpen.set(!menuOpen())"
-          class="md:hidden inline-flex items-center justify-center p-2 -ml-2 text-ink-2 hover:text-ink hover:bg-sunken rounded-sm transition-colors"
+          class="md:hidden inline-flex min-h-11 min-w-11 items-center justify-center p-2 -ml-2 text-ink-2 hover:text-ink hover:bg-sunken rounded-sm transition-colors"
           [attr.aria-expanded]="menuOpen()"
           aria-controls="nav-mobile-menu"
         >
@@ -69,7 +69,7 @@
 
         <a
           routerLink="/me"
-          class="flex min-h-10 min-w-10 items-center justify-center rounded-sm"
+          class="flex min-h-11 min-w-11 items-center justify-center rounded-sm"
           [attr.aria-label]="initials() ? 'My account' : 'Sign in'"
         >
           @if (initials()) {
@@ -90,7 +90,7 @@
         <button
           type="button"
           (click)="cart.toggle()"
-          class="relative flex min-h-10 min-w-10 items-center justify-center rounded-sm cursor-pointer text-ink-2 hover:text-ink transition-colors"
+          class="relative flex min-h-11 min-w-11 items-center justify-center rounded-sm cursor-pointer text-ink-2 hover:text-ink transition-colors"
           [attr.aria-label]="
             cart.itemCount() > 0 ? 'Open cart, ' + cart.itemCount() + ' items' : 'Open cart, empty'
           "

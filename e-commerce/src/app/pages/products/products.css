@@ -278,7 +278,12 @@
 }
 
 .cat-btn {
-  display: block;
+  /* min-height 44px = minimo target tattile (prima ~36px, dato da
+     0.4375rem*2 di padding + line-height). Il target resta a piena
+     larghezza: qui cambia solo l'altezza minima della riga. */
+  display: flex;
+  align-items: center;
+  min-height: 44px;
   width: 100%;
   text-align: left;
   padding: 0.4375rem 0;
@@ -499,8 +504,10 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2rem;
-  height: 2rem;
+  /* 2.75rem = 44px, il minimo per un target tattile: prima era 2rem (32px),
+     sotto la soglia su ogni pagina che mostra una card prodotto. */
+  width: 2.75rem;
+  height: 2.75rem;
   border: none;
   border-radius: 50%;
   background: oklch(1 0 0 / 0.9);
