@@ -132,4 +132,89 @@ describe('Me', () => {
 
     expect(component.hasPassword()).toBe(true);
   });
+
+  // ─── Spedizione gratuita e sconto in fattura ────────────────────────────
+  //
+  // Prima questi due punti si decidevano confrontando l'esito gia' formattato
+  // (`formatOrderPrice(v) === '€ 0,00'`): quando la formattazione e' passata
+  // all'inglese ("€0.00") quel confronto ha smesso silenziosamente di incontrare
+  // qualsiasi valore, e il difetto non l'ha preso nessun test. Qui si fissa il
+  // comportamento reso a schermo — non la stringa formattata — cosi' un domani
+  // `formatPrice` cambiasse ancora formato (spazio, separatore delle migliaia) un
+  // test rosso lo direbbe subito, invece di un badge "Free" che smette di comparire
+  // in silenzio.
+
+  function orderSummary(overrides: { shippingCost?: string; discountTotal?: string } = {}) {
+    return {
+      id: 'order-1',
+      status: 'delivered',
+      total: '45.00',
+      subtotal: '45.00',
+      shippingCost: '0.00',
+      discountTotal: '0.00',
+      createdAt: '2026-01-01T00:00:00Z',
+      items: [{ id: 'item-1', productName: 'Tee', quantity: 1, lineTotal: '45.00' }],
+      payments: [{ status: 'succeeded' }],
+      ...overrides,
+    };
+  }
+
+  describe('order totals — shipping and discount, rendered', () => {
+    beforeEach(() => {
+      // Si salta `setTab('orders')` apposta: chiamerebbe `loadOrders()`, cioe' una
+      // richiesta HTTP che qui non serve e che nessuno intercetterebbe.
+      component.activeTab.set('orders');
+    });
+
+    it('shows shipping as Free when the cost is zero', () => {
+      component.orders.set([orderSummary({ shippingCost: '0.00' })]);
+      component.expandedOrderId.set('order-1');
+      fixture.detectChanges();
+
+      const text = fixture.nativeElement.textContent as string;
+      expect(text).toContain('Free');
+      expect(text).not.toContain('€0.00');
+    });
+
+    it('shows the formatted shipping cost when it is not free', () => {
+      component.orders.set([orderSummary({ shippingCost: '4.90' })]);
+      component.expandedOrderId.set('order-1');
+      fixture.detectChanges();
+
+      const text = fixture.nativeElement.textContent as string;
+      expect(text).toContain('€4.90');
+      expect(text).not.toContain('Free');
+    });
+
+    it('hides the discount line when no discount was applied', () => {
+      component.orders.set([orderSummary({ discountTotal: '0.00' })]);
+      component.expandedOrderId.set('order-1');
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.textContent).not.toContain('Discount');
+    });
+
+    it('shows the discount line and amount when a discount was applied', () => {
+      component.orders.set([orderSummary({ discountTotal: '5.00' })]);
+      component.expandedOrderId.set('order-1');
+      fixture.detectChanges();
+
+      const text = fixture.nativeElement.textContent as string;
+      expect(text).toContain('Discount');
+      expect(text).toContain('€5.00');
+    });
+  });
+
+  describe('isZeroAmount', () => {
+    it('treats a numeric or string zero as zero, whatever formatPrice would print', () => {
+      expect(component.isZeroAmount(0)).toBe(true);
+      expect(component.isZeroAmount('0.00')).toBe(true);
+      expect(component.isZeroAmount('0')).toBe(true);
+    });
+
+    it('treats anything else as not zero', () => {
+      expect(component.isZeroAmount(4.9)).toBe(false);
+      expect(component.isZeroAmount('4.90')).toBe(false);
+    });
+  });
 });

@@ -328,6 +328,23 @@ export class MeComponent {
     return formatPrice(v);
   }
 
+  /**
+   * Vero se l'importo (numero o stringa numerica, residuo dell'epoca Prisma) e' zero
+   * — spedizione gratuita, nessuno sconto.
+   *
+   * Confronta il numero, non l'esito di `formatOrderPrice`: prima questo controllo
+   * era `formatOrderPrice(v) === '€ 0,00'`, e il giorno in cui `formatPrice` e'
+   * passato al formato inglese ("€0.00") quel confronto ha smesso di incontrare
+   * qualunque valore — la spedizione gratuita non compariva mai piu', e lo sconto
+   * sarebbe sempre apparso anche a zero. Un domani `formatPrice` cambiasse ancora
+   * (separatore delle migliaia, uno spazio) romperebbe di nuovo un confronto sulla
+   * stringa formattata. Il numero sotto non cambia mai.
+   */
+  isZeroAmount(v: string | number): boolean {
+    const amount = typeof v === 'number' ? v : parseFloat(v);
+    return Number.isFinite(amount) && amount === 0;
+  }
+
   orderStatusLabel(s: string): string { return this.orderStatusLabels[s] ?? s; }
   orderStatusColor(s: string): string { return this.orderStatusColors[s] ?? 'badge-neutral'; }
   canCancelOrder(status: string): boolean { return status === 'pending' || status === 'paid'; }

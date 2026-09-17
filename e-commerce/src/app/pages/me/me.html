@@ -331,9 +331,9 @@
                       <div class="border-t border-line pt-3 space-y-1 text-sm">
                         <div class="flex justify-between text-ink-muted">
                           <span>Shipping</span>
-                          <span>{{ formatOrderPrice(order.shippingCost) === '€0.00' ? 'Free' : formatOrderPrice(order.shippingCost) }}</span>
+                          <span>{{ isZeroAmount(order.shippingCost) ? 'Free' : formatOrderPrice(order.shippingCost) }}</span>
                         </div>
-                        @if (formatOrderPrice(order.discountTotal) !== '€0.00') {
+                        @if (!isZeroAmount(order.discountTotal)) {
                           <div class="flex justify-between text-success">
                             <span>Discount</span>
                             <span>–{{ formatOrderPrice(order.discountTotal) }}</span>
@@ -474,7 +474,7 @@
                   <input formControlName="city" type="text" class="field"/>
                 </div>
                 <div>
-                  <label class="block text-xs font-medium text-ink-2 mb-1">Prov.</label>
+                  <label class="block text-xs font-medium text-ink-2 mb-1">Province</label>
                   <input formControlName="province" type="text" maxlength="2" class="field uppercase"/>
                 </div>
               </div>
