@@ -15,61 +15,61 @@
 @if (cookies.visible()) {
   <div class="cookie-notice" role="dialog" aria-modal="false" aria-labelledby="cookie-notice-title">
     @if (!showingDetails()) {
-      <p id="cookie-notice-title" class="cookie-notice-title">Cookie tecnici</p>
+      <p id="cookie-notice-title" class="cookie-notice-title">Technical cookies</p>
       <p class="cookie-notice-desc">
-        Usiamo solo cookie tecnici: quelli che ti tengono collegato, quelli che ricordano
-        che hai letto questo avviso e quelli di Stripe durante il pagamento. Nessuna
-        statistica, nessuna profilazione, nessuna pubblicità. Non c'è niente da accettare
-        o rifiutare — solo da sapere.
-        <a routerLink="/legal/cookies" (click)="acknowledgeCookies()">Leggi la Cookie Policy</a>
+        We only use technical cookies: the ones that keep you signed in, the ones that
+        remember you've read this notice, and Stripe's during checkout. No analytics,
+        no profiling, no advertising. There's nothing to accept or decline — just to
+        know.
+        <a routerLink="/legal/cookies" (click)="acknowledgeCookies()">Read the Cookie Policy</a>
       </p>
       <div class="cookie-notice-actions">
         <button type="button" class="btn btn-ghost btn-sm" (click)="showCookieDetails()">
-          Dettagli
+          Details
         </button>
         <button type="button" class="btn btn-primary btn-sm" (click)="acknowledgeCookies()">
-          Ho capito
+          Got it
         </button>
       </div>
     } @else {
       <div class="cookie-details">
-        <button type="button" class="cookie-back" (click)="hideCookieDetails()">← Indietro</button>
-        <p class="cookie-notice-title" style="margin-top: 0.625rem">Cosa usiamo, per categoria</p>
+        <button type="button" class="cookie-back" (click)="hideCookieDetails()">← Back</button>
+        <p class="cookie-notice-title" style="margin-top: 0.625rem">What we use, by category</p>
 
         <div class="cookie-toggle-row">
           <div class="cookie-toggle-info">
-            <span class="cookie-toggle-label">Cookie tecnici</span>
+            <span class="cookie-toggle-label">Technical cookies</span>
             <span class="cookie-toggle-desc">
-              Sessione di accesso, memoria di questo avviso e antifrode di Stripe durante il
-              pagamento. Senza, il sito non funziona.
+              Sign-in session, memory of this notice, and Stripe's fraud prevention during
+              checkout. Without them, the site doesn't work.
             </span>
           </div>
-          <div class="cookie-toggle-state cookie-toggle-state--on">Sempre attivi</div>
+          <div class="cookie-toggle-state cookie-toggle-state--on">Always on</div>
         </div>
 
         <div class="cookie-toggle-row cookie-toggle-row--muted">
           <div class="cookie-toggle-info">
-            <span class="cookie-toggle-label">Cookie analitici</span>
+            <span class="cookie-toggle-label">Analytics cookies</span>
             <span class="cookie-toggle-desc">
-              Non usati. Nessuna statistica sulla navigazione, né nostra né di terzi.
+              Not used. No browsing analytics, ours or third-party.
             </span>
           </div>
-          <div class="cookie-toggle-state">Non usati</div>
+          <div class="cookie-toggle-state">Not used</div>
         </div>
 
         <div class="cookie-toggle-row cookie-toggle-row--muted">
           <div class="cookie-toggle-info">
-            <span class="cookie-toggle-label">Cookie di profilazione</span>
+            <span class="cookie-toggle-label">Profiling cookies</span>
             <span class="cookie-toggle-desc">
-              Non usati. Nessun circuito pubblicitario, nessun pixel di tracciamento.
+              Not used. No advertising networks, no tracking pixels.
             </span>
           </div>
-          <div class="cookie-toggle-state">Non usati</div>
+          <div class="cookie-toggle-state">Not used</div>
         </div>
 
         <div class="cookie-notice-actions" style="margin-top: 0.875rem">
           <button type="button" class="btn btn-primary btn-sm" (click)="acknowledgeCookies()">
-            Ho capito
+            Got it
           </button>
         </div>
       </div>
