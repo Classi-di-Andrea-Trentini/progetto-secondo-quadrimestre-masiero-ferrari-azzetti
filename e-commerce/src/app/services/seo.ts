@@ -49,9 +49,9 @@ export class SeoService {
 
   setProduct(product: ProductSeo): void {
     const description =
-      product.description?.slice(0, 300) ?? `${product.name} su Common Era.`;
+      product.description?.slice(0, 300) ?? `${product.name} on CommonEra.`;
 
-    this.setPage(`${product.name} — Common Era`, description, product.image, product.url);
+    this.setPage(`${product.name} — CommonEra`, description, product.image, product.url);
     this.meta.updateTag({ property: 'og:type', content: 'product' });
 
     this.setJsonLd({
