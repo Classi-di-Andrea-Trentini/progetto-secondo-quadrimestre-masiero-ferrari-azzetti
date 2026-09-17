@@ -176,7 +176,7 @@ public class ReturnService {
         if (dto.status() == OrderReturn.ReturnStatus.refunded && !wasAlreadyRefunded) {
             var order = orders.findById(ret.getOrderId())
                     .orElseThrow(() -> ApiException.notFound("Order not found"));
-            compensation.refundCharge(order, ret.getRefundAmount(), "Return " + ret.getId());
+            compensation.refundCharge(order, ret.getRefundAmount());
         }
 
         var saved = returns.save(ret);

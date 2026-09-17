@@ -35,7 +35,7 @@ class FullRefundClosesOrderTest extends AbstractIntegrationTest {
         var order = orders.findById(draft.orderId()).orElseThrow();
         var charged = payments.findByOrderId(draft.orderId()).orElseThrow().getAmount();
 
-        compensation.refundCharge(order, charged, "reso completo");
+        compensation.refundCharge(order, charged);
 
         assertEquals(OrderStatus.refunded, orders.findById(draft.orderId()).orElseThrow().getStatus());
     }

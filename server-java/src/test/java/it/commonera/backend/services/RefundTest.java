@@ -103,19 +103,19 @@ class RefundTest extends AbstractIntegrationTest {
         var charged = payments.findByOrderId(draft.orderId()).orElseThrow().getAmount();
         var half = charged.divide(new BigDecimal("2"), 2, java.math.RoundingMode.HALF_UP);
 
-        compensation.refundCharge(order, half, "primo parziale");
+        compensation.refundCharge(order, half);
         var afterFirst = payments.findByOrderId(draft.orderId()).orElseThrow();
         assertEquals(Payment.PaymentStatus.partially_refunded, afterFirst.getStatus());
         assertEquals(0, afterFirst.getRefundedAmount().compareTo(half));
 
-        compensation.refundCharge(order, charged.subtract(half), "secondo parziale");
+        compensation.refundCharge(order, charged.subtract(half));
         var payment = payments.findByOrderId(draft.orderId()).orElseThrow();
         assertEquals(Payment.PaymentStatus.refunded, payment.getStatus(),
                 "rimborsato tutto: lo stato non puo' restare 'parziale'");
         assertEquals(0, payment.getRefundedAmount().compareTo(charged));
 
         assertThrows(RuntimeException.class,
-                () -> compensation.refundCharge(order, new BigDecimal("0.01"), "un centesimo di troppo"),
+                () -> compensation.refundCharge(order, new BigDecimal("0.01")),
                 "finito il capiente, non si restituisce piu' niente");
     }
 }

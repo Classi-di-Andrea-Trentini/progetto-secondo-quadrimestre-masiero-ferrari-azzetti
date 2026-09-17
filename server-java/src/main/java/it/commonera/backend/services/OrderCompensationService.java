@@ -87,7 +87,7 @@ public class OrderCompensationService {
                     .filter(payment -> payment.getStatus() == Payment.PaymentStatus.succeeded
                             || payment.getStatus() == Payment.PaymentStatus.partially_refunded)
                     .ifPresent(payment ->
-                            refundCharge(order, outstanding(payment), "Order cancelled"));
+                            refundCharge(order, outstanding(payment)));
         }
 
         // La merce torna a magazzino: compensare senza ripristinare la giacenza
@@ -123,7 +123,7 @@ public class OrderCompensationService {
      * restituirebbe piu' di quanto incassato.
      */
     @Transactional
-    public void refundCharge(Order order, BigDecimal amount, String reason) {
+    public void refundCharge(Order order, BigDecimal amount) {
         if (amount == null || amount.signum() <= 0) return;
 
         var payment = payments.findByOrderId(order.getId()).orElse(null);
