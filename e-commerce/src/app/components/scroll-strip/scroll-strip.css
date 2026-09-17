@@ -20,8 +20,11 @@
 }
 
 /* Sotto lg l'incollaggio non parte (vedi guardia matchMedia nel componente):
-   niente altezza extra, la riga diventa una fila con swipe nativo. */
-@media (max-width: 1023px) {
+   niente altezza extra, la riga diventa una fila con swipe nativo.
+   1023.98px, non 1023px: stessa soglia "sotto lg" di admin.css, nella forma
+   che non lascia un buco a larghezze frazionarie tra questa query e il
+   `min-width: 1024px` che le sta sopra. */
+@media (max-width: 1023.98px) {
   .scroll-strip {
     height: auto;
   }

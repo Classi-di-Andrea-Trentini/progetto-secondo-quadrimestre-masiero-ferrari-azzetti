@@ -622,6 +622,11 @@
   grid-template-columns: 1fr;
   gap: 0.75rem;
 }
+/* 30rem (480px) e' fuori scala apposta, non un refuso per `sm` (640px):
+   queste righe affiancano solo campi stretti (nome/telefono, CAP/citta'/
+   provincia a 2 lettere), che stanno comodi su piu' colonne molto prima di
+   640px. Aspettare `sm` terrebbe il form impilato su tablet e telefoni in
+   orizzontale, dove lo spazio per affiancarli c'e' gia'. */
 @media (min-width: 30rem) {
   .form-row-2 {
     grid-template-columns: 1fr 1fr;
