@@ -67,7 +67,7 @@ export class Legal {
       title: 'Privacy notice',
       updatedAt: '16 September 2026',
       intro:
-        'This notice explains what personal data we collect when you use Common Era, why we collect it, how long we keep it, and what rights you can exercise. It is provided under Articles 13 and 14 of Regulation (EU) 2016/679 (GDPR).',
+        'This notice explains what personal data we collect when you use CommonEra, why we collect it, how long we keep it, and what rights you can exercise. It is provided under Articles 13 and 14 of Regulation (EU) 2016/679 (GDPR).',
       sections: [
         {
           heading: '1. Data controller',
@@ -156,7 +156,7 @@ export class Legal {
       title: 'Cookie policy',
       updatedAt: '16 September 2026',
       intro:
-        'This page lists, one by one, the cookies and local storage entries that Common Era uses, what they are for, and how long they last. We use technical cookies only: no analytics, advertising or profiling cookies of any kind.',
+        'This page lists, one by one, the cookies and local storage entries that CommonEra uses, what they are for, and how long they last. We use technical cookies only: no analytics, advertising or profiling cookies of any kind.',
       sections: [
         {
           heading: 'What cookies are',
@@ -168,7 +168,7 @@ export class Legal {
         },
         {
           heading: 'The cookies we use',
-          body: 'The table lists everything saved in your browser by Common Era and by Stripe, the provider that handles card payments. Some entries appear only at certain times: the Google sign-in cookie exists only for the few minutes of that step, and Stripe\'s only if you reach the payment page.',
+          body: 'The table lists everything saved in your browser by CommonEra and by Stripe, the provider that handles card payments. Some entries appear only at certain times: the Google sign-in cookie exists only for the few minutes of that step, and Stripe\'s only if you reach the payment page.',
           cookies: [
             {
               name: 'access_token',
@@ -227,7 +227,7 @@ export class Legal {
         {
           heading: 'No analytics or advertising cookies',
           body:
-            'Common Era does not use Google Analytics, Meta Pixel, ad networks or any other third-party tracking service. No data about your browsing behaviour is shared with outside parties for commercial purposes.\n\n' +
+            'CommonEra does not use Google Analytics, Meta Pixel, ad networks or any other third-party tracking service. No data about your browsing behaviour is shared with outside parties for commercial purposes.\n\n' +
             'One clarification, because the two things are easily confused: the site offers sign-in with Google. That isn\'t tracking — it\'s authentication, and it only happens if you press that button yourself. Google receives no data about the pages you visit, gives us no advertising profile, and sets no cookies on this site: the consent screen opens on Google\'s own domain, and the cookies you see there are Google\'s and follow Google\'s notice. It is nonetheless a disclosure of personal data to an outside party, and it is declared as such in the privacy notice, at point 4.',
         },
         {
@@ -251,7 +251,7 @@ export class Legal {
       title: 'Terms & Conditions of Sale',
       updatedAt: '15 September 2026',
       intro:
-        'These terms govern distance sales contracts concluded through the Common Era site. They form an integral part of every order: accepting them is a condition of purchase. We recommend saving or printing a copy.',
+        'These terms govern distance sales contracts concluded through the CommonEra site. They form an integral part of every order: accepting them is a condition of purchase. We recommend saving or printing a copy.',
       sections: [
         {
           heading: '1. The seller',

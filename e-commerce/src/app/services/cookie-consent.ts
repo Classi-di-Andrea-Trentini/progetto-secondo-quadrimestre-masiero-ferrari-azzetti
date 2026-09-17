@@ -16,7 +16,7 @@ export interface CookieNoticeRecord {
  *
  * <h2>Perche' non e' un banner di consenso</h2>
  *
- * Common Era usa **solo cookie tecnici**: il cookie di sessione che tiene collegato
+ * CommonEra usa **solo cookie tecnici**: il cookie di sessione che tiene collegato
  * chi ha fatto il login, la riga che ricorda che questo avviso e' stato letto, e i
  * cookie di Stripe che servono a far funzionare il pagamento e a riconoscere le
  * frodi. Nessun cookie analitico, nessun cookie di profilazione, nessuna terza parte

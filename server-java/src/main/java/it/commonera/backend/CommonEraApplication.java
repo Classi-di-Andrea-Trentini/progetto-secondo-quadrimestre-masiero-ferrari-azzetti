@@ -6,7 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
- * Riscrittura in Java del backend di Common Era.
+ * Riscrittura in Java del backend di CommonEra.
  *
  * Parla lo **stesso database** e la **stessa API** del backend Node: il frontend
  * Angular non deve cambiare una riga per passare dall'uno all'altro. Da qui due
