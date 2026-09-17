@@ -158,7 +158,8 @@ public class InvoiceService {
     }
 
     private String euro(BigDecimal value) {
-        return "EUR " + (value == null ? "0.00" : value.toPlainString());
+        var amount = value == null ? BigDecimal.ZERO : value;
+        return "€" + amount.setScale(2, java.math.RoundingMode.HALF_UP).toPlainString();
     }
 
     public record Invoice(String filename, byte[] pdf) {}
