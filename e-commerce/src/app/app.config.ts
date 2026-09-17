@@ -1,6 +1,4 @@
 import { ApplicationConfig, isDevMode, LOCALE_ID, provideBrowserGlobalErrorListeners } from '@angular/core';
-import { registerLocaleData } from '@angular/common';
-import localeIt from '@angular/common/locales/it';
 import { provideServiceWorker } from '@angular/service-worker';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withFetch } from '@angular/common/http';
@@ -8,15 +6,19 @@ import { provideClientHydration, withEventReplay } from '@angular/platform-brows
 
 import { routes } from './app.routes';
 
-// Senza questo il pipe `date` formatta in inglese ("March 12, 1998") dentro un
-// sito per il resto tutto in italiano: il locale predefinito di Angular e'
-// `en-US` a prescindere dal `lang` dell'HTML.
-registerLocaleData(localeIt);
-
+// Il sito e' stato tradotto interamente in inglese: `LOCALE_ID` deve seguire,
+// altrimenti il pipe `date` con token testuali (`MMMM`, `longDate`, ...)
+// continua a formattare i mesi in italiano ("settembre 2026") su una pagina
+// tutta in inglese, anche se nessuna stringa italiana e' rimasta nel codice.
+// `en-US` e' gia' il locale con cui Angular viene distribuito di default, quindi
+// non serve registrare dati locale aggiuntivi con `registerLocaleData`.
+// `formatPrice` (services/format-price.ts) non dipende da questo provider — usa
+// un `Intl.NumberFormat('en', ...)` proprio, indipendente da `LOCALE_ID` — quindi
+// il formato prezzo ("€120.00") resta invariato.
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    { provide: LOCALE_ID, useValue: 'it-IT' },
+    { provide: LOCALE_ID, useValue: 'en-US' },
     provideRouter(routes),
     provideHttpClient(withFetch()),
     provideClientHydration(withEventReplay()),
