@@ -273,7 +273,7 @@ class PrivacyServiceTest extends AbstractIntegrationTest {
 
         assertThatThrownBy(() -> privacy.eraseAccount(user.getId(), "Sbagliata1"))
                 .isInstanceOf(ApiException.class)
-                .hasMessageContaining("password");
+                .hasMessageContaining("Incorrect password");
 
         // E soprattutto: non deve aver cancellato niente per strada.
         assertThat(users.findById(user.getId()).orElseThrow().getDeletedAt()).isNull();
@@ -315,7 +315,7 @@ class PrivacyServiceTest extends AbstractIntegrationTest {
         // amministratore prima.
         assertThatThrownBy(() -> privacy.eraseAccount(user.getId(), "Password123"))
                 .isInstanceOf(ApiException.class)
-                .hasMessageContaining("administrator");
+                .hasMessageContaining("You're the last active administrator: appoint another administrator before deleting the account.");
 
         assertThat(users.findById(user.getId()).orElseThrow().getDeletedAt()).isNull();
     }

@@ -94,7 +94,7 @@ class AdminServiceTest extends AbstractIntegrationTest {
 
         assertThatThrownBy(() -> admin.deleteUser(secondAdmin.getId(), plainUser.getId()))
                 .isInstanceOf(ApiException.class)
-                .hasMessageContaining("administrator");
+                .hasMessageContaining("the last remaining administrator");
     }
 
     @Test

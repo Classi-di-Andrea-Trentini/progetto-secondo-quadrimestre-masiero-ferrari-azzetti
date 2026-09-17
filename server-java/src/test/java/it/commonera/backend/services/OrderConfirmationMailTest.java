@@ -22,7 +22,7 @@ class OrderConfirmationMailTest {
                 List.of(new MailService.Line("T-shirt nera", "M", 2, new BigDecimal("29.90"))));
 
         assertTrue(html.contains("2026-0042"));
-        assertTrue(html.contains("94,90") || html.contains("94.90"));
+        assertTrue(html.contains("94.90"));
         assertTrue(html.contains("T-shirt nera"));
         // Nome di battesimo, come **tutte** le altre email del progetto
         // ("Hi Marco"): il piano diceva nome intero, ma una sola email che
