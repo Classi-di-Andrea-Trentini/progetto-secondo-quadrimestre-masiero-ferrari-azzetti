@@ -39,6 +39,30 @@ describe('ScrollStrip', () => {
     expect(() => fixture.detectChanges()).not.toThrow();
   });
 
+  it('measures travel against the sticky viewport, not the unconstrained rail', () => {
+    // Regressione per il bug B1: la rail (`.scroll-strip__rail`) e' un flex
+    // item senza vincoli di larghezza propri, quindi il suo `clientWidth`
+    // coincide SEMPRE col suo `scrollWidth` (jsdom non fa layout, ma il
+    // comportamento reale e' identico: e' proprio quello che rendeva
+    // `travel` sempre 0 in produzione). Qui si simula quello scenario reale
+    // definendo le proprieta' a mano: se `measure()` guardasse ancora
+    // `strip.clientWidth` invece di quello del contenitore sticky, `travel`
+    // risulterebbe 0 anche con 2400px di contenuto in un viewport da 1440px.
+    const fixture = TestBed.createComponent(ScrollStrip);
+    fixture.detectChanges();
+
+    const rail: HTMLElement = fixture.nativeElement.querySelector('.scroll-strip__rail');
+    const sticky: HTMLElement = fixture.nativeElement.querySelector('.scroll-strip__sticky');
+    Object.defineProperty(rail, 'scrollWidth', { value: 2400, configurable: true });
+    Object.defineProperty(rail, 'clientWidth', { value: 2400, configurable: true });
+    Object.defineProperty(sticky, 'clientWidth', { value: 1440, configurable: true });
+
+    fixture.componentInstance.measure();
+
+    const section: HTMLElement = fixture.nativeElement.querySelector('.scroll-strip');
+    expect(section.style.getPropertyValue('--travel')).toBe('960px');
+  });
+
   it('keeps the fallback scrollable container keyboard-reachable and labelled', () => {
     // Sotto lg e con prefers-reduced-motion la striscia diventa un contenitore
     // overflow-x:auto in puro CSS: senza tabindex non e' raggiungibile da

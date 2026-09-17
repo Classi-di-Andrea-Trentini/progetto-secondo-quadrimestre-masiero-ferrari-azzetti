@@ -15,8 +15,13 @@ import {
  *
  * La sezione e' "incollata" (position: sticky) per un tratto di scroll verticale
  * pari a `strip.scrollWidth - viewport`: mentre quel tratto viene consumato, la
- * riga interna trasla della stessa quantita' in orizzontale. E' un componente
- * riusabile con content projection: chi lo usa ci mette dentro le proprie card
+ * riga interna trasla della stessa quantita' in orizzontale. `viewport` e' il
+ * `clientWidth` del contenitore sticky (`#sticky`), MAI quello della rail
+ * stessa (`#strip`): la rail e' un flex item senza vincoli propri di
+ * larghezza, quindi il suo `clientWidth` coincide sempre col suo
+ * `scrollWidth` (vedi il commento su `measure()` piu' sotto) e misurarla
+ * contro se stessa produce sempre `travel = 0`. E' un componente riusabile
+ * con content projection: chi lo usa ci mette dentro le proprie card
  * (`<app-scroll-strip><div class="card">...</div>...</app-scroll-strip>`).
  *
  * Il calcolo (progress -> offset) vive in metodi puri (`applyProgress`,
@@ -46,6 +51,23 @@ export class ScrollStrip {
   private travel = 0;
   private readonly section = viewChild.required<ElementRef<HTMLElement>>('section');
   private readonly strip = viewChild.required<ElementRef<HTMLElement>>('strip');
+  /**
+   * `.scroll-strip__sticky`: e' il contenitore con `overflow: hidden` che da'
+   * davvero la larghezza del viewport. `strip` (`.scroll-strip__rail`) e'
+   * invece un flex item senza vincoli di larghezza propri dentro un flex
+   * container che riempie il genitore: siccome le sue card hanno `shrink-0`,
+   * il minimo di contenuto della rail supera sempre lo spazio disponibile, e
+   * flexbox non lascia mai un elemento restringersi sotto il proprio "minimo
+   * automatico" (il famoso `min-width: auto` implicito). Risultato: se si
+   * misura la rail contro se stessa, `scrollWidth` e `clientWidth` coincidono
+   * sempre — sono la stessa identica larghezza di contenuto — e `travel`
+   * risulta sempre 0, a prescindere da quante card ci sono. Misurando invece
+   * contro il contenitore sticky (che NON cresce col contenuto, ha
+   * `overflow: hidden` e la sua larghezza e' vincolata dalla sezione/viewport)
+   * si ottiene la differenza vera tra "quanto e' largo il contenuto" e
+   * "quanto spazio c'e' per vederlo".
+   */
+  private readonly sticky = viewChild.required<ElementRef<HTMLElement>>('sticky');
   private readonly destroyRef = inject(DestroyRef);
 
   constructor() {
@@ -80,7 +102,8 @@ export class ScrollStrip {
 
   measure(): void {
     const strip = this.strip().nativeElement;
-    this.setTravel(strip.scrollWidth - strip.clientWidth);
+    const viewport = this.sticky().nativeElement;
+    this.setTravel(strip.scrollWidth - viewport.clientWidth);
     this.section().nativeElement.style.setProperty('--travel', `${this.travel}px`);
   }
 
