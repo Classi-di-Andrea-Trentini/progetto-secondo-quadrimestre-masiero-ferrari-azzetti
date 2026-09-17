@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-labelledby="ttl">
+  <title id="ttl">Stivaletti in suede</title>
+  <rect width="400" height="400" fill="#F3F3F5"/>
+  <ellipse cx="190" cy="318" rx="132" ry="12" fill="#E2E3E5"/>
+  <path d="M80 288 Q74 266 98 258 L192 226 Q210 220 214 200 L214 128 Q214 118 224 118 L280 118 Q290 118 290 128 L290 254 L296 298 L266 302 L258 262 L104 294 Q84 298 80 288 Z" fill="#A73C2A" stroke="#17171B" stroke-width="3.2" stroke-linejoin="round"/>
+  <path d="M214 128 Q252 142 290 128" fill="none" stroke="#721E10" stroke-width="3"/>
+  <path d="M252 124 L252 258" fill="none" stroke="#721E10" stroke-width="2.6" stroke-dasharray="6 5"/>
+  <rect x="246" y="130" width="12" height="18" rx="3" fill="#E2E3E5" stroke="#17171B" stroke-width="1.8"/>
+  <path d="M104 294 L258 262" fill="none" stroke="#232328" stroke-width="8" stroke-linecap="round"/>
+  <path d="M258 262 L266 302 L296 298 L290 254" fill="#232328" stroke="#17171B" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M110 268 Q150 254 190 240" fill="none" stroke="#912B1B" stroke-width="2.4"/>
+</svg>

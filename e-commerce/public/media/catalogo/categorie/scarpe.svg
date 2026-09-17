@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" role="img" aria-labelledby="ttl">
+  <title id="ttl">Scarpe</title>
+  <rect width="600" height="400" fill="#ECECEF"/>
+  <circle cx="300" cy="196" r="152" fill="#E2E3E5"/>
+  <g transform="translate(12,-8) scale(0.66)">
+    <path d="M72 254 L72 200 Q72 176 98 170 Q132 164 154 186 L178 164 Q188 159 197 170 L230 214 Q240 226 256 230 L304 242 Q334 250 340 254 Z" fill="#FFFFFF" stroke="#17171B" stroke-width="4.6" stroke-linejoin="round"/>
+    <path d="M110 240 Q162 212 216 236 Q238 246 252 250" fill="none" stroke="#CFCFD2" stroke-width="15" stroke-linecap="round"/>
+    <g stroke="#17171B" stroke-width="3.6" stroke-linecap="round" fill="none">
+      <path d="M160 190 L182 172"/><path d="M170 204 L192 186"/><path d="M181 218 L203 200"/><path d="M192 232 L214 214"/>
+    </g>
+    <path d="M64 252 L342 252 Q356 254 354 268 Q352 288 332 288 L82 288 Q62 288 60 268 Q59 256 64 252 Z" fill="#ECECEF" stroke="#17171B" stroke-width="4.6" stroke-linejoin="round"/>
+  </g>
+  <g transform="translate(300,138) scale(0.62)">
+    <path d="M250 250 L272 244 L290 296 Q291 302 285 302 L276 302 Q271 302 270 297 Z" fill="#232328" stroke="#17171B" stroke-width="4.8" stroke-linejoin="round"/>
+    <path d="M56 282 Q92 240 150 226 L196 210 Q226 200 236 166 L278 166 L272 250 L250 256 L88 290 Q58 294 56 282 Z" fill="#232328" stroke="#17171B" stroke-width="4.8" stroke-linejoin="round"/>
+    <path d="M152 224 Q200 208 234 170 Q212 212 168 230 Z" fill="#424247"/>
+    <path d="M88 290 L250 254" fill="none" stroke="#A73C2A" stroke-width="7" stroke-linecap="round"/>
+  </g>
+  <path d="M48 356 L128 356" stroke="#A73C2A" stroke-width="4" stroke-linecap="round"/>
+</svg>

@@ -11,10 +11,17 @@ import { PrismaService } from '../prisma/prisma.service';
 import { MailService } from '../mail/mail.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { SESSION_TTL_MS } from './session.constants';
 
 const BCRYPT_ROUNDS = 12;
-// Durata della sessione: 7 giorni
-const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+
+/**
+ * Hash di una password che non esiste, usato solo per bruciare lo stesso tempo di un confronto
+ * vero quando l'email non e' registrata (vedi `login`). E' un hash bcrypt valido a 12 round,
+ * quindi `bcrypt.compare` ci lavora sopra esattamente come su un utente reale.
+ */
+const DUMMY_PASSWORD_HASH =
+  '$2b$12$C6UzMDM.H6dfI/f/IKcEe.tGGWo9Ir4KHfPtyDzM.PdKHkxCUuBoO';
 
 @Injectable()
 export class AuthService {
@@ -64,13 +71,17 @@ export class AuthService {
       where: { email: dto.email.toLowerCase() },
     });
 
-    // Messaggio generico per non rivelare se l'email esiste o meno
-    if (!user || !user.isActive || user.deletedAt) {
-      throw new UnauthorizedException('Credenziali non valide');
-    }
+    // Il messaggio generico da solo non bastava: se l'utente non esisteva si usciva subito,
+    // mentre con un utente reale si aspettavano i ~12 round di bcrypt (decine di ms). La
+    // differenza si misura dall'esterno, quindi bastava cronometrare le risposte per sapere
+    // quali email sono registrate. Adesso il confronto bcrypt avviene sempre: su un utente
+    // inesistente gira contro un hash finto, e i due percorsi costano uguale.
+    const passwordValid = await bcrypt.compare(
+      dto.password,
+      user?.passwordHash ?? DUMMY_PASSWORD_HASH,
+    );
 
-    const passwordValid = await bcrypt.compare(dto.password, user.passwordHash);
-    if (!passwordValid) {
+    if (!user || !user.isActive || user.deletedAt || !passwordValid) {
       throw new UnauthorizedException('Credenziali non valide');
     }
 

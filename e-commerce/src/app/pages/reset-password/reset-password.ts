@@ -24,13 +24,13 @@ export class ResetPassword implements OnInit {
 
   ngOnInit() {
     this.token = this.route.snapshot.queryParamMap.get('token') ?? '';
-    if (!this.token) this.error.set('Token mancante. Usa il link ricevuto via email.');
+    if (!this.token) this.error.set('Missing token. Use the link you received by email.');
   }
 
   async submit() {
     if (this.loading() || !this.token) return;
-    if (this.password.length < 8) { this.error.set('La password deve essere di almeno 8 caratteri.'); return; }
-    if (this.password !== this.confirm) { this.error.set('Le password non coincidono.'); return; }
+    if (this.password.length < 8) { this.error.set('Password must be at least 8 characters.'); return; }
+    if (this.password !== this.confirm) { this.error.set('Passwords do not match.'); return; }
     this.loading.set(true);
     this.error.set(null);
     try {
@@ -38,7 +38,7 @@ export class ResetPassword implements OnInit {
       this.done.set(true);
       setTimeout(() => this.router.navigate(['/login']), 3000);
     } catch (e: any) {
-      this.error.set(e?.error?.message ?? 'Token non valido o scaduto.');
+      this.error.set(e?.error?.message ?? 'Invalid or expired token.');
     } finally {
       this.loading.set(false);
     }

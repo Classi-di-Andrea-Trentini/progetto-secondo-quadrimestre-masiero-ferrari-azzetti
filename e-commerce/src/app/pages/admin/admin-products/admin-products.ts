@@ -5,18 +5,21 @@ import {
   AdminService,
   AdminProduct,
   AdminProductDetail,
+  AdminCategory,
   ProductVariant,
   ProductImage,
   CreateProductPayload,
 } from '../../../services/admin.service';
 import { firstValueFrom } from 'rxjs';
+import { ProductImageComponent } from '../../../components/product-image/product-image';
+import { formatPrice as formatPriceShared } from '../../../services/format-price';
 
 type ModalTab = 'info' | 'variants' | 'images';
 
 @Component({
   selector: 'app-admin-products',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, ProductImageComponent],
   templateUrl: './admin-products.html',
   styleUrl: './admin-products.css',
 })
@@ -47,13 +50,26 @@ export class AdminProducts implements OnInit {
   confirmDeleteId = signal<string | null>(null);
   deleteLoading = signal(false);
 
+  // ─── Categorie ────────────────────────────────────────────────────────────
+  // Il backend rifiuta un prodotto senza categoria: finche' questa tendina non
+  // c'era, "Nuovo prodotto" falliva sempre con "categoryId is required".
+  categories = signal<AdminCategory[]>([]);
+  showNewCategory = signal(false);
+  newCategoryName = '';
+  categoryLoading = signal(false);
+
   // ─── Info form ────────────────────────────────────────────────────────────
   readonly productForm = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.minLength(2)]],
     slug: ['', [Validators.required, Validators.pattern(/^[a-z0-9-]+$/)]],
+    categoryId: ['', [Validators.required]],
+    shortDesc: [''],
+    brand: [''],
     description: [''],
     basePrice: [0, [Validators.required, Validators.min(0.01)]],
     isActive: [true],
+    isFeatured: [false],
+    isNewArrival: [false],
   });
 
   // ─── Variant form ─────────────────────────────────────────────────────────
@@ -85,6 +101,39 @@ export class AdminProducts implements OnInit {
 
   ngOnInit() {
     this.load();
+    this.loadCategories();
+  }
+
+  loadCategories() {
+    this.adminSvc.getCategories().subscribe({
+      next: (list) => this.categories.set(list),
+      error: () => this.formError.set('Unable to load categories'),
+    });
+  }
+
+  /** Il nome della categoria con quello del padre davanti: "Shoes / Sneakers". */
+  categoryLabel(category: AdminCategory): string {
+    const parent = this.categories().find((c) => c.id === category.parentId);
+    return parent ? `${parent.name} / ${category.name}` : category.name;
+  }
+
+  async createCategory() {
+    const name = this.newCategoryName.trim();
+    if (!name || this.categoryLoading()) return;
+    this.categoryLoading.set(true);
+    this.formError.set(null);
+    try {
+      const created = await firstValueFrom(this.adminSvc.createCategory({ name }));
+      this.categories.update((list) => [...list, created]);
+      // Selezionata subito: chi crea una categoria la sta creando per questo prodotto.
+      this.productForm.controls.categoryId.setValue(created.id);
+      this.newCategoryName = '';
+      this.showNewCategory.set(false);
+    } catch (err: any) {
+      this.formError.set(err?.error?.message ?? 'Unable to create the category');
+    } finally {
+      this.categoryLoading.set(false);
+    }
   }
 
   load() {
@@ -99,7 +148,7 @@ export class AdminProducts implements OnInit {
         this.loading.set(false);
       },
       error: () => {
-        this.error.set('Impossibile caricare i prodotti');
+        this.error.set('Unable to load products');
         this.loading.set(false);
       },
     });
@@ -120,7 +169,11 @@ export class AdminProducts implements OnInit {
     this.editingProduct.set(null);
     this.formError.set(null);
     this.activeTab.set('info');
-    this.productForm.reset({ name: '', slug: '', description: '', basePrice: 0, isActive: true });
+    this.productForm.reset({
+      name: '', slug: '', categoryId: '', shortDesc: '', brand: '', description: '',
+      basePrice: 0, isActive: true, isFeatured: false, isNewArrival: false,
+    });
+    this.showNewCategory.set(false);
     this.showModal.set(true);
   }
 
@@ -136,12 +189,17 @@ export class AdminProducts implements OnInit {
       this.productForm.patchValue({
         name: detail.name,
         slug: detail.slug,
+        categoryId: detail.category?.id ?? '',
+        shortDesc: detail.shortDesc ?? '',
+        brand: detail.brand ?? '',
         description: detail.description ?? '',
         basePrice: parseFloat(String(detail.basePrice)),
         isActive: detail.isActive,
+        isFeatured: detail.isFeatured ?? false,
+        isNewArrival: detail.isNewArrival ?? false,
       });
     } catch {
-      this.formError.set('Impossibile caricare il prodotto');
+      this.formError.set('Unable to load the product');
     } finally {
       this.modalLoading.set(false);
     }
@@ -176,8 +234,19 @@ export class AdminProducts implements OnInit {
     this.formLoading.set(true);
     this.formError.set(null);
 
-    const { name, slug, description, basePrice, isActive } = this.productForm.getRawValue();
-    const payload: CreateProductPayload = { name, slug, description: description || undefined, basePrice, isActive };
+    const form = this.productForm.getRawValue();
+    const payload: CreateProductPayload = {
+      name: form.name,
+      slug: form.slug,
+      categoryId: form.categoryId,
+      description: form.description || undefined,
+      shortDesc: form.shortDesc || undefined,
+      brand: form.brand || undefined,
+      basePrice: form.basePrice,
+      isActive: form.isActive,
+      isFeatured: form.isFeatured,
+      isNewArrival: form.isNewArrival,
+    };
 
     const editing = this.editingProduct();
     const obs = editing
@@ -191,19 +260,19 @@ export class AdminProducts implements OnInit {
           const detail = await firstValueFrom(this.adminSvc.getProductDetail(saved.id));
           this.editingProduct.set(detail);
           this.products.update(list => list.map(p => p.id === saved.id ? { ...p, ...saved } : p));
-          this.actionSuccess.set('Prodotto aggiornato');
+          this.actionSuccess.set('Product updated');
         } else {
           // After create, switch to edit mode so user can add variants/images
           const detail = await firstValueFrom(this.adminSvc.getProductDetail(saved.id));
           this.editingProduct.set(detail);
           this.load();
-          this.actionSuccess.set('Prodotto creato — ora puoi aggiungere varianti e immagini');
+          this.actionSuccess.set('Product created — you can now add variants and images');
         }
         this.formLoading.set(false);
         setTimeout(() => this.actionSuccess.set(null), 4000);
       },
       error: (err) => {
-        this.formError.set(err?.error?.message ?? 'Errore durante il salvataggio');
+        this.formError.set(err?.error?.message ?? 'Error while saving');
         this.formLoading.set(false);
       },
     });
@@ -276,7 +345,7 @@ export class AdminProducts implements OnInit {
       this.showVariantForm.set(false);
       this.editingVariant.set(null);
     } catch (err: any) {
-      this.variantFormError.set(err?.error?.message ?? 'Errore durante il salvataggio');
+      this.variantFormError.set(err?.error?.message ?? 'Error while saving');
     } finally {
       this.variantFormLoading.set(false);
     }
@@ -291,7 +360,7 @@ export class AdminProducts implements OnInit {
       this.products.update(list => list.map(p => p.id === productId
         ? { ...p, _count: { variants: Math.max(0, p._count.variants - 1) } } : p));
     } catch {
-      this.variantFormError.set('Impossibile eliminare la variante');
+      this.variantFormError.set('Unable to delete the variant');
     }
   }
 
@@ -318,11 +387,11 @@ export class AdminProducts implements OnInit {
     const file = input.files?.[0];
     if (!file) return;
     if (!file.type.startsWith('image/')) {
-      this.imageFormError.set('Solo file immagine sono consentiti (JPG, PNG, WebP…)');
+      this.imageFormError.set('Only image files are allowed (JPG, PNG, WebP…)');
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      this.imageFormError.set('Il file non può superare 5 MB');
+      this.imageFormError.set('The file cannot exceed 5 MB');
       return;
     }
     this.imageFile = file;
@@ -341,10 +410,10 @@ export class AdminProducts implements OnInit {
     try {
       let created: any;
       if (this.imageMode === 'upload') {
-        if (!this.imageFile) { this.imageFormError.set('Seleziona un file'); this.imageFormLoading.set(false); return; }
+        if (!this.imageFile) { this.imageFormError.set('Select a file'); this.imageFormLoading.set(false); return; }
         created = await firstValueFrom(this.adminSvc.uploadImage(productId, this.imageFile));
       } else {
-        if (!this.imageUrl.trim()) { this.imageFormError.set('Inserisci un URL'); this.imageFormLoading.set(false); return; }
+        if (!this.imageUrl.trim()) { this.imageFormError.set('Enter a URL'); this.imageFormLoading.set(false); return; }
         const isFirst = (this.editingProduct()?.images.length ?? 0) === 0;
         created = await firstValueFrom(this.adminSvc.addImage(productId, {
           url: this.imageUrl.trim(),
@@ -357,7 +426,7 @@ export class AdminProducts implements OnInit {
       this.imagePreview.set(null);
       this.imageFile = null;
     } catch (err: any) {
-      this.imageFormError.set(err?.error?.message ?? 'Errore durante il salvataggio');
+      this.imageFormError.set(err?.error?.message ?? 'Error while saving');
     } finally {
       this.imageFormLoading.set(false);
     }
@@ -378,7 +447,7 @@ export class AdminProducts implements OnInit {
         return { ...p, images };
       });
     } catch {
-      this.imageFormError.set('Impossibile eliminare l\'immagine');
+      this.imageFormError.set('Unable to delete the image');
     }
   }
 
@@ -392,7 +461,7 @@ export class AdminProducts implements OnInit {
         images: p.images.map(i => ({ ...i, isCover: i.id === imageId })),
       } : p);
     } catch {
-      this.imageFormError.set('Impossibile impostare la cover');
+      this.imageFormError.set('Unable to set the cover image');
     }
   }
 
@@ -411,12 +480,12 @@ export class AdminProducts implements OnInit {
         this.total.update(n => n - 1);
         this.confirmDeleteId.set(null);
         this.deleteLoading.set(false);
-        this.actionSuccess.set('Prodotto eliminato');
+        this.actionSuccess.set('Product deleted');
         setTimeout(() => this.actionSuccess.set(null), 3000);
       },
       error: () => {
         this.deleteLoading.set(false);
-        this.error.set('Impossibile eliminare il prodotto');
+        this.error.set('Unable to delete the product');
         this.confirmDeleteId.set(null);
       },
     });
@@ -424,13 +493,39 @@ export class AdminProducts implements OnInit {
 
   // ─── Helpers ──────────────────────────────────────────────────────────────
 
+  // Formato inglese (€120.00), centralizzato in services/format-price.ts.
   formatPrice(v: string | number): string {
-    return '€ ' + parseFloat(String(v)).toFixed(2).replace('.', ',');
+    return formatPriceShared(v);
   }
 
   variantLabel(v: ProductVariant): string {
     const parts = [v.size, v.color, v.material].filter(Boolean);
     return parts.length ? parts.join(' / ') : v.sku;
+  }
+
+  // ─── Stock state (design: Available / Running Out / Out of Stock) ─────────
+  //
+  // Il backend ha gia' un concetto di soglia per-variante (`lowStockAlert` su
+  // ProductVariant, usato da AdminService.lowStock/GET /admin/inventory), ma
+  // non e' esposto da nessun DTO ne' impostabile da questo form: agganciarcisi
+  // vorrebbe dire aprire un endpoint che oggi questa pagina non chiama, fuori
+  // dal perimetro di un allineamento visivo. In attesa che quella soglia
+  // diventi un campo vero del prodotto, questa e' una soglia di sola
+  // visualizzazione, fissa e dichiarata in un punto solo.
+  private readonly lowStockThreshold = 5;
+
+  stockState(qty: number): 'Available' | 'Running Out' | 'Out of Stock' {
+    if (qty <= 0) return 'Out of Stock';
+    if (qty <= this.lowStockThreshold) return 'Running Out';
+    return 'Available';
+  }
+
+  stockBadgeClass(qty: number): string {
+    switch (this.stockState(qty)) {
+      case 'Available': return 'badge-success';
+      case 'Running Out': return 'badge-warning';
+      case 'Out of Stock': return 'badge-danger';
+    }
   }
 
   pagesArray(): number[] {

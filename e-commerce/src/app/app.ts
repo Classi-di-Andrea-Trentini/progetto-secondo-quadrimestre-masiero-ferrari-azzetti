@@ -1,78 +1,43 @@
-import { Component, PLATFORM_ID, inject, signal } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { Component, inject, signal } from '@angular/core';
 import { RouterOutlet, RouterModule, Router } from '@angular/router';
 import { NavBar } from './components/nav-bar/nav-bar';
 import { Footer } from './components/footer/footer';
 import { Cart } from './components/cart/cart';
 import { ToastComponent } from './components/toast/toast';
-
-export interface CookieConsent {
-  essential: true;   // always true — cannot be disabled
-  timestamp: string;
-}
+import { CookieConsentService } from './services/cookie-consent';
 
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet, RouterModule, NavBar, Footer, Cart, ToastComponent],
   templateUrl: './app.html',
-  styleUrl: './app.css'
+  styleUrl: './app.css',
 })
 export class App {
-  private readonly platformId = inject(PLATFORM_ID);
-  private readonly storageKey = 'common_era_cookie_consent';
+  /**
+   * L'informativa cookie sta in un servizio e non qui dentro: a riaprirla e' il link
+   * "Gestisci cookie" del footer, che e' un altro componente. Vedi
+   * {@link CookieConsentService} per il motivo per cui e' un avviso e non un banner
+   * di consenso con due pulsanti.
+   */
+  readonly cookies = inject(CookieConsentService);
 
   protected readonly title = signal('e-commerce');
-  protected readonly bannerVisible = signal(false);
-  protected readonly customizing = signal(false);
+  /** Il pannello con l'elenco per categoria, chiuso finche' non lo si apre. */
+  protected readonly showingDetails = signal(false);
 
-  constructor(public router: Router) {
-    if (isPlatformBrowser(this.platformId)) {
-      const stored = localStorage.getItem(this.storageKey);
-      if (!stored) {
-        this.bannerVisible.set(true);
-      }
-    }
+  constructor(public router: Router) {}
+
+  acknowledgeCookies(): void {
+    this.cookies.acknowledge();
+    this.showingDetails.set(false);
   }
 
-  acceptAll(): void {
-    this.saveConsent();
-    this.bannerVisible.set(false);
-    this.customizing.set(false);
+  showCookieDetails(): void {
+    this.showingDetails.set(true);
   }
 
-  saveCustom(): void {
-    // Essential only (only option available)
-    this.saveConsent();
-    this.bannerVisible.set(false);
-    this.customizing.set(false);
-  }
-
-  decline(): void {
-    if (isPlatformBrowser(this.platformId)) {
-      localStorage.setItem(this.storageKey, JSON.stringify({ essential: true, declined: true, timestamp: new Date().toISOString() }));
-    }
-    this.bannerVisible.set(false);
-    this.customizing.set(false);
-  }
-
-  openCustomize(): void {
-    this.customizing.set(true);
-  }
-
-  backToBanner(): void {
-    this.customizing.set(false);
-  }
-
-  // Keep backward-compat getter used in app.html
-  get cookiesAccepted(): boolean {
-    return !this.bannerVisible();
-  }
-
-  private saveConsent(): void {
-    if (isPlatformBrowser(this.platformId)) {
-      const consent: CookieConsent = { essential: true, timestamp: new Date().toISOString() };
-      localStorage.setItem(this.storageKey, JSON.stringify(consent));
-    }
+  hideCookieDetails(): void {
+    this.showingDetails.set(false);
   }
 
   isHome(): boolean {

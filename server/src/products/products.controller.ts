@@ -4,14 +4,28 @@ import { GetProductsDto } from './dto/get-products.dto';
 
 @Controller('products')
 export class ProductsController {
-    // inject del servizio 
+    // inject del servizio
     constructor(@Inject(ProductsService) private productsService: ProductsService) {}
 
-    // 3 metodi get
-    // filtro -> prende un prodotto filtrato secondo il metodo 
+    // filtro -> valori disponibili, con quanti prodotti hanno ciascuno
     @Get('filters')
     getFilters() {
         return this.productsService.getFilters();
+    }
+
+    /**
+     * Suggerimenti per la barra di ricerca. Sta **prima** di `:slug`, altrimenti
+     * Nest interpreterebbe "suggest" come lo slug di un prodotto.
+     */
+    @Get('suggest')
+    suggest(@Query('q') q: string) {
+        return this.productsService.suggest(q ?? '');
+    }
+
+    /** Prodotti per id: la cronologia dei "visti di recente" vive nel browser. */
+    @Get('by-ids')
+    byIds(@Query('ids') ids: string) {
+        return this.productsService.findByIds((ids ?? '').split(',').filter(Boolean));
     }
 
     // get --> prende un prodotto con findAll

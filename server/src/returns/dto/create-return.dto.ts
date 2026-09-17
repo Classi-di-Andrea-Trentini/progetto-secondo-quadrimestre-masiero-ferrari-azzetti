@@ -2,7 +2,7 @@ import { IsArray, IsString, IsUUID, IsInt, Min, ValidateNested, MinLength } from
 import { Type } from 'class-transformer';
 
 export class ReturnItemDto {
-  @IsUUID()
+  @IsUUID('loose')
   orderItemId: string;
 
   @IsInt()
@@ -11,7 +11,7 @@ export class ReturnItemDto {
 }
 
 export class CreateReturnDto {
-  @IsUUID()
+  @IsUUID('loose')
   orderId: string;
 
   @IsString()

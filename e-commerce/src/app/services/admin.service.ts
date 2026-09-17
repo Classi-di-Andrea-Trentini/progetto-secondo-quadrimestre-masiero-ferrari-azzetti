@@ -42,8 +42,12 @@ export interface AdminProduct {
   name: string;
   slug: string;
   description: string | null;
+  shortDesc: string | null;
+  brand: string | null;
   basePrice: string;
   isActive: boolean;
+  isFeatured: boolean;
+  isNewArrival: boolean;
   soldCount: number;
   rating: string;
   createdAt: string;
@@ -154,9 +158,28 @@ export interface CreateProductPayload {
   name: string;
   slug: string;
   description?: string;
+  shortDesc?: string;
+  brand?: string;
   categoryId?: string;
   basePrice: number;
   isActive?: boolean;
+  isFeatured?: boolean;
+  isNewArrival?: boolean;
+}
+
+export interface AdminCategory {
+  id: string;
+  name: string;
+  slug: string;
+  parentId: string | null;
+  isActive: boolean;
+}
+
+export interface CreateCategoryPayload {
+  name: string;
+  slug?: string;
+  description?: string;
+  parentId?: string;
 }
 
 export interface CreatePromoCodePayload {
@@ -207,6 +230,16 @@ export class AdminService {
 
   deleteUser(id: string): Observable<{ message: string }> {
     return this.http.delete<{ message: string }>(`${this.base}/users/${id}`, { withCredentials: true });
+  }
+
+  // ─── Categories ───────────────────────────────────────────────────────────
+
+  getCategories(): Observable<AdminCategory[]> {
+    return this.http.get<AdminCategory[]>(`${this.base}/categories`, { withCredentials: true });
+  }
+
+  createCategory(payload: CreateCategoryPayload): Observable<AdminCategory> {
+    return this.http.post<AdminCategory>(`${this.base}/categories`, payload, { withCredentials: true });
   }
 
   // ─── Products ─────────────────────────────────────────────────────────────

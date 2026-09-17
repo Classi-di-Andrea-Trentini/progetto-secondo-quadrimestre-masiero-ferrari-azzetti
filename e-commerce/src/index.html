@@ -2,10 +2,28 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>ECommerce</title>
+  <title>CommonEra</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="CommonEra — timeless, essential clothing. A curated collection of garments and accessories with a clean design.">
+  <meta name="theme-color" content="#fafafb">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
+
+  <!-- App installabile: manifest + icona per iOS, che il manifest lo ignora. -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="CommonEra">
+  <meta name="mobile-web-app-capable" content="yes">
+
+  <!-- I due font erano dichiarati ovunque nei CSS ma non venivano MAI caricati:
+       tutto il sito ricadeva su Georgia e sul sans di sistema. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap">
+
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>

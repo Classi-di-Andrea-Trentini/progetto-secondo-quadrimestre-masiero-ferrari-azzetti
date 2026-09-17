@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-labelledby="ttl">
+  <title id="ttl">Parka invernale con cappuccio</title>
+  <rect width="400" height="400" fill="#F3F3F5"/>
+  <ellipse cx="200" cy="368" rx="116" ry="12" fill="#E2E3E5"/>
+  <path d="M148 154 Q142 80 200 80 Q258 80 252 154 Z" fill="#424247" stroke="#17171B" stroke-width="3.2" stroke-linejoin="round"/>
+  <path d="M168 154 Q166 108 200 108 Q234 108 232 154 Z" fill="#F3F3F5" stroke="#17171B" stroke-width="2.4"/>
+  <g fill="#E2E3E5" stroke="#17171B" stroke-width="1.8">
+    <circle cx="170" cy="124" r="9"/><circle cx="166" cy="142" r="9"/><circle cx="180" cy="110" r="9"/>
+    <circle cx="200" cy="104" r="9"/><circle cx="220" cy="110" r="9"/><circle cx="234" cy="124" r="9"/>
+    <circle cx="238" cy="142" r="9"/>
+  </g>
+  <path d="M142 148 L106 170 L86 306 Q84 316 94 317 L124 321 Q134 322 135 313 L148 212 L148 348 Q148 356 156 356 L244 356 Q252 356 252 348 L252 212 L265 313 Q266 322 276 321 L306 317 Q316 316 314 306 L294 170 L258 148 Z" fill="#54545A" stroke="#17171B" stroke-width="3.2" stroke-linejoin="round"/>
+  <path d="M142 148 Q170 172 200 172 Q230 172 258 148" fill="#424247" stroke="#17171B" stroke-width="2.6" stroke-linejoin="round"/>
+  <path d="M200 172 L200 356" fill="none" stroke="#17171B" stroke-width="3"/>
+  <path d="M200 178 L200 350" fill="none" stroke="#9E9EA2" stroke-width="2" stroke-dasharray="5 4"/>
+  <g fill="#424247" stroke="#17171B" stroke-width="2.4" stroke-linejoin="round">
+    <path d="M156 288 L190 288 L190 328 L156 328 Z"/>
+    <path d="M210 288 L244 288 L244 328 L210 328 Z"/>
+    <path d="M154 282 L192 282 L192 296 L154 296 Z"/>
+    <path d="M208 282 L246 282 L246 296 L208 296 Z"/>
+  </g>
+  <path d="M150 256 L250 256" fill="none" stroke="#17171B" stroke-width="2.4" stroke-dasharray="7 6"/>
+  <circle cx="178" cy="256" r="5" fill="#A73C2A"/>
+  <circle cx="222" cy="256" r="5" fill="#A73C2A"/>
+  <path d="M94 296 L126 300 M306 296 L274 300" fill="none" stroke="#17171B" stroke-width="2.4" stroke-linecap="round"/>
+</svg>

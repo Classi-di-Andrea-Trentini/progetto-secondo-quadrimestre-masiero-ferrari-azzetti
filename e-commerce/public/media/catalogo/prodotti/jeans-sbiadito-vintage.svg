@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-labelledby="ttl">
+  <title id="ttl">Jeans sbiadito vintage</title>
+  <defs>
+    <clipPath id="jeans-vint">
+      <path d="M138 108 L128 240 L120 352 Q120 359 127 359 L177 359 Q184 359 185 352 L199 214 L201 214 L215 352 Q216 359 223 359 L273 359 Q280 359 280 352 L272 240 L262 108 Z"/>
+    </clipPath>
+  </defs>
+  <rect width="400" height="400" fill="#F3F3F5"/>
+  <ellipse cx="200" cy="370" rx="108" ry="11" fill="#E2E3E5"/>
+  <path d="M138 108 L128 240 L120 352 Q120 359 127 359 L177 359 Q184 359 185 352 L199 214 L201 214 L215 352 Q216 359 223 359 L273 359 Q280 359 280 352 L272 240 L262 108 Z" fill="#B7B7BA" stroke="#17171B" stroke-width="3.2" stroke-linejoin="round"/>
+  <g clip-path="url(#jeans-vint)">
+    <ellipse cx="160" cy="196" rx="26" ry="52" fill="#E2E3E5"/>
+    <ellipse cx="242" cy="196" rx="26" ry="52" fill="#E2E3E5"/>
+    <path d="M124 300 L178 300 M222 300 L278 300" stroke="#E2E3E5" stroke-width="18" stroke-linecap="round"/>
+    <path d="M132 250 L176 246" stroke="#ECECEF" stroke-width="5" stroke-linecap="round"/>
+    <path d="M226 252 L270 256" stroke="#ECECEF" stroke-width="5" stroke-linecap="round"/>
+    <g stroke="#9E9EA2" stroke-width="2">
+      <path d="M134 268 L170 266 M136 276 L166 275"/>
+      <path d="M230 270 L266 268 M234 278 L264 277"/>
+    </g>
+  </g>
+  <rect x="136" y="84" width="128" height="28" rx="5" fill="#CFCFD2" stroke="#17171B" stroke-width="3.2"/>
+  <g stroke="#17171B" stroke-width="2.4" fill="none" stroke-linecap="round">
+    <path d="M148 80 L148 116 M196 80 L196 116 M252 80 L252 116"/>
+  </g>
+  <g stroke="#A73C2A" stroke-width="2" fill="none" stroke-linecap="round" stroke-dasharray="6 5">
+    <path d="M200 114 L200 152 Q200 164 208 170"/>
+    <path d="M146 116 Q170 134 188 116"/>
+    <path d="M254 116 Q230 134 212 116"/>
+    <path d="M126 338 L180 338 M220 338 L276 338"/>
+  </g>
+  <circle cx="200" cy="98" r="6" fill="#F3F3F5" stroke="#17171B" stroke-width="2.4"/>
+</svg>

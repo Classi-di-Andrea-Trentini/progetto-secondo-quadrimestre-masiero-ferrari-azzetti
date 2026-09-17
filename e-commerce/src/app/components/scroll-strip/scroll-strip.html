@@ -1,0 +1,24 @@
+<section #section class="scroll-strip">
+  <!--
+    tabindex/role/aria-label statici e non condizionati alla larghezza: e' lo
+    stesso elemento che sotto lg e con motion ridotto diventa scorrevole via
+    overflow-x:auto (vedi scroll-strip.css). Tenerli sempre presenti evita di
+    dover sincronizzare via JS un attributo con un breakpoint CSS puro — che
+    tra l'altro deve restare puro CSS per funzionare senza JavaScript. A
+    desktop, dove la sezione e' invece "incollata" e trasla via JS, il tab
+    stop non fa danno: overflow e' hidden (nessuno scroll di container da
+    intercettare) e il focus arriva comunque sul contenuto proiettato subito
+    dopo, quindi non e' un vicolo cieco da tastiera.
+  -->
+  <div
+    #sticky
+    class="scroll-strip__sticky"
+    tabindex="0"
+    role="region"
+    [attr.aria-label]="ariaLabel"
+  >
+    <div #strip class="scroll-strip__rail" [style.transform]="'translate3d(' + offset() + 'px,0,0)'">
+      <ng-content />
+    </div>
+  </div>
+</section>

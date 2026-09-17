@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { ScheduleModule } from '@nestjs/schedule';
 import { APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -9,6 +10,10 @@ import { UsersModule } from './users/users.module';
 import { MailModule } from './mail/mail.module';
 import { ProductsModule } from './products/products.module';
 import { WishlistModule } from './wishlist/wishlist.module';
+import { CartModule } from './cart/cart.module';
+import { StockAlertsModule } from './stock-alerts/stock-alerts.module';
+import { GiftCardsModule } from './gift-cards/gift-cards.module';
+import { LoyaltyModule } from './loyalty/loyalty.module';
 import { NewsletterModule } from './newsletter/newsletter.module';
 import { AddressesModule } from './addresses/addresses.module';
 import { OrdersModule } from './orders/orders.module';
@@ -32,11 +37,17 @@ import { ConfigModule } from '@nestjs/config';
         limit: 100,
       },
     ]),
+    // Serve al promemoria dei carrelli abbandonati, che gira una volta al giorno.
+    ScheduleModule.forRoot(),
     PrismaModule,
     AuthModule,
     UsersModule,
     MailModule,
     ProductsModule,
+    CartModule,
+    StockAlertsModule,
+    GiftCardsModule,
+    LoyaltyModule,
     WishlistModule,
     NewsletterModule,
     AddressesModule,

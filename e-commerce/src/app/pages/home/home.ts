@@ -3,10 +3,12 @@ import { isPlatformBrowser } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth';
 import { ProductsService, ProductListItem } from '../../services/products.service';
+import { ScrollStrip } from '../../components/scroll-strip/scroll-strip';
+import { formatPrice as formatPriceShared } from '../../services/format-price';
 
 @Component({
   selector: 'app-home',
-  imports: [RouterModule],
+  imports: [RouterModule, ScrollStrip],
   templateUrl: './home.html',
   styleUrl: './home.css',
 })
@@ -16,74 +18,89 @@ export class Home implements OnInit {
   private readonly platformId = inject(PLATFORM_ID);
 
   readonly featuredProducts = signal<ProductListItem[]>([]);
+
+  /** Immagine di apertura dell'hero (e-commerce/public/media/catalogo/collezioni):
+      percorso relativo, nessuna dipendenza da CDN esterne. */
+  readonly heroHighlight = {
+    image: '/media/catalogo/collezioni/capispalla.svg',
+    title: 'Outerwear',
+    subtitle: 'Layers for the shoulder seasons',
+  };
+
+  /** Ventaglio (fan carousel) sopra la striscia di prodotti, come nel design
+      (`bd179c77.jpg`, `CardCarousel.tsx`): sei illustrazioni interne, le
+      stesse gia' usate quando il carosello era stato tolto e poi rivoluto da
+      Alessio. Copy tradotto dall'italiano dell'epoca, non preso dal design
+      (il componente Figma usa immagini segnaposto di Picsum, senza titoli). */
   readonly collectionHighlights = [
     {
-      image:
-        'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=1200&q=80',
-      title: 'Outerwear Edit',
-      subtitle: 'Layering pieces for transitional days',
+      image: '/media/catalogo/collezioni/capispalla.svg',
+      title: 'Outerwear',
+      subtitle: 'Layers for the shoulder seasons',
     },
     {
-      image:
-        'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=1200&q=80',
+      image: '/media/catalogo/collezioni/guardaroba-minimo.svg',
       title: 'Minimal Wardrobe',
-      subtitle: 'Clean silhouettes and timeless essentials',
+      subtitle: 'Clean lines, pieces that last',
     },
     {
-      image:
-        'https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=1200&q=80',
+      image: '/media/catalogo/collezioni/neutri-da-sera.svg',
       title: 'Evening Neutrals',
-      subtitle: 'Elevated tones for refined occasions',
+      subtitle: 'Quiet tones for the occasion',
     },
     {
-      image:
-        'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=1200&q=80',
+      image: '/media/catalogo/collezioni/sartoria-di-strada.svg',
       title: 'Street Tailoring',
-      subtitle: 'Structured fits with relaxed attitude',
+      subtitle: 'Structured cuts, worn soft',
     },
     {
-      image:
-        'https://images.unsplash.com/photo-1463100099107-aa0980c362e6?auto=format&fit=crop&w=1200&q=80',
+      image: '/media/catalogo/collezioni/linea-monocroma.svg',
       title: 'Monochrome Line',
-      subtitle: 'Black and ivory staples reimagined',
+      subtitle: 'Black and ivory, the two extremes',
     },
     {
-      image:
-        'https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=1200&q=80',
+      image: '/media/catalogo/collezioni/capsule-weekend.svg',
       title: 'Weekend Capsule',
-      subtitle: 'Effortless pieces for off-duty looks',
+      subtitle: 'What you reach for without thinking',
     },
   ];
 
+  /** Indice della card in primo piano. Le frecce lo cambiano; non c'e' nessun
+      collegamento con lo scroll della pagina (a differenza di <app-scroll-strip>
+      qui sotto, che invece si muove SOLO con lo scroll verticale). */
   readonly activeSlide = signal(0);
 
+  /** Le prime due voci sono il copy letterale dei banner del design (design-code.txt,
+      blocchi CollectionBanner e SaleBanner). La terza non ha un equivalente nel
+      design: e' una funzionalita' del sito (accesso account) che non avrebbe senso
+      togliere solo perche' il file Figma non la mostra. */
   readonly promoShowcase = [
     {
-      label: 'new season',
-      title: 'New Collection',
-      description:
-        'Essential pieces with refined proportions and carefully selected materials for every day.',
-      notes: ['Modern silhouettes', 'Premium fabrics', 'Timeless palette'],
-      cta: 'Discover More',
-      link: '/products',
-    },
-    {
-      label: 'seasonal sale',
+      label: 'Seasonal Sale',
       title: 'Up to',
       highlight: '-60%',
       description:
-        'An exclusive selection of essential items at special prices for a limited time.',
-      notes: ['Limited-time prices', 'Best-selling edits', 'Fast worldwide shipping'],
+        'An exclusive selection of essential pieces at special prices. For a limited time only.',
+      notes: ['Limited-time prices', 'Best sellers', '48h delivery'],
       cta: 'Shop the Sale',
       link: '/products',
     },
     {
-      label: 'members benefits',
-      title: 'Early Access',
+      label: 'New Season',
+      title: 'New Collection',
       description:
-        'Sign in to preview upcoming drops, save wishlists, and unlock private offers.',
-      notes: ['Private offers', 'Wishlist sync', 'Early product drops'],
-      cta: 'Go to Account',
+        'Essentiality, refined proportions and carefully selected materials. A modern vision of everyday style.',
+      notes: ['Current lines', 'Chosen fabrics', 'Timeless palette'],
+      cta: 'Discover More',
+      link: '/products',
+    },
+    {
+      label: 'For account holders',
+      title: 'Early access',
+      description:
+        'Sign in to see new arrivals first, save your wishlist and use your loyalty points.',
+      notes: ['Member-only offers', 'Wishlist', 'Loyalty points'],
+      cta: 'Go to account',
       link: '/me',
       loginLink: '/login',
     },
@@ -91,7 +108,7 @@ export class Home implements OnInit {
 
   ngOnInit(): void {
     if (!isPlatformBrowser(this.platformId)) return;
-    this.productsService.getProducts({ sortBy: 'newest', limit: 4 }).subscribe({
+    this.productsService.getProducts({ sortBy: 'newest', limit: 8 }).subscribe({
       next: (res) => this.featuredProducts.set(res.data),
     });
   }
@@ -100,18 +117,27 @@ export class Home implements OnInit {
     return product.images.find((i) => i.isCover)?.url ?? product.images[0]?.url ?? '';
   }
 
+  // Il calcolo del prezzo scontato resta qui (e' logica della card prodotto,
+  // non formattazione); la resa in stringa (€120.00) e' centralizzata in
+  // services/format-price.ts.
   formatPrice(product: ProductListItem): string {
     const base = parseFloat(String(product.basePrice));
     const d = product.discounts[0];
-    if (!d) return '€ ' + base.toFixed(2).replace('.', ',');
+    if (!d) return formatPriceShared(base);
     const val = parseFloat(String(d.value));
     const eff = d.type === 'percentage' ? base * (1 - val / 100) : base - val;
-    return '€ ' + eff.toFixed(2).replace('.', ',');
+    return formatPriceShared(eff);
   }
 
   hasDiscount(product: ProductListItem): boolean {
     return product.discounts.length > 0;
   }
+
+  // ─── Ventaglio (fan carousel) ───────────────────────────────────────────
+  // Stesso schema del design (CardCarousel.tsx): un indice attivo, le due
+  // card immediatamente prima/dopo restano visibili ruotate ai lati, le
+  // altre spariscono. Qui con il wraparound modulo, perche' le voci sono sei
+  // e non tre come nel componente originale.
 
   prevSlide(): void {
     const total = this.collectionHighlights.length;
@@ -123,39 +149,30 @@ export class Home implements OnInit {
     this.activeSlide.update((value) => (value + 1) % total);
   }
 
-  goToSlide(index: number): void {
-    this.activeSlide.set(index);
-  }
-
   isActive(index: number): boolean {
-    return this.getSlideOffset(index) === 0;
+    return this.slideOffset(index) === 0;
   }
 
   isLeft(index: number): boolean {
-    return this.getSlideOffset(index) === -1;
+    return this.slideOffset(index) === -1;
   }
 
   isRight(index: number): boolean {
-    return this.getSlideOffset(index) === 1;
+    return this.slideOffset(index) === 1;
   }
 
   isHidden(index: number): boolean {
     return !this.isActive(index) && !this.isLeft(index) && !this.isRight(index);
   }
 
-  private getSlideOffset(index: number): number {
+  /** -1/0/+1 rispetto alla card attiva, con wraparound (l'ultima voce e'
+      "a sinistra" della prima). Oltre quel raggio la card e' nascosta:
+      il design ne mostra solo tre insieme, qui idem anche con sei voci. */
+  private slideOffset(index: number): number {
     const total = this.collectionHighlights.length;
     let offset = index - this.activeSlide();
-
-    if (offset > total / 2) {
-      offset -= total;
-    }
-
-    if (offset < -total / 2) {
-      offset += total;
-    }
-
+    if (offset > total / 2) offset -= total;
+    if (offset < -total / 2) offset += total;
     return offset;
   }
-
 }

@@ -3,33 +3,51 @@ services:
     build: ./e-commerce
     ports:
       - "4200:4200"
-    volumes:
-      - ./e-commerce:/app
-      - /app/node_modules
+    environment:
+      # Il server SSR fa da proxy verso il backend per /api e /uploads: senza dev
+      # server di Angular davanti, e' lui a tenere tutto sulla stessa origine
+      # (vedi e-commerce/src/server.ts).
+      BACKEND_URL: http://backend:3000
+    # Niente bind mount dei sorgenti: l'immagine contiene il **costruito** di
+    # produzione, e montarci sopra la cartella di sviluppo lo coprirebbe. Per
+    # lavorare col ricaricamento automatico si usa `npm run start:local` fuori
+    # da Docker, che e' anche molto piu' veloce.
     depends_on:
       - backend
 
+  # Backend di produzione: la riscrittura Java (server-java/). Il backend Node
+  # (server/) resta nel repo come riferimento e si puo' ancora far girare a mano
+  # con `./server/...` o `npm run start:dev`, ma non e' piu' agganciato al compose.
   backend:
-    build: ./server
+    build: ./server-java
     ports:
       - "3000:3000"
     env_file:
       - ./.env
     environment:
+      # Stessa porta che il frontend si aspetta gia' su http://backend:3000: si
+      # cambia questa variabile, non il proxy del frontend.
       PORT: 3000
-      NODE_ENV: development
-      DATABASE_URL: postgresql://user:password@db:5432/mydb
-      DB_HOST: db
-      DB_PORT: 5432
+      DATABASE_URL_JDBC: jdbc:postgresql://db:5432/mydb
       DB_USER: user
-      DB_PASSWORD: password
-      DB_NAME: mydb
-      JWT_SECRET: changeme_in_production_use_a_long_random_string
+      # Stesso trattamento "nessun default" di JWT_SECRET qui sotto: vedi il
+      # commento su DB_PASSWORD nel servizio `db`.
+      DB_PASSWORD: "${DB_PASSWORD:?manca DB_PASSWORD nel file .env, generala con openssl rand -base64 32}"
+      # Prende il valore dal file .env (vedi .env.example). Il `:?` fa fallire subito
+      # `docker compose up` con un messaggio chiaro se manca, invece di far partire l'app
+      # con un segreto che sta scritto in chiaro in un file versionato — come era prima.
+      JWT_SECRET: "${JWT_SECRET:?manca JWT_SECRET nel file .env, generala con openssl rand -base64 64}"
       FRONTEND_URL: http://localhost:4200
       BACKEND_URL: http://localhost:3000
+      # Primo amministratore: se le imposti nel .env, all'avvio l'account viene
+      # creato (o promosso). Senza, l'unico admin e' quello del seed di scuola,
+      # di cui non si conosce la password.
+      ADMIN_EMAIL: "${ADMIN_EMAIL:-}"
+      ADMIN_PASSWORD: "${ADMIN_PASSWORD:-}"
+      ADMIN_NAME: "${ADMIN_NAME:-Amministratore}"
     volumes:
-      - ./server:/app
-      - /app/node_modules
+      # Foto prodotto caricate dagli admin (vedi AdminService#uploadImage):
+      # senza un volume nominato, un rebuild dell'immagine le perderebbe tutte.
       - uploads:/app/uploads
     depends_on:
       db:
@@ -39,7 +57,10 @@ services:
     image: postgres:16-alpine
     environment:
       POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
+      # Nessun default (prima era "password" in chiaro nel file). Stessa variabile
+      # DB_PASSWORD usata dal backend, cosi' i due restano sincronizzati: cambiarla
+      # richiede di toccare solo il file .env.
+      POSTGRES_PASSWORD: "${DB_PASSWORD:?manca DB_PASSWORD nel file .env, generala con openssl rand -base64 32}"
       POSTGRES_DB: mydb
     volumes:
       - pgdata:/var/lib/postgresql/data

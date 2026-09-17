@@ -1,13 +1,15 @@
-import { Component, inject, signal, effect } from '@angular/core';
+import { Component, computed, inject, signal, effect } from '@angular/core';
 import { NgClass, DatePipe } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormBuilder, Validators } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../services/auth';
-import { WishlistService } from '../../services/wishlist.service';
+import { WishlistService, WishlistItem } from '../../services/wishlist.service';
 import { CartService, AddressData } from '../../services/cart-service';
 import { API_URL } from '../../services/api.config';
+import { ProductImageComponent } from '../../components/product-image/product-image';
+import { formatPrice } from '../../services/format-price';
 
 interface OrderSummary {
   id: string;
@@ -17,8 +19,13 @@ interface OrderSummary {
   shippingCost: string;
   discountTotal: string;
   createdAt: string;
-  items: { productName: string; quantity: number; lineTotal: string }[];
+  items: { id: string; productName: string; quantity: number; lineTotal: string }[];
   payments: { status: string }[];
+  /** Cronologia degli stati: il backend la restituisce gia', non veniva mostrata. */
+  statusHistory?: { status: string; note: string | null; createdAt: string }[];
+  trackingNumber?: string | null;
+  trackingUrl?: string | null;
+  invoiceNumber?: string | null;
 }
 
 type TabSection = 'profile' | 'orders' | 'favorites' | 'addresses' | 'settings';
@@ -26,13 +33,25 @@ type TabSection = 'profile' | 'orders' | 'favorites' | 'addresses' | 'settings';
 @Component({
   selector: 'app-me',
   standalone: true,
-  imports: [NgClass, DatePipe, ReactiveFormsModule, FormsModule, RouterModule],
+  imports: [NgClass, DatePipe, ReactiveFormsModule, FormsModule, RouterModule, ProductImageComponent],
   templateUrl: './me.html',
   styleUrls: ['./me.css'],
 })
 export class MeComponent {
   readonly auth = inject(AuthService);
   readonly wishlist = inject(WishlistService);
+
+  /**
+   * Se questo account una password ce l'ha.
+   *
+   * Chi si e' registrato con Google non ne ha mai scelta una: offrirgli "cambia
+   * password" o chiedergli la "password attuale" per cambiare indirizzo significa
+   * chiedere qualcosa che non esiste, e il server risponderebbe con un errore che
+   * sembra colpa sua. `!== false` e non `=== true`: finche' l'utente non e' ancora
+   * stato caricato non si mostra lo stato speciale, altrimenti la pagina
+   * sfarfallerebbe fra le due versioni a ogni ricaricamento.
+   */
+  readonly hasPassword = computed(() => this.auth.currentUser()?.hasPassword !== false);
   private readonly cart = inject(CartService);
   private readonly fb = inject(FormBuilder);
   private readonly http = inject(HttpClient);
@@ -47,9 +66,25 @@ export class MeComponent {
   ordersTotalPages = signal(1);
   ordersTotal = signal(0);
   expandedOrderId = signal<string | null>(null);
+  invoiceLoadingId = signal<string | null>(null);
   cancelOrderId = signal<string | null>(null);
   cancelOrderLoading = signal(false);
   cancelOrderSuccess = signal<string | null>(null);
+
+  // -- Resi --
+  /** orderId -> stato del reso già aperto per quell'ordine, se c'è. */
+  returnStatusByOrderId = signal<Record<string, string>>({});
+  returnModalOrder = signal<OrderSummary | null>(null);
+  returnQuantities = signal<Record<string, number>>({});
+  returnReason = signal('');
+  returnLoading = signal(false);
+  returnError = signal<string | null>(null);
+  returnSuccess = signal<string | null>(null);
+
+  readonly returnStatusLabels: Record<string, string> = {
+    requested: 'Requested', approved: 'Approved', rejected: 'Rejected',
+    received: 'Received', refunded: 'Refunded',
+  };
 
   // -- Indirizzi --
   addresses = signal<AddressData[]>([]);
@@ -78,7 +113,7 @@ export class MeComponent {
     try {
       this.addresses.set(await this.cart.getAddresses());
     } catch {
-      this.addressesError.set('Impossibile caricare gli indirizzi');
+      this.addressesError.set('Unable to load addresses');
     } finally {
       this.addressesLoading.set(false);
     }
@@ -102,11 +137,11 @@ export class MeComponent {
       });
       this.newAddressForm.reset({ country: 'IT', isDefault: false });
       this.showAddressForm.set(false);
-      this.addressAction.set('Indirizzo salvato!');
+      this.addressAction.set('Address saved!');
       await this.loadAddresses();
       setTimeout(() => this.addressAction.set(null), 3000);
     } catch {
-      this.addressFormError.set('Impossibile salvare l\'indirizzo');
+      this.addressFormError.set('Unable to save the address');
     } finally {
       this.addressFormLoading.set(false);
     }
@@ -118,44 +153,44 @@ export class MeComponent {
         this.http.delete(`${API_URL}/addresses/${id}`, { withCredentials: true })
       );
       this.addresses.update(list => list.filter(a => a.id !== id));
-      this.addressAction.set('Indirizzo eliminato');
+      this.addressAction.set('Address deleted');
       setTimeout(() => this.addressAction.set(null), 3000);
     } catch {
-      this.addressesError.set('Impossibile eliminare l\'indirizzo');
+      this.addressesError.set('Unable to delete the address');
     }
   }
 
   async setDefaultAddress(id: string) {
     try {
       await firstValueFrom(
-        this.http.patch(`${API_URL}/addresses/${id}/default`, {}, { withCredentials: true })
+        this.http.patch(`${API_URL}/addresses/${id}/set-default`, {}, { withCredentials: true })
       );
       await this.loadAddresses();
     } catch {
-      this.addressesError.set('Impossibile impostare l\'indirizzo predefinito');
+      this.addressesError.set('Unable to set the default address');
     }
   }
 
   readonly orderStatusLabels: Record<string, string> = {
-    pending: 'In attesa',
-    paid: 'Pagato',
-    processing: 'In lavorazione',
-    shipped: 'Spedito',
-    delivered: 'Consegnato',
-    completed: 'Completato',
-    cancelled: 'Annullato',
-    refunded: 'Rimborsato',
+    pending: 'Pending',
+    paid: 'Paid',
+    processing: 'Processing',
+    shipped: 'Shipped',
+    delivered: 'Delivered',
+    completed: 'Completed',
+    cancelled: 'Cancelled',
+    refunded: 'Refunded',
   };
 
   readonly orderStatusColors: Record<string, string> = {
-    pending: 'bg-yellow-100 text-yellow-800',
-    paid: 'bg-blue-100 text-blue-800',
-    processing: 'bg-indigo-100 text-indigo-800',
-    shipped: 'bg-purple-100 text-purple-800',
-    delivered: 'bg-green-100 text-green-800',
-    completed: 'bg-green-200 text-green-900',
-    cancelled: 'bg-red-100 text-red-800',
-    refunded: 'bg-gray-100 text-gray-700',
+    pending: 'badge-warning',
+    paid: 'badge-info',
+    processing: 'badge-info',
+    shipped: 'badge-accent',
+    delivered: 'badge-success',
+    completed: 'badge-success',
+    cancelled: 'badge-danger',
+    refunded: 'badge-neutral',
   };
 
   // -- Modifica profilo --
@@ -231,7 +266,7 @@ export class MeComponent {
   setTab(tab: TabSection) {
     this.activeTab.set(tab);
     if (tab === 'favorites') this.wishlist.loadItems();
-    if (tab === 'orders' && this.orders().length === 0) this.loadOrders();
+    if (tab === 'orders' && this.orders().length === 0) { this.loadOrders(); this.loadMyReturns(); }
     if (tab === 'addresses' && this.addresses().length === 0) this.loadAddresses();
   }
 
@@ -250,9 +285,38 @@ export class MeComponent {
       this.ordersTotalPages.set(res.meta.totalPages);
       this.ordersTotal.set(res.meta.total);
     } catch {
-      this.ordersError.set('Impossibile caricare gli ordini');
+      this.ordersError.set('Unable to load your orders');
     } finally {
       this.ordersLoading.set(false);
+    }
+  }
+
+  /**
+   * Scarica la fattura in PDF.
+   *
+   * Passa da `fetch` e non da un link diretto perche' l'endpoint richiede il cookie
+   * di sessione e risponde con un allegato: un `<a href>` in SSR non porterebbe le
+   * credenziali e mostrerebbe una pagina di errore al posto del file.
+   */
+  async downloadInvoice(orderId: string, event: Event): Promise<void> {
+    event.stopPropagation();
+    this.invoiceLoadingId.set(orderId);
+    try {
+      const res = await fetch(`${API_URL}/orders/${orderId}/invoice`, { credentials: 'include' });
+      if (!res.ok) throw new Error('Invoice not available');
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = res.headers.get('Content-Disposition')?.match(/filename="(.+?)"/)?.[1]
+        ?? `invoice-${orderId}.pdf`;
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      this.ordersError.set('The invoice could not be downloaded.');
+    } finally {
+      this.invoiceLoadingId.set(null);
     }
   }
 
@@ -261,11 +325,28 @@ export class MeComponent {
   }
 
   formatOrderPrice(v: string | number): string {
-    return '€ ' + parseFloat(String(v)).toFixed(2).replace('.', ',');
+    return formatPrice(v);
+  }
+
+  /**
+   * Vero se l'importo (numero o stringa numerica, residuo dell'epoca Prisma) e' zero
+   * — spedizione gratuita, nessuno sconto.
+   *
+   * Confronta il numero, non l'esito di `formatOrderPrice`: prima questo controllo
+   * era `formatOrderPrice(v) === '€ 0,00'`, e il giorno in cui `formatPrice` e'
+   * passato al formato inglese ("€0.00") quel confronto ha smesso di incontrare
+   * qualunque valore — la spedizione gratuita non compariva mai piu', e lo sconto
+   * sarebbe sempre apparso anche a zero. Un domani `formatPrice` cambiasse ancora
+   * (separatore delle migliaia, uno spazio) romperebbe di nuovo un confronto sulla
+   * stringa formattata. Il numero sotto non cambia mai.
+   */
+  isZeroAmount(v: string | number): boolean {
+    const amount = typeof v === 'number' ? v : parseFloat(v);
+    return Number.isFinite(amount) && amount === 0;
   }
 
   orderStatusLabel(s: string): string { return this.orderStatusLabels[s] ?? s; }
-  orderStatusColor(s: string): string { return this.orderStatusColors[s] ?? 'bg-gray-100 text-gray-700'; }
+  orderStatusColor(s: string): string { return this.orderStatusColors[s] ?? 'badge-neutral'; }
   canCancelOrder(status: string): boolean { return status === 'pending' || status === 'paid'; }
 
   requestCancelOrder(id: string) { this.cancelOrderId.set(id); }
@@ -279,12 +360,90 @@ export class MeComponent {
       await firstValueFrom(this.http.patch(`${API_URL}/orders/${id}/cancel`, {}, { withCredentials: true }));
       this.orders.update(list => list.map(o => o.id === id ? { ...o, status: 'cancelled' } : o));
       this.cancelOrderId.set(null);
-      this.cancelOrderSuccess.set('Ordine annullato con successo.');
+      this.cancelOrderSuccess.set('Order cancelled successfully.');
       setTimeout(() => this.cancelOrderSuccess.set(null), 4000);
     } catch {
-      this.ordersError.set('Impossibile annullare l\'ordine. Contatta il supporto.');
+      this.ordersError.set('Unable to cancel the order. Please contact support.');
     } finally {
       this.cancelOrderLoading.set(false);
+    }
+  }
+
+  /** Un reso attivo per ordine (stessa regola del backend): mostra il badge invece del bottone. */
+  async loadMyReturns() {
+    try {
+      const res: any = await firstValueFrom(this.http.get(`${API_URL}/returns`, { withCredentials: true }));
+      const map: Record<string, string> = {};
+      for (const r of res) {
+        if (r.status !== 'rejected') map[r.order.id] = r.status;
+      }
+      this.returnStatusByOrderId.set(map);
+    } catch {
+      // Non bloccante: senza questa mappa si vede solo il bottone "Richiedi reso"
+      // anche per ordini che già ne hanno uno, il backend rifiuterebbe comunque.
+    }
+  }
+
+  canRequestReturn(order: OrderSummary): boolean {
+    return (order.status === 'delivered' || order.status === 'completed')
+      && !this.returnStatusByOrderId()[order.id];
+  }
+
+  openReturnModal(order: OrderSummary, event: Event) {
+    event.stopPropagation();
+    const initial: Record<string, number> = {};
+    for (const item of order.items) initial[item.id] = 0;
+    this.returnQuantities.set(initial);
+    this.returnReason.set('');
+    this.returnError.set(null);
+    this.returnModalOrder.set(order);
+  }
+
+  closeReturnModal() {
+    if (this.returnLoading()) return;
+    this.returnModalOrder.set(null);
+  }
+
+  setReturnQuantity(itemId: string, qty: number, maxQty: number) {
+    const clamped = Math.max(0, Math.min(qty, maxQty));
+    this.returnQuantities.update(map => ({ ...map, [itemId]: clamped }));
+  }
+
+  get returnHasSelection(): boolean {
+    return Object.values(this.returnQuantities()).some(q => q > 0);
+  }
+
+  async submitReturn() {
+    const order = this.returnModalOrder();
+    if (!order || this.returnLoading()) return;
+
+    const reason = this.returnReason().trim();
+    if (reason.length < 10) {
+      this.returnError.set('Describe the reason for the return in at least 10 characters.');
+      return;
+    }
+    const items = Object.entries(this.returnQuantities())
+      .filter(([, qty]) => qty > 0)
+      .map(([orderItemId, quantity]) => ({ orderItemId, quantity }));
+    if (items.length === 0) {
+      this.returnError.set('Select at least one item to return.');
+      return;
+    }
+
+    this.returnLoading.set(true);
+    this.returnError.set(null);
+    try {
+      const created: any = await firstValueFrom(
+        this.http.post(`${API_URL}/returns`, { orderId: order.id, reason, items }, { withCredentials: true }),
+      );
+      this.returnStatusByOrderId.update(map => ({ ...map, [order.id]: created.status }));
+      this.returnModalOrder.set(null);
+      this.returnSuccess.set('Return request sent.');
+      setTimeout(() => this.returnSuccess.set(null), 4000);
+    } catch (err: any) {
+      this.returnError.set(err?.error?.message ?? 'Unable to send the return request.');
+    } finally {
+      this.returnLoading.set(false);
     }
   }
 
@@ -292,20 +451,12 @@ export class MeComponent {
     await this.wishlist.toggle(productId);
   }
 
-  wishlistCoverImage(item: any): string {
-    return item.product?.images?.find((i: any) => i.isCover)?.url
-      ?? item.product?.images?.[0]?.url
-      ?? '';
-  }
 
-  wishlistPrice(item: any): string {
-    const p = item.product;
-    if (!p) return '';
-    const d = p.discounts?.[0];
-    let price = parseFloat(String(p.basePrice));
-    if (d?.type === 'percentage') price = price * (1 - parseFloat(String(d.value)) / 100);
-    else if (d?.type === 'fixed_amount') price -= parseFloat(String(d.value));
-    return '€ ' + price.toFixed(2).replace('.', ',');
+  /** GET /wishlist non manda gli sconti: qui si mostra il prezzo di listino. */
+  wishlistPrice(item: WishlistItem): string {
+    const price = parseFloat(String(item.basePrice));
+    if (!Number.isFinite(price)) return '';
+    return formatPrice(price);
   }
 
   startEditing() {
@@ -386,6 +537,91 @@ export class MeComponent {
       this.passwordError.set(this.auth.extractErrorMessage(err));
     } finally {
       this.passwordLoading.set(false);
+    }
+  }
+
+  // ─── GDPR: i propri dati, e la porta d'uscita ───────────────────────────
+
+  exportLoading = signal(false);
+  exportError = signal<string | null>(null);
+
+  /**
+   * Art. 20: scarica tutto quello che il negozio conserva su di te.
+   *
+   * Passa da `fetch` e non da un `<a href>` per la stessa ragione della fattura:
+   * l'endpoint vuole il cookie di sessione e risponde con un allegato, e un link
+   * diretto non porterebbe le credenziali.
+   */
+  async exportMyData(): Promise<void> {
+    if (this.exportLoading()) return;
+    this.exportLoading.set(true);
+    this.exportError.set(null);
+
+    try {
+      const res = await fetch(`${API_URL}/users/me/export`, { credentials: 'include' });
+      if (!res.ok) throw new Error('Export not available');
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download =
+        res.headers.get('Content-Disposition')?.match(/filename="?([^";]+)"?/)?.[1]
+        ?? 'common-era-personal-data.json';
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      this.exportError.set('Your data could not be downloaded. Please try again shortly.');
+    } finally {
+      this.exportLoading.set(false);
+    }
+  }
+
+  // ── Cancellazione dell'account ────────────────────────────────────
+
+  deleteAccountOpen = signal(false);
+  deleteAccountPassword = signal('');
+  deleteAccountLoading = signal(false);
+  deleteAccountError = signal<string | null>(null);
+
+  openDeleteAccount(): void {
+    this.deleteAccountPassword.set('');
+    this.deleteAccountError.set(null);
+    this.deleteAccountOpen.set(true);
+  }
+
+  closeDeleteAccount(): void {
+    if (this.deleteAccountLoading()) return;
+    this.deleteAccountOpen.set(false);
+    this.deleteAccountPassword.set('');
+  }
+
+  /**
+   * Art. 17: chiude l'account.
+   *
+   * La password si controlla anche qui e non solo sul server: non e' sicurezza —
+   * quella la fa il backend — ma evita di mandare una richiesta irreversibile
+   * partita da un campo lasciato vuoto per sbaglio.
+   */
+  async confirmDeleteAccount(): Promise<void> {
+    if (this.deleteAccountLoading()) return;
+
+    const password = this.deleteAccountPassword();
+    if (!password) {
+      this.deleteAccountError.set('Enter your password to confirm.');
+      return;
+    }
+
+    this.deleteAccountLoading.set(true);
+    this.deleteAccountError.set(null);
+
+    try {
+      await this.auth.eraseAccount(password);
+      this.deleteAccountOpen.set(false);
+    } catch (err) {
+      this.deleteAccountError.set(this.auth.extractErrorMessage(err));
+    } finally {
+      this.deleteAccountLoading.set(false);
     }
   }
 

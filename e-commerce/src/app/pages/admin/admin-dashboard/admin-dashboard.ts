@@ -3,6 +3,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AdminService, AdminStats } from '../../../services/admin.service';
 import { SkeletonComponent } from '../../../components/skeleton/skeleton';
+import { formatPrice as formatPriceShared } from '../../../services/format-price';
 
 declare var Chart: any;
 
@@ -23,25 +24,42 @@ export class AdminDashboard implements OnInit, OnDestroy {
   error = signal<string | null>(null);
 
   readonly orderStatusLabels: Record<string, string> = {
-    pending: 'In attesa',
-    paid: 'Pagato',
-    processing: 'In lavorazione',
-    shipped: 'Spedito',
-    delivered: 'Consegnato',
-    completed: 'Completato',
-    cancelled: 'Annullato',
-    refunded: 'Rimborsato',
+    pending: 'Pending',
+    paid: 'Paid',
+    processing: 'Processing',
+    shipped: 'Shipped',
+    delivered: 'Delivered',
+    completed: 'Completed',
+    cancelled: 'Cancelled',
+    refunded: 'Refunded',
   };
 
   readonly statusColors: Record<string, string> = {
-    pending: 'bg-yellow-100 text-yellow-800',
-    paid: 'bg-blue-100 text-blue-800',
-    processing: 'bg-indigo-100 text-indigo-800',
-    shipped: 'bg-purple-100 text-purple-800',
-    delivered: 'bg-green-100 text-green-800',
-    completed: 'bg-green-200 text-green-900',
-    cancelled: 'bg-red-100 text-red-800',
-    refunded: 'bg-gray-100 text-gray-700',
+    pending: 'badge-warning',
+    paid: 'badge-info',
+    processing: 'badge-info',
+    shipped: 'badge-accent',
+    delivered: 'badge-success',
+    completed: 'badge-success',
+    cancelled: 'badge-danger',
+    refunded: 'badge-neutral',
+  };
+
+  // Stessa semantica di statusColors qui sopra (le "wash", le versioni
+  // chiare dei colori di stato), cosi' la fetta della ciambella e il badge
+  // dello stesso stato d'ordine si leggono con lo stesso colore. Chart.js
+  // vuole una stringa colore letterale, non puo' leggere una custom
+  // property da solo: i valori veri si leggono da :root a runtime in
+  // resolveChartColor, qui restano solo i nomi dei token.
+  private readonly statusChartVars: Record<string, string> = {
+    pending: '--color-warning-wash',
+    paid: '--color-info-wash',
+    processing: '--color-info-wash',
+    shipped: '--color-accent-wash',
+    delivered: '--color-success-wash',
+    completed: '--color-success-wash',
+    cancelled: '--color-danger-wash',
+    refunded: '--color-sunken',
   };
 
   ngOnInit() {
@@ -58,7 +76,7 @@ export class AdminDashboard implements OnInit, OnDestroy {
         setTimeout(() => this.buildChart(), 0);
       },
       error: () => {
-        this.error.set('Impossibile caricare le statistiche');
+        this.error.set('Unable to load statistics');
         this.loading.set(false);
       },
     });
@@ -75,7 +93,7 @@ export class AdminDashboard implements OnInit, OnDestroy {
         labels: data.map(s => this.statusLabel(s.status)),
         datasets: [{
           data: data.map(s => s.count),
-          backgroundColor: ['#fef08a','#bfdbfe','#e0e7ff','#e9d5ff','#bbf7d0','#a7f3d0','#fecaca','#e5e7eb'],
+          backgroundColor: data.map(s => this.resolveChartColor(this.statusChartVars[s.status] ?? '--color-sunken')),
           borderWidth: 0,
         }],
       },
@@ -92,8 +110,19 @@ export class AdminDashboard implements OnInit, OnDestroy {
     if (this.donutChart) { this.donutChart.destroy(); }
   }
 
+  // Legge il valore vero del token direttamente da :root: niente hex ne'
+  // oklch scritti qui, cosi' la ciambella segue la stessa rampa colori di
+  // tutto il resto del sito se un giorno i token cambiano. Chart.js gira
+  // solo nel browser (vedi la guardia "typeof Chart === 'undefined'" in
+  // buildChart), quindi getComputedStyle e' sempre disponibile qui.
+  private resolveChartColor(cssVar: string): string {
+    const value = getComputedStyle(document.documentElement).getPropertyValue(cssVar).trim();
+    return value || 'transparent';
+  }
+
+  // Formato inglese (€120.00), centralizzato in services/format-price.ts.
   formatPrice(v: string | number): string {
-    return '€ ' + parseFloat(String(v)).toFixed(2).replace('.', ',');
+    return formatPriceShared(v);
   }
 
   statusLabel(s: string): string {
@@ -101,6 +130,6 @@ export class AdminDashboard implements OnInit, OnDestroy {
   }
 
   statusColor(s: string): string {
-    return this.statusColors[s] ?? 'bg-gray-100 text-gray-700';
+    return this.statusColors[s] ?? 'badge-neutral';
   }
 }

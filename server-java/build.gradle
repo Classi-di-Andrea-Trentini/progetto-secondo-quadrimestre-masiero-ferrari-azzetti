@@ -1,0 +1,71 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '4.1.0'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'it.commonera'
+version = '0.0.1-SNAPSHOT'
+description = 'Common Era — backend Java'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+    // La posta: stesso trasporto SMTP scelto per il backend Node.
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+    // Fattura in PDF. OpenPDF e' il ramo mantenuto di iText 4, con licenza LGPL/MPL:
+    // iText 5+ e' AGPL e non si puo' usare senza pubblicare tutto o pagare.
+    implementation 'com.github.librepdf:openpdf:2.0.3'
+
+    // Incasso reale. La libreria ufficiale porta la verifica della firma del
+    // webhook e la chiave di idempotenza: due cose che scritte a mano si sbagliano,
+    // e si sbagliano sui soldi.
+    implementation 'com.stripe:stripe-java:33.4.2'
+
+    // Accesso con Google. Sta lato server e non nel browser di proposito: il codice
+    // di autorizzazione viene scambiato con l'id_token qui dentro, cosi' il token di
+    // Google non passa mai per il JavaScript della pagina e al ritorno si emette lo
+    // stesso cookie di sessione del login normale. Senza GOOGLE_CLIENT_ID/SECRET la
+    // libreria resta inerte: non registra nessuna rotta (vedi GoogleOAuthConfig).
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+
+    // JWT nel cookie HttpOnly, come fa il backend Node: stesso schema di sessione.
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
+
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    runtimeOnly 'org.postgresql:postgresql'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-security-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // Il BOM di Spring Boot 4 non gestisce piu' le versioni di Testcontainers.
+    // Testcontainers 2.x ha rinominato gli artifact dei moduli con il prefisso
+    // "testcontainers-" (prima erano "junit-jupiter"/"postgresql" senza prefisso):
+    // le coordinate della 1.x non risolvono piu' contro questo BOM.
+    testImplementation platform('org.testcontainers:testcontainers-bom:2.0.5')
+    testImplementation 'org.testcontainers:testcontainers-junit-jupiter'
+    testImplementation 'org.testcontainers:testcontainers-postgresql'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}

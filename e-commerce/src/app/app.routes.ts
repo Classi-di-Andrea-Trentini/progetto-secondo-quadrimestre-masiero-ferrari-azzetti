@@ -19,36 +19,62 @@ import { AdminReturns } from './pages/admin/admin-returns/admin-returns';
 import { Checkout } from './pages/checkout/checkout';
 import { ForgotPassword } from './pages/forgot-password/forgot-password';
 import { ResetPassword } from './pages/reset-password/reset-password';
+import { NotFound } from './pages/not-found/not-found';
 import { authGuardGuard } from './guards/auth-guard-guard';
 import { adminGuardGuard } from './guards/admin-guard-guard';
 
+// `title` su ogni rotta e' cio' che aggiorna `document.title` a ogni
+// navigazione lato client: senza, il `Title` di Angular non lo tocca mai da
+// solo, e la scheda resta bloccata sul titolo dell'ultima pagina che lo
+// impostava esplicitamente (solo product-detail e la 404 lo fanno). La
+// pagina prodotto sovrascrive comunque questo valore in `ngOnInit` una volta
+// caricati i dati (nome vero del prodotto), quindi qui basta un fallback.
 export const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
-  { path: 'home', component: Home },
-  { path: 'login', component: Login },
-  { path: 'register', component: Register },
-  { path: 'products', component: Products },
-  { path: 'product/:slug', component: ProductDetail },
-  { path: 'me', component: MeComponent, canActivate: [authGuardGuard] },
-  { path: 'checkout', component: Checkout, canActivate: [authGuardGuard] },
-  { path: 'forgot-password', component: ForgotPassword },
-  { path: 'reset-password', component: ResetPassword },
-  { path: 'verify-email/:token', component: VerifyEmail },
-  { path: 'legal/:pagina', component: Legal },
+  { path: 'home', component: Home, title: 'CommonEra' },
+  // `About` era importato ma la rotta non era mai stata registrata: il link "About us"
+  // nella barra in alto cadeva nel jolly e riportava alla home.
+  { path: 'about', component: About, title: 'About Us — CommonEra' },
+  { path: 'login', component: Login, title: 'Sign In — CommonEra' },
+  { path: 'register', component: Register, title: 'Create Account — CommonEra' },
+  { path: 'products', component: Products, title: 'Shop — CommonEra' },
+  { path: 'product/:slug', component: ProductDetail, title: 'Product — CommonEra' },
+  {
+    path: 'me',
+    component: MeComponent,
+    canActivate: [authGuardGuard],
+    title: 'My Account — CommonEra',
+  },
+  {
+    path: 'checkout',
+    component: Checkout,
+    canActivate: [authGuardGuard],
+    title: 'Checkout — CommonEra',
+  },
+  { path: 'forgot-password', component: ForgotPassword, title: 'Forgot Password — CommonEra' },
+  { path: 'reset-password', component: ResetPassword, title: 'Reset Password — CommonEra' },
+  { path: 'verify-email/:token', component: VerifyEmail, title: 'Verify Email — CommonEra' },
+  { path: 'legal/:pagina', component: Legal, title: 'Legal — CommonEra' },
   {
     path: 'admin',
     component: Admin,
     canActivate: [adminGuardGuard],
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-      { path: 'dashboard', component: AdminDashboard },
-      { path: 'products', component: AdminProducts },
-      { path: 'orders', component: AdminOrders },
-      { path: 'users', component: AdminUsers },
-      { path: 'promo', component: AdminPromo },
-      { path: 'reviews', component: AdminReviews },
-      { path: 'returns', component: AdminReturns },
+      { path: 'dashboard', component: AdminDashboard, title: 'Admin Dashboard — CommonEra' },
+      { path: 'products', component: AdminProducts, title: 'Admin Products — CommonEra' },
+      { path: 'orders', component: AdminOrders, title: 'Admin Orders — CommonEra' },
+      { path: 'users', component: AdminUsers, title: 'Admin Users — CommonEra' },
+      { path: 'promo', component: AdminPromo, title: 'Admin Promotions — CommonEra' },
+      { path: 'reviews', component: AdminReviews, title: 'Admin Reviews — CommonEra' },
+      { path: 'returns', component: AdminReturns, title: 'Admin Returns — CommonEra' },
     ],
   },
-  { path: '**', redirectTo: 'home' },
+  // Il jolly rende una 404 vera e non reindirizza piu' in home: un indirizzo
+  // sbagliato deve dirlo, non fingere che vada tutto bene. Lo stato HTTP 404 lo
+  // mette `app.routes.server.ts`, che e' l'unico punto in cui si puo' scegliere.
+  // Niente `title` qui: `NotFound` imposta il proprio nel costruttore (via
+  // `SeoService`), che gira PRIMA che il router applichi il titolo statico di
+  // rotta — un `title` qui lo sovrascriverebbe subito dopo, silenziosamente.
+  { path: '**', component: NotFound },
 ];

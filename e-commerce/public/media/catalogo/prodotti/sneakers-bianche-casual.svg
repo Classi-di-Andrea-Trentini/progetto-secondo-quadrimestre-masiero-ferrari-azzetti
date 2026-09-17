@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-labelledby="ttl">
+  <title id="ttl">Sneakers bianche casual</title>
+  <rect width="400" height="400" fill="#F3F3F5"/>
+  <ellipse cx="204" cy="306" rx="146" ry="12" fill="#E2E3E5"/>
+  <path d="M72 254 L72 200 Q72 176 98 170 Q132 164 154 186 L178 164 Q188 159 197 170 L230 214 Q240 226 256 230 L304 242 Q334 250 340 254 Z" fill="#FFFFFF" stroke="#17171B" stroke-width="3.2" stroke-linejoin="round"/>
+  <path d="M110 240 Q162 212 216 236 Q238 246 252 250" fill="none" stroke="#CFCFD2" stroke-width="13" stroke-linecap="round"/>
+  <path d="M110 240 Q162 212 216 236 Q238 246 252 250" fill="none" stroke="#85868B" stroke-width="2" stroke-linecap="round"/>
+  <g stroke="#17171B" stroke-width="2.6" stroke-linecap="round" fill="none">
+    <path d="M160 190 L182 172"/>
+    <path d="M170 204 L192 186"/>
+    <path d="M181 218 L203 200"/>
+    <path d="M192 232 L214 214"/>
+  </g>
+  <path d="M154 186 L204 244" fill="none" stroke="#17171B" stroke-width="2" stroke-dasharray="4 4"/>
+  <path d="M178 164 L228 218" fill="none" stroke="#17171B" stroke-width="2" stroke-dasharray="4 4"/>
+  <path d="M74 200 Q88 188 108 184" fill="none" stroke="#17171B" stroke-width="2.4"/>
+  <path d="M290 238 Q302 218 328 218" fill="none" stroke="#17171B" stroke-width="2.4"/>
+  <path d="M64 252 L342 252 Q356 254 354 268 Q352 288 332 288 L82 288 Q62 288 60 268 Q59 256 64 252 Z" fill="#ECECEF" stroke="#17171B" stroke-width="3.2" stroke-linejoin="round"/>
+  <path d="M62 270 L352 270" fill="none" stroke="#17171B" stroke-width="2"/>
+  <rect x="74" y="208" width="5" height="20" rx="1.6" fill="#A73C2A"/>
+</svg>

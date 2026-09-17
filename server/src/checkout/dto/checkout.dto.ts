@@ -2,7 +2,7 @@ import { IsArray, IsString, IsNumber, IsOptional, IsEnum, ValidateNested, Min, I
 import { Type } from 'class-transformer';
 
 export class CheckoutItemDto {
-  @IsUUID()
+  @IsUUID('loose')
   variantId: string;
 
   @IsNumber()
@@ -21,7 +21,7 @@ export class CheckoutDto {
   @Type(() => CheckoutItemDto)
   items: CheckoutItemDto[];
 
-  @IsUUID()
+  @IsUUID('loose')
   addressId: string;
 
   @IsOptional()
@@ -31,6 +31,18 @@ export class CheckoutDto {
   @IsOptional()
   @IsString()
   promoCode?: string;
+
+  /** Codice della gift card da scalare su questo ordine. */
+  @IsOptional()
+  @IsString()
+  giftCardCode?: string;
+
+  /** Punti fedelta' da convertire in sconto su questo ordine. */
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  loyaltyPoints?: number;
 
   @IsOptional()
   @IsString()

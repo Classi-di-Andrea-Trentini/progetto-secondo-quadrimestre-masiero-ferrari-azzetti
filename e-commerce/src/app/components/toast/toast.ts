@@ -26,14 +26,14 @@ export class ToastComponent {
   }
 
   containerClass(type: Toast['type']): string {
-    if (type === 'success') return 'bg-green-50 border-green-200 text-green-700';
-    if (type === 'error') return 'bg-red-50 border-red-200 text-red-700';
-    return 'bg-blue-50 border-blue-200 text-blue-700';
+    if (type === 'success') return 'bg-success-wash text-success';
+    if (type === 'error') return 'bg-danger-wash text-danger';
+    return 'bg-info-wash text-info';
   }
 
   iconClass(type: Toast['type']): string {
-    if (type === 'success') return 'text-green-500';
-    if (type === 'error') return 'text-red-500';
-    return 'text-blue-500';
+    if (type === 'success') return 'text-success';
+    if (type === 'error') return 'text-danger';
+    return 'text-info';
   }
 }

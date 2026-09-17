@@ -196,13 +196,20 @@ CREATE TABLE IF NOT EXISTS products (
   sold_count INT NOT NULL DEFAULT 0,
   avg_rating NUMERIC(3, 2),
   created_at TIMESTAMP NOT NULL DEFAULT now(),
-  updated_at TIMESTAMP NOT NULL DEFAULT now()
+  updated_at TIMESTAMP NOT NULL DEFAULT now(),
+  -- Il backend fa soft delete sui prodotti (products.service.ts e admin.service.ts filtrano
+  -- tutti su deleted_at), ma questa colonna mancava qui: su un volume pulito
+  -- (`docker compose down -v && up -d`) il primo GET /products moriva con
+  -- "column products.deleted_at does not exist". Non si vedeva perche' sul volume di sviluppo
+  -- la colonna era stata aggiunta a mano, fuori dal repo.
+  deleted_at TIMESTAMP
 );
 
 CREATE INDEX IF NOT EXISTS idx_products_category_id ON products (category_id);
 CREATE INDEX IF NOT EXISTS idx_products_is_active ON products (is_active);
 CREATE INDEX IF NOT EXISTS idx_products_is_featured ON products (is_featured);
 CREATE INDEX IF NOT EXISTS idx_products_slug ON products (slug);
+CREATE INDEX IF NOT EXISTS idx_products_deleted_at ON products (deleted_at);
 
 CREATE TABLE IF NOT EXISTS product_tags (
   product_id UUID NOT NULL REFERENCES products (id) ON DELETE CASCADE,
@@ -219,7 +226,10 @@ CREATE TABLE IF NOT EXISTS product_variants (
   color_hex VARCHAR(7),
   material VARCHAR(100),
   price_override NUMERIC(10, 2),
-  stock_qty INT NOT NULL DEFAULT 0,
+  -- Rete di sicurezza contro l'overselling: il decremento in checkout e' gia' condizionale
+  -- (vedi checkout.service.ts), ma se un giorno qualcuno scrive un altro percorso che
+  -- scala la giacenza senza controllare, qui il DB si rifiuta invece di andare sotto zero.
+  stock_qty INT NOT NULL DEFAULT 0 CHECK (stock_qty >= 0),
   low_stock_alert INT DEFAULT 5,
   weight_grams INT,
   barcode VARCHAR(100),
@@ -388,7 +398,12 @@ CREATE TABLE IF NOT EXISTS return_items (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   return_id UUID NOT NULL REFERENCES returns (id) ON DELETE CASCADE,
   order_item_id UUID NOT NULL REFERENCES order_items (id) ON DELETE RESTRICT,
-  quantity INT NOT NULL CHECK (quantity > 0)
+  quantity INT NOT NULL CHECK (quantity > 0),
+  -- Una riga d'ordine compare una volta sola per reso. Senza questo vincolo lo
+  -- stesso order_item_id ripetuto nella richiesta produce piu' righe e gonfia la
+  -- quantita' resa oltre quella acquistata: il controllo applicativo sta in
+  -- ReturnService#create, questa e' la rete sotto.
+  UNIQUE (return_id, order_item_id)
 );
 
 CREATE TABLE IF NOT EXISTS payments (
@@ -504,3 +519,59 @@ CREATE TABLE IF NOT EXISTS audit_logs (
 CREATE INDEX IF NOT EXISTS idx_audit_logs_user_id ON audit_logs (user_id);
 CREATE INDEX IF NOT EXISTS idx_audit_logs_entity ON audit_logs (entity_type, entity_id);
 CREATE INDEX IF NOT EXISTS idx_audit_logs_created_at ON audit_logs (created_at);
+
+-- Avvisi "torna disponibile": chi vuole essere avvertito quando una variante
+-- esaurita rientra. La riga resta anche dopo l'invio, come storico.
+CREATE TABLE IF NOT EXISTS stock_alerts (
+    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id     UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    variant_id  UUID NOT NULL REFERENCES product_variants(id) ON DELETE CASCADE,
+    created_at  TIMESTAMP NOT NULL DEFAULT NOW(),
+    notified_at TIMESTAMP,
+    UNIQUE (user_id, variant_id)
+);
+CREATE INDEX IF NOT EXISTS idx_stock_alerts_variant ON stock_alerts (variant_id, notified_at);
+
+-- Punti fedelta': il saldo si ricava sommando i movimenti, cosi' non puo' divergere
+-- dalla storia come farebbe un contatore tenuto a parte.
+CREATE TABLE IF NOT EXISTS loyalty_entries (
+    id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id    UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    order_id   UUID REFERENCES orders(id),
+    points     INTEGER NOT NULL,
+    reason     VARCHAR(120) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    UNIQUE (order_id, reason)
+);
+CREATE INDEX IF NOT EXISTS idx_loyalty_entries_user ON loyalty_entries (user_id, created_at);
+
+-- Foto allegate alle recensioni.
+ALTER TABLE reviews ADD COLUMN IF NOT EXISTS photos TEXT[] NOT NULL DEFAULT '{}';
+
+-- Un reso puo' restituire una parte di quanto incassato: senza questo valore lo
+-- stato del pagamento dovrebbe mentire, dicendo "rimborsato" per un rimborso
+-- parziale oppure "riuscito" per un incasso di cui una parte e' gia' tornata
+-- indietro.
+--
+-- ⚠️ Questo file lo esegue Docker **solo su un volume vuoto**: su un database
+-- gia' creato questa riga non arriverebbe mai. La stessa istruzione viene percio'
+-- applicata anche all'avvio dell'applicazione, da `SchemaUpgrades`.
+ALTER TYPE "PaymentStatus" ADD VALUE IF NOT EXISTS 'partially_refunded';
+
+-- ─── Accesso con Google ───────────────────────────────────────────────────────
+-- Chi entra con Google non sceglie mai una password, quindi `password_hash` non
+-- puo' piu' essere obbligatoria: senza questa riga l'inserimento di un utente
+-- solo-Google fallisce sul vincolo NOT NULL. DROP NOT NULL e' ripetibile, su una
+-- colonna gia' nullable non fa nulla.
+ALTER TABLE users ALTER COLUMN password_hash DROP NOT NULL;
+
+-- L'identita' Google si riconosce dal `sub`, non dall'email: il `sub` e' stabile
+-- per sempre, l'indirizzo puo' cambiare (e un indirizzo liberato puo' finire a
+-- un'altra persona). Unico, perche' due account nostri non possono essere lo
+-- stesso account Google; NULL per tutti quelli che Google non lo usano, e in
+-- Postgres un indice unico ammette quanti NULL vuole.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS google_sub VARCHAR(255);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_users_google_sub ON users (google_sub);
+
+-- ⚠️ Anche queste tre righe sono ripetute in `SchemaUpgrades`, per lo stesso
+-- motivo scritto sopra: qui dentro arrivano solo ai database creati da zero.

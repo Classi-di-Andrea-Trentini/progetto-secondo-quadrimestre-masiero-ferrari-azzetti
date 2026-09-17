@@ -8,6 +8,9 @@ import { PrismaService } from '../prisma/prisma.service';
 import { PromoCodesService } from '../promo-codes/promo-codes.service';
 import { MailService } from '../mail/mail.service';
 import { CheckoutDto, ShippingMethod } from './dto/checkout.dto';
+import { GiftCardsService } from '../gift-cards/gift-cards.service';
+import { LoyaltyService } from '../loyalty/loyalty.service';
+import { priceOf } from '../common/pricing';
 
 const SHIPPING_COST: Record<ShippingMethod, number> = {
   [ShippingMethod.STANDARD]: 4.9,
@@ -21,6 +24,8 @@ export class CheckoutService {
     private prisma: PrismaService,
     private promoSvc: PromoCodesService,
     private mailService: MailService,
+    private giftCards: GiftCardsService,
+    private loyalty: LoyaltyService,
   ) {}
 
   async placeOrder(userId: string, dto: CheckoutDto) {
@@ -54,13 +59,9 @@ export class CheckoutService {
 
     // 3. Calculate subtotal using DB prices (never trust client)
     const lineItems = variants.map(({ variant, quantity }) => {
-      const basePrice = parseFloat(String(variant.priceOverride ?? variant.product.basePrice));
-      const discount = variant.product.discounts[0];
-      let unitPrice = basePrice;
-      if (discount) {
-        const val = parseFloat(String(discount.value));
-        unitPrice = discount.type === 'percentage' ? basePrice * (1 - val / 100) : basePrice - val;
-      }
+      // Stessa funzione che usa il carrello: se le due formule divergessero, il
+      // totale mostrato prima di pagare non combacerebbe con quello addebitato.
+      const { originalPrice: basePrice, unitPrice } = priceOf(variant);
       const discountApplied = (basePrice - unitPrice) * quantity;
       const variantLabel = [variant.color, variant.size].filter(Boolean).join(' / ');
       return {
@@ -96,6 +97,11 @@ export class CheckoutService {
     // 6. Total
     const total = Math.max(0, subtotal - discountTotal + shippingCost);
 
+    // La gift card si scala **dopo** sconti e spedizione, sul dovuto reale: scalarla
+    // prima farebbe pagare al cliente una spedizione che il buono avrebbe coperto.
+    // Il saldo si tocca solo dentro la transazione, cosi' un ordine che fallisce piu'
+    // avanti non brucia il credito.
+
     // 7. Create order in a transaction
     const order = await this.prisma.$transaction(async (tx) => {
       const created = await tx.order.create({
@@ -123,14 +129,63 @@ export class CheckoutService {
         data: { orderId: created.id, status: 'pending', changedBy: userId },
       });
 
+      // Gift card: scala quanto serve e annota l'utilizzo sull'ordine.
+      let giftCardApplied = 0;
+      if (dto.giftCardCode) {
+        const redeemed = await this.giftCards.redeemWithin(tx, dto.giftCardCode, total, created.id);
+        giftCardApplied = redeemed.applied;
+        await tx.order.update({
+          where: { id: created.id },
+          data: { giftCardId: redeemed.giftCardId, giftCardAmount: redeemed.applied },
+        });
+      }
+
+      // Punti fedelta': si convertono in sconto prima della gift card, cosi' il buono
+      // copre solo cio' che resta e non viene consumato al posto dei punti.
+      let loyaltyDiscount = 0;
+      if (dto.loyaltyPoints && dto.loyaltyPoints > 0) {
+        const redeemed = await this.loyalty.redeemWithin(
+          tx,
+          userId,
+          created.id,
+          dto.loyaltyPoints,
+          total,
+        );
+        loyaltyDiscount = redeemed.discount;
+      }
+
+      const payable = Math.max(0, Math.round((total - loyaltyDiscount) * 100) / 100);
+      if (loyaltyDiscount > 0) {
+        await tx.order.update({
+          where: { id: created.id },
+          data: {
+            discountTotal: { increment: loyaltyDiscount },
+            total: payable,
+          },
+        });
+      }
+
+      // Quello che resta da incassare col metodo di pagamento vero.
+      const amountToCharge = Math.round((payable - giftCardApplied) * 100) / 100;
+
+      // Punti guadagnati: sull'imponibile scontato, senza spedizione.
+      await this.loyalty.awardForOrder(
+        tx,
+        userId,
+        created.id,
+        Math.max(0, subtotal - discountTotal - loyaltyDiscount),
+      );
+
       // Mock payment (immediately succeeded — real Stripe hook would update this)
       await tx.payment.create({
         data: {
           orderId: created.id,
           userId,
           status: 'succeeded',
-          method: 'credit_card',
-          amount: total,
+          // Coperto interamente dal buono: il metodo lo dice, invece di far figurare
+          // una carta che non e' stata usata.
+          method: amountToCharge > 0 ? 'credit_card' : 'gift_card',
+          amount: amountToCharge,
           paidAt: new Date(),
         },
       });
@@ -141,15 +196,50 @@ export class CheckoutService {
         data: { orderId: created.id, status: 'paid', changedBy: userId, note: 'Mock payment succeeded' },
       });
 
-      // Decrement stock
-      await Promise.all(
-        variants.map(({ variant, quantity }) =>
-          tx.productVariant.update({
-            where: { id: variant.id },
-            data: { stockQty: { decrement: quantity } },
-          }),
-        ),
-      );
+      // Decrement stock.
+      //
+      // Il controllo fatto al punto 2 non basta: due checkout concorrenti sull'ultimo pezzo
+      // leggono entrambi stockQty=1, entrano entrambi nella propria transazione e decrementano
+      // entrambi, lasciando la giacenza a -1 (venduto piu' di quanto c'era). Qui il decremento
+      // e' condizionale: `updateMany` con `stockQty: { gte: quantity }` tocca la riga solo se
+      // la giacenza c'e' ancora nel momento della scrittura, e `count === 0` vuol dire che
+      // qualcun altro e' arrivato prima — si lancia e la transazione fa rollback di tutto.
+      for (const { variant, quantity } of variants) {
+        const { count } = await tx.productVariant.updateMany({
+          where: { id: variant.id, stockQty: { gte: quantity } },
+          data: { stockQty: { decrement: quantity } },
+        });
+        if (count === 0) {
+          throw new BadRequestException(
+            `Insufficient stock for ${variant.product.name} (${variant.size ?? ''} ${variant.color ?? ''})`.trim(),
+          );
+        }
+      }
+
+      // Il carrello si svuota qui dentro, non dal client dopo la risposta: se la
+      // chiamata di svuotamento fallisse, il cliente resterebbe con l'ordine gia'
+      // fatto e il carrello ancora pieno, pronto a comprare due volte.
+      const cart = await tx.cart.findUnique({ where: { userId }, select: { id: true } });
+      if (cart) {
+        for (const { variant, quantity } of variants) {
+          const line = await tx.cartItem.findUnique({
+            where: { cartId_variantId: { cartId: cart.id, variantId: variant.id } },
+            select: { id: true, quantity: true },
+          });
+          if (!line) continue;
+
+          // Si scala la quantita' ordinata, non si cancella la riga: chi ne aveva tre
+          // nel carrello e ne ordina uno deve ritrovarsi gli altri due.
+          if (line.quantity > quantity) {
+            await tx.cartItem.update({
+              where: { id: line.id },
+              data: { quantity: line.quantity - quantity },
+            });
+          } else {
+            await tx.cartItem.delete({ where: { id: line.id } });
+          }
+        }
+      }
 
       // Increment soldCount on each product
       const productQtyMap = new Map<string, number>();
@@ -176,7 +266,10 @@ export class CheckoutService {
         });
       }
 
-      return created;
+      // Si restituisce il totale **effettivo**: `total` qui sopra e' quello calcolato
+      // prima dello sconto punti, e restituirlo farebbe vedere al cliente un importo
+      // diverso da quello addebitato e scritto a database.
+      return { ...created, finalTotal: payable, loyaltyDiscount, giftCardApplied };
     });
 
     // Invia email di conferma ordine (fire-and-forget)
@@ -192,11 +285,17 @@ export class CheckoutService {
             quantity: i.quantity,
             lineTotal: i.lineTotal,
           })),
-          total,
+          total: order.finalTotal,
         }).catch(() => {});
       }
     }).catch(() => {});
 
-    return { orderId: order.id, total, status: 'paid' };
+    return {
+      orderId: order.id,
+      total: order.finalTotal,
+      loyaltyDiscount: order.loyaltyDiscount,
+      giftCardApplied: order.giftCardApplied,
+      status: 'paid',
+    };
   }
 }

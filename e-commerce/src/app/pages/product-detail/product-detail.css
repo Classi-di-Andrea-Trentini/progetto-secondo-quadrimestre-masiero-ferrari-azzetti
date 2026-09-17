@@ -8,8 +8,8 @@
 .spinner {
   width: 32px;
   height: 32px;
-  border: 2px solid #f0f0f0;
-  border-top-color: #000;
+  border: 2px solid var(--color-sunken);
+  border-top-color: var(--color-ink);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -22,19 +22,27 @@
   align-items: center;
   justify-content: center;
   gap: 16px;
-  color: #666;
+  color: var(--color-ink-2);
 }
 .detail-error a {
-  color: #000;
-  font-size: 13px;
+  color: var(--color-ink);
+  font-size: var(--text-sm);
   text-decoration: underline;
 }
 
 /* ── PAGE ─────────────────────────────────────────────────── */
 .detail-page {
-  max-width: 1400px;
+  /* Stessa misura e stesso bordo del catalogo (.products-page): fra griglia e
+     scheda prodotto la colonna non deve spostarsi. */
+  max-width: 90rem;
   margin: 0 auto;
-  padding: 0 40px 80px;
+  padding: 0 1.25rem 5rem;
+}
+
+@media (min-width: 1024px) {
+  .detail-page {
+    padding: 0 2rem 5rem;
+  }
 }
 
 /* ── BREADCRUMB ───────────────────────────────────────────── */
@@ -44,7 +52,7 @@
   gap: 8px;
   padding: 20px 0;
   font-size: 11px;
-  color: #8F8F8F;
+  color: var(--color-ink-muted);
   letter-spacing: 0.04em;
 }
 .breadcrumb a {
@@ -52,30 +60,77 @@
   text-decoration: none;
   transition: color 0.15s;
 }
-.breadcrumb a:hover { color: #000; }
-.breadcrumb span:last-child { color: #000; }
+.breadcrumb a:hover { color: var(--color-ink); }
+.breadcrumb span:last-child { color: var(--color-ink); }
 
-/* ── MAIN LAYOUT ──────────────────────────────────────────── */
+/* ── MAIN LAYOUT ──────────────────────────────────────────────────────────
+   Mobile-first: sotto lg una colonna sola, gallery e info impilate. Da lg
+   (1024px, lo stesso breakpoint del resto del sito) in su, due colonne.
+   Prima c'erano tre breakpoint ad hoc (1100/900/480): consolidati in uno
+   solo, coerente con products.css e con "lg:" usato ovunque nel sito. ───── */
 .detail-layout {
-  display: grid;
-  grid-template-columns: 1fr 480px;
-  gap: 60px;
-  align-items: start;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+@media (min-width: 1024px) {
+  .detail-layout {
+    display: grid;
+    grid-template-columns: 1fr 480px;
+    gap: 3.75rem;
+    align-items: start;
+  }
 }
 
 /* ── GALLERY ──────────────────────────────────────────────── */
+
+/* Sotto lg: tutta la galleria in una striscia orizzontale con scroll-snap —
+   niente immagine singola + miniature, non c'e' spazio per due colonne e lo
+   swipe e' il gesto naturale su un telefono. Bleed fino al bordo pagina
+   (margin negativo pari al padding di .detail-page) cosi' le immagini toccano
+   i due lati, come in un carosello nativo. */
+.gallery-scroll {
+  display: flex;
+  gap: 0.625rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  margin: 0 -1.25rem;
+  padding: 0 1.25rem;
+}
+.gallery-scroll::-webkit-scrollbar { display: none; }
+
+.gallery-scroll-item {
+  flex: 0 0 82%;
+  aspect-ratio: 3/4;
+  scroll-snap-align: center;
+  background: var(--color-sunken);
+  overflow: hidden;
+}
+.gallery-scroll-item app-product-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Da lg in su: immagine principale grande + miniature selezionabili sotto —
+   il pattern del design (f33fcdda.jpg). Le due gallerie sono nello stesso
+   DOM, alternate via display: nessun JavaScript in piu' per il breakpoint. */
+.gallery-desktop {
+  display: none;
+}
+
 .gallery-main {
   aspect-ratio: 3/4;
-  background: #F5F5F5;
+  background: var(--color-sunken);
   overflow: hidden;
   margin-bottom: 8px;
 }
-.gallery-main img,
 .gallery-main .main-img {
+  display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: center top;
   transition: opacity 0.3s;
 }
 
@@ -93,31 +148,36 @@
   height: 90px;
   border: 2px solid transparent;
   padding: 0;
-  background: #F5F5F5;
+  background: var(--color-sunken);
   cursor: pointer;
   overflow: hidden;
   transition: border-color 0.15s;
 }
-.thumb.active { border-color: #000; }
-.thumb img {
+.thumb.active { border-color: var(--color-ink); }
+.thumb app-product-image {
+  display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover;
 }
 
 /* ── INFO PANEL ───────────────────────────────────────────── */
 .detail-info {
-  position: sticky;
-  top: 80px;
   display: flex;
   flex-direction: column;
   gap: 28px;
 }
 
+@media (min-width: 1024px) {
+  .detail-info {
+    position: sticky;
+    top: 80px;
+  }
+}
+
 .info-header { display: flex; flex-direction: column; gap: 6px; }
 .brand {
   font-size: 11px;
-  color: #8F8F8F;
+  color: var(--color-ink-muted);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   margin: 0;
@@ -127,27 +187,32 @@
   align-items: flex-start;
   gap: 10px;
 }
-.heart-btn-detail {
+/* .heart-btn: vocabolario condiviso in styles.css (colore/transizione/stato
+   "saved"). Qui resta solo il posizionamento locale accanto al titolo. */
+.heart-btn {
   flex-shrink: 0;
-  margin-top: 4px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #ccc;
-  padding: 4px;
-  transition: color 0.2s, transform 0.15s;
+  margin-top: 0.25rem;
+  padding: 0.25rem;
 }
-.heart-btn-detail:hover { color: #e85d5d; transform: scale(1.12); }
-.heart-btn-detail.saved { color: #e02020; }
-.heart-btn-detail.saved svg { fill: #e02020; stroke: #e02020; }
-.heart-btn-detail:hover svg { fill: #e85d5d; stroke: #e85d5d; }
+.heart-btn:hover {
+  transform: scale(1.12);
+}
 
 .product-name {
-  font-size: 26px;
-  font-weight: 400;
+  /* Il nome del capo e' il titolo della pagina: stessa voce editoriale del
+     titolo del catalogo e delle sezioni della home, non il sans di sistema. */
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: 600;
   margin: 0;
-  line-height: 1.2;
-  letter-spacing: -0.01em;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+@media (min-width: 1024px) {
+  .product-name {
+    font-size: var(--text-3xl);
+  }
 }
 
 .price-row {
@@ -157,14 +222,14 @@
   margin-top: 4px;
 }
 .price-main { font-size: 20px; font-weight: 400; }
-.price-original { font-size: 16px; color: #aaa; text-decoration: line-through; }
-.price-sale { font-size: 20px; font-weight: 500; color: #B5451B; }
+.price-original { font-size: 16px; color: var(--color-ink-muted); text-decoration: line-through; }
+.price-sale { font-size: 20px; font-weight: 500; color: var(--color-accent); }
 .discount-tag {
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.1em;
-  background: #C3A88D;
-  color: #fff;
+  background: var(--color-accent);
+  color: var(--color-surface);
   padding: 3px 7px;
 }
 
@@ -174,21 +239,21 @@
   gap: 2px;
   margin-top: 2px;
 }
-.star { font-size: 14px; color: #ddd; }
-.star.filled { color: #C3A88D; }
-.rating-count { font-size: 11px; color: #8F8F8F; margin-left: 6px; }
+.star { font-size: 14px; color: var(--color-line); }
+.star.filled { color: var(--color-accent); }
+.rating-count { font-size: 11px; color: var(--color-ink-muted); margin-left: 6px; }
 
 /* ── SELECTORS ────────────────────────────────────────────── */
 .selector-block { display: flex; flex-direction: column; gap: 12px; }
 .selector-label {
-  font-size: 11px;
+  font-size: var(--text-2xs);
   font-weight: 400;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   margin: 0;
-  color: #555;
+  color: var(--color-ink-2);
 }
-.selector-label strong { color: #000; font-weight: 600; }
+.selector-label strong { color: var(--color-ink); font-weight: 600; }
 
 .color-row { display: flex; gap: 10px; flex-wrap: wrap; }
 .color-circle {
@@ -201,70 +266,76 @@
   outline-offset: 3px;
   transition: outline-color 0.15s, transform 0.15s;
 }
-.color-circle.selected { outline-color: #000; transform: scale(1.1); }
+.color-circle.selected { outline-color: var(--color-ink); transform: scale(1.1); }
 .color-circle:hover { transform: scale(1.1); }
 
-.size-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-.size-btn {
-  padding: 13px 8px;
-  border: 1px solid #e0e0e0;
-  background: none;
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.06em;
-  cursor: pointer;
-  text-align: center;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
-}
-.size-btn:hover:not(:disabled) { border-color: #000; }
-.size-btn.selected { background: #000; color: #fff; border-color: #000; }
-.size-btn.out-of-stock { opacity: 0.3; cursor: not-allowed; text-decoration: line-through; }
+/* Griglia 3x2 fissa (XS S M L XL XXL), come nel design: non si reimpila a
+   4 o a 2 colonne sotto nessun breakpoint. .size-btn: vocabolario condiviso
+   in styles.css (bottone, stato selected/out-of-stock, min-height 44px). */
+.size-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.375rem; }
 
 /* ── ADD TO CART ──────────────────────────────────────────── */
-.add-to-cart {
-  width: 100%;
-  padding: 18px;
-  background: #000;
-  color: #fff;
-  border: none;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: background 0.2s;
+/* Il bottone usa il vocabolario condiviso (.btn .btn-primary .btn-lg
+   .btn-block, gia' nero via --color-cta): qui resta solo lo stato locale
+   "aggiunto", che il vocabolario non prevede. */
+.add-to-cart.added,
+.add-to-cart.added:hover {
+  background: var(--color-success);
 }
-.add-to-cart:disabled { background: #ccc; cursor: not-allowed; }
-.add-to-cart.added { background: #3D8B37; }
-.add-to-cart:not(:disabled):hover { background: #333; }
 
 /* ── ACCORDIONS ───────────────────────────────────────────── */
+/* <details>/<summary> nativi: tastiera e screen reader gratis, senza una
+   riga di JavaScript. Qui si toglie solo il triangolo di default del
+   browser e si disegna l'icona +/− che il design mostra. */
 .accordions { display: flex; flex-direction: column; }
-.accordion { border-top: 1px solid #e8e8e8; }
-.accordion:last-child { border-bottom: 1px solid #e8e8e8; }
+.accordion { border-top: 1px solid var(--color-line); }
+.accordion:last-child { border-bottom: 1px solid var(--color-line); }
 
 .accordion-head {
-  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 16px 0;
-  background: none;
-  border: none;
   cursor: pointer;
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  text-align: left;
+  list-style: none;
 }
-.acc-icon { font-size: 18px; font-weight: 300; color: #555; }
+.accordion-head::-webkit-details-marker { display: none; }
+.accordion-head::marker { content: ''; }
+
+/* Segno "+"/"−" disegnato con due pseudo-elementi: la barra orizzontale resta
+   sempre, quella verticale sparisce quando l'accordion e' aperto. */
+.acc-icon {
+  position: relative;
+  width: 11px;
+  height: 11px;
+  flex-shrink: 0;
+}
+.acc-icon::before,
+.acc-icon::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  background: var(--color-ink-2);
+  transform: translate(-50%, -50%);
+}
+.acc-icon::before { width: 11px; height: 1.5px; }
+.acc-icon::after {
+  width: 1.5px;
+  height: 11px;
+  transition: opacity 160ms var(--ease-out-quart);
+}
+.accordion[open] .acc-icon::after { opacity: 0; }
 
 .accordion-body {
   padding: 0 0 16px;
   font-size: 13px;
   line-height: 1.7;
-  color: #555;
+  color: var(--color-ink-2);
   white-space: pre-line;
 }
 
@@ -272,19 +343,21 @@
 .related-section {
   margin-top: 80px;
   padding-top: 48px;
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid var(--color-sunken);
 }
 .related-title {
   text-align: center;
-  font-size: 12px;
+  font-size: var(--text-2xs);
   font-weight: 700;
   letter-spacing: 0.18em;
-  margin: 0 0 36px;
+  text-transform: uppercase;
+  color: var(--color-ink-2);
+  margin: 0 0 2.25rem;
 }
 .related-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 2px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
 }
 .related-card {
   display: block;
@@ -293,16 +366,16 @@
 }
 .related-img {
   aspect-ratio: 3/4;
-  background: #F5F5F5;
+  background: var(--color-sunken);
   overflow: hidden;
 }
-.related-img img {
+.related-img app-product-image {
+  display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover;
   transition: transform 0.4s ease;
 }
-.related-card:hover .related-img img { transform: scale(1.04); }
+.related-card:hover .related-img app-product-image { transform: scale(1.04); }
 
 .related-info {
   padding: 10px 2px 0;
@@ -313,23 +386,28 @@
 }
 .related-name { font-size: 13px; }
 .related-price { font-size: 13px; font-weight: 500; flex-shrink: 0; }
-.related-price s { color: #aaa; font-size: 11px; margin-right: 4px; text-decoration: line-through; }
+.related-price s { color: var(--color-ink-muted); font-size: 11px; margin-right: 4px; text-decoration: line-through; }
 
-/* ── RESPONSIVE ───────────────────────────────────────────── */
-@media (max-width: 1100px) {
-  .detail-layout { grid-template-columns: 1fr 420px; gap: 40px; }
+/* ── RECENTLY VIEWED ──────────────────────────────────────── */
+/* Stesso trattamento di .related-grid, per coerenza fra le due strisce di
+   card in fondo alla pagina: prima era l'unica utility responsive Tailwind
+   del template (grid-cols-2 md:grid-cols-4), ora e' CSS come il resto del file. */
+.recent-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
 }
 
-@media (max-width: 900px) {
-  .detail-page { padding: 0 20px 60px; }
-  .detail-layout { grid-template-columns: 1fr; gap: 32px; }
-  .detail-info { position: static; }
-  .size-grid { grid-template-columns: repeat(4, 1fr); }
-  .related-grid { grid-template-columns: repeat(2, 1fr); }
+/* ── RESPONSIVE (lg, 1024px) ─────────────────────────────────────────────── */
+@media (min-width: 1024px) {
+  .gallery-scroll { display: none; }
+  .gallery-desktop { display: block; }
+
+  .related-grid { grid-template-columns: repeat(4, 1fr); gap: 2px; }
+  .recent-grid { grid-template-columns: repeat(4, 1fr); }
 }
 
-@media (max-width: 480px) {
-  .product-name { font-size: 20px; }
-  .size-grid { grid-template-columns: repeat(3, 1fr); }
-  .related-grid { grid-template-columns: repeat(2, 1fr); }
+@media (prefers-reduced-motion: reduce) {
+  .gallery-scroll { scroll-behavior: auto; }
+  .acc-icon::after { transition: none; }
 }

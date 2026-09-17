@@ -2,12 +2,14 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminService, AdminReturn } from '../../../services/admin.service';
+import { formatPrice as formatPriceShared } from '../../../services/format-price';
 
 @Component({
   selector: 'app-admin-returns',
   standalone: true,
   imports: [CommonModule, DatePipe, FormsModule],
   templateUrl: './admin-returns.html',
+  styleUrl: './admin-returns.css',
 })
 export class AdminReturns implements OnInit {
   private readonly adminSvc = inject(AdminService);
@@ -31,20 +33,20 @@ export class AdminReturns implements OnInit {
   updateLoading = signal(false);
 
   readonly allStatuses = [
-    { value: '', label: 'Tutti gli stati' },
-    { value: 'requested', label: 'Richiesto' },
-    { value: 'approved', label: 'Approvato' },
-    { value: 'rejected', label: 'Rifiutato' },
-    { value: 'received', label: 'Ricevuto' },
-    { value: 'refunded', label: 'Rimborsato' },
+    { value: '', label: 'All statuses' },
+    { value: 'requested', label: 'Requested' },
+    { value: 'approved', label: 'Approved' },
+    { value: 'rejected', label: 'Rejected' },
+    { value: 'received', label: 'Received' },
+    { value: 'refunded', label: 'Refunded' },
   ];
 
   readonly statusColors: Record<string, string> = {
-    requested: 'bg-yellow-100 text-yellow-800',
-    approved: 'bg-blue-100 text-blue-800',
-    rejected: 'bg-red-100 text-red-800',
-    received: 'bg-purple-100 text-purple-800',
-    refunded: 'bg-green-100 text-green-800',
+    requested: 'badge-warning',
+    approved: 'badge-info',
+    rejected: 'badge-danger',
+    received: 'badge-accent',
+    refunded: 'badge-success',
   };
 
   ngOnInit() { this.load(); }
@@ -63,7 +65,7 @@ export class AdminReturns implements OnInit {
         this.totalPages.set(res.meta.totalPages);
         this.loading.set(false);
       },
-      error: () => { this.error.set('Impossibile caricare i resi'); this.loading.set(false); },
+      error: () => { this.error.set('Unable to load returns'); this.loading.set(false); },
     });
   }
 
@@ -77,7 +79,7 @@ export class AdminReturns implements OnInit {
   }
 
   statusLabel(s: string): string { return this.allStatuses.find(x => x.value === s)?.label ?? s; }
-  statusColor(s: string): string { return this.statusColors[s] ?? 'bg-gray-100 text-gray-700'; }
+  statusColor(s: string): string { return this.statusColors[s] ?? 'badge-neutral'; }
 
   openDetail(r: AdminReturn) {
     this.selectedReturn.set(r);
@@ -100,19 +102,22 @@ export class AdminReturns implements OnInit {
         this.returns.update(list => list.map(x => x.id === updated.id ? updated : x));
         this.selectedReturn.set(updated);
         this.updateLoading.set(false);
-        this.actionSuccess.set('Stato reso aggiornato');
+        this.actionSuccess.set('Return status updated');
         setTimeout(() => this.actionSuccess.set(null), 3000);
       },
       error: () => {
         this.updateLoading.set(false);
-        this.error.set('Errore aggiornamento stato');
+        this.error.set('Error updating the status');
       },
     });
   }
 
+  // Formato inglese (€120.00), centralizzato in services/format-price.ts;
+  // il caso null/0 resta qui perche' e' una scelta di questa pagina (mostrare
+  // un trattino), non della formattazione in se'.
   formatPrice(v: string | number | null): string {
     if (!v) return '—';
-    return '€ ' + parseFloat(String(v)).toFixed(2).replace('.', ',');
+    return formatPriceShared(v);
   }
 
   pagesArray(): number[] {

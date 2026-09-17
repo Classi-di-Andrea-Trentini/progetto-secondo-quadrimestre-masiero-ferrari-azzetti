@@ -1,126 +1,202 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guida per Claude Code (claude.ai/code) quando lavora su questo repository.
 
-## Project Overview
+> Se qualcosa qui dentro non combacia con il codice, **vince il codice**: questo file
+> ha gia' descritto per mesi un backend che non era piu' quello in esecuzione.
 
-Full-stack e-commerce application ("Common Era") built with:
-- **Backend:** NestJS 11 + Prisma 7 + PostgreSQL 16
-- **Frontend:** Angular 21 (standalone components, SSR) + Tailwind CSS 4
-- **Infrastructure:** Docker Compose (3 services: frontend, backend, db)
+## Cos'e' il progetto
 
-## Running the Project
+E-commerce "Common Era", full-stack.
 
-Everything runs in Docker. From the repo root:
+| Pezzo | Tecnologia | Dove |
+|---|---|---|
+| Backend **in uso** | Spring Boot 4.1 · Java 21 · Gradle · Spring Security · JJWT · Lombok · OpenPDF · stripe-java | `server-java/` |
+| Backend **dismesso** | NestJS + Prisma | `server/` |
+| Frontend | Angular 21 (standalone, SSR) · Tailwind CSS 4 · Vitest | `e-commerce/` |
+| Database | PostgreSQL 16, schema in SQL a mano | `database/init/` |
+| Infrastruttura | Docker Compose: `frontend`, `backend`, `db` | `docker-compose.yml` |
+
+**`server/` non e' agganciato al compose e non va modificato.** Resta nel repo come
+riferimento: i due backend parlavano lo stesso database e la stessa API, e il
+confronto e' servito durante la riscrittura. Ogni lavoro sul backend si fa in
+`server-java/`.
+
+## Far girare il progetto
 
 ```bash
-docker compose up -d          # Start all services
-docker compose restart backend  # Reload backend after code changes
-docker compose restart frontend # Reload frontend after code changes
-docker compose logs backend --tail=30  # Check backend logs
-docker compose logs frontend --tail=30 # Check frontend build errors
+cp .env.example .env     # e riempire JWT_SECRET e DB_PASSWORD, altrimenti non parte
+docker compose up -d
 ```
 
-- Frontend: http://localhost:4200
-- Backend API: http://localhost:3000
-- DB (external): `localhost:5433` (PostgreSQL, user/password/mydb)
+- Frontend: <http://localhost:4200>
+- API: <http://localhost:3000/api>
+- Postgres: `localhost:5433` (utente `user`, database `mydb`)
+
+Il compose **non** monta i sorgenti: le immagini contengono il costruito di
+produzione. Per lavorare col ricaricamento automatico si sta fuori da Docker.
+
+```bash
+# backend, col solo Postgres in Docker
+docker compose up -d db
+cd server-java
+DATABASE_URL_JDBC="jdbc:postgresql://localhost:5433/mydb" DB_USER=user DB_PASSWORD=... \
+  JWT_SECRET="$(openssl rand -base64 48)" PORT=8080 ./gradlew bootRun
+
+# frontend, con il proxy verso la porta 8080
+cd e-commerce && npm run start:local
+```
 
 ## Database
 
-```bash
-# Run a SQL file against the DB
-docker compose exec -T db psql -U user -d mydb < database/seed.sql
+**Lo schema non lo genera nessun ORM.** Nasce da `database/init/001_schema.sql`, che
+Postgres esegue al primo avvio del volume, e i dati di prova da
+`002_seed_data.sql`. Hibernate gira con `ddl-auto=validate`: se un'entita' non
+combacia con la tabella, **l'applicazione non parte**. E' voluto.
 
-# Interactive psql
+Quindi: una modifica allo schema si scrive **prima** in `database/init/001_schema.sql`,
+poi si adegua l'entita' JPA. Non esistono migrazioni generate, non esiste
+`prisma migrate`, non esiste `ddl-auto=update`.
+
+```bash
+# psql interattivo
 docker compose exec db psql -U user -d mydb
 
-# Regenerate Prisma client after schema changes
-docker compose exec backend npx prisma generate
-docker compose exec backend npx prisma migrate dev --name <migration_name>
+# ricreare il database da zero (il volume tiene i dati: senza cancellarlo,
+# gli script di init NON vengono rieseguiti)
+docker compose down -v && docker compose up -d
 ```
 
-Schema is at `server/prisma/schema.prisma`. All primary keys are UUIDs via `gen_random_uuid()`. Prisma serializes `Decimal` fields as **strings** in JSON — always use `parseFloat(String(v))` before arithmetic in the frontend.
+Tre trappole trovate proprio grazie a `validate`, da ricordare scrivendo entita':
 
-## Backend (NestJS)
+1. `users.role` e' un **enum Postgres** (`"UserRole"`), non una varchar: va
+   `@JdbcTypeCode(NAMED_ENUM)`, altrimenti ogni scrittura fallisce con un errore
+   di tipo che non nomina la colonna.
+2. `sessions.ip_address` e' di tipo **`inet`**: mapparlo come stringa fa fallire
+   ogni inserimento. Resta fuori dall'entita'.
+3. I timestamp sono **`timestamp without time zone`**: `Instant` pretenderebbe
+   `timestamptz` e la validazione blocca l'avvio. Si usa `LocalDateTime`.
+
+## Backend — `server-java/`
 
 ```bash
-# Run outside Docker (from /server)
-npm run start:dev   # watch mode
-npm run lint        # ESLint + auto-fix
-npm run test        # Jest unit tests
-npm run test:e2e    # End-to-end tests
+cd server-java
+./gradlew test      # 81 test, Testcontainers: serve Docker in esecuzione
+./gradlew bootJar   # jar eseguibile
+./gradlew bootRun   # avvio locale
 ```
 
-### Architecture
+I test fanno partire un **Postgres vero** in un container e ci caricano dentro lo
+stesso `001_schema.sql` di produzione. Senza un demone Docker raggiungibile la
+suite non parte proprio.
 
-`app.module.ts` imports:
-- `ConfigModule` (global, reads `.env`)
-- `ThrottlerModule` — 100 req/min/IP via `APP_GUARD`
-- `PrismaModule` (`@Global()`) — inject `PrismaService` anywhere
-- `MailModule` (`@Global()`) — inject `MailService` anywhere
-- Feature modules: `AuthModule`, `UsersModule`, `ProductsModule`, `WishlistModule`
+### Come e' fatto
 
-Each feature module follows: `module.ts` → `controller.ts` → `service.ts` → `dto/`.
+Struttura piatta per ruolo, non per funzionalita':
 
-**Auth flow:** JWT stored in HttpOnly cookie → `JwtAuthGuard` validates session via `session` table + `jwt.strategy.ts`. The `req.user` object includes `sessionId` (from `jwt.strategy.ts`). Sessions expire in 7 days.
+```
+controllers/   traducono HTTP in una chiamata al servizio, niente logica
+services/      tutta la logica, tutte le transazioni
+repositories/  Spring Data JPA, con @Query dove serve un UPDATE condizionale
+entities/      le tabelle di database/init/001_schema.sql
+dtos/          record Java, la forma che esce dall'API
+security/      JwtCookieFilter, JwtService, AuthCookie, CurrentUser
+config/        SecurityConfig, WebConfig, PaymentConfig, AdminBootstrap
+exceptions/    ApiException + ApiExceptionHandler
+```
 
-**Important:** The backend's `login()` response must include all user fields (`emailVerifiedAt`, `gender`, etc.) or the frontend signal will have stale `null` values until page refresh.
+- **`open-in-view=false`.** Le associazioni lazy non si possono toccare dal
+  controller: la conversione in DTO avviene **dentro il servizio**, in transazione.
+  Fuori si prende una `LazyInitializationException`.
+- **Errori nella forma `{ message, error, statusCode }`**, la stessa del backend
+  Node, perche' il frontend la legge cosi'. **401** per chi non e' autenticato e
+  **403** per chi non ha i permessi: Spring di suo risponderebbe 403 a entrambi, e
+  il frontend usa il 401 per mandare al login.
+- **BCrypt costo 10**: gli hash nella tabella `users` sono quelli scritti dal
+  backend Node, l'algoritmo non e' una scelta libera.
+- **`JWT_SECRET` non ha un default.** Se manca o e' piu' corto di 32 caratteri
+  l'applicazione non parte.
 
-## Frontend (Angular 21)
+### Autenticazione
+
+JWT in un cookie **HttpOnly** di nome `access_token`, `SameSite=Lax`, `path=/`,
+`Secure` pilotato da `COOKIE_SECURE`. Il token porta `sub` (utente), `sid`
+(sessione) e `role`.
+
+`JwtCookieFilter` non si ferma alla firma: controlla anche che la riga in
+`sessions` **esista ancora** e non sia scaduta, e che l'utente sia attivo e non
+cancellato. Senza quel secondo passaggio il logout non avrebbe alcun effetto, dato
+che un JWT firmato resta valido fino alla scadenza. Durata: 7 giorni
+(`JWT_TTL_DAYS`).
+
+## Frontend — `e-commerce/`
 
 ```bash
-# Run outside Docker (from /e-commerce)
-npm start           # ng serve
-npm run build       # production build
-npm test            # Karma unit tests
+cd e-commerce
+npm ci
+npm start        # ng serve
+npm run build    # build di produzione + prerender
+npm test         # 54 test, Vitest su jsdom
 ```
 
-### Architecture
+- **Tutti i componenti sono standalone**, nessun `NgModule`. Sintassi di controllo
+  nuova (`@if`, `@for`, `@switch`).
+- **Stato con i signal** (`signal`, `computed`, `effect`). L'autenticazione vive in
+  `AuthService` (`services/auth.ts`), segnale `currentUser`.
+- **`API_URL` sta in un posto solo**: `services/api.config.ts`. Nel browser e'
+  `/api` (stessa origine, niente CORS ne' cookie cross-site); in SSR punta al
+  backend per nome di servizio Docker. Non si scrive un URL a mano in un servizio.
+- **SSR**: `outputMode: "server"`, e ogni rotta sceglie come essere resa in
+  `app.routes.server.ts` — prerender per cio' che e' uguale per tutti, server per
+  cio' che e' pubblico ma cambia, client per cio' che e' dietro autenticazione.
+- **Le guardie controllano `isPlatformBrowser`** e lasciano passare sul server, per
+  non innescare cicli di redirect durante l'idratazione.
 
-**All components are standalone** — no NgModules. Import `CommonModule`, `RouterModule`, `FormsModule`, `ReactiveFormsModule` per-component as needed.
+Il design system sta in `src/styles.css`: token OKLCH con contrasto misurato e un
+vocabolario di classi (`.btn`, `.field`, `.badge`, `.display`, `.rule`, `.measure`).
+**Un bottone si scrive `class="btn btn-primary"`**, non ricostruito a mano con
+utility Tailwind.
 
-**State management** uses Angular signals (`signal()`, `computed()`, `effect()`). Auth state lives in `AuthService` (`services/auth.ts`) with `currentUser` signal.
+## Variabili d'ambiente
 
-**SSR caveat:** Both auth guards check `isPlatformBrowser(inject(PLATFORM_ID))` and return `of(true)` on the server to avoid redirect loops during SSR hydration.
+Un solo file: **`.env` nella radice**. Il compose lo usa due volte, come `env_file`
+del servizio `backend` e per risolvere le scritture `${...}` nel compose stesso.
+L'elenco completo e commentato e' in `.env.example`, che e' allineato a quello che
+il backend legge davvero. Obbligatorie: `JWT_SECRET` e `DB_PASSWORD`.
 
-**API base URL** is hardcoded as `const API_URL = 'http://localhost:3000'` in each service file (no environment.ts used).
+Il backend Java **non** legge `NODE_ENV`, `TRUST_PROXY`, `CORS_EXTRA_ORIGINS`,
+`DATABASE_URL` in formato `postgresql://` ne' nessuna variabile `RESEND_*`: erano
+del backend Node.
 
-**Key services:**
-- `AuthService` — login/register/logout, `currentUser` signal, email verification, password change
-- `ProductsService` — product listing with filters, product by slug, filter metadata
-- `WishlistService` — toggle save, load IDs (for heart icons), load full items (for /me)
+## Note sul modello dei dati
 
-**Route structure:**
+- Gli importi sono `NUMERIC` in Postgres e `BigDecimal` in Java, e Jackson li
+  serializza come **numeri JSON**. Prisma invece li mandava come **stringhe**: i
+  `parseFloat(String(v))` sparsi nel frontend sono il residuo di quella epoca.
+  Funzionano anche su un numero, quindi non sono un errore, ma non servono piu'.
+- `Discount.type` e' minuscolo: `'percentage' | 'fixed_amount'`.
+- La wishlist ha un vincolo unico su `(user_id, product_id, variant_id)`: il toggle
+  deve cercare per tutti e tre.
+- Immagini prodotto: `is_cover = true` per la principale, `sort_order = 1` per
+  quella che appare al passaggio del mouse.
+- Le categorie sono gerarchiche via `parent_id` che punta a se stessa.
+- La cancellazione di un account e' **logica** (`users.deleted_at`): `orders.user_id`
+  e' `ON DELETE RESTRICT` e il database rifiuterebbe la cancellazione vera.
 
-| Path | Component | Guard |
-|------|-----------|-------|
-| `/products` | Products | — |
-| `/product/:slug` | ProductDetail | — |
-| `/me` | MeComponent | authGuardGuard |
-| `/verify-email/:token` | VerifyEmail | — |
+## Convenzioni
 
-## Environment Variables
+- **Documentazione e commenti in italiano.** I commenti spiegano *perche'*, non
+  *cosa*: il cosa si legge nel codice.
+- **Conventional Commits in inglese**, corti, tipo con l'iniziale maiuscola:
+  `Feat(routing): real 404 page`, `Docs: rewrite readme on java backend`.
+- **Nessuna attribuzione AI nei commit.** Mai `Co-Authored-By`, mai
+  `Claude-Session:`, mai "Generated with Claude Code".
+- Niente `git add .`: si aggiungono i file che si sono toccati.
+- Branch principale: **`main`**. Non esiste piu' nessun branch `products` attivo.
 
-Backend reads from `server/.env` (mapped via `env_file` in docker-compose):
+## Dove guardare
 
-```
-DATABASE_URL=postgresql://user:password@db:5432/mydb
-JWT_SECRET=...
-FRONTEND_URL=http://localhost:4200
-BACKEND_URL=http://localhost:3000
-RESEND_API_KEY=...
-RESEND_SENDER_EMAIL=...
-RESEND_SENDER_NAME=...
-```
-
-## Key Data Model Notes
-
-- `Product.basePrice` and all `Decimal` fields come from Prisma as **strings** — parse with `parseFloat()` in frontend
-- `Discount.type` enum values are lowercase: `'percentage'` | `'fixed_amount'` (not uppercase)
-- Wishlist uses a unique constraint on `(user_id, product_id, variant_id)` — toggle logic must query by all three
-- Product images: `is_cover = true` for main, `sort_order = 1` for hover image
-- Categories support parent/child hierarchy via `parent_id` self-reference
-
-## Git Workflow
-
-Current active branch: `products`. Main branch: `main`. PRs merge into `main`.
+- `docs/README.md` — indice della documentazione tecnica
+- `docs/11-what-is-missing.md` — cosa manca davvero, verificato sul codice
+- `docs/api.md` — tutti gli endpoint
+- `server-java/README.md` — note sulla riscrittura Java

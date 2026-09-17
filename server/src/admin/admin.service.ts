@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { InventoryService } from './inventory.service';
 import { MailService } from '../mail/mail.service';
 import {
   AdminListQueryDto,
@@ -23,11 +24,18 @@ import {
   CreateImageDto,
 } from './dto/admin.dto';
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function isUuid(value: string): boolean {
+  return UUID_RE.test(value.trim());
+}
+
 @Injectable()
 export class AdminService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly mail: MailService,
+    private readonly inventory: InventoryService,
   ) {}
 
   // ─── Dashboard ──────────────────────────────────────────────────────────────
@@ -70,16 +78,91 @@ export class AdminService {
       }),
     ]);
 
+    const paidStatuses = ['paid', 'processing', 'shipped', 'delivered', 'completed'];
+    const totalRevenue = parseFloat(String(revenueAgg._sum.total ?? 0));
+
+    // Incassi giorno per giorno negli ultimi 30: un totale complessivo non dice se
+    // le vendite stanno salendo o si sono fermate la settimana scorsa.
+    const since = new Date();
+    since.setDate(since.getDate() - 29);
+    since.setHours(0, 0, 0, 0);
+
+    const revenueByDay = await this.prisma.$queryRaw<{ day: Date; revenue: string; orders: bigint }[]>`
+      SELECT date_trunc('day', created_at) AS day,
+             COALESCE(SUM(total), 0)      AS revenue,
+             COUNT(*)                     AS orders
+      FROM orders
+      WHERE created_at >= ${since}
+        AND status = ANY(${paidStatuses}::text[]::"OrderStatus"[])
+      GROUP BY 1
+      ORDER BY 1
+    `;
+
+    const paidOrders = ordersByStatus
+      .filter((s) => paidStatuses.includes(s.status))
+      .reduce((sum, s) => sum + s._count.status, 0);
+
+    const lowStock = await this.inventory.lowStock();
+
     return {
       totalUsers,
       totalOrders,
       totalProducts,
-      totalRevenue: parseFloat(String(revenueAgg._sum.total ?? 0)),
+      totalRevenue,
       pendingOrders,
       recentOrders,
       topProducts,
       ordersByStatus: ordersByStatus.map((s) => ({ status: s.status, count: s._count.status })),
+      // Scontrino medio sugli ordini incassati, non su tutti: gli annullati e i
+      // pendenti abbasserebbero un numero che serve a leggere le vendite vere.
+      averageOrderValue: paidOrders === 0 ? 0 : totalRevenue / paidOrders,
+      revenueByDay: revenueByDay.map((row) => ({
+        day: row.day,
+        revenue: parseFloat(String(row.revenue)),
+        orders: Number(row.orders),
+      })),
+      inventory: { outOfStock: lowStock.outOfStock, lowStock: lowStock.lowStock },
     };
+  }
+
+  /** Catalogo in CSV: mancava, mentre ordini e utenti si esportavano gia'. */
+  async exportProducts(): Promise<string> {
+    const products = await this.prisma.product.findMany({
+      where: { deletedAt: null },
+      include: {
+        category: { select: { name: true } },
+        variants: { select: { sku: true, size: true, color: true, stockQty: true, priceOverride: true } },
+      },
+      orderBy: { name: 'asc' },
+    });
+
+    const header = 'product_id,name,slug,category,brand,base_price,active,sku,size,color,stock,price_override';
+    const rows: string[] = [];
+
+    for (const product of products) {
+      // Una riga per variante: e' il livello a cui si conta la merce.
+      const variants = product.variants.length ? product.variants : [null];
+      for (const variant of variants) {
+        rows.push(
+          [
+            this.csvCell(product.id),
+            this.csvCell(product.name),
+            this.csvCell(product.slug),
+            this.csvCell(product.category?.name),
+            this.csvCell(product.brand),
+            this.csvCell(String(product.basePrice)),
+            this.csvCell(product.isActive ? 'yes' : 'no'),
+            this.csvCell(variant?.sku),
+            this.csvCell(variant?.size),
+            this.csvCell(variant?.color),
+            this.csvCell(variant ? String(variant.stockQty) : ''),
+            this.csvCell(variant?.priceOverride ? String(variant.priceOverride) : ''),
+          ].join(','),
+        );
+      }
+    }
+
+    return [header, ...rows].join('\n');
   }
 
   // ─── Users ──────────────────────────────────────────────────────────────────
@@ -120,9 +203,34 @@ export class AdminService {
     return { data, meta: { total, page, limit, totalPages: Math.ceil(total / limit) } };
   }
 
+  /**
+   * Impedisce di restare senza amministratori.
+   *
+   * Prima non c'era nessun controllo: un admin poteva declassare o cancellare se stesso, o
+   * cancellare tutti gli altri admin. Con zero admin non esiste piu' un modo per rientrare
+   * dall'API — si recupera solo entrando a mano nel database.
+   */
+  private async assertNotLastAdmin(targetUserId: string, adminId: string, action: string) {
+    if (targetUserId === adminId) {
+      throw new BadRequestException(`Non puoi ${action} il tuo stesso account`);
+    }
+    const target = await this.prisma.user.findUnique({ where: { id: targetUserId } });
+    if (target?.role !== 'admin') return;
+
+    const admins = await this.prisma.user.count({
+      where: { role: 'admin', deletedAt: null, isActive: true },
+    });
+    if (admins <= 1) {
+      throw new BadRequestException(`Non puoi ${action} l'ultimo amministratore rimasto`);
+    }
+  }
+
   async updateUserRole(id: string, dto: UpdateUserRoleDto, adminId: string) {
     const user = await this.prisma.user.findUnique({ where: { id } });
     if (!user) throw new NotFoundException('Utente non trovato');
+    if (dto.role !== 'admin') {
+      await this.assertNotLastAdmin(id, adminId, 'declassare');
+    }
     const updated = await this.prisma.user.update({
       where: { id },
       data: { role: dto.role as any },
@@ -144,6 +252,7 @@ export class AdminService {
   async deleteUser(id: string, adminId: string) {
     const user = await this.prisma.user.findUnique({ where: { id } });
     if (!user) throw new NotFoundException('Utente non trovato');
+    await this.assertNotLastAdmin(id, adminId, 'cancellare');
     await this.prisma.user.delete({ where: { id } });
     await this.prisma.auditLog.create({
       data: {
@@ -347,8 +456,14 @@ export class AdminService {
       where.OR = [
         { user: { email: { contains: query.search, mode: 'insensitive' } } },
         { user: { fullName: { contains: query.search, mode: 'insensitive' } } },
-        { id: { contains: query.search, mode: 'insensitive' } },
       ];
+      // `Order.id` e' una colonna `uuid`: Postgres non sa fare ILIKE su quel tipo senza cast,
+      // quindi cercare un id parziale (cosa che un admin fa per istinto) faceva esplodere la
+      // query con un 500. Se la stringa e' un UUID intero la si cerca per uguaglianza, che e'
+      // l'unica ricerca per id che il DB puo' davvero fare.
+      if (isUuid(query.search)) {
+        where.OR.push({ id: query.search });
+      }
     }
 
     const [data, total] = await Promise.all([
@@ -582,10 +697,11 @@ export class AdminService {
     const where: any = {};
     if (query.status) where.status = query.status;
     if (query.search) {
-      where.OR = [
-        { orderId: { contains: query.search, mode: 'insensitive' } },
-        { user: { email: { contains: query.search, mode: 'insensitive' } } },
-      ];
+      where.OR = [{ user: { email: { contains: query.search, mode: 'insensitive' } } }];
+      // Stesso motivo di `getOrders`: `Return.orderId` e' `uuid`, niente ILIKE parziale.
+      if (isUuid(query.search)) {
+        where.OR.push({ orderId: query.search });
+      }
     }
 
     const [data, total] = await Promise.all([
@@ -655,6 +771,21 @@ export class AdminService {
 
   // ─── CSV Export ──────────────────────────────────────────────────────────────
 
+  /**
+   * Prepara un valore per una cella CSV.
+   *
+   * Oltre al raddoppio delle virgolette (che c'era gia'), mette un apice davanti alle celle
+   * che iniziano con `=`, `+`, `-` o `@`: Excel e Google Sheets trattano quelle celle come
+   * formule, e `fullName` e' un campo che l'utente sceglie in fase di registrazione. Con
+   * `fullName = "=1+1"` l'export diventa un foglio che esegue roba scritta da un estraneo
+   * (formula injection, linea guida OWASP).
+   */
+  private csvCell(value: unknown): string {
+    const raw = String(value ?? '');
+    const safe = /^[=+\-@\t\r]/.test(raw) ? `'${raw}` : raw;
+    return `"${safe.replace(/"/g, '""')}"`;
+  }
+
   async exportOrders(query: AdminExportOrdersQueryDto): Promise<string> {
     const where: any = {};
     if (query.status) where.status = query.status;
@@ -678,8 +809,8 @@ export class AdminService {
         o.id,
         o.createdAt.toISOString(),
         o.status,
-        `"${(o.user?.email ?? '').replace(/"/g, '""')}"`,
-        `"${(o.user?.fullName ?? '').replace(/"/g, '""')}"`,
+        this.csvCell(o.user?.email),
+        this.csvCell(o.user?.fullName),
         parseFloat(String(o.total)).toFixed(2),
       ].join(','),
     );
@@ -705,8 +836,8 @@ export class AdminService {
     const rows = users.map((u) =>
       [
         u.id,
-        `"${u.email.replace(/"/g, '""')}"`,
-        `"${u.fullName.replace(/"/g, '""')}"`,
+        this.csvCell(u.email),
+        this.csvCell(u.fullName),
         u.role,
         u.createdAt.toISOString(),
         u.emailVerifiedAt ? u.emailVerifiedAt.toISOString() : '',

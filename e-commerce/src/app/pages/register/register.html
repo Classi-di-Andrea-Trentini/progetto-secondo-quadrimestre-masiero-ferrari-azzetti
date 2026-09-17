@@ -1,64 +1,58 @@
-<div class="min-h-screen flex items-center justify-center px-4 py-16 bg-white">
+<div class="min-h-screen flex items-center justify-center px-4 py-16 bg-paper">
   <div class="w-full max-w-sm">
 
     <div class="mb-10 text-center">
-      <h1 class="text-2xl font-bold tracking-tight text-gray-900">Crea un account</h1>
-      <p class="mt-2 text-sm text-gray-500">
-        Hai già un account?
-        <a routerLink="/login" class="font-medium text-black underline underline-offset-2">
-          Accedi
-        </a>
+      <h1 class="display text-3xl">Create an account</h1>
+      <p class="mt-2 text-sm text-ink-muted">
+        Already have an account?
+        <a routerLink="/login" class="link">Sign in</a>
       </p>
     </div>
 
     @if (success()) {
-      <div class="px-4 py-4 bg-green-50 border border-green-200 text-sm text-green-700 rounded text-center">
-        Account creato. Verrai reindirizzato al login...
+      <div role="status" class="bg-success-wash text-success px-4 py-4 rounded-sm text-sm text-center">
+        Account created. You'll be redirected to sign in...
       </div>
     } @else {
 
       <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate class="space-y-5">
 
         <div>
-          <label for="fullName" class="block text-xs font-semibold uppercase tracking-widest text-gray-500 mb-1.5">
-            Nome completo
-          </label>
+          <label for="fullName" class="label">Full name</label>
           <input
             id="fullName"
             type="text"
             formControlName="fullName"
             autocomplete="name"
-            placeholder="Mario Rossi"
-            class="w-full border px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-black transition"
-            [ngClass]="fullName.invalid && fullName.touched ? 'border-red-400' : 'border-gray-300'"
+            placeholder="Jane Doe"
+            class="field"
+            [attr.aria-invalid]="fullName.invalid && fullName.touched ? 'true' : null"
+            [attr.aria-describedby]="fullName.invalid && fullName.touched ? 'fullName-error' : null"
           />
           @if (fullName.invalid && fullName.touched) {
-            <p class="mt-1 text-xs text-red-500">Inserisci il tuo nome completo (min. 2 caratteri)</p>
+            <p id="fullName-error" class="field-error">Enter your full name (min. 2 characters)</p>
           }
         </div>
 
         <div>
-          <label for="email" class="block text-xs font-semibold uppercase tracking-widest text-gray-500 mb-1.5">
-            Email
-          </label>
+          <label for="email" class="label">Email</label>
           <input
             id="email"
             type="email"
             formControlName="email"
             autocomplete="email"
-            placeholder="nome@esempio.it"
-            class="w-full border px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-black transition"
-            [ngClass]="email.invalid && email.touched ? 'border-red-400' : 'border-gray-300'"
+            placeholder="name@example.com"
+            class="field"
+            [attr.aria-invalid]="email.invalid && email.touched ? 'true' : null"
+            [attr.aria-describedby]="email.invalid && email.touched ? 'email-error' : null"
           />
           @if (email.invalid && email.touched) {
-            <p class="mt-1 text-xs text-red-500">Inserisci un indirizzo email valido</p>
+            <p id="email-error" class="field-error">Enter a valid email address</p>
           }
         </div>
 
         <div>
-          <label for="password" class="block text-xs font-semibold uppercase tracking-widest text-gray-500 mb-1.5">
-            Password
-          </label>
+          <label for="password" class="label">Password</label>
           <div class="relative">
             <input
               id="password"
@@ -66,34 +60,34 @@
               formControlName="password"
               autocomplete="new-password"
               placeholder="••••••••"
-              class="w-full border px-4 py-3 pr-20 text-sm focus:outline-none focus:ring-2 focus:ring-black transition"
-              [ngClass]="password.invalid && password.touched ? 'border-red-400' : 'border-gray-300'"
+              class="field pr-24"
+              [attr.aria-invalid]="password.invalid && password.touched ? 'true' : null"
+              [attr.aria-describedby]="password.invalid && password.touched ? 'password-error' : null"
             />
+            <!-- Il toggle vive dentro il campo: btn-ghost btn-sm, non un bottone ricostruito a mano. -->
             <button
               type="button"
-              class="absolute inset-y-0 right-0 px-3 text-xs font-semibold uppercase tracking-wider text-gray-600 hover:text-black"
+              class="btn btn-ghost btn-sm absolute inset-y-0 right-0"
               [attr.aria-pressed]="showPassword()"
-              [attr.aria-label]="showPassword() ? 'Nascondi password' : 'Mostra password'"
+              [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
               (click)="togglePasswordVisibility()"
             >
-              {{ showPassword() ? 'Nascondi' : 'Mostra' }}
+              {{ showPassword() ? 'Hide' : 'Show' }}
             </button>
           </div>
           @if (password.touched) {
             @if (password.hasError('required') || password.hasError('minlength')) {
-              <p class="mt-1 text-xs text-red-500">Minimo 8 caratteri</p>
+              <p id="password-error" class="field-error">At least 8 characters</p>
             } @else if (password.hasError('complexity')) {
-              <p class="mt-1 text-xs text-red-500">
-                Deve contenere almeno una maiuscola, una minuscola e un numero
+              <p id="password-error" class="field-error">
+                Must contain at least one uppercase letter, one lowercase letter and one number
               </p>
             }
           }
         </div>
 
         <div>
-          <label for="confirmPassword" class="block text-xs font-semibold uppercase tracking-widest text-gray-500 mb-1.5">
-            Conferma password
-          </label>
+          <label for="confirmPassword" class="label">Confirm password</label>
           <div class="relative">
             <input
               id="confirmPassword"
@@ -101,43 +95,49 @@
               formControlName="confirmPassword"
               autocomplete="new-password"
               placeholder="••••••••"
-              class="w-full border px-4 py-3 pr-20 text-sm focus:outline-none focus:ring-2 focus:ring-black transition"
-              [ngClass]="passwordMismatch ? 'border-red-400' : 'border-gray-300'"
+              class="field pr-24"
+              [attr.aria-invalid]="passwordMismatch ? 'true' : null"
+              [attr.aria-describedby]="passwordMismatch ? 'confirmPassword-error' : null"
             />
+            <!-- Il toggle vive dentro il campo: btn-ghost btn-sm, non un bottone ricostruito a mano. -->
             <button
               type="button"
-              class="absolute inset-y-0 right-0 px-3 text-xs font-semibold uppercase tracking-wider text-gray-600 hover:text-black"
+              class="btn btn-ghost btn-sm absolute inset-y-0 right-0"
               [attr.aria-pressed]="showConfirmPassword()"
-              [attr.aria-label]="showConfirmPassword() ? 'Nascondi conferma password' : 'Mostra conferma password'"
+              [attr.aria-label]="showConfirmPassword() ? 'Hide confirm password' : 'Show confirm password'"
               (click)="toggleConfirmPasswordVisibility()"
             >
-              {{ showConfirmPassword() ? 'Nascondi' : 'Mostra' }}
+              {{ showConfirmPassword() ? 'Hide' : 'Show' }}
             </button>
           </div>
           @if (passwordMismatch) {
-            <p class="mt-1 text-xs text-red-500">Le password non coincidono</p>
+            <p id="confirmPassword-error" class="field-error">Passwords do not match</p>
           }
         </div>
 
         @if (error()) {
-          <div class="px-4 py-3 bg-red-50 border border-red-200 text-sm text-red-700 rounded">
+          <div role="alert" class="bg-danger-wash text-danger px-4 py-3 rounded-sm text-sm">
             {{ error() }}
           </div>
         }
 
         <button
           type="submit"
-          [disabled]="loading()"
-          class="w-full bg-black text-white text-sm font-semibold uppercase tracking-widest py-3.5 hover:bg-gray-900 transition disabled:opacity-50 disabled:cursor-not-allowed"
+          class="btn btn-primary btn-lg btn-block"
+          [attr.data-loading]="loading() ? 'true' : null"
         >
-          @if (loading()) {
-            Registrazione in corso...
-          } @else {
-            Crea account
-          }
+          {{ loading() ? 'Creating account' : 'Create account' }}
         </button>
 
       </form>
+
+      <!--
+        Fuori dalla form: non e' un invio di questi campi. Su questa pagina il
+        bottone **registra**, non solo accede — e' lo stesso giro, ed e' il motivo
+        per cui la sua etichetta parla di accesso anche qui: se l'indirizzo Google
+        non e' mai stato visto, l'account nasce in quel momento.
+      -->
+      <app-google-sign-in />
 
     }
   </div>

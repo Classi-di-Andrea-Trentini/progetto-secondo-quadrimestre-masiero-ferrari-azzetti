@@ -16,7 +16,9 @@ describe('AppController', () => {
 
   describe('root', () => {
     it('should return "Hello World!"', () => {
-      expect(appController.getHello()).toBe('Hello World!');
+      // `AppService.getHello()` chiude con un a capo (comodo quando si prova con curl):
+      // lo spec non lo prevedeva ed era rosso da prima di questa sessione.
+      expect(appController.getHello()).toBe('Hello World!\n');
     });
   });
 });

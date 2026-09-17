@@ -8,11 +8,13 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { WishlistService } from '../../services/wishlist.service';
 import { SkeletonComponent } from '../../components/skeleton/skeleton';
 import { AuthService } from '../../services/auth';
+import { ProductImageComponent } from '../../components/product-image/product-image';
+import { formatPrice as formatPriceShared } from '../../services/format-price';
 
 @Component({
   selector: 'app-products',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, SkeletonComponent],
+  imports: [CommonModule, RouterModule, FormsModule, SkeletonComponent, ProductImageComponent],
   templateUrl: './products.html',
   styleUrl: './products.css',
 })
@@ -47,10 +49,10 @@ export class Products implements OnInit, OnDestroy {
 
   readonly sortOptions = [
     { value: 'newest',     label: 'Newest' },
-    { value: 'popular',    label: 'Best Sellers' },
-    { value: 'rating',     label: 'Top Rated' },
-    { value: 'price_asc',  label: 'Price: Low to High' },
-    { value: 'price_desc', label: 'Price: High to Low' },
+    { value: 'popular',    label: 'Best sellers' },
+    { value: 'rating',     label: 'Top rated' },
+    { value: 'price_asc',  label: 'Price: low to high' },
+    { value: 'price_desc', label: 'Price: high to low' },
   ];
 
   ngOnInit() {
@@ -60,6 +62,22 @@ export class Products implements OnInit, OnDestroy {
     // Read query params
     this.route.queryParams.subscribe(params => {
       if (params['category']) this.selectedCategory.set(params['category']);
+      // La barra di ricerca in cima al sito naviga qui con `?q=`, ma il termine non
+      // veniva letto: la pagina si apriva col catalogo intero come se non avessi
+      // cercato niente. E' l'altra meta' del difetto della ricerca — il backend
+      // ignorava il parametro, e il frontend non glielo mandava nemmeno.
+      const term = params['q'] ?? '';
+      if (term !== this.searchQuery()) {
+        this.searchQuery.set(term);
+        this.currentPage.set(1);
+      }
+      // `?sort=` arriva dai link del footer. Va validato contro le opzioni vere:
+      // un valore inventato nell'URL finirebbe dritto al backend.
+      const sort = params['sort'];
+      if (sort && this.sortOptions.some((o) => o.value === sort) && sort !== this.sortBy()) {
+        this.sortBy.set(sort);
+        this.currentPage.set(1);
+      }
       this.loadProducts();
     });
 
@@ -169,14 +187,10 @@ export class Products implements OnInit, OnDestroy {
     return null;
   }
 
-  discountLabel(p: ProductListItem): string | null {
-    const d = p.discounts[0];
-    if (!d) return null;
-    return d.label ?? (d.type === 'percentage' ? `-${d.value}%` : 'SALE');
-  }
-
+  // Formato inglese (€120.00), ora centralizzato in services/format-price.ts:
+  // era una delle nove copie duplicate della stessa funzione (task 3-bis).
   formatPrice(v: number | string) {
-    return '€ ' + parseFloat(String(v)).toFixed(2).replace('.', ',');
+    return formatPriceShared(v);
   }
 
   uniqueColors(p: ProductListItem) {

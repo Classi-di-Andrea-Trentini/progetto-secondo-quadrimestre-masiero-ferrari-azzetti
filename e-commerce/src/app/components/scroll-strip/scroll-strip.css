@@ -1,0 +1,64 @@
+/* La sezione e' alta quanto il viewport piu' la distanza da percorrere: e'
+   questo "sovraccarico" di altezza che le fa consumare scroll verticale
+   mentre la riga trasla in orizzontale (var(--travel) e' impostata da JS). */
+.scroll-strip {
+  height: calc(100vh + var(--travel, 0px));
+}
+.scroll-strip__sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+.scroll-strip__rail {
+  display: flex;
+  gap: 1.5rem;
+  will-change: transform;
+  padding-inline: clamp(1rem, 5vw, 6rem);
+}
+
+/* Sotto lg l'incollaggio non parte (vedi guardia matchMedia nel componente):
+   niente altezza extra, la riga diventa una fila con swipe nativo.
+   1023.98px, non 1023px: stessa soglia "sotto lg" di admin.css, nella forma
+   che non lascia un buco a larghezze frazionarie tra questa query e il
+   `min-width: 1024px` che le sta sopra. */
+@media (max-width: 1023.98px) {
+  .scroll-strip {
+    height: auto;
+  }
+  .scroll-strip__sticky {
+    position: static;
+    height: auto;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+  }
+  .scroll-strip__rail {
+    transform: none !important;
+    /* Niente transform animato in questo ramo: promuovere comunque un layer
+       di compositing con will-change sarebbe spreco puro. */
+    will-change: auto;
+  }
+  .scroll-strip__rail > * {
+    scroll-snap-align: start;
+  }
+}
+
+/* Motion ridotto: mai dirottare lo scroll verticale, a qualsiasi larghezza.
+   Via d'uscita obbligatoria, non opzionale: senza, chi ha il motion ridotto
+   resterebbe bloccato in una sezione alta quanto il viewport piu' il travel. */
+@media (prefers-reduced-motion: reduce) {
+  .scroll-strip {
+    height: auto;
+  }
+  .scroll-strip__sticky {
+    position: static;
+    height: auto;
+    overflow-x: auto;
+  }
+  .scroll-strip__rail {
+    transform: none !important;
+    will-change: auto;
+  }
+}

@@ -1,0 +1,159 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   DRAWER DEL CARRELLO
+
+   Queste regole stavano in `app.css`, cioe' nel foglio di stile **del
+   componente App**: con l'incapsulamento emulato di Angular quelle classi
+   ricevono l'attributo di App e non combaciano con niente dentro <app-cart>,
+   che ha il suo. Risultato: il drawer restava senza un solo stile e compariva
+   come un blocco grigio in cima a **ogni** pagina invece di scivolare da destra.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── CART DRAWER ──────────────────────────────────────────────────────────
+   Il drawer resta montato e scivola: montarlo/smontarlo perde l'animazione di
+   uscita. Prima esistevano due implementazioni in conflitto — queste classi e
+   un set di utility Tailwind nel template — e vinceva la seconda.
+   ─────────────────────────────────────────────────────────────────────────── */
+.cart-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background: oklch(0.205 0.009 285 / 0.4);
+  backdrop-filter: blur(2px);
+  z-index: var(--z-backdrop);
+  transition: opacity 240ms var(--ease-out-quart);
+}
+
+.cart-drawer-backdrop[data-open='false'] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.cart-drawer-backdrop[data-open='true'] {
+  opacity: 1;
+}
+
+.cart-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: min(27rem, 100vw);
+  height: 100dvh;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-drawer);
+  z-index: var(--z-drawer);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: transform 300ms var(--ease-out-expo);
+}
+
+.cart-drawer[data-open='false'] {
+  transform: translateX(100%);
+}
+
+.cart-drawer[data-open='true'] {
+  transform: translateX(0);
+}
+
+.cart-drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid var(--color-line);
+  padding: 1.125rem 1.25rem;
+  flex-shrink: 0;
+}
+
+.cart-drawer-title {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--color-ink);
+}
+
+.cart-drawer-count {
+  font-family: var(--font-sans);
+  font-size: var(--text-2xs);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--color-ink-muted);
+}
+
+.cart-drawer-close {
+  border: none;
+  background: transparent;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--color-ink-2);
+  padding: 0.375rem;
+  display: inline-flex;
+  border-radius: 2px;
+  transition:
+    color 160ms var(--ease-out-quart),
+    background-color 160ms var(--ease-out-quart);
+}
+
+.cart-drawer-close:hover {
+  color: var(--color-ink);
+  background: var(--color-sunken);
+}
+
+/* Il corpo scorre, header e footer restano fermi: prima scorreva tutto e con
+   pochi articoli il totale finiva sotto la piega. */
+.cart-drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.cart-drawer-footer {
+  flex-shrink: 0;
+  border-top: 1px solid var(--color-line);
+  padding: 1.125rem 1.25rem;
+  background: var(--color-surface);
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+/* ── Riga articolo ────────────────────────────────────────────────────────── */
+.cart-line {
+  display: flex;
+  gap: 0.875rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--color-line);
+}
+
+.cart-line:last-child {
+  border-bottom: none;
+}
+
+.cart-line-thumb {
+  width: 4.5rem;
+  height: 6rem;
+  flex-shrink: 0;
+  background: var(--color-sunken);
+  overflow: hidden;
+  border-radius: 2px;
+}
+
+.cart-line-thumb app-product-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* ── Stepper quantita' — stessa forma ovunque compaia nell'app. ───────────── */
+/* .qty / .qty-btn / .qty-value: vocabolario condiviso in styles.css. */
+
+@media (prefers-reduced-motion: reduce) {
+  .cart-drawer,
+  .cart-drawer-backdrop {
+    transition: none;
+  }
+}

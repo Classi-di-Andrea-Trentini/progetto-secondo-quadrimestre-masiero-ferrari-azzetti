@@ -13,17 +13,30 @@ TRUNCATE TABLE products RESTART IDENTITY CASCADE;
 
 
 -- ==================== UTENTI ====================
+-- Hash bcrypt reali, cost 12 (lo stesso usato da AuthService.BCRYPT_ROUNDS).
+-- Password in chiaro: SOLO dati di sviluppo, questo seed non va usato in produzione.
+--
+--   admin@ecommerce.it          Admin2026!
+--   marco.rossi@gmail.com       MarcoRossi01
+--   giulia.bianchi@gmail.com    GiuliaB2026
+--   luca.verdi@hotmail.com      LucaVerdi77
+--   francesca.neri@yahoo.it     Francesca09
+--   diego.romano@gmail.com      DiegoRomano5
+--   elena.colombo@gmail.com     ElenaColombo3
+--   andrea.ferrari@hotmail.com  AndreaF2026     (utente disattivato)
+--   sara.gallo@gmail.com        SaraGallo88
+--   carlo.rinaldi@yahoo.it      CarloRinaldi4
 INSERT INTO users (id, email, password_hash, full_name, role, is_active, phone, birth_date, gender, newsletter_opt_in, email_verified_at, created_at, updated_at) VALUES
-('11111111-1111-1111-1111-111111111111', 'admin@ecommerce.it', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcg7b3XeKeUxWdeS86E36gZvQm6', 'Admin User', 'admin', true, '3891234567', '1985-01-15', 'M', true, now(), now(), now()),
-('22222222-2222-2222-2222-222222222222', 'marco.rossi@gmail.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcg7b3XeKeUxWdeS86E36gZvQm6', 'Marco Rossi', 'user', true, '3891234568', '1990-05-20', 'M', true, now(), now(), now()),
-('33333333-3333-3333-3333-333333333333', 'giulia.bianchi@gmail.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcg7b3XeKeUxWdeS86E36gZvQm6', 'Giulia Bianchi', 'user', true, '3891234569', '1992-08-10', 'F', true, now(), now(), now()),
-('44444444-4444-4444-4444-444444444444', 'luca.verdi@hotmail.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcg7b3XeKeUxWdeS86E36gZvQm6', 'Luca Verdi', 'user', true, '3891234570', '1988-12-03', 'M', false, now(), now(), now()),
-('55555555-5555-5555-5555-555555555555', 'francesca.neri@yahoo.it', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcg7b3XeKeUxWdeS86E36gZvQm6', 'Francesca Neri', 'user', true, '3891234571', '1995-03-25', 'F', true, now(), now(), now()),
-('66666666-6666-6666-6666-666666666666', 'diego.romano@gmail.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcg7b3XeKeUxWdeS86E36gZvQm6', 'Diego Romano', 'user', true, '3891234572', '1987-07-14', 'M', true, now(), now(), now()),
-('77777777-7777-7777-7777-777777777777', 'elena.colombo@gmail.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcg7b3XeKeUxWdeS86E36gZvQm6', 'Elena Colombo', 'user', true, '3891234573', '1993-11-08', 'F', true, now(), now(), now()),
-('88888888-8888-8888-8888-888888888888', 'andrea.ferrari@hotmail.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcg7b3XeKeUxWdeS86E36gZvQm6', 'Andrea Ferrari', 'user', false, '3891234574', '1991-02-19', 'M', false, now(), now(), now()),
-('99999999-9999-9999-9999-999999999999', 'sara.gallo@gmail.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcg7b3XeKeUxWdeS86E36gZvQm6', 'Sara Gallo', 'user', true, '3891234575', '1994-09-30', 'F', true, now(), now(), now()),
-('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'carlo.rinaldi@yahoo.it', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcg7b3XeKeUxWdeS86E36gZvQm6', 'Carlo Rinaldi', 'user', true, '3891234576', '1989-06-12', 'M', true, now(), now(), now());
+('11111111-1111-1111-1111-111111111111', 'admin@ecommerce.it', '$2b$12$aNiZf./tL7TmpQlWIt5P7.nLUEVffJExwdS33XAqHP.hICQIiY.QC', 'Admin User', 'admin', true, '3891234567', '1985-01-15', 'M', true, now(), now(), now()),
+('22222222-2222-2222-2222-222222222222', 'marco.rossi@gmail.com', '$2b$12$8vn4D7ePp.NzYiG0kY730u2JwYxE3I.KobSbweDxcDAN9UeqU/.S2', 'Marco Rossi', 'user', true, '3891234568', '1990-05-20', 'M', true, now(), now(), now()),
+('33333333-3333-3333-3333-333333333333', 'giulia.bianchi@gmail.com', '$2b$12$g2y97MkEaSDWUms2fkGypuCk8ptRoefxKn8N6yEuJdrPQoWvk5Hpi', 'Giulia Bianchi', 'user', true, '3891234569', '1992-08-10', 'F', true, now(), now(), now()),
+('44444444-4444-4444-4444-444444444444', 'luca.verdi@hotmail.com', '$2b$12$fF.u.e1jwQP3EZKHEjP1xO.NxSHpXKW43XhFuJSmI5nkphPkTwmN.', 'Luca Verdi', 'user', true, '3891234570', '1988-12-03', 'M', false, now(), now(), now()),
+('55555555-5555-5555-5555-555555555555', 'francesca.neri@yahoo.it', '$2b$12$I7WhYrTUbW.oThMenBXrsucqP10cbz.1Xu1zYltv9aUmRbbMignaS', 'Francesca Neri', 'user', true, '3891234571', '1995-03-25', 'F', true, now(), now(), now()),
+('66666666-6666-6666-6666-666666666666', 'diego.romano@gmail.com', '$2b$12$R6kxjUo84jsVq6BQDTrLOeH0aoqnIKwtVc0rT/DrxnYLt5K12wwu2', 'Diego Romano', 'user', true, '3891234572', '1987-07-14', 'M', true, now(), now(), now()),
+('77777777-7777-7777-7777-777777777777', 'elena.colombo@gmail.com', '$2b$12$D2JXrhiXJlouhIcwyRNIbupITG.O7YqOK61SV1SHveYEdaiWZWvYi', 'Elena Colombo', 'user', true, '3891234573', '1993-11-08', 'F', true, now(), now(), now()),
+('88888888-8888-8888-8888-888888888888', 'andrea.ferrari@hotmail.com', '$2b$12$B74TPcMalRlO2aYtxa6VjefAgqDANlW4C..S2xsRgwp8uwUnAGy6O', 'Andrea Ferrari', 'user', false, '3891234574', '1991-02-19', 'M', false, now(), now(), now()),
+('99999999-9999-9999-9999-999999999999', 'sara.gallo@gmail.com', '$2b$12$9gT/KPi7UJr4A36TG5OyweIlmVAt8AzuKyKPRQeWCPIddjHgY0Twa', 'Sara Gallo', 'user', true, '3891234575', '1994-09-30', 'F', true, now(), now(), now()),
+('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'carlo.rinaldi@yahoo.it', '$2b$12$ghgZ5lT97c2LtuSnWWTr6utdz5EV83poL9bvSHO90MBgF6HuNfMVG', 'Carlo Rinaldi', 'user', true, '3891234576', '1989-06-12', 'M', true, now(), now(), now());
 
 -- ==================== INDIRIZZI UTENTI ====================
 INSERT INTO user_addresses (id, user_id, label, full_name, phone, street, city, postal_code, country, is_default, created_at) VALUES
@@ -38,16 +51,16 @@ INSERT INTO user_addresses (id, user_id, label, full_name, phone, street, city, 
 
 -- ==================== CATEGORIE ====================
 INSERT INTO categories (id, parent_id, name, slug, description, image_url, is_active, sort_order, created_at) VALUES
-('b0000001-bbbb-bbbb-bbbb-bbbbbbbbbbbb', NULL, 'Clothing', 'clothing', 'Tutti i capi di abbigliamento per uomo, donna e bambino', 'https://via.placeholder.com/300x200?text=Abbigliamento', true, 1, now()),
-('b0000002-bbbb-bbbb-bbbb-bbbbbbbbbbbb', NULL, 'Shoes', 'shoes', 'Scarpe e stivali per tutte le occasioni', 'https://via.placeholder.com/300x200?text=Scarpe', true, 2, now()),
-('b0000003-bbbb-bbbb-bbbb-bbbbbbbbbbbb', NULL, 'Accessories', 'accessories', 'Accessori moda e complementi di stile', 'https://via.placeholder.com/300x200?text=Accessori', true, 3, now()),
-('b0000004-bbbb-bbbb-bbbb-bbbbbbbbbbbb', NULL, 'Bags', 'bags', 'Borse e zaini di qualità', 'https://via.placeholder.com/300x200?text=Borse', true, 4, now()),
-('b0000005-bbbb-bbbb-bbbb-bbbbbbbbbbbb', NULL, 'Gioielli', 'gioielli', 'Gioielli eleganti e contemporanei', 'https://via.placeholder.com/300x200?text=Gioielli', true, 5, now()),
-('b1000001-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'b0000001-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'T-Shirts', 't-shirts', 'T-shirt e magliette', 'https://via.placeholder.com/300x200?text=T-Shirt', true, 1, now()),
-('b1000002-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'b0000001-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Jeans', 'jeans', 'Jeans di vari modelli e colori', 'https://via.placeholder.com/300x200?text=Jeans', true, 2, now()),
-('b1000003-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'b0000001-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Jackets', 'jackets', 'Giacche e capispalla', 'https://via.placeholder.com/300x200?text=Giacche', true, 3, now()),
-('b2000001-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'b0000002-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Sneakers', 'sneakers', 'Scarpe sportive e casual', 'https://via.placeholder.com/300x200?text=Sneakers', true, 1, now()),
-('b2000002-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'b0000002-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Tacchi', 'tacchi', 'Scarpe con tacco', 'https://via.placeholder.com/300x200?text=Tacchi', true, 2, now());
+('b0000001-bbbb-bbbb-bbbb-bbbbbbbbbbbb', NULL, 'Abbigliamento', 'abbigliamento', 'Tutti i capi di abbigliamento per uomo, donna e bambino', '/media/catalogo/categorie/abbigliamento.svg', true, 1, now()),
+('b0000002-bbbb-bbbb-bbbb-bbbbbbbbbbbb', NULL, 'Scarpe', 'scarpe', 'Scarpe e stivali per tutte le occasioni', '/media/catalogo/categorie/scarpe.svg', true, 2, now()),
+('b0000003-bbbb-bbbb-bbbb-bbbbbbbbbbbb', NULL, 'Accessori', 'accessori', 'Accessori moda e complementi di stile', '/media/catalogo/categorie/accessori.svg', true, 3, now()),
+('b0000004-bbbb-bbbb-bbbb-bbbbbbbbbbbb', NULL, 'Borse', 'borse', 'Borse e zaini di qualità', '/media/catalogo/categorie/borse.svg', true, 4, now()),
+('b0000005-bbbb-bbbb-bbbb-bbbbbbbbbbbb', NULL, 'Gioielli', 'gioielli', 'Gioielli eleganti e contemporanei', '/media/catalogo/categorie/gioielli.svg', true, 5, now()),
+('b1000001-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'b0000001-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'T-Shirt', 't-shirt', 'T-shirt e magliette', '/media/catalogo/categorie/t-shirt.svg', true, 1, now()),
+('b1000002-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'b0000001-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Jeans', 'jeans', 'Jeans di vari modelli e lavaggi', '/media/catalogo/categorie/jeans.svg', true, 2, now()),
+('b1000003-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'b0000001-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Giacche', 'giacche', 'Giacche e capispalla', '/media/catalogo/categorie/giacche.svg', true, 3, now()),
+('b2000001-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'b0000002-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Sneakers', 'sneakers', 'Scarpe sportive e casual', '/media/catalogo/categorie/sneakers.svg', true, 1, now()),
+('b2000002-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'b0000002-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Tacchi', 'tacchi', 'Scarpe con tacco', '/media/catalogo/categorie/tacchi.svg', true, 2, now());
 
 -- ==================== TAG ====================
 INSERT INTO tags (id, name, slug) VALUES
@@ -62,28 +75,28 @@ INSERT INTO tags (id, name, slug) VALUES
 INSERT INTO products (id, category_id, name, slug, description, short_desc, brand, base_price, is_active, is_featured, is_new_arrival, sold_count, avg_rating, created_at, updated_at) VALUES
 ('d0000001-dddd-dddd-dddd-dddddddddddd', 'b1000001-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'T-Shirt Bianca Basic', 't-shirt-bianca-basic', 'Comoda t-shirt in cotone 100% puro, perfetta per l''uso quotidiano', 'T-shirt bianca classica', 'BasicWear', 19.99, true, true, true, 150, 4.50, now(), now()),
 ('d0000002-dddd-dddd-dddd-dddddddddddd', 'b1000001-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'T-Shirt Nera Premium', 't-shirt-nera-premium', 'T-shirt in cotone organico certificato, design minimale e elegante', 'T-shirt nera premium', 'EcoStyle', 34.99, true, true, false, 89, 4.80, now(), now()),
-('d0000003-dddd-dddd-dddd-dddddddddddd', 'b1000001-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'T-Shirt Colorata Stampata', 't-shirt-colorata-stampata', 'T-shirt con stampa artistica, disponibile in più colori vivaci', 'T-shirt stampata colorata', 'ArtisticWear', 24.99, true, false, true, 120, 4.30, now(), now()),
-('d0000004-dddd-dddd-dddd-dddddddddddd', 'b1000002-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Jeans Blu Classico', 'jeans-blu-classico', 'Jeans classico in denim di qualità, perfetto per ogni occasione', 'Jeans blu classico slim fit', 'DenimCo', 59.99, true, true, false, 250, 4.70, now(), now()),
+('d0000003-dddd-dddd-dddd-dddddddddddd', 'b1000001-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'T-Shirt Stampata', 't-shirt-stampata', 'T-shirt con stampa artistica applicata a mano, disponibile in più varianti colore', 'T-shirt con stampa artistica', 'ArtisticWear', 24.99, true, false, true, 120, 4.30, now(), now()),
+('d0000004-dddd-dddd-dddd-dddddddddddd', 'b1000002-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Jeans Blu Classico', 'jeans-blu-classico', 'Jeans classico in denim di qualità, perfetto per ogni occasione', 'Jeans blu classico, vestibilità slim', 'DenimCo', 59.99, true, true, false, 250, 4.70, now(), now()),
 ('d0000005-dddd-dddd-dddd-dddddddddddd', 'b1000002-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Jeans Nero Stretch', 'jeans-nero-stretch', 'Jeans nero con elastan per massima comodità e libertà di movimento', 'Jeans nero stretch comfort', 'StretchDenim', 64.99, true, true, true, 180, 4.60, now(), now()),
-('d0000006-dddd-dddd-dddd-dddddddddddd', 'b1000002-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Jeans Sbiadito Vintage', 'jeans-sbiadito-vintage', 'Jeans con effetto vintage sbiadito, stile retrò moderno', 'Jeans sbiadito vintage style', 'VintageDenim', 69.99, true, false, true, 95, 4.40, now(), now()),
+('d0000006-dddd-dddd-dddd-dddddddddddd', 'b1000002-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Jeans Sbiadito Vintage', 'jeans-sbiadito-vintage', 'Jeans con effetto vintage sbiadito, stile retrò moderno', 'Jeans sbiadito effetto vintage', 'VintageDenim', 69.99, true, false, true, 95, 4.40, now(), now()),
 ('d0000007-dddd-dddd-dddd-dddddddddddd', 'b1000003-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Giacca Jeans Blu', 'giacca-jeans-blu', 'Giacca in jeans classica, perfetta da indossare su qualsiasi outfit', 'Giacca di jeans blu', 'DenimJackets', 89.99, true, true, false, 120, 4.65, now(), now()),
 ('d0000008-dddd-dddd-dddd-dddddddddddd', 'b1000003-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Parka Invernale', 'parka-invernale', 'Parka caldo e resistente per l''inverno, con cappuccio staccabile', 'Parka invernale con cappuccio', 'WinterWear', 149.99, true, true, true, 85, 4.75, now(), now()),
 ('d0000009-dddd-dddd-dddd-dddddddddddd', 'b1000003-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Giacca Pelle Nera', 'giacca-pelle-nera', 'Giacca in vera pelle premium, look rock e sofisticato', 'Giacca in vera pelle nera', 'LeatherPremium', 199.99, true, false, false, 45, 4.80, now(), now()),
 ('d0000010-dddd-dddd-dddd-dddddddddddd', 'b2000001-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Sneakers Bianche Casual', 'sneakers-bianche-casual', 'Comode sneakers bianche perfette per l''uso quotidiano e sportivo', 'Sneakers bianche casual', 'SportStyle', 79.99, true, true, true, 320, 4.70, now(), now()),
-('d0000011-dddd-dddd-dddd-dddddddddddd', 'b2000001-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Sneakers Nere High-Top', 'sneakers-nere-high-top', 'Sneakers nere alte con supporto caviglia, design moderno', 'Sneakers nere high-top', 'StreetWear', 94.99, true, true, false, 210, 4.55, now(), now()),
-('d0000012-dddd-dddd-dddd-dddddddddddd', 'b2000001-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Scarpe Running Pro', 'scarpe-running-pro', 'Scarpe running professionali con tecnologia ammortizzamento avanzato', 'Scarpe running ammortizzate', 'RunningPro', 129.99, true, false, true, 150, 4.85, now(), now()),
+('d0000011-dddd-dddd-dddd-dddddddddddd', 'b2000001-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Sneakers Nere Alte', 'sneakers-nere-alte', 'Sneakers nere alte con supporto alla caviglia, design moderno', 'Sneakers nere alte', 'StreetWear', 94.99, true, true, false, 210, 4.55, now(), now()),
+('d0000012-dddd-dddd-dddd-dddddddddddd', 'b2000001-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Scarpe da Running Pro', 'scarpe-da-running-pro', 'Scarpe da running professionali con tecnologia di ammortizzamento avanzata', 'Scarpe da running ammortizzate', 'RunningPro', 129.99, true, false, true, 150, 4.85, now(), now()),
 ('d0000013-dddd-dddd-dddd-dddddddddddd', 'b2000002-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Tacchi Neri Classici', 'tacchi-neri-classici', 'Eleganti tacchi neri, perfetti per cene e occasioni speciali', 'Tacchi neri classici', 'ElegantShoes', 99.99, true, true, false, 180, 4.60, now(), now()),
-('d0000014-dddd-dddd-dddd-dddddddddddd', 'b2000002-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Scarpe Plateau Oro', 'scarpe-plateau-oro', 'Scarpe plateau dorate con effetto metallico, ideali per party', 'Scarpe plateau oro', 'PartyShoes', 109.99, true, true, true, 95, 4.50, now(), now()),
-('d0000015-dddd-dddd-dddd-dddddddddddd', 'b2000002-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Stivaletti Rossi', 'stivaletti-rossi', 'Stivaletti rossi in suede, eleganti e sofisticati', 'Stivaletti rossi suede', 'BootsStyle', 129.99, true, false, true, 75, 4.70, now(), now()),
+('d0000014-dddd-dddd-dddd-dddddddddddd', 'b2000002-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Scarpe Plateau Oro', 'scarpe-plateau-oro', 'Scarpe con plateau e tacco a blocco, finitura dorata, ideali per le occasioni di sera', 'Scarpe plateau oro', 'PartyShoes', 109.99, true, true, true, 95, 4.50, now(), now()),
+('d0000015-dddd-dddd-dddd-dddddddddddd', 'b2000002-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Stivaletti Rossi', 'stivaletti-rossi', 'Stivaletti rossi in suede, eleganti e sofisticati', 'Stivaletti rossi in suede', 'BootsStyle', 129.99, true, false, true, 75, 4.70, now(), now()),
 ('d0000016-dddd-dddd-dddd-dddddddddddd', 'b0000003-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Cintura Pelle Nera', 'cintura-pelle-nera', 'Cintura in vera pelle nera, fibbia classica, taglia regolabile', 'Cintura in vera pelle nera', 'LeatherGoods', 44.99, true, true, false, 220, 4.75, now(), now()),
 ('d0000017-dddd-dddd-dddd-dddddddddddd', 'b0000003-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Sciarpa Cashmere', 'sciarpa-cashmere', 'Morbida sciarpa in cashmere 100%, colori assortiti disponibili', 'Sciarpa in cashmere puro', 'CashmereWear', 74.99, true, true, true, 140, 4.90, now(), now()),
 ('d0000018-dddd-dddd-dddd-dddddddddddd', 'b0000003-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Berretto Lana Grigio', 'berretto-lana-grigio', 'Caldo berretto in lana merino, perfetto per l''inverno', 'Berretto in lana grigio', 'WoolWear', 39.99, true, false, true, 110, 4.55, now(), now()),
-('d0000019-dddd-dddd-dddd-dddddddddddd', 'b0000004-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Borsa Tote Nera', 'borsa-tote-nera', 'Ampia borsa tote in pelle, perfetta per il lavoro e lo shopping', 'Borsa tote nera pelle', 'BagStyle', 129.99, true, true, false, 165, 4.80, now(), now()),
-('d0000020-dddd-dddd-dddd-dddddddddddd', 'b0000004-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Zaino Viaggio', 'zaino-viaggio', 'Zaino capiente per viaggi, con scomparto laptop e USB', 'Zaino viaggio con USB', 'TravelGear', 89.99, true, true, true, 190, 4.70, now(), now()),
-('d0000021-dddd-dddd-dddd-dddddddddddd', 'b0000004-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Clutch Elegante Rosso', 'clutch-elegante-rosso', 'Piccola e elegante clutch rossa, ideale per occasioni speciali', 'Clutch rosso elegante', 'FormalWear', 84.99, true, true, true, 105, 4.65, now(), now()),
-('d0000022-dddd-dddd-dddd-dddddddddddd', 'b0000005-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Collana Oro Delicata', 'collana-oro-delicata', 'Delicata collana in oro 18kt, design minimalista e elegante', 'Collana oro 18kt', 'JewelryPure', 249.99, true, true, false, 80, 4.85, now(), now()),
-('d0000023-dddd-dddd-dddd-dddddddddddd', 'b0000005-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Anello Con Diamante', 'anello-con-diamante', 'Bellissimo anello con diamante naturale, certificato GIA', 'Anello diamante certificato', 'DiamondLux', 599.99, true, true, true, 35, 4.95, now(), now()),
-('d0000024-dddd-dddd-dddd-dddddddddddd', 'b0000005-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Orecchini Perle Bianche', 'orecchini-perle-bianche', 'Classici orecchini con perle bianche naturali in argento', 'Orecchini perle argento', 'PearlJewels', 159.99, true, false, true, 60, 4.75, now(), now());
+('d0000019-dddd-dddd-dddd-dddddddddddd', 'b0000004-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Borsa Tote Nera', 'borsa-tote-nera', 'Ampia borsa tote in pelle, perfetta per il lavoro e per lo shopping', 'Borsa tote nera in pelle', 'BagStyle', 129.99, true, true, false, 165, 4.80, now(), now()),
+('d0000020-dddd-dddd-dddd-dddddddddddd', 'b0000004-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Zaino da Viaggio', 'zaino-da-viaggio', 'Zaino capiente da viaggio, con scomparto per il laptop e presa USB', 'Zaino da viaggio con presa USB', 'TravelGear', 89.99, true, true, true, 190, 4.70, now(), now()),
+('d0000021-dddd-dddd-dddd-dddddddddddd', 'b0000004-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Pochette Elegante Rossa', 'pochette-elegante-rossa', 'Pochette rossa piccola ed elegante, ideale per le occasioni speciali', 'Pochette rossa elegante', 'FormalWear', 84.99, true, true, true, 105, 4.65, now(), now()),
+('d0000022-dddd-dddd-dddd-dddddddddddd', 'b0000005-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Collana Oro Delicata', 'collana-oro-delicata', 'Delicata collana in oro 18 kt, design minimalista ed elegante', 'Collana in oro 18 kt', 'JewelryPure', 249.99, true, true, false, 80, 4.85, now(), now()),
+('d0000023-dddd-dddd-dddd-dddddddddddd', 'b0000005-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Anello con Diamante', 'anello-con-diamante', 'Anello solitario con diamante naturale, certificato GIA', 'Anello con diamante certificato', 'DiamondLux', 599.99, true, true, true, 35, 4.95, now(), now()),
+('d0000024-dddd-dddd-dddd-dddddddddddd', 'b0000005-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Orecchini Perle Bianche', 'orecchini-perle-bianche', 'Classici orecchini pendenti con perle bianche naturali su montatura in argento', 'Orecchini con perle in argento', 'PearlJewels', 159.99, true, false, true, 60, 4.75, now(), now());
 
 -- ==================== PRODUCT TAGS ====================
 INSERT INTO product_tags (product_id, tag_id) VALUES
@@ -124,39 +137,56 @@ INSERT INTO product_variants (id, product_id, sku, size, color, color_hex, price
 ('e0000002-eeee-eeee-eeee-eeeeeeeeeeee', 'd0000001-dddd-dddd-dddd-dddddddddddd', 'TS-BAS-001-M', 'M', 'Bianco', '#FFFFFF', NULL, 75, true, now()),
 ('e0000003-eeee-eeee-eeee-eeeeeeeeeeee', 'd0000001-dddd-dddd-dddd-dddddddddddd', 'TS-BAS-001-L', 'L', 'Bianco', '#FFFFFF', NULL, 60, true, now()),
 ('e0000004-eeee-eeee-eeee-eeeeeeeeeeee', 'd0000001-dddd-dddd-dddd-dddddddddddd', 'TS-BAS-001-XL', 'XL', 'Bianco', '#FFFFFF', NULL, 40, true, now()),
-('e0000005-eeee-eeee-eeee-eeeeeeeeeeee', 'd0000002-dddd-dddd-dddd-dddddddddddd', 'TS-PRE-002-S', 'S', 'Nero', '#000000', NULL, 35, true, now()),
-('e0000006-eeee-eeee-eeee-eeeeeeeeeeee', 'd0000002-dddd-dddd-dddd-dddddddddddd', 'TS-PRE-002-M', 'M', 'Nero', '#000000', NULL, 50, true, now()),
-('e0000007-eeee-eeee-eeee-eeeeeeeeeeee', 'd0000002-dddd-dddd-dddd-dddddddddddd', 'TS-PRE-002-L', 'L', 'Nero', '#000000', NULL, 45, true, now()),
-('e0000008-eeee-eeee-eeee-eeeeeeeeeeee', 'd0000003-dddd-dddd-dddd-dddddddddddd', 'TS-ART-003-M', 'M', 'Rosso', '#FF0000', NULL, 30, true, now()),
-('e0000009-eeee-eeee-eeee-eeeeeeeeeeee', 'd0000003-dddd-dddd-dddd-dddddddddddd', 'TS-ART-003-M-BLU', 'M', 'Blu', '#0000FF', NULL, 40, true, now()),
-('e0000010-eeee-eeee-eeee-eeeeeeeeeeee', 'd0000004-dddd-dddd-dddd-dddddddddddd', 'JN-BLU-004-30', '30', 'Blu', '#0052CC', NULL, 45, true, now()),
-('e0000011-eeee-eeee-eeee-eeeeeeeeeeee', 'd0000004-dddd-dddd-dddd-dddddddddddd', 'JN-BLU-004-32', '32', 'Blu', '#0052CC', NULL, 50, true, now()),
-('e0000012-eeee-eeee-eeee-eeeeeeeeeeee', 'd0000004-dddd-dddd-dddd-dddddddddddd', 'JN-BLU-004-34', '34', 'Blu', '#0052CC', NULL, 55, true, now()),
-('e0000013-eeee-eeee-eeee-eeeeeeeeeeee', 'd0000005-dddd-dddd-dddd-dddddddddddd', 'JN-NEL-005-28', '28', 'Nero', '#000000', NULL, 40, true, now()),
-('e0000014-eeee-eeee-eeee-eeeeeeeeeeee', 'd0000005-dddd-dddd-dddd-dddddddddddd', 'JN-NEL-005-30', '30', 'Nero', '#000000', NULL, 50, true, now()),
-('e0000015-eeee-eeee-eeee-eeeeeeeeeeee', 'd0000005-dddd-dddd-dddd-dddddddddddd', 'JN-NEL-005-32', '32', 'Nero', '#000000', NULL, 48, true, now()),
+('e0000005-eeee-eeee-eeee-eeeeeeeeeeee', 'd0000002-dddd-dddd-dddd-dddddddddddd', 'TS-PRE-002-S', 'S', 'Nero', '#17171B', NULL, 35, true, now()),
+('e0000006-eeee-eeee-eeee-eeeeeeeeeeee', 'd0000002-dddd-dddd-dddd-dddddddddddd', 'TS-PRE-002-M', 'M', 'Nero', '#17171B', NULL, 50, true, now()),
+('e0000007-eeee-eeee-eeee-eeeeeeeeeeee', 'd0000002-dddd-dddd-dddd-dddddddddddd', 'TS-PRE-002-L', 'L', 'Nero', '#17171B', NULL, 45, true, now()),
+('e0000008-eeee-eeee-eeee-eeeeeeeeeeee', 'd0000003-dddd-dddd-dddd-dddddddddddd', 'TS-ART-003-M', 'M', 'Rosso', '#A73C2A', NULL, 30, true, now()),
+('e0000009-eeee-eeee-eeee-eeeeeeeeeeee', 'd0000003-dddd-dddd-dddd-dddddddddddd', 'TS-ART-003-M-BLU', 'M', 'Blu', '#335784', NULL, 40, true, now()),
+('e0000010-eeee-eeee-eeee-eeeeeeeeeeee', 'd0000004-dddd-dddd-dddd-dddddddddddd', 'JN-BLU-004-30', '30', 'Blu', '#335784', NULL, 45, true, now()),
+('e0000011-eeee-eeee-eeee-eeeeeeeeeeee', 'd0000004-dddd-dddd-dddd-dddddddddddd', 'JN-BLU-004-32', '32', 'Blu', '#335784', NULL, 50, true, now()),
+('e0000012-eeee-eeee-eeee-eeeeeeeeeeee', 'd0000004-dddd-dddd-dddd-dddddddddddd', 'JN-BLU-004-34', '34', 'Blu', '#335784', NULL, 55, true, now()),
+('e0000013-eeee-eeee-eeee-eeeeeeeeeeee', 'd0000005-dddd-dddd-dddd-dddddddddddd', 'JN-NEL-005-28', '28', 'Nero', '#17171B', NULL, 40, true, now()),
+('e0000014-eeee-eeee-eeee-eeeeeeeeeeee', 'd0000005-dddd-dddd-dddd-dddddddddddd', 'JN-NEL-005-30', '30', 'Nero', '#17171B', NULL, 50, true, now()),
+('e0000015-eeee-eeee-eeee-eeeeeeeeeeee', 'd0000005-dddd-dddd-dddd-dddddddddddd', 'JN-NEL-005-32', '32', 'Nero', '#17171B', NULL, 48, true, now()),
 ('e0000016-eeee-eeee-eeee-eeeeeeeeeeee', 'd0000010-dddd-dddd-dddd-dddddddddddd', 'SN-BIA-010-39', '39', 'Bianco', '#FFFFFF', NULL, 35, true, now()),
 ('e0000017-eeee-eeee-eeee-eeeeeeeeeeee', 'd0000010-dddd-dddd-dddd-dddddddddddd', 'SN-BIA-010-40', '40', 'Bianco', '#FFFFFF', NULL, 50, true, now()),
 ('e0000018-eeee-eeee-eeee-eeeeeeeeeeee', 'd0000010-dddd-dddd-dddd-dddddddddddd', 'SN-BIA-010-41', '41', 'Bianco', '#FFFFFF', NULL, 45, true, now()),
 ('e0000019-eeee-eeee-eeee-eeeeeeeeeeee', 'd0000010-dddd-dddd-dddd-dddddddddddd', 'SN-BIA-010-42', '42', 'Bianco', '#FFFFFF', NULL, 40, true, now()),
-('e0000020-eeee-eeee-eeee-eeeeeeeeeeee', 'd0000022-dddd-dddd-dddd-dddddddddddd', 'JW-COL-022-45CM', 'Unica', 'Oro', '#FFD700', NULL, 25, true, now()),
-('e0000021-eeee-eeee-eeee-eeeeeeeeeeee', 'd0000023-dddd-dddd-dddd-dddddddddddd', 'JW-ANE-023-50', '50', 'Oro', '#FFD700', NULL, 10, true, now()),
-('e0000022-eeee-eeee-eeee-eeeeeeeeeeee', 'd0000023-dddd-dddd-dddd-dddddddddddd', 'JW-ANE-023-52', '52', 'Oro', '#FFD700', NULL, 12, true, now()),
-('e0000023-eeee-eeee-eeee-eeeeeeeeeeee', 'd0000013-dddd-dddd-dddd-dddddddddddd', 'SH-TAC-013-36', '36', 'Nero', '#000000', NULL, 20, true, now()),
-('e0000024-eeee-eeee-eeee-eeeeeeeeeeee', 'd0000013-dddd-dddd-dddd-dddddddddddd', 'SH-TAC-013-37', '37', 'Nero', '#000000', NULL, 25, true, now()),
-('e0000025-eeee-eeee-eeee-eeeeeeeeeeee', 'd0000013-dddd-dddd-dddd-dddddddddddd', 'SH-TAC-013-38', '38', 'Nero', '#000000', NULL, 30, true, now());
+('e0000020-eeee-eeee-eeee-eeeeeeeeeeee', 'd0000022-dddd-dddd-dddd-dddddddddddd', 'JW-COL-022-45CM', 'Unica', 'Oro', '#C6AC94', NULL, 25, true, now()),
+('e0000021-eeee-eeee-eeee-eeeeeeeeeeee', 'd0000023-dddd-dddd-dddd-dddddddddddd', 'JW-ANE-023-50', '50', 'Oro', '#C6AC94', NULL, 10, true, now()),
+('e0000022-eeee-eeee-eeee-eeeeeeeeeeee', 'd0000023-dddd-dddd-dddd-dddddddddddd', 'JW-ANE-023-52', '52', 'Oro', '#C6AC94', NULL, 12, true, now()),
+('e0000023-eeee-eeee-eeee-eeeeeeeeeeee', 'd0000013-dddd-dddd-dddd-dddddddddddd', 'SH-TAC-013-36', '36', 'Nero', '#17171B', NULL, 20, true, now()),
+('e0000024-eeee-eeee-eeee-eeeeeeeeeeee', 'd0000013-dddd-dddd-dddd-dddddddddddd', 'SH-TAC-013-37', '37', 'Nero', '#17171B', NULL, 25, true, now()),
+('e0000025-eeee-eeee-eeee-eeeeeeeeeeee', 'd0000013-dddd-dddd-dddd-dddddddddddd', 'SH-TAC-013-38', '38', 'Nero', '#17171B', NULL, 30, true, now());
 
 -- ==================== PRODUCT IMAGES ====================
+-- Illustrazioni SVG servite dal frontend (e-commerce/public/media/catalogo/prodotti).
+-- Percorsi relativi: restano validi a prescindere dall'host su cui gira l'app.
 INSERT INTO product_images (id, product_id, variant_id, url, alt_text, sort_order, is_cover, created_at) VALUES
-('f0000001-ffff-ffff-ffff-ffffffffffff', 'd0000001-dddd-dddd-dddd-dddddddddddd', NULL, 'https://via.placeholder.com/500x500?text=T-Shirt+Bianca+1', 'T-Shirt Bianca Basic vista frontale', 1, true, now()),
-('f0000002-ffff-ffff-ffff-ffffffffffff', 'd0000001-dddd-dddd-dddd-dddddddddddd', NULL, 'https://via.placeholder.com/500x500?text=T-Shirt+Bianca+2', 'T-Shirt Bianca Basic vista laterale', 2, false, now()),
-('f0000003-ffff-ffff-ffff-ffffffffffff', 'd0000002-dddd-dddd-dddd-dddddddddddd', NULL, 'https://via.placeholder.com/500x500?text=T-Shirt+Nera+1', 'T-Shirt Nera Premium vista frontale', 1, true, now()),
-('f0000004-ffff-ffff-ffff-ffffffffffff', 'd0000004-dddd-dddd-dddd-dddddddddddd', NULL, 'https://via.placeholder.com/500x500?text=Jeans+Blu+1', 'Jeans Blu Classico vista frontale', 1, true, now()),
-('f0000005-ffff-ffff-ffff-ffffffffffff', 'd0000004-dddd-dddd-dddd-dddddddddddd', NULL, 'https://via.placeholder.com/500x500?text=Jeans+Blu+2', 'Jeans Blu Classico vista laterale', 2, false, now()),
-('f0000006-ffff-ffff-ffff-ffffffffffff', 'd0000010-dddd-dddd-dddd-dddddddddddd', NULL, 'https://via.placeholder.com/500x500?text=Sneakers+Bianche+1', 'Sneakers Bianche tre quarti', 1, true, now()),
-('f0000007-ffff-ffff-ffff-ffffffffffff', 'd0000010-dddd-dddd-dddd-dddddddddddd', NULL, 'https://via.placeholder.com/500x500?text=Sneakers+Bianche+2', 'Sneakers Bianche suola', 2, false, now()),
-('f0000008-ffff-ffff-ffff-ffffffffffff', 'd0000022-dddd-dddd-dddd-dddddddddddd', NULL, 'https://via.placeholder.com/500x500?text=Collana+Oro+1', 'Collana Oro Delicata indossata', 1, true, now()),
-('f0000009-ffff-ffff-ffff-ffffffffffff', 'd0000023-dddd-dddd-dddd-dddddddddddd', NULL, 'https://via.placeholder.com/500x500?text=Anello+Diamante+1', 'Anello Con Diamante vista frontale', 1, true, now());
+('f0000001-ffff-ffff-ffff-ffffffffffff', 'd0000001-dddd-dddd-dddd-dddddddddddd', NULL, '/media/catalogo/prodotti/t-shirt-bianca-basic.svg', 'Illustrazione della T-Shirt Bianca Basic', 1, true, now()),
+('f0000002-ffff-ffff-ffff-ffffffffffff', 'd0000002-dddd-dddd-dddd-dddddddddddd', NULL, '/media/catalogo/prodotti/t-shirt-nera-premium.svg', 'Illustrazione della T-Shirt Nera Premium', 1, true, now()),
+('f0000003-ffff-ffff-ffff-ffffffffffff', 'd0000003-dddd-dddd-dddd-dddddddddddd', NULL, '/media/catalogo/prodotti/t-shirt-stampata.svg', 'Illustrazione della T-Shirt Stampata', 1, true, now()),
+('f0000004-ffff-ffff-ffff-ffffffffffff', 'd0000004-dddd-dddd-dddd-dddddddddddd', NULL, '/media/catalogo/prodotti/jeans-blu-classico.svg', 'Illustrazione del Jeans Blu Classico', 1, true, now()),
+('f0000005-ffff-ffff-ffff-ffffffffffff', 'd0000005-dddd-dddd-dddd-dddddddddddd', NULL, '/media/catalogo/prodotti/jeans-nero-stretch.svg', 'Illustrazione del Jeans Nero Stretch', 1, true, now()),
+('f0000006-ffff-ffff-ffff-ffffffffffff', 'd0000006-dddd-dddd-dddd-dddddddddddd', NULL, '/media/catalogo/prodotti/jeans-sbiadito-vintage.svg', 'Illustrazione del Jeans Sbiadito Vintage', 1, true, now()),
+('f0000007-ffff-ffff-ffff-ffffffffffff', 'd0000007-dddd-dddd-dddd-dddddddddddd', NULL, '/media/catalogo/prodotti/giacca-jeans-blu.svg', 'Illustrazione della Giacca di Jeans Blu', 1, true, now()),
+('f0000008-ffff-ffff-ffff-ffffffffffff', 'd0000008-dddd-dddd-dddd-dddddddddddd', NULL, '/media/catalogo/prodotti/parka-invernale.svg', 'Illustrazione del Parka Invernale', 1, true, now()),
+('f0000009-ffff-ffff-ffff-ffffffffffff', 'd0000009-dddd-dddd-dddd-dddddddddddd', NULL, '/media/catalogo/prodotti/giacca-pelle-nera.svg', 'Illustrazione della Giacca in Pelle Nera', 1, true, now()),
+('f0000010-ffff-ffff-ffff-ffffffffffff', 'd0000010-dddd-dddd-dddd-dddddddddddd', NULL, '/media/catalogo/prodotti/sneakers-bianche-casual.svg', 'Illustrazione delle Sneakers Bianche Casual', 1, true, now()),
+('f0000011-ffff-ffff-ffff-ffffffffffff', 'd0000011-dddd-dddd-dddd-dddddddddddd', NULL, '/media/catalogo/prodotti/sneakers-nere-alte.svg', 'Illustrazione delle Sneakers Nere Alte', 1, true, now()),
+('f0000012-ffff-ffff-ffff-ffffffffffff', 'd0000012-dddd-dddd-dddd-dddddddddddd', NULL, '/media/catalogo/prodotti/scarpe-da-running-pro.svg', 'Illustrazione delle Scarpe da Running Pro', 1, true, now()),
+('f0000013-ffff-ffff-ffff-ffffffffffff', 'd0000013-dddd-dddd-dddd-dddddddddddd', NULL, '/media/catalogo/prodotti/tacchi-neri-classici.svg', 'Illustrazione dei Tacchi Neri Classici', 1, true, now()),
+('f0000014-ffff-ffff-ffff-ffffffffffff', 'd0000014-dddd-dddd-dddd-dddddddddddd', NULL, '/media/catalogo/prodotti/scarpe-plateau-oro.svg', 'Illustrazione delle Scarpe Plateau Oro', 1, true, now()),
+('f0000015-ffff-ffff-ffff-ffffffffffff', 'd0000015-dddd-dddd-dddd-dddddddddddd', NULL, '/media/catalogo/prodotti/stivaletti-rossi.svg', 'Illustrazione degli Stivaletti Rossi', 1, true, now()),
+('f0000016-ffff-ffff-ffff-ffffffffffff', 'd0000016-dddd-dddd-dddd-dddddddddddd', NULL, '/media/catalogo/prodotti/cintura-pelle-nera.svg', 'Illustrazione della Cintura in Pelle Nera', 1, true, now()),
+('f0000017-ffff-ffff-ffff-ffffffffffff', 'd0000017-dddd-dddd-dddd-dddddddddddd', NULL, '/media/catalogo/prodotti/sciarpa-cashmere.svg', 'Illustrazione della Sciarpa in Cashmere', 1, true, now()),
+('f0000018-ffff-ffff-ffff-ffffffffffff', 'd0000018-dddd-dddd-dddd-dddddddddddd', NULL, '/media/catalogo/prodotti/berretto-lana-grigio.svg', 'Illustrazione del Berretto in Lana Grigio', 1, true, now()),
+('f0000019-ffff-ffff-ffff-ffffffffffff', 'd0000019-dddd-dddd-dddd-dddddddddddd', NULL, '/media/catalogo/prodotti/borsa-tote-nera.svg', 'Illustrazione della Borsa Tote Nera', 1, true, now()),
+('f0000020-ffff-ffff-ffff-ffffffffffff', 'd0000020-dddd-dddd-dddd-dddddddddddd', NULL, '/media/catalogo/prodotti/zaino-da-viaggio.svg', 'Illustrazione dello Zaino da Viaggio', 1, true, now()),
+('f0000021-ffff-ffff-ffff-ffffffffffff', 'd0000021-dddd-dddd-dddd-dddddddddddd', NULL, '/media/catalogo/prodotti/pochette-elegante-rossa.svg', 'Illustrazione della Pochette Elegante Rossa', 1, true, now()),
+('f0000022-ffff-ffff-ffff-ffffffffffff', 'd0000022-dddd-dddd-dddd-dddddddddddd', NULL, '/media/catalogo/prodotti/collana-oro-delicata.svg', 'Illustrazione della Collana Oro Delicata', 1, true, now()),
+('f0000023-ffff-ffff-ffff-ffffffffffff', 'd0000023-dddd-dddd-dddd-dddddddddddd', NULL, '/media/catalogo/prodotti/anello-con-diamante.svg', 'Illustrazione dell''Anello con Diamante', 1, true, now()),
+('f0000024-ffff-ffff-ffff-ffffffffffff', 'd0000024-dddd-dddd-dddd-dddddddddddd', NULL, '/media/catalogo/prodotti/orecchini-perle-bianche.svg', 'Illustrazione degli Orecchini Perle Bianche', 1, true, now());
 
 -- ==================== DISCOUNTS ====================
 INSERT INTO discounts (id, product_id, variant_id, type, value, label, starts_at, ends_at, is_active, created_at) VALUES
@@ -213,10 +243,10 @@ INSERT INTO order_items (id, order_id, variant_id, product_name, variant_label, 
 ('08000007-0000-0000-0000-000000000007', '07000004-0000-0000-0000-000000000004', 'e0000023-eeee-eeee-eeee-eeeeeeeeeeee', 'Tacchi Neri Classici', '36 - Nero', 'SH-TAC-013-36', 99.99, 1, 99.99),
 ('08000008-0000-0000-0000-000000000008', '07000006-0000-0000-0000-000000000006', 'e0000003-eeee-eeee-eeee-eeeeeeeeeeee', 'T-Shirt Bianca Basic', 'L - Bianco', 'TS-BAS-001-L', 19.99, 1, 19.99),
 ('08000009-0000-0000-0000-000000000009', '07000006-0000-0000-0000-000000000006', 'e0000012-eeee-eeee-eeee-eeeeeeeeeeee', 'Jeans Blu Classico', '34 - Blu', 'JN-BLU-004-34', 59.99, 1, 59.99),
-('08000010-0000-0000-0000-000000000010', '07000006-0000-0000-0000-000000000006', 'e0000021-eeee-eeee-eeee-eeeeeeeeeeee', 'Anello Con Diamante', '50 - Oro', 'JW-ANE-023-50', 599.99, 1, 599.99),
+('08000010-0000-0000-0000-000000000010', '07000006-0000-0000-0000-000000000006', 'e0000021-eeee-eeee-eeee-eeeeeeeeeeee', 'Anello con Diamante', '50 - Oro', 'JW-ANE-023-50', 599.99, 1, 599.99),
 ('08000011-0000-0000-0000-000000000011', '07000007-0000-0000-0000-000000000007', 'e0000004-eeee-eeee-eeee-eeeeeeeeeeee', 'T-Shirt Bianca Basic', 'XL - Bianco', 'TS-BAS-001-XL', 19.99, 1, 19.99),
 ('08000012-0000-0000-0000-000000000012', '07000007-0000-0000-0000-000000000007', 'e0000010-eeee-eeee-eeee-eeeeeeeeeeee', 'Jeans Blu Classico', '30 - Blu', 'JN-BLU-004-30', 59.99, 1, 59.99),
-('08000013-0000-0000-0000-000000000013', '07000007-0000-0000-0000-000000000007', 'e0000022-eeee-eeee-eeee-eeeeeeeeeeee', 'Anello Con Diamante', '52 - Oro', 'JW-ANE-023-52', 599.99, 1, 599.99),
+('08000013-0000-0000-0000-000000000013', '07000007-0000-0000-0000-000000000007', 'e0000022-eeee-eeee-eeee-eeeeeeeeeeee', 'Anello con Diamante', '52 - Oro', 'JW-ANE-023-52', 599.99, 1, 599.99),
 ('08000014-0000-0000-0000-000000000014', '07000008-0000-0000-0000-000000000008', 'e0000018-eeee-eeee-eeee-eeeeeeeeeeee', 'Sneakers Bianche Casual', '41 - Bianco', 'SN-BIA-010-41', 79.99, 1, 79.99),
 ('08000015-0000-0000-0000-000000000015', '07000005-0000-0000-0000-000000000005', 'e0000006-eeee-eeee-eeee-eeeeeeeeeeee', 'T-Shirt Nera Premium', 'M - Nero', 'TS-PRE-002-M', 34.99, 1, 34.99),
 ('08000016-0000-0000-0000-000000000016', '07000005-0000-0000-0000-000000000005', 'e0000019-eeee-eeee-eeee-eeeeeeeeeeee', 'Sneakers Bianche Casual', '42 - Bianco', 'SN-BIA-010-42', 79.99, 1, 79.99);

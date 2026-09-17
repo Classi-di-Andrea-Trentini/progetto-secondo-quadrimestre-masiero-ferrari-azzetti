@@ -1,51 +1,74 @@
 <section class="legal-shell px-6 py-14 sm:py-18 lg:px-8">
   <div class="mx-auto max-w-4xl">
-    <nav class="legal-nav mb-8 flex flex-wrap gap-3" aria-label="Legal pages navigation">
-      <a href="/legal/privacy" class="legal-chip">Privacy</a>
-      <a href="/legal/terms" class="legal-chip">Terms</a>
-      <a href="/legal/cookies" class="legal-chip">Cookies</a>
+    <!-- routerLink, non href: con href ogni passaggio fra le pagine legali
+         ricaricava l'intera applicazione da zero. -->
+    <nav class="legal-nav mb-8 flex flex-wrap gap-2" aria-label="Legal pages">
+      <a routerLink="/legal/privacy" routerLinkActive="is-current" class="legal-chip">Privacy</a>
+      <a routerLink="/legal/cookies" routerLinkActive="is-current" class="legal-chip">Cookies</a>
+      <a routerLink="/legal/terms" routerLinkActive="is-current" class="legal-chip">
+        Terms &amp; Conditions
+      </a>
+      <a routerLink="/legal/recesso" routerLinkActive="is-current" class="legal-chip">Right of Withdrawal</a>
+      <a routerLink="/legal/spedizioni-e-resi" routerLinkActive="is-current" class="legal-chip">
+        Shipping &amp; Returns
+      </a>
     </nav>
 
-    <header class="legal-header mb-10">
-      <h1 class="legal-title">{{ doc.title }}</h1>
-      <p class="legal-updated mt-2">Last updated: {{ doc.updatedAt }}</p>
-      <p class="legal-intro mt-5">{{ doc.intro }}</p>
-    </header>
+    @if (doc; as doc) {
+      <header class="legal-header mb-10">
+        <h1 class="legal-title">{{ doc.title }}</h1>
+        <p class="legal-updated mt-2">Last updated: {{ doc.updatedAt }}</p>
+        <p class="legal-intro mt-5">{{ doc.intro }}</p>
+      </header>
 
-    <div class="legal-body space-y-7">
-      @for (section of doc.sections; track section.heading) {
-        <article class="legal-section">
-          <h2 class="legal-section-title">{{ section.heading }}</h2>
-          <p class="legal-section-text mt-2">{{ section.body }}</p>
+      <div class="legal-body space-y-7">
+        @for (section of doc.sections; track section.heading) {
+          <article class="legal-section">
+            <h2 class="legal-section-title">{{ section.heading }}</h2>
+            <p class="legal-section-text mt-2">{{ section.body }}</p>
 
-          @if (section.cookies?.length) {
-            <div class="cookie-table-wrap mt-5">
-              <table class="cookie-table">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Type</th>
-                    <th>Purpose</th>
-                    <th>Duration</th>
-                    <th>Category</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (c of section.cookies; track c.name) {
+            @if (section.cookies?.length) {
+              <div class="cookie-table-wrap mt-5">
+                <table class="cookie-table">
+                  <thead>
                     <tr>
-                      <td><code>{{ c.name }}</code></td>
-                      <td>{{ c.type }}</td>
-                      <td>{{ c.purpose }}</td>
-                      <td>{{ c.duration }}</td>
-                      <td><span class="cookie-badge">{{ c.category }}</span></td>
+                      <th>Name</th>
+                      <th>Type</th>
+                      <th>Purpose</th>
+                      <th>Duration</th>
+                      <th>Category</th>
                     </tr>
-                  }
-                </tbody>
-              </table>
-            </div>
-          }
-        </article>
-      }
-    </div>
+                  </thead>
+                  <tbody>
+                    @for (c of section.cookies; track c.name) {
+                      <tr>
+                        <td><code>{{ c.name }}</code></td>
+                        <td>{{ c.type }}</td>
+                        <td>{{ c.purpose }}</td>
+                        <td>{{ c.duration }}</td>
+                        <td><span class="cookie-badge">{{ c.category }}</span></td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+          </article>
+        }
+      </div>
+    } @else {
+      <!-- Indirizzo legale inesistente. Prima qualunque chiave sconosciuta ricadeva
+           su `privacy`: si vedeva l'informativa privacy senza aver capito di aver
+           sbagliato URL. -->
+      <div class="legal-missing" role="alert">
+        <p class="legal-missing-code">404</p>
+        <h1 class="legal-title">This page doesn't exist</h1>
+        <p class="legal-intro mt-4">
+          The address you opened doesn't match any of our legal documents.
+          Maybe the link was old, or there's a typo. You'll find all the available
+          pages above.
+        </p>
+      </div>
+    }
   </div>
 </section>

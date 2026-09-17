@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-labelledby="ttl">
+  <title id="ttl">Zaino da viaggio con scomparto laptop</title>
+  <rect width="400" height="400" fill="#F3F3F5"/>
+  <ellipse cx="200" cy="360" rx="104" ry="12" fill="#E2E3E5"/>
+  <path d="M132 200 Q132 148 200 148 Q268 148 268 200 L268 250 L132 250 Z" fill="#54545A" stroke="#17171B" stroke-width="3.2" stroke-linejoin="round"/>
+  <path d="M184 150 Q200 120 216 150" fill="none" stroke="#232328" stroke-width="9" stroke-linecap="round"/>
+  <path d="M112 220 Q100 260 108 320" fill="none" stroke="#424247" stroke-width="16" stroke-linecap="round"/>
+  <path d="M288 220 Q300 260 292 320" fill="none" stroke="#424247" stroke-width="16" stroke-linecap="round"/>
+  <path d="M124 214 L276 214 Q288 214 288 226 L282 332 Q281 348 265 348 L135 348 Q119 348 118 332 L112 226 Q112 214 124 214 Z" fill="#6E6F75" stroke="#17171B" stroke-width="3.2" stroke-linejoin="round"/>
+  <path d="M124 214 Q200 236 276 214" fill="none" stroke="#17171B" stroke-width="2.6"/>
+  <path d="M130 240 Q200 258 270 240" fill="none" stroke="#424247" stroke-width="5" stroke-dasharray="5 4"/>
+  <circle cx="200" cy="252" r="7" fill="#A73C2A"/>
+  <path d="M148 276 L252 276 Q260 276 260 284 L256 326 Q255 334 247 334 L153 334 Q145 334 144 326 L140 284 Q140 276 148 276 Z" fill="#85868B" stroke="#17171B" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M146 296 L254 296" fill="none" stroke="#424247" stroke-width="4" stroke-dasharray="5 4"/>
+  <g fill="#CFCFD2" stroke="#17171B" stroke-width="2">
+    <rect x="160" y="262" width="22" height="16" rx="3"/>
+    <rect x="218" y="262" width="22" height="16" rx="3"/>
+  </g>
+  <rect x="186" y="308" width="28" height="18" rx="3" fill="none" stroke="#424247" stroke-width="2.4"/>
+</svg>

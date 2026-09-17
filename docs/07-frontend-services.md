@@ -1,115 +1,120 @@
-# Frontend — Services
+# Frontend — i servizi
 
-All services are in `e-commerce/src/app/services/` and are provided in the root injector (`providedIn: 'root'`), meaning a single instance is shared across the entire application.
+`e-commerce/src/app/services/`. Tutti `providedIn: 'root'`, quindi singleton
+condivisi. Nessuno scrive un URL a mano: usano `API_URL` da `api.config.ts`.
 
----
+| File | Classe | Responsabilita' |
+|---|---|---|
+| `api.config.ts` | — | `API_URL`: `/api` nel browser, indirizzo diretto in SSR |
+| `auth.ts` | `AuthService` | accesso, registrazione, profilo, verifica email, cancellazione account |
+| `cart-service.ts` | `CartService` | il carrello, ospite e collegato, piu' indirizzi/promo/gift card del checkout |
+| `products.service.ts` | `ProductsService` | catalogo, filtri, scheda per slug |
+| `wishlist.service.ts` | `WishlistService` | preferiti |
+| `reviews.service.ts` | `ReviewsService` | recensioni di un prodotto |
+| `admin.service.ts` | `AdminService` | tutte le chiamate del pannello |
+| `cookie-consent.ts` | `CookieConsentService` | l'informativa cookie |
+| `recently-viewed.ts` | `RecentlyViewedService` | i prodotti guardati di recente |
+| `seo.ts` | `SeoService` | titolo, meta tag, dati strutturati |
+| `toast.service.ts` | `ToastService` | notifiche temporanee |
+| `users-service.ts` | `UsersService` | **vuota**: una classe senza un solo metodo |
 
-## AuthService — auth.ts
+## `AuthService`
 
-The central auth service. Every part of the app that needs to know who is logged in reads from this service.
+Segnali: `currentUser`, `isAuthenticated`, `isAdmin`, `isLoading`.
 
-### State
+`isLoading` non e' un dettaglio: all'avvio il servizio chiama `/auth/me`, e finche'
+quella risposta non arriva nessuno puo' dire se c'e' un utente. Le guardie e il
+carrello lo aspettano — senza, chi ricarica `/me` verrebbe sbattuto al login.
 
-Four signals are exposed:
+Metodi: `login`, `register`, `logout`, `updateProfile`, `sendVerificationEmail`,
+`confirmVerification`, `changePassword`, `requestEmailChange`, `eraseAccount`,
+`extractErrorMessage`.
 
-- `currentUser` — `Signal<AuthUser | null>`. Null means not logged in or not yet checked.
-- `isAuthenticated` — `computed(() => currentUser() !== null)`.
-- `isAdmin` — `computed(() => currentUser()?.role === 'admin')`.
-- `isLoading` — `Signal<boolean>`. True during the initial `GET /auth/me` check. Used by the auth guard to wait before deciding whether to redirect.
+Tutte le chiamate viaggiano con `withCredentials: true`: l'autenticazione e' un
+cookie, non un header.
 
-### Initialisation
+## `CartService`
 
-The constructor calls `checkAuth()` only when running in the browser (`isPlatformBrowser`). On the server it just sets `isLoading` to false and leaves `currentUser` as null. `checkAuth` calls `GET /auth/me` with credentials and sets the user signal from the response.
+Segnali: `items`, `itemCount`, `subtotal`, `isOpen`, `isSyncing`, `hasIssues`,
+`ready`.
 
-### Methods
+### Dove vive il carrello
 
-**login(payload)** — posts to `/auth/login`, sets the `currentUser` signal from the response. Throws on error — the caller handles it.
+- **Da ospite**: in `localStorage`. Prima stava solo in memoria e bastava un
+  aggiornamento della pagina per perderlo.
+- **Da collegato**: sul server (`carts`/`cart_items`), cosi' segue l'utente fra
+  telefono e computer.
+- **Al login i due vengono fusi** (`POST /cart/merge`). Senza, chi riempie il
+  carrello e poi accede se lo ritrova vuoto: il modo piu' diretto per perdere una
+  vendita.
 
-**register(payload)** — posts to `/auth/register`. Does not set any state because registration does not log the user in automatically.
+La fusione non puo' avvenire nel costruttore, perche' `isAuthenticated` diventa
+vero solo dopo la risposta di `/auth/me`: serve un `effect` che reagisca al
+cambiamento.
 
-**logout()** — posts to `/auth/logout` to delete the session, clears `currentUser` to null, navigates to `/home`. The `finally` block ensures state is cleared even if the logout request fails.
+### `ready`
 
-**updateProfile(payload)** — patches `/users/me` and updates the `currentUser` signal with the returned user data. This keeps the navbar and profile page in sync without a page reload.
+Falso finche' il carrello non e' stato caricato almeno una volta. Da quando il
+carrello vive sul server arriva **dopo** il primo render, e il checkout che
+controllava subito `items().length === 0` rimbalzava sul catalogo anche col
+carrello pieno. Per un ospite `isAuthenticated` resta falso dall'inizio alla fine:
+il ramo che dichiara pronto quando l'autenticazione si conclude senza cambiare
+identita' e' l'unico che lo salva dal restare in eterno sullo scheletro.
 
-**sendVerificationEmail() / confirmVerification(token) / changePassword() / requestEmailChange()** — thin wrappers that call the corresponding user endpoints and return the server's message string.
+### Il resto del checkout
 
-**extractErrorMessage(err)** — a utility used by components to get a human-readable string from an `HttpErrorResponse`. Handles array messages from class-validator (joins them with `. `), connection errors, and rate limiting.
+`getAddresses`, `createAddress`, `validatePromo`, `checkGiftCard` stanno qui
+dentro. Il servizio copre quindi anche la parte "dati per concludere l'ordine", non
+solo le righe del carrello.
 
----
+## `ProductsService`
 
-## ProductsService — products.service.ts
+`getProducts(params)` con filtri, `getFilters()`, `getProductBySlug(slug)`. Le
+risposte sono tipizzate nel file stesso, con `basePrice: number`.
 
-Handles all product-related API calls. Stateless — no signals.
+## `WishlistService`
 
-### Interfaces exported from this file
+`savedIds` e' un `Set` di id: serve ad accendere i cuoricini sulla griglia senza
+scaricare i prodotti interi. `items` e' la lista completa, usata in `/me`.
+`toggle` e' ottimistico e `reset` va chiamato al logout.
 
-`ProductImage`, `ProductVariant`, `ProductDiscount`, `ProductCategory`, `ProductListItem`, `ProductFull` (extends `ProductListItem` with `description`), `ProductFilters`, `ProductsResponse`, `GetProductsParams`.
+## `CookieConsentService`
 
-These interfaces are used by multiple components across the app, so they live in the service file rather than a separate interfaces directory (which contains older and partially redundant interfaces from an earlier iteration).
+**Non e' un banner di consenso, e' un'informativa.** Il negozio usa solo cookie
+tecnici — il cookie di sessione, la riga che ricorda che l'avviso e' stato letto, e
+i cookie antifrode di Stripe sulla pagina di pagamento. Per i cookie tecnici la
+direttiva ePrivacy (art. 5 § 3, e l'art. 122 del Codice privacy) **non chiede il
+consenso**: chiede di informare.
 
-### Methods
+Per questo non c'e' un pulsante "Rifiuta". Quello di prima era peggio della sua
+assenza: `decline()` e `acceptAll()` scrivevano la stessa identica cosa in
+`localStorage` e cambiava solo un flag che nessuno leggeva.
 
-**getProducts(params)** — builds `HttpParams` incrementally from the provided `GetProductsParams` object. Array params (`colors`, `sizes`) are appended multiple times using `p.append()`. Returns an Observable of `ProductsResponse`.
+`acknowledge()` chiude l'avviso, `reopen()` lo riapre — ed e' il link "Gestisci
+cookie" nel footer a chiamarlo. Lo stato sta in un servizio e non nel componente
+proprio perche' a disegnarlo e' `App` e a riaprirlo e' il footer.
 
-**getFilters()** — calls `GET /products/filters`. Returns an Observable of `ProductFilters`.
+Il giorno in cui entrasse un cookie non tecnico, questo servizio va rifatto come
+consenso vero: due pulsanti che fanno due cose diverse e granularita' per categoria.
 
-**getProductBySlug(slug)** — calls `GET /products/:slug`. Returns an Observable of `{ product: ProductFull; related: ProductListItem[] }`.
+## `RecentlyViewedService`
 
-These methods return Observables rather than Promises because the Products page needs to subscribe and re-call on filter changes without the overhead of converting.
+La cronologia sta nel `localStorage` (al massimo 10 voci) e non sul server: e' una
+comodita', non un dato da legare a un account, e cosi' funziona anche da sloggati —
+che e' proprio quando serve di piu'. Al server si chiedono solo i dati aggiornati
+(`GET /products/by-ids`), perche' prezzo e disponibilita' possono essere cambiati.
 
----
+## `SeoService`
 
-## WishlistService — wishlist.service.ts
+`setPage(title, description, image?, url?)` scrive titolo, `description`, Open
+Graph e Twitter card. `setProduct()` aggiunge il JSON-LD `Product`, che e' quello
+che permette a un motore di ricerca di mostrare prezzo e disponibilita' nei
+risultati.
 
-Manages the user's saved items. Has a small amount of client-side state.
+Va chiamato **durante** la resa, non dal browser dopo: il sito e' reso lato server
+proprio perche' questi tag arrivino gia' nell'HTML.
 
-### State
+## `UsersService` — da togliere o da riempire
 
-- `savedIds` — `Signal<Set<string>>`. The set of product IDs currently saved. Used on listing pages to render filled or empty heart icons without fetching full item data.
-- `items` — `Signal<WishlistItem[]>`. The full list with product data, loaded separately when needed (e.g. on the `/me` page).
-- `_loaded` — a private boolean flag that prevents loading IDs twice.
-
-### Methods
-
-**loadIds()** — calls `GET /wishlist/ids` if not already loaded. Sets the `savedIds` signal.
-
-**loadItems()** — calls `GET /wishlist` with full product data. Updates both `items` and `savedIds` from the response.
-
-**isSaved(productId)** — synchronous, reads from the `savedIds` signal. Used in templates.
-
-**toggle(productId)** — calls `POST /wishlist/:productId/toggle`. Updates `savedIds` based on the response. If removed, also filters the product out of `items` if that list is loaded.
-
-**reset()** — clears all state. Called by the logout flow to avoid showing stale wishlist data after a new user logs in.
-
----
-
-## CartService — cart-service.ts
-
-Gestisce il carrello lato client (nessun endpoint carrello sul backend — il carrello viene inviato al backend solo al momento del checkout).
-
-### Interfacce
-
-`CartItem` — `{ variantId, productId, productName, slug, variantLabel, size, color, colorHex, imageUrl, unitPrice, originalPrice, quantity }`.
-
-`AddressData` — struttura degli indirizzi di spedizione, condivisa con il Checkout.
-
-### State
-
-- `items` — `Signal<CartItem[]>`.
-- `isOpen` — `Signal<boolean>`.
-- `itemCount` — `computed` che somma le quantità.
-- `subtotal` — `computed` che somma `unitPrice * quantity`.
-
-### Methods
-
-`open()`, `close()`, `toggle()` — gestiscono il drawer.
-
-`addItem(item)` — se il variantId esiste già incrementa la quantità, altrimenti aggiunge.
-
-`removeItem(variantId)`, `updateQuantity(variantId, qty)`, `clear()`.
-
-`getAddresses()` — chiama `GET /addresses` e restituisce una Promise.
-
-`placeOrder(payload)` — chiama `POST /checkout` e svuota il carrello al successo.
-
-**Nota:** il carrello è in-memory. Non viene persistito in localStorage — si azzera al ricaricamento della pagina.
+`users-service.ts` contiene una classe vuota. Le chiamate del profilo stanno dentro
+`AuthService` e dentro `me.ts`. Vedi [11-what-is-missing.md](./11-what-is-missing.md).

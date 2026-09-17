@@ -1,0 +1,107 @@
+# Test automatici a ogni push e su ogni pull request.
+#
+# Due lavori separati e non uno solo: backend e frontend non dipendono l'uno
+# dall'altro, girano in parallelo e, quando qualcosa si rompe, la lista dei
+# controlli dice subito **da che parte** guardare invece di mostrare un unico
+# riquadro rosso.
+#
+# Il runner deve essere `ubuntu-latest` e non va cambiato a cuor leggero: i test
+# del backend usano Testcontainers, cioe' avviano un Postgres vero in un
+# container per ogni esecuzione. Le immagini macOS e Windows di GitHub non hanno
+# un demone Docker utilizzabile, e li' la suite fallirebbe in avvio senza che il
+# codice abbia niente che non va.
+name: Test
+
+on:
+  push:
+  pull_request:
+
+# Il workflow legge soltanto: nessun push, nessun commento, nessuna release.
+permissions:
+  contents: read
+
+# Un push che arriva mentre il precedente e' ancora in corso annulla quello
+# vecchio: il risultato di un commit gia' superato non interessa a nessuno e
+# tiene occupati i runner.
+concurrency:
+  group: test-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend (Spring Boot, Java 21)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        # Si scarica tutto il repository e non il solo `server-java/`:
+        # AbstractIntegrationTest risale le cartelle fino a
+        # `database/init/001_schema.sql` e lo copia dentro il container Postgres.
+        # Lo schema dei test e' quello vero, non uno generato da Hibernate — se
+        # quel file mancasse, la suite non partirebbe affatto.
+
+      - name: Prepara Java 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: temurin
+          # Mette in cache ~/.gradle (dipendenze e distribuzione del wrapper),
+          # con chiave calcolata sui file di build. Senza, ogni esecuzione
+          # riscarica l'intero albero delle dipendenze di Spring Boot.
+          cache: gradle
+
+      - name: Test
+        working-directory: server-java
+        # `--no-daemon`: il demone Gradle serve a restare caldo fra un comando e
+        # l'altro, e un runner usa e getta non ha un "dopo".
+        run: ./gradlew test --no-daemon
+
+      - name: Conserva il referto dei test
+        # Anche (soprattutto) quando sono rossi: il log della console dice
+        # quanti ne sono falliti, il referto dice perche'.
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-report
+          path: server-java/build/reports/tests/test
+          if-no-files-found: ignore
+          retention-days: 7
+
+  frontend:
+    name: Frontend (Angular)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepara Node
+        uses: actions/setup-node@v4
+        with:
+          # Stessa versione dell'immagine Docker del frontend
+          # (e-commerce/Dockerfile parte da node:20-alpine).
+          node-version: '20'
+          cache: npm
+          # Il progetto Angular non sta nella radice del repository: senza questo
+          # percorso la cache non troverebbe nessun package-lock.json.
+          cache-dependency-path: e-commerce/package-lock.json
+
+      - name: Installa le dipendenze
+        working-directory: e-commerce
+        # `npm ci` e non `npm install`: installa esattamente quello che dice il
+        # lock file e fallisce se i due non combaciano, che e' il controllo che
+        # si vuole in integrazione continua.
+        run: npm ci
+
+      - name: Test
+        working-directory: e-commerce
+        # `npm test` -> `ng test` (vedi package.json). Il builder
+        # `@angular/build:unit-test` gira con Vitest su jsdom: nessun browser da
+        # installare sul runner.
+        run: npm test
+
+      - name: Build di produzione
+        working-directory: e-commerce
+        # Un test verde non garantisce che l'applicazione si costruisca: la
+        # compilazione AOT dei template e il prerender delle pagine pubbliche
+        # falliscono per cose che i test unitari non toccano mai.
+        run: npm run build
