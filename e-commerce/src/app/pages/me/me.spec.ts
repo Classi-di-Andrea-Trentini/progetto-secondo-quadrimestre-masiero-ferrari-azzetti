@@ -205,6 +205,64 @@ describe('Me', () => {
     });
   });
 
+  // ─── Modale di reso — stepper quantita' ─────────────────────────────────
+  //
+  // Prima di questo test nessuna asserzione toccava gli aria-label del modale
+  // di reso ne' il collegamento reale a setReturnQuantity: la pagina non ha
+  // mai un ordine restituibile per l'unico account disponibile in locale,
+  // quindi era anche l'unico modo per verificare questo pezzo — qui si fissa
+  // il comportamento vero (l'etichetta e' quella giusta, il click aggiorna il
+  // segnale, il tetto e' la quantita' acquistata), non solo la presenza dei
+  // bottoni.
+
+  describe('return request modal — quantity stepper', () => {
+    it('names each quantity button for a screen reader, and wires the click to setReturnQuantity', () => {
+      const order = orderSummary(); // un solo articolo, "Tee", quantity: 1
+      component.openReturnModal(order, new Event('click'));
+      fixture.detectChanges();
+
+      const decreaseBtn = fixture.nativeElement.querySelector(
+        'button[aria-label="Decrease return quantity of Tee"]',
+      ) as HTMLButtonElement;
+      const increaseBtn = fixture.nativeElement.querySelector(
+        'button[aria-label="Increase return quantity of Tee"]',
+      ) as HTMLButtonElement;
+
+      // Senza aria-label qui, uno screen reader annuncia solo "meno"/"piu'":
+      // la stessa lacuna gia' chiusa nel drawer del carrello (cart.html).
+      expect(decreaseBtn).toBeTruthy();
+      expect(increaseBtn).toBeTruthy();
+      expect(component.returnQuantities()['item-1']).toBe(0);
+
+      increaseBtn.click();
+      fixture.detectChanges();
+
+      expect(component.returnQuantities()['item-1']).toBe(1);
+      expect(fixture.nativeElement.querySelector('.qty-value')?.textContent?.trim()).toBe('1');
+
+      decreaseBtn.click();
+      fixture.detectChanges();
+
+      expect(component.returnQuantities()['item-1']).toBe(0);
+    });
+
+    it('does not let the requested return quantity exceed what was purchased', () => {
+      const order = orderSummary(); // quantity: 1 sull'unico articolo
+      component.openReturnModal(order, new Event('click'));
+      fixture.detectChanges();
+
+      const increaseBtn = fixture.nativeElement.querySelector(
+        'button[aria-label="Increase return quantity of Tee"]',
+      ) as HTMLButtonElement;
+
+      increaseBtn.click();
+      increaseBtn.click(); // il secondo click supererebbe la quantita' acquistata
+      fixture.detectChanges();
+
+      expect(component.returnQuantities()['item-1']).toBe(1);
+    });
+  });
+
   describe('isZeroAmount', () => {
     it('treats a numeric or string zero as zero, whatever formatPrice would print', () => {
       expect(component.isZeroAmount(0)).toBe(true);
