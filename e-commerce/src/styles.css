@@ -275,13 +275,18 @@
     background: var(--color-ink-2);
   }
 
+  /* A riposo il bordo era --color-line-strong (grigio chiaro): sullo schermo
+     legge come un ghost button senza bordo, non come la CTA outline
+     quasi-nera del Figma (#111). --color-ink e' il token quasi-nero gia'
+     usato per il testo: a riposo il bordo ora usa quello, e --color-ink-strong
+     (ancora piu' scuro) resta per l'hover cosi' lo stato resta percepibile. */
   .btn-outline {
     background: transparent;
     color: var(--color-ink);
-    border-color: var(--color-line-strong);
+    border-color: var(--color-ink);
   }
   .btn-outline:hover:not(:disabled) {
-    border-color: var(--color-ink);
+    border-color: var(--color-ink-strong);
     background: var(--color-sunken);
   }
   .btn-outline:active:not(:disabled) {
@@ -318,7 +323,14 @@
     background: color-mix(in oklab, var(--color-accent-admin) 80%, transparent);
   }
 
+  /* min-height 44px = il minimo per un target tattile: senza, il padding
+     ridotto piu' --text-2xs misurava ~27px ("Make admin"/"Delete" in
+     admin-users e gli equivalenti in admin-reviews/admin-returns), la stessa
+     interazione a piu' alto rischio del rifacimento tabella->card. Un solo
+     punto perche' .btn-sm e' condiviso anche dalla paginazione pubblica
+     (product-detail, me.html). */
   .btn-sm {
+    min-height: 2.75rem;
     padding: 0.4375rem 0.875rem;
     font-size: var(--text-2xs);
     letter-spacing: 0.075em;
@@ -484,10 +496,26 @@
   }
 
   /* ── Data tables ───────────────────────────────────────────────────────── */
+  /* A 768px alcune tabelle admin (es. Users, Orders) sono piu' larghe del
+     riquadro e scorrono in orizzontale senza nessun indizio visivo: la colonna
+     Azioni a destra restava tagliata e invisibile. Le due ombre laterali sono
+     il trucco CSS classico basato su `background-attachment: local` contro
+     `scroll`: quelle "local" scorrono col contenuto e coprono l'ombra "scroll"
+     (fissa sul contenitore) quando non c'e' altro da vedere in quella
+     direzione, quindi l'ombra appare solo dal lato in cui il contenuto
+     nascosto esiste davvero — niente JavaScript, funziona a qualunque
+     larghezza di tabella o di viewport. */
   .table-wrap {
     width: 100%;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    background:
+      linear-gradient(to right, var(--color-surface) 50%, transparent) 0 0 / 40px 100% local,
+      linear-gradient(to left, var(--color-surface) 50%, transparent) 100% 0 / 40px 100% local,
+      linear-gradient(to right, oklch(0.205 0.009 285 / 0.16), transparent) 0 0 / 14px 100% scroll,
+      linear-gradient(to left, oklch(0.205 0.009 285 / 0.16), transparent) 100% 0 / 14px 100% scroll;
+    background-repeat: no-repeat;
+    background-color: var(--color-surface);
   }
 
   .table {
