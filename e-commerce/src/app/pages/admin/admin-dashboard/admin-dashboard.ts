@@ -24,14 +24,14 @@ export class AdminDashboard implements OnInit, OnDestroy {
   error = signal<string | null>(null);
 
   readonly orderStatusLabels: Record<string, string> = {
-    pending: 'In attesa',
-    paid: 'Pagato',
-    processing: 'In lavorazione',
-    shipped: 'Spedito',
-    delivered: 'Consegnato',
-    completed: 'Completato',
-    cancelled: 'Annullato',
-    refunded: 'Rimborsato',
+    pending: 'Pending',
+    paid: 'Paid',
+    processing: 'Processing',
+    shipped: 'Shipped',
+    delivered: 'Delivered',
+    completed: 'Completed',
+    cancelled: 'Cancelled',
+    refunded: 'Refunded',
   };
 
   readonly statusColors: Record<string, string> = {
@@ -59,7 +59,7 @@ export class AdminDashboard implements OnInit, OnDestroy {
         setTimeout(() => this.buildChart(), 0);
       },
       error: () => {
-        this.error.set('Impossibile caricare le statistiche');
+        this.error.set('Unable to load statistics');
         this.loading.set(false);
       },
     });

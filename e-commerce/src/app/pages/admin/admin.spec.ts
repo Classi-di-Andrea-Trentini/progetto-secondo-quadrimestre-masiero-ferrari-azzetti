@@ -24,4 +24,20 @@ describe('Admin', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  // Sotto `lg` la sidebar e' un drawer fuori schermo: questo e' il toggle che
+  // lo apre/chiude, l'unico comportamento nuovo introdotto per il telefono.
+  it('should toggle the mobile drawer open and closed', () => {
+    expect(component.mobileOpen()).toBe(false);
+    component.toggleMobileNav();
+    expect(component.mobileOpen()).toBe(true);
+    component.closeMobileNav();
+    expect(component.mobileOpen()).toBe(false);
+  });
+
+  it('should list the seven panel sections in the design order, Returns and Reviews included', () => {
+    expect(component.navItems.map(i => i.label)).toEqual([
+      'Dashboard', 'Users', 'Orders', 'Products', 'Promotions', 'Returns', 'Reviews',
+    ]);
+  });
 });

@@ -2,6 +2,7 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { AdminService, AdminPromoCode, CreatePromoCodePayload } from '../../../services/admin.service';
+import { formatPrice as formatPriceShared } from '../../../services/format-price';
 
 @Component({
   selector: 'app-admin-promo',
@@ -59,7 +60,7 @@ export class AdminPromo implements OnInit {
         this.loading.set(false);
       },
       error: () => {
-        this.error.set('Impossibile caricare i codici promo');
+        this.error.set('Unable to load promo codes');
         this.loading.set(false);
       },
     });
@@ -116,11 +117,11 @@ export class AdminPromo implements OnInit {
         this.formLoading.set(false);
         this.closeModal();
         this.load();
-        this.actionSuccess.set('Codice promo creato');
+        this.actionSuccess.set('Promo code created');
         setTimeout(() => this.actionSuccess.set(null), 3000);
       },
       error: (err) => {
-        this.formError.set(err?.error?.message ?? 'Errore durante la creazione');
+        this.formError.set(err?.error?.message ?? 'Error while creating');
         this.formLoading.set(false);
       },
     });
@@ -130,10 +131,10 @@ export class AdminPromo implements OnInit {
     this.adminSvc.updatePromoCode(promo.id, { isActive: !promo.isActive }).subscribe({
       next: (updated) => {
         this.promoCodes.update(list => list.map(p => p.id === updated.id ? { ...p, isActive: updated.isActive } : p));
-        this.actionSuccess.set(`Codice ${updated.code} ${updated.isActive ? 'attivato' : 'disattivato'}`);
+        this.actionSuccess.set(`Code ${updated.code} ${updated.isActive ? 'activated' : 'deactivated'}`);
         setTimeout(() => this.actionSuccess.set(null), 3000);
       },
-      error: () => this.error.set('Impossibile aggiornare il codice'),
+      error: () => this.error.set('Unable to update the code'),
     });
   }
 
@@ -155,20 +156,27 @@ export class AdminPromo implements OnInit {
         this.total.update(n => n - 1);
         this.confirmDeleteId.set(null);
         this.deleteLoading.set(null);
-        this.actionSuccess.set('Codice promo eliminato');
+        this.actionSuccess.set('Promo code deleted');
         setTimeout(() => this.actionSuccess.set(null), 3000);
       },
       error: () => {
         this.deleteLoading.set(null);
-        this.error.set('Impossibile eliminare il codice');
+        this.error.set('Unable to delete the code');
         this.confirmDeleteId.set(null);
       },
     });
   }
 
+  // Formato inglese (€120.00), centralizzato in services/format-price.ts —
+  // qui c'era un `€ ${v.toFixed(2)}` scritto a mano, residuo pre-Task-7.
   formatDiscount(promo: AdminPromoCode): string {
     const v = parseFloat(String(promo.discountValue));
-    return promo.discountType === 'percentage' ? `${v}%` : `€ ${v.toFixed(2)}`;
+    return promo.discountType === 'percentage' ? `${v}%` : formatPriceShared(v);
+  }
+
+  // Stesso formatPrice condiviso, per il minimo d'ordine mostrato in tabella.
+  formatPrice(v: string | number): string {
+    return formatPriceShared(v);
   }
 
   pagesArray(): number[] {

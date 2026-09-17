@@ -46,7 +46,7 @@ export class AdminUsers implements OnInit {
         this.loading.set(false);
       },
       error: () => {
-        this.error.set('Impossibile caricare gli utenti');
+        this.error.set('Unable to load users');
         this.loading.set(false);
       },
     });
@@ -63,8 +63,8 @@ export class AdminUsers implements OnInit {
   }
 
   readonly allRoles = [
-    { value: '', label: 'Tutti i ruoli' },
-    { value: 'user', label: 'Utente' },
+    { value: '', label: 'All roles' },
+    { value: 'user', label: 'User' },
     { value: 'admin', label: 'Admin' },
   ];
 
@@ -82,12 +82,12 @@ export class AdminUsers implements OnInit {
       next: (updated) => {
         this.users.update(list => list.map(u => u.id === updated.id ? { ...u, role: updated.role } : u));
         this.actionLoading.set(null);
-        this.actionSuccess.set(`Ruolo di ${updated.fullName} aggiornato a ${updated.role}`);
+        this.actionSuccess.set(`${updated.fullName}'s role updated to ${updated.role}`);
         setTimeout(() => this.actionSuccess.set(null), 3000);
       },
       error: () => {
         this.actionLoading.set(null);
-        this.error.set('Impossibile aggiornare il ruolo');
+        this.error.set('Unable to update the role');
       },
     });
   }
@@ -110,12 +110,12 @@ export class AdminUsers implements OnInit {
         this.total.update(n => n - 1);
         this.confirmDeleteId.set(null);
         this.actionLoading.set(null);
-        this.actionSuccess.set('Utente eliminato');
+        this.actionSuccess.set('User deleted');
         setTimeout(() => this.actionSuccess.set(null), 3000);
       },
       error: () => {
         this.actionLoading.set(null);
-        this.error.set('Impossibile eliminare l\'utente');
+        this.error.set('Unable to delete the user');
         this.confirmDeleteId.set(null);
       },
     });

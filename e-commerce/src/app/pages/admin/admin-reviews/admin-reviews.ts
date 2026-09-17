@@ -57,9 +57,9 @@ export class AdminReviews implements OnInit {
         this.reviews.update(list => list.map(r => { const u = updated.find(x => x.id === r.id); return u ?? r; }));
         this.clearSelection();
         this.bulkLoading.set(false);
-        this.showSuccess(`${ids.length} recensioni approvate`);
+        this.showSuccess(`${ids.length} reviews approved`);
       },
-      error: () => { this.bulkLoading.set(false); this.error.set('Errore nell\'operazione bulk'); },
+      error: () => { this.bulkLoading.set(false); this.error.set('Error in the bulk operation'); },
     });
   }
 
@@ -72,9 +72,9 @@ export class AdminReviews implements OnInit {
         this.reviews.update(list => list.map(r => { const u = updated.find(x => x.id === r.id); return u ?? r; }));
         this.clearSelection();
         this.bulkLoading.set(false);
-        this.showSuccess(`${ids.length} recensioni rifiutate`);
+        this.showSuccess(`${ids.length} reviews rejected`);
       },
-      error: () => { this.bulkLoading.set(false); this.error.set('Errore nell\'operazione bulk'); },
+      error: () => { this.bulkLoading.set(false); this.error.set('Error in the bulk operation'); },
     });
   }
 
@@ -88,17 +88,17 @@ export class AdminReviews implements OnInit {
         this.total.update(n => n - ids.length);
         this.clearSelection();
         this.bulkLoading.set(false);
-        this.showSuccess(`${ids.length} recensioni eliminate`);
+        this.showSuccess(`${ids.length} reviews deleted`);
       },
-      error: () => { this.bulkLoading.set(false); this.error.set('Errore nell\'operazione bulk'); },
+      error: () => { this.bulkLoading.set(false); this.error.set('Error in the bulk operation'); },
     });
   }
 
   readonly allStatuses = [
-    { value: '', label: 'Tutti' },
-    { value: 'pending', label: 'In attesa' },
-    { value: 'approved', label: 'Approvata' },
-    { value: 'rejected', label: 'Rifiutata' },
+    { value: '', label: 'All' },
+    { value: 'pending', label: 'Pending' },
+    { value: 'approved', label: 'Approved' },
+    { value: 'rejected', label: 'Rejected' },
   ];
 
   readonly statusColors: Record<string, string> = {
@@ -127,7 +127,7 @@ export class AdminReviews implements OnInit {
         this.loading.set(false);
       },
       error: () => {
-        this.error.set('Impossibile caricare le recensioni');
+        this.error.set('Unable to load reviews');
         this.loading.set(false);
       },
     });
@@ -153,9 +153,9 @@ export class AdminReviews implements OnInit {
     this.adminSvc.updateReviewStatus(id, 'approved').subscribe({
       next: (updated) => {
         this.reviews.update(list => list.map(r => r.id === id ? updated : r));
-        this.showSuccess('Recensione approvata');
+        this.showSuccess('Review approved');
       },
-      error: () => this.error.set('Impossibile aggiornare la recensione'),
+      error: () => this.error.set('Unable to update the review'),
     });
   }
 
@@ -163,9 +163,9 @@ export class AdminReviews implements OnInit {
     this.adminSvc.updateReviewStatus(id, 'rejected').subscribe({
       next: (updated) => {
         this.reviews.update(list => list.map(r => r.id === id ? updated : r));
-        this.showSuccess('Recensione rifiutata');
+        this.showSuccess('Review rejected');
       },
-      error: () => this.error.set('Impossibile aggiornare la recensione'),
+      error: () => this.error.set('Unable to update the review'),
     });
   }
 
@@ -187,11 +187,11 @@ export class AdminReviews implements OnInit {
         this.total.update(n => n - 1);
         this.confirmDeleteId.set(null);
         this.deleteLoading.set(false);
-        this.showSuccess('Recensione eliminata');
+        this.showSuccess('Review deleted');
       },
       error: () => {
         this.deleteLoading.set(false);
-        this.error.set('Impossibile eliminare la recensione');
+        this.error.set('Unable to delete the review');
       },
     });
   }

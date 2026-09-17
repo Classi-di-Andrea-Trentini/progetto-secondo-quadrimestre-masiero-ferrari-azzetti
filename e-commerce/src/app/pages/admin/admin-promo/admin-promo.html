@@ -2,14 +2,14 @@
 
   <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
     <div>
-      <h1 class="text-2xl font-bold text-ink">Codici promozionali</h1>
-      <p class="text-ink-muted text-sm mt-1">{{ total() }} codici promo</p>
+      <h1 class="text-2xl font-bold text-ink">Promotions</h1>
+      <p class="text-ink-muted text-sm mt-1">{{ total() }} promo codes</p>
     </div>
-    <button (click)="openCreate()" class="flex items-center gap-2 btn btn-primary">
+    <button (click)="openCreate()" class="btn btn-primary">
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
       </svg>
-      Nuovo codice
+      New Promotion
     </button>
   </div>
 
@@ -21,28 +21,28 @@
   }
 
   <!-- Filters -->
-  <div class="bg-surface border border-line rounded-sm shadow-sm p-4 mb-6">
+  <div class="panel p-4 mb-6">
     <div class="flex flex-col sm:flex-row gap-3">
       <div class="relative flex-1">
         <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
         </svg>
-        <input [(ngModel)]="search" (keyup.enter)="onSearch()" type="text" placeholder="Cerca codice…"
+        <input [(ngModel)]="search" (keyup.enter)="onSearch()" type="text" placeholder="Search code…"
           class="field pl-9"/>
       </div>
       <select [(ngModel)]="discountTypeFilter" (change)="onFilter()"
         class="field field-auto">
-        <option value="">Tutti i tipi</option>
-        <option value="percentage">Percentuale</option>
-        <option value="fixed_amount">Importo fisso</option>
+        <option value="">All types</option>
+        <option value="percentage">Percentage</option>
+        <option value="fixed_amount">Fixed amount</option>
       </select>
       <select [(ngModel)]="isActiveFilter" (change)="onFilter()"
         class="field field-auto">
-        <option value="">Tutti gli stati</option>
-        <option value="true">Attivi</option>
-        <option value="false">Disattivati</option>
+        <option value="">All statuses</option>
+        <option value="true">Active</option>
+        <option value="false">Deactivated</option>
       </select>
-      <button (click)="onSearch()" class="btn btn-primary">Cerca</button>
+      <button (click)="onSearch()" class="btn btn-primary">Search</button>
     </div>
   </div>
 
@@ -51,69 +51,111 @@
       <div class="w-7 h-7 border-4 border-line-strong border-t-gray-900 rounded-full animate-spin"></div>
     </div>
   } @else {
-    <div class="bg-surface border border-line rounded-sm shadow-sm overflow-hidden">
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead class="bg-sunken border-b border-line">
+    <!-- Table: md and up -->
+    <div class="panel overflow-hidden hidden md:block">
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
             <tr>
-              <th class="text-left px-4 py-3 text-2xs font-bold uppercase tracking-[0.09em] text-ink-2">Codice</th>
-              <th class="text-left px-4 py-3 text-2xs font-bold uppercase tracking-[0.09em] text-ink-2">Sconto</th>
-              <th class="text-left px-4 py-3 text-2xs font-bold uppercase tracking-[0.09em] text-ink-2">Min. ordine</th>
-              <th class="text-left px-4 py-3 text-2xs font-bold uppercase tracking-[0.09em] text-ink-2">Utilizzi</th>
-              <th class="text-left px-4 py-3 text-2xs font-bold uppercase tracking-[0.09em] text-ink-2">Scadenza</th>
-              <th class="text-center px-4 py-3 text-2xs font-bold uppercase tracking-[0.09em] text-ink-2">Stato</th>
-              <th class="text-right px-4 py-3 text-2xs font-bold uppercase tracking-[0.09em] text-ink-2">Azioni</th>
+              <th class="text-left">Code</th>
+              <th class="text-left">Discount</th>
+              <th class="text-left">Min. order</th>
+              <th class="text-left">Uses</th>
+              <th class="text-left">Expires</th>
+              <th class="text-center">Status</th>
+              <th class="text-right">Actions</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-line">
             @for (promo of promoCodes(); track promo.id) {
               <tr class="hover:bg-sunken transition-colors">
-                <td class="px-4 py-3 font-mono font-bold text-ink tracking-wide">{{ promo.code }}</td>
-                <td class="px-4 py-3 font-semibold text-ink">{{ formatDiscount(promo) }}</td>
-                <td class="px-4 py-3 text-ink-muted">
-                  {{ promo.minOrderAmount ? '€ ' + (+promo.minOrderAmount).toFixed(0) : '—' }}
+                <td class="font-mono font-bold text-ink tracking-wide">{{ promo.code }}</td>
+                <td class="font-semibold text-ink">{{ formatDiscount(promo) }}</td>
+                <td class="text-ink-muted">
+                  {{ promo.minOrderAmount ? formatPrice(promo.minOrderAmount) : '—' }}
                 </td>
-                <td class="px-4 py-3 text-ink-muted">
+                <td class="text-ink-muted">
                   {{ promo._count.uses }}{{ promo.maxUses ? ' / ' + promo.maxUses : '' }}
                 </td>
-                <td class="px-4 py-3 text-ink-muted text-xs">
-                  {{ promo.expiresAt ? (promo.expiresAt | date: 'dd/MM/yyyy') : 'Nessuna' }}
+                <td class="text-ink-muted text-xs">
+                  {{ promo.expiresAt ? (promo.expiresAt | date: 'dd/MM/yyyy') : 'None' }}
                 </td>
-                <td class="px-4 py-3 text-center">
+                <td class="text-center">
                   <button (click)="toggleActive(promo)"
                     class="badge transition-colors cursor-pointer"
-                    [class.bg-success-wash]="promo.isActive" [class.text-success]="promo.isActive"
-                    [class.bg-sunken]="!promo.isActive" [class.text-ink-muted]="!promo.isActive"
+                    [class.badge-success]="promo.isActive" [class.badge-neutral]="!promo.isActive"
                   >
-                    {{ promo.isActive ? 'Attivo' : 'Disattivato' }}
+                    {{ promo.isActive ? 'Active' : 'Deactivated' }}
                   </button>
                 </td>
-                <td class="px-4 py-3 text-right">
+                <td class="text-right">
                   <button (click)="requestDelete(promo.id)"
-                    class="px-3 py-1.5 text-xs border border-transparent text-danger rounded-sm hover:bg-danger-wash transition-colors">
-                    Elimina
+                    class="btn btn-ghost btn-sm text-danger">
+                    Delete
                   </button>
                 </td>
               </tr>
             }
             @empty {
-              <tr><td colspan="7" class="px-4 py-12 text-center text-ink-muted">Nessun codice promo</td></tr>
+              <tr><td colspan="7" class="py-12 text-center text-ink-muted">No promo codes found</td></tr>
             }
           </tbody>
         </table>
       </div>
     </div>
 
+    <!-- Cards: below md -->
+    <div class="md:hidden space-y-3">
+      @for (promo of promoCodes(); track promo.id) {
+        <div class="panel p-4">
+          <div class="flex items-start justify-between gap-3">
+            <p class="font-mono font-bold text-ink tracking-wide">{{ promo.code }}</p>
+            <button (click)="toggleActive(promo)"
+              class="badge flex-shrink-0 transition-colors cursor-pointer"
+              [class.badge-success]="promo.isActive" [class.badge-neutral]="!promo.isActive"
+            >
+              {{ promo.isActive ? 'Active' : 'Deactivated' }}
+            </button>
+          </div>
+          <dl class="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 text-xs">
+            <div>
+              <dt class="label !mb-0.5">Discount</dt>
+              <dd class="text-ink font-semibold">{{ formatDiscount(promo) }}</dd>
+            </div>
+            <div>
+              <dt class="label !mb-0.5">Min. order</dt>
+              <dd class="text-ink">{{ promo.minOrderAmount ? formatPrice(promo.minOrderAmount) : '—' }}</dd>
+            </div>
+            <div>
+              <dt class="label !mb-0.5">Uses</dt>
+              <dd class="text-ink">{{ promo._count.uses }}{{ promo.maxUses ? ' / ' + promo.maxUses : '' }}</dd>
+            </div>
+            <div>
+              <dt class="label !mb-0.5">Expires</dt>
+              <dd class="text-ink">{{ promo.expiresAt ? (promo.expiresAt | date: 'dd/MM/yyyy') : 'None' }}</dd>
+            </div>
+          </dl>
+          <div class="mt-3 pt-3 border-t border-line">
+            <button (click)="requestDelete(promo.id)" class="btn btn-ghost btn-sm text-danger btn-block">
+              Delete
+            </button>
+          </div>
+        </div>
+      }
+      @empty {
+        <div class="panel p-8 text-center text-ink-muted text-sm">No promo codes found</div>
+      }
+    </div>
+
     @if (totalPages() > 1) {
       <div class="flex items-center justify-between mt-4">
-        <p class="text-sm text-ink-muted">Pagina {{ currentPage() }} di {{ totalPages() }}</p>
+        <p class="text-sm text-ink-muted">Page {{ currentPage() }} of {{ totalPages() }}</p>
         <div class="flex gap-1">
           <button (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() === 1" class="btn btn-outline btn-sm">‹</button>
           @for (p of pagesArray(); track p) {
-            <button (click)="goToPage(p)" class="px-3 py-1.5 text-sm border rounded-sm transition-colors"
-              [class.bg-ink]="p === currentPage()" [class.text-white]="p === currentPage()"
-              [class.border-ink]="p === currentPage()" [class.border-line]="p !== currentPage()"
-              [class.hover:bg-sunken]="p !== currentPage()">{{ p }}</button>
+            <button (click)="goToPage(p)" class="btn btn-sm"
+              [class.btn-primary]="p === currentPage()" [class.btn-outline]="p !== currentPage()"
+              [attr.aria-current]="p === currentPage() ? 'page' : null">{{ p }}</button>
           }
           <button (click)="goToPage(currentPage() + 1)" [disabled]="currentPage() === totalPages()" class="btn btn-outline btn-sm">›</button>
         </div>
@@ -124,10 +166,10 @@
 
 <!-- Create Modal -->
 @if (showModal()) {
-  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-    <div class="absolute inset-0 bg-black/40" (click)="closeModal()"></div>
+  <div class="fixed inset-0 z-modal flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-inverse/40" (click)="closeModal()"></div>
     <div class="relative bg-surface rounded-sm shadow-2xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
-      <h3 class="text-lg font-bold text-ink mb-5">Nuovo codice promozionale</h3>
+      <h3 class="text-lg font-bold text-ink mb-5">New promo code</h3>
 
       @if (formError()) {
         <div class="mb-4 bg-danger-wash text-danger px-3 py-2 rounded-sm text-sm">{{ formError() }}</div>
@@ -135,21 +177,21 @@
 
       <form [formGroup]="promoForm" (ngSubmit)="submitForm()" class="space-y-4">
         <div>
-          <label class="block text-sm font-medium text-ink-2 mb-1">Codice *</label>
-          <input formControlName="code" type="text" placeholder="es. ESTATE20"
+          <label class="block text-sm font-medium text-ink-2 mb-1">Code *</label>
+          <input formControlName="code" type="text" placeholder="e.g. SUMMER20"
             class="field font-mono uppercase"/>
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-sm font-medium text-ink-2 mb-1">Tipo sconto *</label>
+            <label class="block text-sm font-medium text-ink-2 mb-1">Discount type *</label>
             <select formControlName="discountType" class="field bg-surface">
-              <option value="percentage">Percentuale (%)</option>
-              <option value="fixed_amount">Importo fisso (€)</option>
+              <option value="percentage">Percentage (%)</option>
+              <option value="fixed_amount">Fixed amount (€)</option>
             </select>
           </div>
           <div>
-            <label class="block text-sm font-medium text-ink-2 mb-1">Valore * {{ isPercentage ? '(%)' : '(€)' }}</label>
+            <label class="block text-sm font-medium text-ink-2 mb-1">Value * {{ isPercentage ? '(%)' : '(€)' }}</label>
             <input formControlName="discountValue" type="number" step="0.01" min="0.01"
               class="field"/>
           </div>
@@ -157,35 +199,33 @@
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-sm font-medium text-ink-2 mb-1">Ordine minimo (€)</label>
-            <input formControlName="minOrderAmount" type="number" step="0.01" min="0" placeholder="Nessun minimo"
+            <label class="block text-sm font-medium text-ink-2 mb-1">Minimum order (€)</label>
+            <input formControlName="minOrderAmount" type="number" step="0.01" min="0" placeholder="No minimum"
               class="field"/>
           </div>
           <div>
-            <label class="block text-sm font-medium text-ink-2 mb-1">Utilizzi massimi</label>
-            <input formControlName="maxUses" type="number" min="1" placeholder="Illimitati"
+            <label class="block text-sm font-medium text-ink-2 mb-1">Maximum uses</label>
+            <input formControlName="maxUses" type="number" min="1" placeholder="Unlimited"
               class="field"/>
           </div>
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-ink-2 mb-1">Data scadenza</label>
+          <label class="block text-sm font-medium text-ink-2 mb-1">Expiry date</label>
           <input formControlName="expiresAt" type="date"
             class="field"/>
         </div>
 
         <div class="flex items-center gap-3">
-          <input formControlName="isActive" type="checkbox" id="promoActive" class="w-4 h-4 accent-gray-900"/>
-          <label for="promoActive" class="text-sm text-ink-2">Attivo subito</label>
+          <input formControlName="isActive" type="checkbox" id="promoActive" class="w-4 h-4 accent-ink"/>
+          <label for="promoActive" class="text-sm text-ink-2">Active immediately</label>
         </div>
 
         <div class="flex gap-3 pt-2">
-          <button type="button" (click)="closeModal()" class="btn btn-outline flex-1 transition-colors">Annulla</button>
+          <button type="button" (click)="closeModal()" class="btn btn-outline flex-1">Cancel</button>
           <button type="submit" [disabled]="promoForm.invalid || formLoading()"
-            class="flex-1 px-4 py-2.5 bg-ink text-white rounded-sm text-sm hover:bg-ink-strong transition-colors disabled:opacity-50">
-            @if (formLoading()) {
-              <span class="inline-block w-4 h-4 border-2 border-line-strong border-t-white rounded-full animate-spin mx-auto"></span>
-            } @else { Crea codice }
+            class="btn flex-1 bg-accent-admin text-ink-strong hover:bg-accent-admin/80" [attr.data-loading]="formLoading() ? 'true' : null">
+            @if (!formLoading()) { Create code }
           </button>
         </div>
       </form>
@@ -195,18 +235,16 @@
 
 <!-- Confirm Delete -->
 @if (confirmDeleteId()) {
-  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-    <div class="absolute inset-0 bg-black/40" (click)="cancelDelete()"></div>
+  <div class="fixed inset-0 z-modal flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-inverse/40" (click)="cancelDelete()"></div>
     <div class="relative bg-surface rounded-sm shadow-2xl max-w-sm w-full p-6">
-      <h3 class="text-lg font-bold text-ink mb-2">Elimina codice promo</h3>
-      <p class="text-ink-muted text-sm mb-6">Questa azione è irreversibile.</p>
+      <h3 class="text-lg font-bold text-ink mb-2">Delete promo code</h3>
+      <p class="text-ink-muted text-sm mb-6">This action is irreversible.</p>
       <div class="flex gap-3">
-        <button (click)="cancelDelete()" class="btn btn-outline flex-1">Annulla</button>
+        <button (click)="cancelDelete()" class="btn btn-outline flex-1">Cancel</button>
         <button (click)="confirmDelete()" [disabled]="deleteLoading() !== null"
-          class="flex-1 px-4 py-2.5 bg-danger text-white rounded-sm text-sm hover:bg-danger disabled:opacity-50">
-          @if (deleteLoading()) {
-            <span class="inline-block w-4 h-4 border-2 border-danger border-t-white rounded-full animate-spin mx-auto"></span>
-          } @else { Elimina }
+          class="btn btn-danger flex-1" [attr.data-loading]="deleteLoading() ? 'true' : null">
+          @if (!deleteLoading()) { Delete }
         </button>
       </div>
     </div>

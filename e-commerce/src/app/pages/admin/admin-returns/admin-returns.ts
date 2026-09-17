@@ -9,6 +9,7 @@ import { formatPrice as formatPriceShared } from '../../../services/format-price
   standalone: true,
   imports: [CommonModule, DatePipe, FormsModule],
   templateUrl: './admin-returns.html',
+  styleUrl: './admin-returns.css',
 })
 export class AdminReturns implements OnInit {
   private readonly adminSvc = inject(AdminService);
@@ -32,12 +33,12 @@ export class AdminReturns implements OnInit {
   updateLoading = signal(false);
 
   readonly allStatuses = [
-    { value: '', label: 'Tutti gli stati' },
-    { value: 'requested', label: 'Richiesto' },
-    { value: 'approved', label: 'Approvato' },
-    { value: 'rejected', label: 'Rifiutato' },
-    { value: 'received', label: 'Ricevuto' },
-    { value: 'refunded', label: 'Rimborsato' },
+    { value: '', label: 'All statuses' },
+    { value: 'requested', label: 'Requested' },
+    { value: 'approved', label: 'Approved' },
+    { value: 'rejected', label: 'Rejected' },
+    { value: 'received', label: 'Received' },
+    { value: 'refunded', label: 'Refunded' },
   ];
 
   readonly statusColors: Record<string, string> = {
@@ -64,7 +65,7 @@ export class AdminReturns implements OnInit {
         this.totalPages.set(res.meta.totalPages);
         this.loading.set(false);
       },
-      error: () => { this.error.set('Impossibile caricare i resi'); this.loading.set(false); },
+      error: () => { this.error.set('Unable to load returns'); this.loading.set(false); },
     });
   }
 
@@ -101,12 +102,12 @@ export class AdminReturns implements OnInit {
         this.returns.update(list => list.map(x => x.id === updated.id ? updated : x));
         this.selectedReturn.set(updated);
         this.updateLoading.set(false);
-        this.actionSuccess.set('Stato reso aggiornato');
+        this.actionSuccess.set('Return status updated');
         setTimeout(() => this.actionSuccess.set(null), 3000);
       },
       error: () => {
         this.updateLoading.set(false);
-        this.error.set('Errore aggiornamento stato');
+        this.error.set('Error updating the status');
       },
     });
   }

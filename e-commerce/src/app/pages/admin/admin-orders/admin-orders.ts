@@ -37,15 +37,15 @@ export class AdminOrders implements OnInit {
   statusLoading = signal(false);
 
   readonly allStatuses = [
-    { value: '', label: 'Tutti gli stati' },
-    { value: 'pending', label: 'In attesa' },
-    { value: 'paid', label: 'Pagato' },
-    { value: 'processing', label: 'In lavorazione' },
-    { value: 'shipped', label: 'Spedito' },
-    { value: 'delivered', label: 'Consegnato' },
-    { value: 'completed', label: 'Completato' },
-    { value: 'cancelled', label: 'Annullato' },
-    { value: 'refunded', label: 'Rimborsato' },
+    { value: '', label: 'All statuses' },
+    { value: 'pending', label: 'Pending' },
+    { value: 'paid', label: 'Paid' },
+    { value: 'processing', label: 'Processing' },
+    { value: 'shipped', label: 'Shipped' },
+    { value: 'delivered', label: 'Delivered' },
+    { value: 'completed', label: 'Completed' },
+    { value: 'cancelled', label: 'Cancelled' },
+    { value: 'refunded', label: 'Refunded' },
   ];
 
   readonly statusColors: Record<string, string> = {
@@ -79,7 +79,7 @@ export class AdminOrders implements OnInit {
         this.loading.set(false);
       },
       error: () => {
-        this.error.set('Impossibile caricare gli ordini');
+        this.error.set('Unable to load orders');
         this.loading.set(false);
       },
     });
@@ -115,7 +115,7 @@ export class AdminOrders implements OnInit {
       error: () => {
         this.detailLoading.set(false);
         this.showDetail.set(false);
-        this.error.set('Impossibile caricare i dettagli');
+        this.error.set('Unable to load order details');
       },
     });
   }
@@ -134,13 +134,13 @@ export class AdminOrders implements OnInit {
         this.orders.update(list => list.map(o => o.id === updated.id ? { ...o, status: updated.status } : o));
         this.selectedOrder.update(o => o ? { ...o, status: updated.status } : o);
         this.statusLoading.set(false);
-        this.actionSuccess.set(`Stato ordine aggiornato a "${this.statusLabel(updated.status)}"`);
+        this.actionSuccess.set(`Order status updated to "${this.statusLabel(updated.status)}"`);
         this.statusNote = '';
         setTimeout(() => this.actionSuccess.set(null), 3000);
       },
       error: () => {
         this.statusLoading.set(false);
-        this.error.set('Impossibile aggiornare lo stato');
+        this.error.set('Unable to update the status');
       },
     });
   }

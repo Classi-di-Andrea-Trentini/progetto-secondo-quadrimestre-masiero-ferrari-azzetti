@@ -6,9 +6,36 @@
 
 .admin-shell {
   display: flex;
+  flex-direction: column;
   height: 100dvh;
   overflow: hidden;
   background: var(--color-paper);
+}
+
+/* Barra superiore: solo sotto `lg`, dove la sidebar smette di essere fissa e
+   diventa un drawer — e' l'unico punto che resta sempre visibile per aprirlo. */
+.admin-topbar {
+  display: none;
+  align-items: center;
+  gap: 0.75rem;
+  height: 3.5rem;
+  padding: 0 1rem;
+  border-bottom: 1px solid var(--color-line);
+  background: var(--color-surface);
+  flex-shrink: 0;
+}
+
+.admin-backdrop {
+  position: fixed;
+  inset: 0;
+  background: oklch(0 0 0 / 0.4);
+  z-index: 35;
+}
+
+.admin-body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
 }
 
 .admin-sidebar {
@@ -18,7 +45,9 @@
   width: 14rem;
   background: var(--color-surface);
   border-right: 1px solid var(--color-line);
-  transition: width 260ms var(--ease-out-expo);
+  transition:
+    width 260ms var(--ease-out-expo),
+    transform 260ms var(--ease-out-expo);
 }
 
 .admin-sidebar.is-collapsed {
@@ -143,36 +172,63 @@
   background: var(--color-paper);
 }
 
-/* Sotto i 640px la sidebar resta sempre la barra stretta: a 14rem su un
-   telefono mangiava meta' schermo alla tabella. */
-@media (max-width: 640px) {
-  .admin-sidebar,
-  .admin-sidebar.is-collapsed {
-    width: 3.25rem;
+/* Sotto `lg` (1024px) la sidebar smette di essere una colonna fissa: a 14rem
+   su un telefono mangiava meta' schermo alla tabella. Diventa un drawer fuori
+   schermo, aperto dall'hamburger della topbar e chiuso dal backdrop o da un
+   click su una voce — il collapse a icone resta un affare da desktop. */
+@media (max-width: 1023.98px) {
+  .admin-topbar {
+    display: flex;
   }
 
-  .admin-sidebar .admin-brand,
-  .admin-sidebar-head .admin-icon-btn {
+  .admin-sidebar,
+  .admin-sidebar.is-collapsed {
+    position: fixed;
+    inset-block: 0;
+    left: 0;
+    width: 16rem;
+    max-width: 82vw;
+    transform: translateX(-100%);
+    z-index: 40;
+    box-shadow: none;
+  }
+
+  .admin-sidebar.is-mobile-open {
+    transform: translateX(0);
+    box-shadow: 8px 0 24px oklch(0 0 0 / 0.12);
+  }
+
+  /* La topbar mostra gia' marchio e apertura: l'intestazione interna del
+     drawer sarebbe un duplicato. */
+  .admin-sidebar-head {
     display: none;
   }
 
+  /* Nel drawer aperto le etichette restano leggibili per intero: qui non c'e'
+     un collapse a icone, solo aperto o chiuso. */
   .admin-sidebar .admin-nav-item,
   .admin-sidebar .admin-foot-btn {
-    justify-content: center;
-    padding-inline: 0;
+    justify-content: flex-start;
+    padding-inline: 1rem;
   }
 
-  .admin-sidebar .admin-nav-item span:not(.sr-only),
-  .admin-sidebar .admin-foot-btn span:not(.sr-only) {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
+  .admin-sidebar .admin-nav-item span,
+  .admin-sidebar .admin-foot-btn span {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip-path: none;
     white-space: nowrap;
   }
 
   .admin-sidebar-foot > div {
+    display: flex;
+  }
+}
+
+@media (min-width: 1024px) {
+  .admin-backdrop {
     display: none;
   }
 }

@@ -3,15 +3,15 @@
   <!-- Header -->
   <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
     <div>
-      <h1 class="text-2xl font-bold text-ink">Prodotti</h1>
-      <p class="text-ink-muted text-sm mt-1">{{ total() }} prodotti nel catalogo</p>
+      <h1 class="text-2xl font-bold text-ink">Products</h1>
+      <p class="text-ink-muted text-sm mt-1">{{ total() }} products in the catalogue</p>
     </div>
     <button (click)="openCreate()"
       class="btn btn-primary">
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
       </svg>
-      Nuovo prodotto
+      New Product
     </button>
   </div>
 
@@ -29,37 +29,38 @@
         <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
         </svg>
-        <input [(ngModel)]="search" (keyup.enter)="onSearch()" type="text" placeholder="Cerca per nome o slug…"
+        <input [(ngModel)]="search" (keyup.enter)="onSearch()" type="text" placeholder="Search by name or slug…"
           class="field pl-9"/>
       </div>
       <select [(ngModel)]="isActiveFilter" (change)="onFilter()"
         class="field field-auto">
-        <option value="">Tutti i prodotti</option>
-        <option value="true">Solo attivi</option>
-        <option value="false">Solo inattivi</option>
+        <option value="">All products</option>
+        <option value="true">Active only</option>
+        <option value="false">Hidden only</option>
       </select>
-      <button (click)="onSearch()" class="btn btn-primary">Cerca</button>
+      <button (click)="onSearch()" class="btn btn-primary">Search</button>
     </div>
   </div>
 
-  <!-- Table -->
+  <!-- Table / cards -->
   @if (loading()) {
     <div class="flex items-center justify-center h-48">
       <div class="w-7 h-7 border-4 border-line-strong border-t-ink rounded-full animate-spin"></div>
     </div>
   } @else {
-    <div class="panel overflow-hidden">
+    <!-- Table: md and up -->
+    <div class="panel overflow-hidden hidden md:block">
       <div class="table-wrap">
         <table class="table">
           <thead>
             <tr>
-              <th class="text-left">Prodotto</th>
-              <th class="text-left">Categoria</th>
-              <th class="text-right">Prezzo</th>
-              <th class="text-right">Varianti</th>
-              <th class="text-right">Vendite</th>
-              <th class="text-center">Stato</th>
-              <th class="text-right">Azioni</th>
+              <th class="text-left">Product</th>
+              <th class="text-left">Category</th>
+              <th class="text-right">Price</th>
+              <th class="text-right">Variants</th>
+              <th class="text-right">Sold</th>
+              <th class="text-center">Status</th>
+              <th class="text-right">Actions</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-line">
@@ -83,34 +84,82 @@
                 <td class="text-center">
                   <span class="badge"
                     [class.badge-success]="product.isActive" [class.badge-neutral]="!product.isActive">
-                    {{ product.isActive ? 'Attivo' : 'Nascosto' }}
+                    {{ product.isActive ? 'Active' : 'Hidden' }}
                   </span>
                 </td>
                 <td>
                   <div class="flex items-center justify-end gap-2">
                     <button (click)="openEdit(product)"
                       class="btn btn-outline btn-sm">
-                      Modifica
+                      Edit
                     </button>
                     <button (click)="requestDelete(product.id)"
                       class="btn btn-ghost btn-sm text-danger">
-                      Elimina
+                      Delete
                     </button>
                   </div>
                 </td>
               </tr>
             }
             @empty {
-              <tr><td colspan="7" class="py-12 text-center text-ink-muted">Nessun prodotto trovato</td></tr>
+              <tr><td colspan="7" class="py-12 text-center text-ink-muted">No products found</td></tr>
             }
           </tbody>
         </table>
       </div>
     </div>
 
+    <!-- Cards: below md -->
+    <div class="md:hidden space-y-3">
+      @for (product of products(); track product.id) {
+        <div class="panel p-4">
+          <div class="flex items-start justify-between gap-3">
+            <div class="flex items-center gap-3 min-w-0">
+              <div class="w-10 h-10 rounded-sm overflow-hidden bg-sunken flex-shrink-0">
+                <app-product-image [src]="product.images[0]?.url" [alt]="product.name" fit="contain" />
+              </div>
+              <div class="min-w-0">
+                <p class="font-medium text-ink truncate">{{ product.name }}</p>
+                <p class="text-xs text-ink-muted font-mono truncate">{{ product.slug }}</p>
+              </div>
+            </div>
+            <span class="badge flex-shrink-0"
+              [class.badge-success]="product.isActive" [class.badge-neutral]="!product.isActive">
+              {{ product.isActive ? 'Active' : 'Hidden' }}
+            </span>
+          </div>
+          <dl class="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 text-xs">
+            <div>
+              <dt class="label !mb-0.5">Category</dt>
+              <dd class="text-ink">{{ product.category?.name ?? '—' }}</dd>
+            </div>
+            <div>
+              <dt class="label !mb-0.5">Price</dt>
+              <dd class="text-ink font-semibold">{{ formatPrice(product.basePrice) }}</dd>
+            </div>
+            <div>
+              <dt class="label !mb-0.5">Variants</dt>
+              <dd class="text-ink">{{ product._count.variants }}</dd>
+            </div>
+            <div>
+              <dt class="label !mb-0.5">Sold</dt>
+              <dd class="text-ink">{{ product.soldCount }}</dd>
+            </div>
+          </dl>
+          <div class="mt-3 pt-3 border-t border-line flex gap-2">
+            <button (click)="openEdit(product)" class="btn btn-outline btn-sm flex-1">Edit</button>
+            <button (click)="requestDelete(product.id)" class="btn btn-ghost btn-sm text-danger">Delete</button>
+          </div>
+        </div>
+      }
+      @empty {
+        <div class="panel p-8 text-center text-ink-muted text-sm">No products found</div>
+      }
+    </div>
+
     @if (totalPages() > 1) {
       <div class="flex items-center justify-between mt-4">
-        <p class="text-sm text-ink-muted">Pagina {{ currentPage() }} di {{ totalPages() }}</p>
+        <p class="text-sm text-ink-muted">Page {{ currentPage() }} of {{ totalPages() }}</p>
         <div class="flex gap-1">
           <button (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() === 1" class="btn btn-outline btn-sm">‹</button>
           @for (p of pagesArray(); track p) {
@@ -136,7 +185,7 @@
       <!-- Modal header -->
       <div class="flex items-center justify-between px-6 pt-5 pb-4 border-b border-line">
         <h3 class="text-lg font-bold text-ink">
-          {{ editingProduct() ? 'Modifica prodotto' : 'Nuovo prodotto' }}
+          {{ editingProduct() ? 'Edit product' : 'New product' }}
         </h3>
         <button (click)="closeModal()" class="p-1.5 rounded-sm hover:bg-sunken transition-colors">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -162,7 +211,7 @@
             [class.text-ink]="activeTab() === 'variants'"
             [class.border-transparent]="activeTab() !== 'variants'"
             [class.text-ink-muted]="activeTab() !== 'variants'">
-            Varianti
+            Variants
             <span class="badge badge-neutral ml-1.5">
               {{ editingProduct()!.variants.length }}
             </span>
@@ -173,7 +222,7 @@
             [class.text-ink]="activeTab() === 'images'"
             [class.border-transparent]="activeTab() !== 'images'"
             [class.text-ink-muted]="activeTab() !== 'images'">
-            Immagini
+            Images
             <span class="badge badge-neutral ml-1.5">
               {{ editingProduct()!.images.length }}
             </span>
@@ -198,87 +247,87 @@
           @if (activeTab() === 'info') {
             <form [formGroup]="productForm" (ngSubmit)="submitForm()" class="space-y-4">
               <div>
-                <label class="block text-sm font-medium text-ink-2 mb-1">Nome *</label>
+                <label class="block text-sm font-medium text-ink-2 mb-1">Name *</label>
                 <input formControlName="name" (blur)="autoSlug()" type="text"
                   class="field"
-                  placeholder="Nome del prodotto"/>
+                  placeholder="Product name"/>
               </div>
               <div>
                 <label class="block text-sm font-medium text-ink-2 mb-1">
-                  Slug * <span class="text-ink-muted font-normal">(lettere minuscole, numeri, trattini)</span>
+                  Slug * <span class="text-ink-muted font-normal">(lowercase letters, numbers, hyphens)</span>
                 </label>
                 <input formControlName="slug" type="text"
                   class="field font-mono"
-                  placeholder="nome-prodotto"/>
+                  placeholder="product-name"/>
               </div>
               <div>
-                <label class="block text-sm font-medium text-ink-2 mb-1">Categoria *</label>
+                <label class="block text-sm font-medium text-ink-2 mb-1">Category *</label>
                 @if (showNewCategory()) {
                   <div class="flex flex-col sm:flex-row gap-2">
                     <input [(ngModel)]="newCategoryName" [ngModelOptions]="{ standalone: true }"
                       (keyup.enter)="createCategory()" type="text"
-                      class="field" placeholder="Nome della nuova categoria"/>
+                      class="field" placeholder="New category name"/>
                     <div class="flex gap-2">
                       <button type="button" (click)="createCategory()" [disabled]="categoryLoading()"
-                        class="btn btn-primary whitespace-nowrap">Crea</button>
+                        class="btn btn-primary whitespace-nowrap">Create</button>
                       <button type="button" (click)="showNewCategory.set(false)"
-                        class="btn btn-outline whitespace-nowrap">Annulla</button>
+                        class="btn btn-outline whitespace-nowrap">Cancel</button>
                     </div>
                   </div>
                 } @else {
                   <div class="flex flex-col sm:flex-row gap-2">
                     <select formControlName="categoryId" class="field">
-                      <option value="">Scegli una categoria…</option>
+                      <option value="">Choose a category…</option>
                       @for (c of categories(); track c.id) {
                         <option [value]="c.id">{{ categoryLabel(c) }}</option>
                       }
                     </select>
                     <button type="button" (click)="showNewCategory.set(true)"
-                      class="btn btn-outline whitespace-nowrap">+ Nuova</button>
+                      class="btn btn-outline whitespace-nowrap">+ New</button>
                   </div>
                 }
               </div>
               <div>
-                <label class="block text-sm font-medium text-ink-2 mb-1">Marca</label>
-                <input formControlName="brand" type="text" class="field" placeholder="Marca o produttore"/>
+                <label class="block text-sm font-medium text-ink-2 mb-1">Brand</label>
+                <input formControlName="brand" type="text" class="field" placeholder="Brand or manufacturer"/>
               </div>
               <div>
                 <label class="block text-sm font-medium text-ink-2 mb-1">
-                  Sottotitolo <span class="text-ink-muted font-normal">(la riga sotto il nome, a catalogo)</span>
+                  Subtitle <span class="text-ink-muted font-normal">(the line under the name, in the catalogue)</span>
                 </label>
-                <input formControlName="shortDesc" type="text" class="field" placeholder="Cotone biologico, taglio dritto"/>
+                <input formControlName="shortDesc" type="text" class="field" placeholder="Organic cotton, straight cut"/>
               </div>
               <div>
-                <label class="block text-sm font-medium text-ink-2 mb-1">Descrizione</label>
+                <label class="block text-sm font-medium text-ink-2 mb-1">Description</label>
                 <textarea formControlName="description" rows="3"
                   class="field resize-none"
-                  placeholder="Descrizione del prodotto…"></textarea>
+                  placeholder="Product description…"></textarea>
               </div>
               <div>
-                <label class="block text-sm font-medium text-ink-2 mb-1">Prezzo base (€) *</label>
+                <label class="block text-sm font-medium text-ink-2 mb-1">Base price (€) *</label>
                 <input formControlName="basePrice" type="number" step="0.01" min="0"
                   class="field"/>
               </div>
               <div class="flex items-center gap-3">
                 <input formControlName="isActive" type="checkbox" id="isActive" class="w-4 h-4 accent-ink"/>
-                <label for="isActive" class="text-sm text-ink-2">Prodotto attivo (visibile ai clienti)</label>
+                <label for="isActive" class="text-sm text-ink-2">Active (visible to customers)</label>
               </div>
               <div class="flex items-center gap-3">
                 <input formControlName="isNewArrival" type="checkbox" id="isNewArrival" class="w-4 h-4 accent-ink"/>
-                <label for="isNewArrival" class="text-sm text-ink-2">Novità (compare fra gli arrivi in home)</label>
+                <label for="isNewArrival" class="text-sm text-ink-2">New arrival (shown on the home page)</label>
               </div>
               <div class="flex items-center gap-3">
                 <input formControlName="isFeatured" type="checkbox" id="isFeatured" class="w-4 h-4 accent-ink"/>
-                <label for="isFeatured" class="text-sm text-ink-2">In evidenza (vetrina della home)</label>
+                <label for="isFeatured" class="text-sm text-ink-2">Featured (home page showcase)</label>
               </div>
               <div class="flex gap-3 pt-2">
                 <button type="button" (click)="closeModal()"
                   class="btn btn-outline flex-1">
-                  Annulla
+                  Cancel
                 </button>
                 <button type="submit" [disabled]="productForm.invalid || formLoading()"
-                  class="btn btn-primary flex-1" [attr.data-loading]="formLoading() ? 'true' : null">
-                  {{ editingProduct() ? 'Salva modifiche' : 'Crea prodotto' }}
+                  class="btn flex-1 bg-accent-admin text-ink-strong hover:bg-accent-admin/80" [attr.data-loading]="formLoading() ? 'true' : null">
+                  {{ editingProduct() ? 'Save changes' : 'Create product' }}
                 </button>
               </div>
             </form>
@@ -291,7 +340,7 @@
               <!-- Variant list -->
               @if (editingProduct()!.variants.length === 0 && !showVariantForm()) {
                 <div class="text-center py-10 text-ink-muted text-sm">
-                  Nessuna variante — aggiungi taglia, colore o materiale
+                  No variants yet — add a size, colour or material
                 </div>
               }
 
@@ -312,11 +361,13 @@
                       @if (v.priceOverride) {
                         <p class="text-xs font-medium text-ink">{{ formatPrice(v.priceOverride) }}</p>
                       }
-                      <p class="text-xs text-ink-muted">Stock: {{ v.stockQty }}</p>
+                      <span class="badge" [class]="stockBadgeClass(v.stockQty)">
+                        {{ stockState(v.stockQty) }} · {{ v.stockQty }}
+                      </span>
                     </div>
                     <span class="badge"
                       [class.badge-success]="v.isActive" [class.badge-neutral]="!v.isActive">
-                      {{ v.isActive ? 'Attiva' : 'Off' }}
+                      {{ v.isActive ? 'Active' : 'Off' }}
                     </span>
                     <button (click)="openEditVariant(v)"
                       class="p-1.5 rounded-sm hover:bg-surface border border-transparent hover:border-line transition-colors">
@@ -338,7 +389,7 @@
               @if (showVariantForm()) {
                 <div class="border border-line rounded-sm p-4 mt-3 bg-surface">
                   <h4 class="text-sm font-semibold text-ink mb-3">
-                    {{ editingVariant() ? 'Modifica variante' : 'Nuova variante' }}
+                    {{ editingVariant() ? 'Edit variant' : 'New variant' }}
                   </h4>
                   @if (variantFormError()) {
                     <div class="mb-3 bg-danger-wash text-danger px-3 py-2 rounded-sm text-xs">{{ variantFormError() }}</div>
@@ -351,27 +402,27 @@
                           class="field font-mono"/>
                       </div>
                       <div>
-                        <label class="block text-xs font-medium text-ink-2 mb-1">Taglia</label>
+                        <label class="block text-xs font-medium text-ink-2 mb-1">Size</label>
                         <input formControlName="size" type="text" placeholder="S, M, L, XL…"
                           class="field"/>
                       </div>
                       <div>
-                        <label class="block text-xs font-medium text-ink-2 mb-1">Colore</label>
-                        <input formControlName="color" type="text" placeholder="Nero, Bianco…"
+                        <label class="block text-xs font-medium text-ink-2 mb-1">Colour</label>
+                        <input formControlName="color" type="text" placeholder="Black, White…"
                           class="field"/>
                       </div>
                       <div>
-                        <label class="block text-xs font-medium text-ink-2 mb-1">Hex colore</label>
+                        <label class="block text-xs font-medium text-ink-2 mb-1">Colour hex</label>
                         <input formControlName="colorHex" type="text" placeholder="#000000"
                           class="field font-mono"/>
                       </div>
                       <div>
-                        <label class="block text-xs font-medium text-ink-2 mb-1">Materiale</label>
-                        <input formControlName="material" type="text" placeholder="Cotone, Lana…"
+                        <label class="block text-xs font-medium text-ink-2 mb-1">Material</label>
+                        <input formControlName="material" type="text" placeholder="Cotton, Wool…"
                           class="field"/>
                       </div>
                       <div>
-                        <label class="block text-xs font-medium text-ink-2 mb-1">Prezzo override (€)</label>
+                        <label class="block text-xs font-medium text-ink-2 mb-1">Price override (€)</label>
                         <input formControlName="priceOverride" type="number" step="0.01" min="0" placeholder="—"
                           class="field"/>
                       </div>
@@ -382,17 +433,17 @@
                       </div>
                       <div class="flex items-center gap-2 pt-5">
                         <input formControlName="isActive" type="checkbox" id="variantActive" class="w-4 h-4 accent-ink"/>
-                        <label for="variantActive" class="text-xs text-ink-2">Attiva</label>
+                        <label for="variantActive" class="text-xs text-ink-2">Active</label>
                       </div>
                     </div>
                     <div class="flex gap-2 pt-1">
                       <button type="button" (click)="cancelVariantForm()"
                         class="btn btn-outline btn-sm flex-1">
-                        Annulla
+                        Cancel
                       </button>
                       <button type="submit" [disabled]="variantForm.invalid || variantFormLoading()"
-                        class="btn btn-primary btn-sm flex-1" [attr.data-loading]="variantFormLoading() ? 'true' : null">
-                        {{ editingVariant() ? 'Salva' : 'Aggiungi' }}
+                        class="btn btn-sm flex-1 bg-accent-admin text-ink-strong hover:bg-accent-admin/80" [attr.data-loading]="variantFormLoading() ? 'true' : null">
+                        {{ editingVariant() ? 'Save' : 'Add' }}
                       </button>
                     </div>
                   </form>
@@ -403,7 +454,7 @@
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                   </svg>
-                  Aggiungi variante
+                  Add variant
                 </button>
               }
             </div>
@@ -430,12 +481,12 @@
                         @if (!img.isCover) {
                           <button (click)="setCover(img.id)"
                             class="btn btn-outline btn-sm bg-surface">
-                            Imposta cover
+                            Set as cover
                           </button>
                         }
                         <button (click)="deleteImage(img.id)"
                           class="btn btn-danger btn-sm">
-                          Elimina
+                          Delete
                         </button>
                       </div>
                       <!-- Cover badge -->
@@ -449,11 +500,11 @@
                 </div>
               } @else if (!showImageForm()) {
                 <div class="text-center py-10 text-ink-muted text-sm">
-                  Nessuna immagine — aggiungi un URL per iniziare
+                  No images yet — add a URL to get started
                 </div>
               }
 
-              <!-- Image form: upload o URL -->
+              <!-- Image form: upload or URL -->
               @if (showImageForm()) {
                 <div class="panel p-4">
 
@@ -464,7 +515,7 @@
                       [class.btn-primary]="imageMode === 'upload'"
                       [class.btn-ghost]="imageMode !== 'upload'"
                       [attr.aria-pressed]="imageMode === 'upload'">
-                      Carica file
+                      Upload file
                     </button>
                     <button type="button" (click)="imageMode = 'url'; imagePreview.set(null); imageFile = null"
                       class="btn btn-sm"
@@ -489,7 +540,7 @@
                             <svg class="w-8 h-8 text-ink-muted mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                             </svg>
-                            <p class="text-xs text-ink-muted">Clicca o trascina un'immagine</p>
+                            <p class="text-xs text-ink-muted">Click or drag an image here</p>
                             <p class="text-xs text-ink-muted mt-1">JPG, PNG, WebP — max 5 MB</p>
                           }
                         </div>
@@ -498,19 +549,19 @@
                     } @else {
                       <!-- URL mode -->
                       <div>
-                        <label class="block text-xs font-medium text-ink-2 mb-1">URL immagine *</label>
+                        <label class="block text-xs font-medium text-ink-2 mb-1">Image URL *</label>
                         <input [(ngModel)]="imageUrl" type="url" placeholder="https://…"
                           class="field"/>
                       </div>
                       <div>
-                        <label class="block text-xs font-medium text-ink-2 mb-1">Alt text (opzionale)</label>
-                        <input [(ngModel)]="imageAlt" type="text" placeholder="Descrizione immagine…"
+                        <label class="block text-xs font-medium text-ink-2 mb-1">Alt text (optional)</label>
+                        <input [(ngModel)]="imageAlt" type="text" placeholder="Image description…"
                           class="field"/>
                       </div>
                       @if (imageUrl.trim()) {
                         <div class="rounded-sm overflow-hidden border border-line h-28 bg-sunken">
                           <img [src]="imageUrl" class="w-full h-full object-contain" alt="preview"
-                            (error)="imageFormError.set('URL non valido o immagine non raggiungibile')"/>
+                            (error)="imageFormError.set('Invalid URL or image unreachable')"/>
                         </div>
                       }
                     }
@@ -518,11 +569,11 @@
                     <div class="flex gap-2">
                       <button type="button" (click)="cancelImageForm()"
                         class="btn btn-outline btn-sm flex-1">
-                        Annulla
+                        Cancel
                       </button>
                       <button type="button" (click)="saveImage()" [disabled]="imageFormLoading()"
-                        class="btn btn-primary btn-sm flex-1" [attr.data-loading]="imageFormLoading() ? 'true' : null">
-                        Aggiungi
+                        class="btn btn-sm flex-1 bg-accent-admin text-ink-strong hover:bg-accent-admin/80" [attr.data-loading]="imageFormLoading() ? 'true' : null">
+                        Add
                       </button>
                     </div>
                   </div>
@@ -533,7 +584,7 @@
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                   </svg>
-                  Aggiungi immagine
+                  Add image
                 </button>
               }
             </div>
@@ -550,13 +601,13 @@
   <div class="fixed inset-0 z-modal flex items-center justify-center p-4">
     <div class="absolute inset-0 bg-inverse/40" (click)="cancelDelete()"></div>
     <div class="relative bg-surface rounded-sm shadow-2xl max-w-sm w-full p-6">
-      <h3 class="text-lg font-bold text-ink mb-2">Elimina prodotto</h3>
-      <p class="text-ink-muted text-sm mb-6">Questa azione è irreversibile. Il prodotto e tutte le sue varianti verranno eliminati.</p>
+      <h3 class="text-lg font-bold text-ink mb-2">Delete product</h3>
+      <p class="text-ink-muted text-sm mb-6">This action is irreversible. The product and all of its variants will be deleted.</p>
       <div class="flex gap-3">
-        <button (click)="cancelDelete()" class="btn btn-outline flex-1">Annulla</button>
+        <button (click)="cancelDelete()" class="btn btn-outline flex-1">Cancel</button>
         <button (click)="confirmDelete()" [disabled]="deleteLoading()"
           class="btn btn-danger flex-1" [attr.data-loading]="deleteLoading() ? 'true' : null">
-          Elimina
+          Delete
         </button>
       </div>
     </div>

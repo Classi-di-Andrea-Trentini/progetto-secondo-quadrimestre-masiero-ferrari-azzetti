@@ -2,8 +2,8 @@
 
   <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
     <div>
-      <h1 class="text-2xl font-bold text-ink">Resi</h1>
-      <p class="text-ink-muted text-sm mt-1">{{ total() }} resi totali</p>
+      <h1 class="text-2xl font-bold text-ink">Returns</h1>
+      <p class="text-ink-muted text-sm mt-1">{{ total() }} returns total</p>
     </div>
   </div>
 
@@ -15,13 +15,13 @@
   }
 
   <!-- Filters -->
-  <div class="bg-surface border border-line rounded-sm shadow-sm p-4 mb-6">
+  <div class="panel p-4 mb-6">
     <div class="flex flex-col sm:flex-row gap-3">
       <div class="relative flex-1">
         <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
         </svg>
-        <input [(ngModel)]="search" (keyup.enter)="onSearch()" type="text" placeholder="Cerca utente o ordine…"
+        <input [(ngModel)]="search" (keyup.enter)="onSearch()" type="text" placeholder="Search user or order…"
           class="field pl-9"/>
       </div>
       <select [(ngModel)]="statusFilter" (change)="onFilter()"
@@ -30,7 +30,7 @@
           <option [value]="s.value">{{ s.label }}</option>
         }
       </select>
-      <button (click)="onSearch()" class="btn btn-primary">Cerca</button>
+      <button (click)="onSearch()" class="btn btn-primary">Search</button>
     </div>
   </div>
 
@@ -39,64 +39,103 @@
       <div class="w-7 h-7 border-4 border-line-strong border-t-gray-900 rounded-full animate-spin"></div>
     </div>
   } @else {
-    <div class="bg-surface border border-line rounded-sm shadow-sm overflow-hidden">
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead class="bg-sunken border-b border-line">
+    <!-- Table: md and up -->
+    <div class="panel overflow-hidden hidden md:block">
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
             <tr>
-              <th class="text-left px-4 py-3 text-2xs font-bold uppercase tracking-[0.09em] text-ink-2">Utente</th>
-              <th class="text-left px-4 py-3 text-2xs font-bold uppercase tracking-[0.09em] text-ink-2">Ordine</th>
-              <th class="text-left px-4 py-3 text-2xs font-bold uppercase tracking-[0.09em] text-ink-2">Motivazione</th>
-              <th class="text-center px-4 py-3 text-2xs font-bold uppercase tracking-[0.09em] text-ink-2">Stato</th>
-              <th class="text-right px-4 py-3 text-2xs font-bold uppercase tracking-[0.09em] text-ink-2">Rimborso</th>
-              <th class="text-right px-4 py-3 text-2xs font-bold uppercase tracking-[0.09em] text-ink-2">Data</th>
-              <th class="text-right px-4 py-3 text-2xs font-bold uppercase tracking-[0.09em] text-ink-2">Azioni</th>
+              <th class="text-left">User</th>
+              <th class="text-left">Order</th>
+              <th class="text-left">Reason</th>
+              <th class="text-center">Status</th>
+              <th class="text-right">Refund</th>
+              <th class="text-right">Date</th>
+              <th class="text-right">Actions</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-line">
             @for (r of returns(); track r.id) {
               <tr class="hover:bg-sunken transition-colors">
-                <td class="px-4 py-3">
+                <td>
                   <p class="font-medium text-ink text-xs">{{ r.user.fullName }}</p>
                   <p class="text-ink-muted text-xs">{{ r.user.email }}</p>
                 </td>
-                <td class="px-4 py-3 font-mono text-xs text-ink-muted">{{ r.order.id.slice(0, 8) }}…</td>
-                <td class="px-4 py-3 max-w-xs">
+                <td class="font-mono text-xs text-ink-muted">{{ r.order.id.slice(0, 8) }}…</td>
+                <td class="max-w-xs">
                   <p class="text-ink-2 text-xs truncate">{{ r.reason }}</p>
                 </td>
-                <td class="px-4 py-3 text-center">
+                <td class="text-center">
                   <span class="badge" [class]="statusColor(r.status)">
                     {{ statusLabel(r.status) }}
                   </span>
                 </td>
-                <td class="px-4 py-3 text-right text-xs text-ink-2">{{ formatPrice(r.refundAmount) }}</td>
-                <td class="px-4 py-3 text-right text-ink-muted text-xs">{{ r.createdAt | date: 'dd/MM/yy' }}</td>
-                <td class="px-4 py-3 text-right">
-                  <button (click)="openDetail(r)"
-                    class="px-2.5 py-1 text-xs border border-line text-ink-2 rounded-sm hover:bg-sunken transition-colors">
-                    Gestisci
+                <td class="num text-xs text-ink-2">{{ formatPrice(r.refundAmount) }}</td>
+                <td class="num text-ink-muted text-xs">{{ r.createdAt | date: 'dd/MM/yy' }}</td>
+                <td class="text-right">
+                  <button (click)="openDetail(r)" class="btn btn-outline btn-sm">
+                    Manage
                   </button>
                 </td>
               </tr>
             }
             @empty {
-              <tr><td colspan="7" class="px-4 py-12 text-center text-ink-muted">Nessun reso trovato</td></tr>
+              <tr><td colspan="7" class="py-12 text-center text-ink-muted">No returns found</td></tr>
             }
           </tbody>
         </table>
       </div>
     </div>
 
+    <!-- Cards: below md -->
+    <div class="md:hidden space-y-3">
+      @for (r of returns(); track r.id) {
+        <div class="panel p-4">
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+              <p class="font-medium text-ink text-xs truncate">{{ r.user.fullName }}</p>
+              <p class="text-ink-muted text-xs truncate">{{ r.user.email }}</p>
+              <p class="text-ink-muted text-xs font-mono mt-0.5">{{ r.order.id.slice(0, 8) }}…</p>
+            </div>
+            <span class="badge flex-shrink-0" [class]="statusColor(r.status)">
+              {{ statusLabel(r.status) }}
+            </span>
+          </div>
+          <dl class="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 text-xs">
+            <div class="col-span-2">
+              <dt class="label !mb-0.5">Reason</dt>
+              <dd class="text-ink-2">{{ r.reason }}</dd>
+            </div>
+            <div>
+              <dt class="label !mb-0.5">Refund</dt>
+              <dd class="text-ink">{{ formatPrice(r.refundAmount) }}</dd>
+            </div>
+            <div>
+              <dt class="label !mb-0.5">Date</dt>
+              <dd class="text-ink">{{ r.createdAt | date: 'dd/MM/yy' }}</dd>
+            </div>
+          </dl>
+          <div class="mt-3 pt-3 border-t border-line">
+            <button (click)="openDetail(r)" class="btn btn-outline btn-sm btn-block">
+              Manage
+            </button>
+          </div>
+        </div>
+      }
+      @empty {
+        <div class="panel p-8 text-center text-ink-muted text-sm">No returns found</div>
+      }
+    </div>
+
     @if (totalPages() > 1) {
       <div class="flex items-center justify-between mt-4">
-        <p class="text-sm text-ink-muted">Pagina {{ currentPage() }} di {{ totalPages() }}</p>
+        <p class="text-sm text-ink-muted">Page {{ currentPage() }} of {{ totalPages() }}</p>
         <div class="flex gap-1">
           <button (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() === 1" class="btn btn-outline btn-sm">‹</button>
           @for (p of pagesArray(); track p) {
-            <button (click)="goToPage(p)" class="px-3 py-1.5 text-sm border rounded-sm transition-colors"
-              [class.bg-ink]="p === currentPage()" [class.text-white]="p === currentPage()"
-              [class.border-ink]="p === currentPage()" [class.border-line]="p !== currentPage()"
-              [class.hover:bg-sunken]="p !== currentPage()">{{ p }}</button>
+            <button (click)="goToPage(p)" class="btn btn-sm"
+              [class.btn-primary]="p === currentPage()" [class.btn-outline]="p !== currentPage()"
+              [attr.aria-current]="p === currentPage() ? 'page' : null">{{ p }}</button>
           }
           <button (click)="goToPage(currentPage() + 1)" [disabled]="currentPage() === totalPages()" class="btn btn-outline btn-sm">›</button>
         </div>
@@ -107,11 +146,11 @@
 
 <!-- Detail Modal -->
 @if (selectedReturn()) {
-  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-    <div class="absolute inset-0 bg-black/40" (click)="closeDetail()"></div>
+  <div class="fixed inset-0 z-modal flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-inverse/40" (click)="closeDetail()"></div>
     <div class="relative bg-surface rounded-sm shadow-2xl max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between mb-4">
-        <h3 class="text-lg font-bold text-ink">Gestisci reso</h3>
+        <h3 class="text-lg font-bold text-ink">Manage return</h3>
         <button (click)="closeDetail()" class="text-ink-muted hover:text-ink">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -121,26 +160,26 @@
 
       <div class="space-y-3 mb-5">
         <div class="flex justify-between text-sm">
-          <span class="text-ink-muted">Utente</span>
+          <span class="text-ink-muted">User</span>
           <span class="font-medium">{{ selectedReturn()!.user.fullName }}</span>
         </div>
         <div class="flex justify-between text-sm">
-          <span class="text-ink-muted">Ordine</span>
+          <span class="text-ink-muted">Order</span>
           <span class="font-mono text-xs">{{ selectedReturn()!.order.id.slice(0, 12) }}…</span>
         </div>
         <div class="flex justify-between text-sm">
-          <span class="text-ink-muted">Stato attuale</span>
+          <span class="text-ink-muted">Current status</span>
           <span class="badge" [class]="statusColor(selectedReturn()!.status)">
             {{ statusLabel(selectedReturn()!.status) }}
           </span>
         </div>
         <div class="text-sm">
-          <span class="text-ink-muted block mb-1">Motivazione</span>
+          <span class="text-ink-muted block mb-1">Reason</span>
           <p class="text-ink-2 bg-sunken rounded px-3 py-2 text-xs">{{ selectedReturn()!.reason }}</p>
         </div>
         @if (selectedReturn()!.items.length > 0) {
           <div class="text-sm">
-            <span class="text-ink-muted block mb-1">Articoli</span>
+            <span class="text-ink-muted block mb-1">Items</span>
             <div class="space-y-1">
               @for (item of selectedReturn()!.items; track item.id) {
                 <div class="flex justify-between text-xs bg-sunken rounded px-3 py-1.5">
@@ -155,38 +194,38 @@
 
       <div class="border-t border-line pt-4 space-y-3">
         <div>
-          <label class="block text-xs font-semibold text-ink-muted uppercase tracking-widest mb-1.5">Nota admin</label>
-          <textarea [(ngModel)]="noteInput" rows="2" placeholder="Motivazione per il cliente…"
-            class="w-full border border-line rounded-sm px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ink resize-none"></textarea>
+          <label class="block text-xs font-semibold text-ink-muted uppercase tracking-widest mb-1.5">Admin note</label>
+          <textarea [(ngModel)]="noteInput" rows="2" placeholder="Reason for the customer…"
+            class="field resize-none"></textarea>
         </div>
         <div>
-          <label class="block text-xs font-semibold text-ink-muted uppercase tracking-widest mb-1.5">Importo rimborso (€)</label>
+          <label class="block text-xs font-semibold text-ink-muted uppercase tracking-widest mb-1.5">Refund amount (€)</label>
           <input [ngModel]="refundInput" (ngModelChange)="refundInput = $event" type="number" step="0.01" min="0" placeholder="0.00"
-            class="w-full border border-line rounded-sm px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ink"/>
+            class="field"/>
         </div>
       </div>
 
       <div class="flex flex-wrap gap-2 mt-5">
         @if (selectedReturn()!.status === 'requested') {
           <button (click)="updateStatus('approved')" [disabled]="updateLoading()"
-            class="px-3 py-1.5 text-xs border border-transparent text-info rounded-sm hover:bg-info-wash transition-colors disabled:opacity-50">
-            Approva
+            class="btn btn-outline btn-sm text-info">
+            Approve
           </button>
           <button (click)="updateStatus('rejected')" [disabled]="updateLoading()"
-            class="px-3 py-1.5 text-xs border border-transparent text-warning rounded-sm hover:bg-warning-wash transition-colors disabled:opacity-50">
-            Rifiuta
+            class="btn btn-outline btn-sm text-warning">
+            Reject
           </button>
         }
         @if (selectedReturn()!.status === 'approved') {
           <button (click)="updateStatus('received')" [disabled]="updateLoading()"
-            class="px-3 py-1.5 text-xs border border-transparent text-info rounded-sm hover:bg-info-wash transition-colors disabled:opacity-50">
-            Segnala ricevuto
+            class="btn btn-outline btn-sm text-info">
+            Mark received
           </button>
         }
         @if (selectedReturn()!.status === 'received') {
           <button (click)="updateStatus('refunded')" [disabled]="updateLoading()"
-            class="px-3 py-1.5 text-xs border border-transparent text-success rounded-sm hover:bg-success-wash transition-colors disabled:opacity-50">
-            Segna rimborsato
+            class="btn btn-outline btn-sm text-success">
+            Mark refunded
           </button>
         }
         @if (updateLoading()) {

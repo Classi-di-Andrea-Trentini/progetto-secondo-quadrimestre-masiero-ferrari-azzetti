@@ -1,82 +1,108 @@
 <div class="admin-shell">
-  <!-- ── Sidebar ─────────────────────────────────────────────────────────── -->
-  <aside class="admin-sidebar" [class.is-collapsed]="!sidebarOpen()">
-    <div class="admin-sidebar-head">
-      @if (sidebarOpen()) {
-        <span class="admin-brand">Admin</span>
-      }
-      <button
-        type="button"
-        (click)="toggleSidebar()"
-        class="admin-icon-btn ml-auto"
-        [attr.aria-label]="sidebarOpen() ? 'Riduci la barra laterale' : 'Espandi la barra laterale'"
-        [attr.aria-expanded]="sidebarOpen()"
-      >
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true">
-          @if (sidebarOpen()) {
-            <path stroke-linecap="round" stroke-linejoin="round" d="M11 19l-7-7 7-7m8 12l-7-7 7-7" />
-          } @else {
-            <path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
-          }
-        </svg>
-      </button>
-    </div>
 
-    <nav class="admin-nav" aria-label="Sezioni del pannello">
-      @for (item of navItems; track item.path) {
-        <a
-          [routerLink]="item.path"
-          class="admin-nav-item"
-          [class.is-active]="isActive(item.path)"
-          [attr.aria-current]="isActive(item.path) ? 'page' : null"
-          [attr.title]="sidebarOpen() ? null : item.label"
+  <!-- ── Mobile top bar ──────────────────────────────────────────────────── -->
+  <!-- Sotto `lg` la sidebar e' un drawer: questa barra e' l'unico modo per
+       aprirlo, ed e' anche dove il marchio resta sempre visibile. -->
+  <div class="admin-topbar">
+    <button
+      type="button"
+      (click)="toggleMobileNav()"
+      class="admin-icon-btn"
+      aria-label="Open menu"
+      [attr.aria-expanded]="mobileOpen()"
+    >
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    </button>
+    <span class="admin-brand">COMMONERA</span>
+  </div>
+
+  @if (mobileOpen()) {
+    <div class="admin-backdrop" (click)="closeMobileNav()"></div>
+  }
+
+  <div class="admin-body">
+    <!-- ── Sidebar ───────────────────────────────────────────────────────── -->
+    <aside class="admin-sidebar" [class.is-collapsed]="!sidebarOpen()" [class.is-mobile-open]="mobileOpen()">
+      <div class="admin-sidebar-head">
+        @if (sidebarOpen()) {
+          <span class="admin-brand">COMMONERA</span>
+        }
+        <button
+          type="button"
+          (click)="toggleSidebar()"
+          class="admin-icon-btn ml-auto"
+          [attr.aria-label]="sidebarOpen() ? 'Collapse sidebar' : 'Expand sidebar'"
+          [attr.aria-expanded]="sidebarOpen()"
         >
-          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" [attr.d]="item.icon" />
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true">
+            @if (sidebarOpen()) {
+              <path stroke-linecap="round" stroke-linejoin="round" d="M11 19l-7-7 7-7m8 12l-7-7 7-7" />
+            } @else {
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+            }
           </svg>
-          <!-- Con la barra ridotta l'etichetta resta per gli screen reader: le
-               icone da sole non dicono niente a chi non le vede. -->
-          <span [class.sr-only]="!sidebarOpen()">{{ item.label }}</span>
-        </a>
-      }
-    </nav>
+        </button>
+      </div>
 
-    <div class="admin-sidebar-foot">
-      @if (sidebarOpen()) {
-        <div class="flex items-center gap-2.5 mb-3 px-1">
-          <div
-            class="w-7 h-7 rounded-full bg-ink flex items-center justify-center text-2xs font-bold uppercase text-surface shrink-0"
+      <nav class="admin-nav" aria-label="Panel sections">
+        @for (item of navItems; track item.path) {
+          <a
+            [routerLink]="item.path"
+            (click)="closeMobileNav()"
+            class="admin-nav-item"
+            [class.is-active]="isActive(item.path)"
+            [attr.aria-current]="isActive(item.path) ? 'page' : null"
+            [attr.title]="sidebarOpen() ? null : item.label"
           >
-            {{ (auth.currentUser()?.fullName ?? 'A')[0] }}
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" [attr.d]="item.icon" />
+            </svg>
+            <!-- Con la barra ridotta l'etichetta resta per gli screen reader: le
+                 icone da sole non dicono niente a chi non le vede. -->
+            <span [class.sr-only]="!sidebarOpen()">{{ item.label }}</span>
+          </a>
+        }
+      </nav>
+
+      <div class="admin-sidebar-foot">
+        @if (sidebarOpen()) {
+          <div class="flex items-center gap-2.5 mb-3 px-1">
+            <div
+              class="w-7 h-7 rounded-full bg-ink flex items-center justify-center text-2xs font-bold uppercase text-surface shrink-0"
+            >
+              {{ (auth.currentUser()?.fullName ?? 'A')[0] }}
+            </div>
+            <div class="overflow-hidden min-w-0">
+              <p class="text-xs font-semibold text-ink truncate">{{ auth.currentUser()?.fullName }}</p>
+              <p class="text-2xs text-ink-muted truncate">{{ auth.currentUser()?.email }}</p>
+            </div>
           </div>
-          <div class="overflow-hidden min-w-0">
-            <p class="text-xs font-semibold text-ink truncate">{{ auth.currentUser()?.fullName }}</p>
-            <p class="text-2xs text-ink-muted truncate">{{ auth.currentUser()?.email }}</p>
-          </div>
-        </div>
-      }
+        }
 
-      <a routerLink="/home" class="admin-foot-btn" [attr.title]="sidebarOpen() ? null : 'Torna al sito'">
-        <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-        </svg>
-        <span [class.sr-only]="!sidebarOpen()">Torna al sito</span>
-      </a>
+        <a routerLink="/home" (click)="closeMobileNav()" class="admin-foot-btn" [attr.title]="sidebarOpen() ? null : 'Back to the store'">
+          <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          <span [class.sr-only]="!sidebarOpen()">Back to the store</span>
+        </a>
 
-      <button type="button" (click)="logout()" class="admin-foot-btn" [attr.title]="sidebarOpen() ? null : 'Esci'">
-        <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true">
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-          />
-        </svg>
-        <span [class.sr-only]="!sidebarOpen()">Esci</span>
-      </button>
-    </div>
-  </aside>
+        <button type="button" (click)="logout()" class="admin-foot-btn" [attr.title]="sidebarOpen() ? null : 'Sign out'">
+          <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+            />
+          </svg>
+          <span [class.sr-only]="!sidebarOpen()">Sign out</span>
+        </button>
+      </div>
+    </aside>
 
-  <main class="admin-main">
-    <router-outlet />
-  </main>
+    <main class="admin-main">
+      <router-outlet />
+    </main>
+  </div>
 </div>

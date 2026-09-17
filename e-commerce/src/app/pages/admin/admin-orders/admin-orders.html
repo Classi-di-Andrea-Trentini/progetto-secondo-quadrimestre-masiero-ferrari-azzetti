@@ -2,15 +2,14 @@
 
   <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
     <div>
-      <h1 class="text-2xl font-bold text-ink">Ordini</h1>
-      <p class="text-ink-muted text-sm mt-1">{{ total() }} ordini totali</p>
+      <h1 class="text-2xl font-bold text-ink">Orders</h1>
+      <p class="text-ink-muted text-sm mt-1">{{ total() }} orders total</p>
     </div>
-    <button (click)="exportCsv()"
-      class="flex items-center gap-2 px-4 py-2 text-sm border border-line rounded-sm hover:bg-sunken transition-colors text-ink-2">
+    <button (click)="exportCsv()" class="btn btn-outline">
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
       </svg>
-      Esporta CSV
+      Export CSV
     </button>
   </div>
 
@@ -22,13 +21,13 @@
   }
 
   <!-- Filters -->
-  <div class="bg-surface border border-line rounded-sm shadow-sm p-4 mb-6">
+  <div class="panel p-4 mb-6">
     <div class="flex flex-col sm:flex-row gap-3">
       <div class="relative flex-1">
         <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
         </svg>
-        <input [(ngModel)]="search" (keyup.enter)="onSearch()" type="text" placeholder="Cerca per cliente o ID…"
+        <input [(ngModel)]="search" (keyup.enter)="onSearch()" type="text" placeholder="Search by customer or ID…"
           class="field pl-9"/>
       </div>
       <select [(ngModel)]="statusFilter" (change)="onStatusFilter()"
@@ -37,7 +36,7 @@
           <option [value]="s.value">{{ s.label }}</option>
         }
       </select>
-      <button (click)="onSearch()" class="btn btn-primary">Cerca</button>
+      <button (click)="onSearch()" class="btn btn-primary">Search</button>
     </div>
   </div>
 
@@ -46,68 +45,115 @@
       <div class="w-7 h-7 border-4 border-line-strong border-t-gray-900 rounded-full animate-spin"></div>
     </div>
   } @else {
-    <div class="bg-surface border border-line rounded-sm shadow-sm overflow-hidden">
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead class="bg-sunken border-b border-line">
+    <!-- Table: md and up -->
+    <div class="panel overflow-hidden hidden md:block">
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
             <tr>
-              <th class="text-left px-4 py-3 text-2xs font-bold uppercase tracking-[0.09em] text-ink-2">ID</th>
-              <th class="text-left px-4 py-3 text-2xs font-bold uppercase tracking-[0.09em] text-ink-2">Cliente</th>
-              <th class="text-left px-4 py-3 text-2xs font-bold uppercase tracking-[0.09em] text-ink-2">Prodotti</th>
-              <th class="text-left px-4 py-3 text-2xs font-bold uppercase tracking-[0.09em] text-ink-2">Stato</th>
-              <th class="text-right px-4 py-3 text-2xs font-bold uppercase tracking-[0.09em] text-ink-2">Totale</th>
-              <th class="text-right px-4 py-3 text-2xs font-bold uppercase tracking-[0.09em] text-ink-2">Data</th>
-              <th class="text-right px-4 py-3 text-2xs font-bold uppercase tracking-[0.09em] text-ink-2">Dettaglio</th>
+              <th class="text-left">ID</th>
+              <th class="text-left">Customer</th>
+              <th class="text-left">Products</th>
+              <th class="text-left">Status</th>
+              <th class="text-right">Total</th>
+              <th class="text-right">Date</th>
+              <th class="text-right">Detail</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-line">
             @for (order of orders(); track order.id) {
               <tr class="hover:bg-sunken transition-colors">
-                <td class="px-4 py-3 font-mono text-xs text-ink-muted">{{ order.id.slice(0, 8) }}…</td>
-                <td class="px-4 py-3">
+                <td class="font-mono text-xs text-ink-muted">{{ order.id.slice(0, 8) }}…</td>
+                <td>
                   <p class="font-medium text-ink">{{ order.user.fullName }}</p>
                   <p class="text-xs text-ink-muted">{{ order.user.email }}</p>
                 </td>
-                <td class="px-4 py-3 text-ink-muted text-xs">
+                <td class="text-ink-muted text-xs">
                   @for (item of order.items.slice(0, 2); track $index) {
                     <p>{{ item.productName }} ×{{ item.quantity }}</p>
                   }
                   @if (order.items.length > 2) {
-                    <p class="text-ink-muted">+{{ order.items.length - 2 }} altri</p>
+                    <p class="text-ink-muted">+{{ order.items.length - 2 }} more</p>
                   }
                 </td>
-                <td class="px-4 py-3">
+                <td>
                   <span class="badge" [class]="statusColor(order.status)">
                     {{ statusLabel(order.status) }}
                   </span>
                 </td>
-                <td class="px-4 py-3 text-right font-semibold text-ink">{{ formatPrice(order.total) }}</td>
-                <td class="px-4 py-3 text-right text-ink-muted text-xs">{{ order.createdAt | date: 'dd/MM/yy' }}</td>
-                <td class="px-4 py-3 text-right">
-                  <button (click)="openDetail(order.id)" class="px-3 py-1.5 text-xs border border-line rounded-sm hover:border-ink transition-colors">
-                    Dettaglio
+                <td class="num font-semibold text-ink">{{ formatPrice(order.total) }}</td>
+                <td class="num text-ink-muted text-xs">{{ order.createdAt | date: 'dd/MM/yy' }}</td>
+                <td class="text-right">
+                  <button (click)="openDetail(order.id)" class="btn btn-outline btn-sm">
+                    Detail
                   </button>
                 </td>
               </tr>
             }
             @empty {
-              <tr><td colspan="7" class="px-4 py-12 text-center text-ink-muted">Nessun ordine trovato</td></tr>
+              <tr><td colspan="7" class="py-12 text-center text-ink-muted">No orders found</td></tr>
             }
           </tbody>
         </table>
       </div>
     </div>
 
+    <!-- Cards: below md -->
+    <div class="md:hidden space-y-3">
+      @for (order of orders(); track order.id) {
+        <div class="panel p-4">
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+              <p class="font-medium text-ink truncate">{{ order.user.fullName }}</p>
+              <p class="text-xs text-ink-muted truncate">{{ order.user.email }}</p>
+              <p class="text-xs text-ink-muted font-mono mt-0.5">{{ order.id.slice(0, 8) }}…</p>
+            </div>
+            <span class="badge flex-shrink-0" [class]="statusColor(order.status)">
+              {{ statusLabel(order.status) }}
+            </span>
+          </div>
+          <dl class="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 text-xs">
+            <div>
+              <dt class="label !mb-0.5">Total</dt>
+              <dd class="text-ink font-semibold">{{ formatPrice(order.total) }}</dd>
+            </div>
+            <div>
+              <dt class="label !mb-0.5">Date</dt>
+              <dd class="text-ink">{{ order.createdAt | date: 'dd/MM/yy' }}</dd>
+            </div>
+            <div class="col-span-2">
+              <dt class="label !mb-0.5">Products</dt>
+              <dd class="text-ink-2">
+                @for (item of order.items.slice(0, 2); track $index) {
+                  <p>{{ item.productName }} ×{{ item.quantity }}</p>
+                }
+                @if (order.items.length > 2) {
+                  <p class="text-ink-muted">+{{ order.items.length - 2 }} more</p>
+                }
+              </dd>
+            </div>
+          </dl>
+          <div class="mt-3 pt-3 border-t border-line">
+            <button (click)="openDetail(order.id)" class="btn btn-outline btn-sm btn-block">
+              Detail
+            </button>
+          </div>
+        </div>
+      }
+      @empty {
+        <div class="panel p-8 text-center text-ink-muted text-sm">No orders found</div>
+      }
+    </div>
+
     @if (totalPages() > 1) {
       <div class="flex items-center justify-between mt-4">
-        <p class="text-sm text-ink-muted">Pagina {{ currentPage() }} di {{ totalPages() }}</p>
+        <p class="text-sm text-ink-muted">Page {{ currentPage() }} of {{ totalPages() }}</p>
         <div class="flex gap-1">
           <button (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() === 1" class="btn btn-outline btn-sm">‹</button>
           @for (p of pagesArray(); track p) {
-            <button (click)="goToPage(p)" class="px-3 py-1.5 text-sm border rounded-sm transition-colors"
-              [class.bg-ink]="p === currentPage()" [class.text-white]="p === currentPage()"
-              [class.border-ink]="p === currentPage()" [class.border-line]="p !== currentPage()"
-              [class.hover:bg-sunken]="p !== currentPage()">{{ p }}</button>
+            <button (click)="goToPage(p)" class="btn btn-sm"
+              [class.btn-primary]="p === currentPage()" [class.btn-outline]="p !== currentPage()"
+              [attr.aria-current]="p === currentPage() ? 'page' : null">{{ p }}</button>
           }
           <button (click)="goToPage(currentPage() + 1)" [disabled]="currentPage() === totalPages()" class="btn btn-outline btn-sm">›</button>
         </div>
@@ -118,12 +164,12 @@
 
 <!-- Order Detail Modal -->
 @if (showDetail()) {
-  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-    <div class="absolute inset-0 bg-black/40" (click)="closeDetail()"></div>
+  <div class="fixed inset-0 z-modal flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-inverse/40" (click)="closeDetail()"></div>
     <div class="relative bg-surface rounded-sm shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
       <!-- Modal header -->
       <div class="flex items-center justify-between p-5 border-b border-line sticky top-0 bg-surface z-10">
-        <h3 class="font-bold text-ink">Dettaglio ordine</h3>
+        <h3 class="font-bold text-ink">Order detail</h3>
         <button (click)="closeDetail()" class="p-1.5 rounded-sm hover:bg-sunken transition-colors">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -144,7 +190,7 @@
               <p class="text-xs text-ink-muted font-mono">{{ selectedOrder()!.id }}</p>
               <p class="text-sm text-ink-muted mt-1">{{ selectedOrder()!.createdAt | date: 'dd/MM/yyyy HH:mm' }}</p>
             </div>
-            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium" [class]="statusColor(selectedOrder()!.status)">
+            <span class="badge" [class]="statusColor(selectedOrder()!.status)">
               {{ statusLabel(selectedOrder()!.status) }}
             </span>
           </div>
@@ -152,12 +198,12 @@
           <!-- Customer & address -->
           <div class="grid grid-cols-2 gap-4 text-sm">
             <div>
-              <p class="font-medium text-ink mb-1">Cliente</p>
+              <p class="font-medium text-ink mb-1">Customer</p>
               <p class="text-ink-2">{{ selectedOrder()!.user.fullName }}</p>
               <p class="text-ink-muted text-xs">{{ selectedOrder()!.user.email }}</p>
             </div>
             <div>
-              <p class="font-medium text-ink mb-1">Indirizzo spedizione</p>
+              <p class="font-medium text-ink mb-1">Shipping address</p>
               <p class="text-ink-2 text-xs leading-relaxed">
                 {{ selectedOrder()!.address.fullName }}<br>
                 {{ selectedOrder()!.address.street }}<br>
@@ -169,7 +215,7 @@
 
           <!-- Items -->
           <div>
-            <p class="font-medium text-ink mb-2 text-sm">Prodotti</p>
+            <p class="font-medium text-ink mb-2 text-sm">Products</p>
             <div class="space-y-2">
               @for (item of selectedOrder()!.items; track $index) {
                 <div class="flex items-center justify-between text-sm bg-sunken rounded-sm px-3 py-2">
@@ -191,21 +237,21 @@
           <!-- Totals -->
           <div class="border-t border-line pt-4 space-y-1 text-sm">
             <div class="flex justify-between text-ink-muted">
-              <span>Subtotale</span>
+              <span>Subtotal</span>
               <span>{{ formatPrice(selectedOrder()!.subtotal) }}</span>
             </div>
-            @if (formatPrice(selectedOrder()!.discountTotal) !== '€ 0,00') {
+            @if (+selectedOrder()!.discountTotal > 0) {
               <div class="flex justify-between text-success">
-                <span>Sconto{{ selectedOrder()!.promoCode ? ' (' + selectedOrder()!.promoCode!.code + ')' : '' }}</span>
+                <span>Discount{{ selectedOrder()!.promoCode ? ' (' + selectedOrder()!.promoCode!.code + ')' : '' }}</span>
                 <span>–{{ formatPrice(selectedOrder()!.discountTotal) }}</span>
               </div>
             }
             <div class="flex justify-between text-ink-muted">
-              <span>Spedizione</span>
-              <span>{{ formatPrice(selectedOrder()!.shippingCost) === '€ 0,00' ? 'Gratuita' : formatPrice(selectedOrder()!.shippingCost) }}</span>
+              <span>Shipping</span>
+              <span>{{ +selectedOrder()!.shippingCost === 0 ? 'Free' : formatPrice(selectedOrder()!.shippingCost) }}</span>
             </div>
             <div class="flex justify-between font-bold text-ink pt-1 border-t border-line">
-              <span>Totale</span>
+              <span>Total</span>
               <span>{{ formatPrice(selectedOrder()!.total) }}</span>
             </div>
           </div>
@@ -213,11 +259,11 @@
           <!-- Status history -->
           @if ((selectedOrder()!.statusHistory || []).length > 0) {
             <div>
-              <p class="font-medium text-ink mb-2 text-sm">Cronologia stato</p>
+              <p class="font-medium text-ink mb-2 text-sm">Status history</p>
               <div class="space-y-1.5">
                 @for (h of selectedOrder()!.statusHistory; track $index) {
                   <div class="flex items-start gap-2 text-xs text-ink-muted">
-                    <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium mt-0.5 flex-shrink-0" [class]="statusColor(h.status)">{{ statusLabel(h.status) }}</span>
+                    <span class="badge" [class]="statusColor(h.status)">{{ statusLabel(h.status) }}</span>
                     <span>{{ h.createdAt | date: 'dd/MM/yy HH:mm' }}</span>
                     @if (h.note) { <span class="text-ink-muted">· {{ h.note }}</span> }
                   </div>
@@ -228,23 +274,22 @@
 
           <!-- Update status -->
           <div class="border-t border-line pt-4">
-            <p class="font-medium text-ink mb-3 text-sm">Aggiorna stato</p>
+            <p class="font-medium text-ink mb-3 text-sm">Update status</p>
             <div class="flex flex-col gap-2">
               <select [ngModel]="newStatus()" (ngModelChange)="newStatus.set($event)" class="field bg-surface">
                 @for (s of allStatuses.slice(1); track s.value) {
                   <option [value]="s.value">{{ s.label }}</option>
                 }
               </select>
-              <input [(ngModel)]="statusNote" type="text" placeholder="Nota opzionale (es. tracking number)…"
+              <input [(ngModel)]="statusNote" type="text" placeholder="Optional note (e.g. tracking number)…"
                 class="field"/>
               <button
                 (click)="updateStatus()"
                 [disabled]="statusLoading() || newStatus() === selectedOrder()!.status"
-                class="w-full btn btn-primary disabled:opacity-50"
+                class="btn btn-block bg-accent-admin text-ink-strong hover:bg-accent-admin/80"
+                [attr.data-loading]="statusLoading() ? 'true' : null"
               >
-                @if (statusLoading()) {
-                  <span class="inline-block w-4 h-4 border-2 border-line-strong border-t-white rounded-full animate-spin mx-auto"></span>
-                } @else { Aggiorna stato }
+                @if (!statusLoading()) { Update status }
               </button>
             </div>
           </div>

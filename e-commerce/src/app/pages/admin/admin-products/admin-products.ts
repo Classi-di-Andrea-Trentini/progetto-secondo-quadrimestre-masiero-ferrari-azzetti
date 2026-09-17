@@ -107,7 +107,7 @@ export class AdminProducts implements OnInit {
   loadCategories() {
     this.adminSvc.getCategories().subscribe({
       next: (list) => this.categories.set(list),
-      error: () => this.formError.set('Impossibile caricare le categorie'),
+      error: () => this.formError.set('Unable to load categories'),
     });
   }
 
@@ -130,7 +130,7 @@ export class AdminProducts implements OnInit {
       this.newCategoryName = '';
       this.showNewCategory.set(false);
     } catch (err: any) {
-      this.formError.set(err?.error?.message ?? 'Impossibile creare la categoria');
+      this.formError.set(err?.error?.message ?? 'Unable to create the category');
     } finally {
       this.categoryLoading.set(false);
     }
@@ -148,7 +148,7 @@ export class AdminProducts implements OnInit {
         this.loading.set(false);
       },
       error: () => {
-        this.error.set('Impossibile caricare i prodotti');
+        this.error.set('Unable to load products');
         this.loading.set(false);
       },
     });
@@ -199,7 +199,7 @@ export class AdminProducts implements OnInit {
         isNewArrival: detail.isNewArrival ?? false,
       });
     } catch {
-      this.formError.set('Impossibile caricare il prodotto');
+      this.formError.set('Unable to load the product');
     } finally {
       this.modalLoading.set(false);
     }
@@ -260,19 +260,19 @@ export class AdminProducts implements OnInit {
           const detail = await firstValueFrom(this.adminSvc.getProductDetail(saved.id));
           this.editingProduct.set(detail);
           this.products.update(list => list.map(p => p.id === saved.id ? { ...p, ...saved } : p));
-          this.actionSuccess.set('Prodotto aggiornato');
+          this.actionSuccess.set('Product updated');
         } else {
           // After create, switch to edit mode so user can add variants/images
           const detail = await firstValueFrom(this.adminSvc.getProductDetail(saved.id));
           this.editingProduct.set(detail);
           this.load();
-          this.actionSuccess.set('Prodotto creato — ora puoi aggiungere varianti e immagini');
+          this.actionSuccess.set('Product created — you can now add variants and images');
         }
         this.formLoading.set(false);
         setTimeout(() => this.actionSuccess.set(null), 4000);
       },
       error: (err) => {
-        this.formError.set(err?.error?.message ?? 'Errore durante il salvataggio');
+        this.formError.set(err?.error?.message ?? 'Error while saving');
         this.formLoading.set(false);
       },
     });
@@ -345,7 +345,7 @@ export class AdminProducts implements OnInit {
       this.showVariantForm.set(false);
       this.editingVariant.set(null);
     } catch (err: any) {
-      this.variantFormError.set(err?.error?.message ?? 'Errore durante il salvataggio');
+      this.variantFormError.set(err?.error?.message ?? 'Error while saving');
     } finally {
       this.variantFormLoading.set(false);
     }
@@ -360,7 +360,7 @@ export class AdminProducts implements OnInit {
       this.products.update(list => list.map(p => p.id === productId
         ? { ...p, _count: { variants: Math.max(0, p._count.variants - 1) } } : p));
     } catch {
-      this.variantFormError.set('Impossibile eliminare la variante');
+      this.variantFormError.set('Unable to delete the variant');
     }
   }
 
@@ -387,11 +387,11 @@ export class AdminProducts implements OnInit {
     const file = input.files?.[0];
     if (!file) return;
     if (!file.type.startsWith('image/')) {
-      this.imageFormError.set('Solo file immagine sono consentiti (JPG, PNG, WebP…)');
+      this.imageFormError.set('Only image files are allowed (JPG, PNG, WebP…)');
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      this.imageFormError.set('Il file non può superare 5 MB');
+      this.imageFormError.set('The file cannot exceed 5 MB');
       return;
     }
     this.imageFile = file;
@@ -410,10 +410,10 @@ export class AdminProducts implements OnInit {
     try {
       let created: any;
       if (this.imageMode === 'upload') {
-        if (!this.imageFile) { this.imageFormError.set('Seleziona un file'); this.imageFormLoading.set(false); return; }
+        if (!this.imageFile) { this.imageFormError.set('Select a file'); this.imageFormLoading.set(false); return; }
         created = await firstValueFrom(this.adminSvc.uploadImage(productId, this.imageFile));
       } else {
-        if (!this.imageUrl.trim()) { this.imageFormError.set('Inserisci un URL'); this.imageFormLoading.set(false); return; }
+        if (!this.imageUrl.trim()) { this.imageFormError.set('Enter a URL'); this.imageFormLoading.set(false); return; }
         const isFirst = (this.editingProduct()?.images.length ?? 0) === 0;
         created = await firstValueFrom(this.adminSvc.addImage(productId, {
           url: this.imageUrl.trim(),
@@ -426,7 +426,7 @@ export class AdminProducts implements OnInit {
       this.imagePreview.set(null);
       this.imageFile = null;
     } catch (err: any) {
-      this.imageFormError.set(err?.error?.message ?? 'Errore durante il salvataggio');
+      this.imageFormError.set(err?.error?.message ?? 'Error while saving');
     } finally {
       this.imageFormLoading.set(false);
     }
@@ -447,7 +447,7 @@ export class AdminProducts implements OnInit {
         return { ...p, images };
       });
     } catch {
-      this.imageFormError.set('Impossibile eliminare l\'immagine');
+      this.imageFormError.set('Unable to delete the image');
     }
   }
 
@@ -461,7 +461,7 @@ export class AdminProducts implements OnInit {
         images: p.images.map(i => ({ ...i, isCover: i.id === imageId })),
       } : p);
     } catch {
-      this.imageFormError.set('Impossibile impostare la cover');
+      this.imageFormError.set('Unable to set the cover image');
     }
   }
 
@@ -480,12 +480,12 @@ export class AdminProducts implements OnInit {
         this.total.update(n => n - 1);
         this.confirmDeleteId.set(null);
         this.deleteLoading.set(false);
-        this.actionSuccess.set('Prodotto eliminato');
+        this.actionSuccess.set('Product deleted');
         setTimeout(() => this.actionSuccess.set(null), 3000);
       },
       error: () => {
         this.deleteLoading.set(false);
-        this.error.set('Impossibile eliminare il prodotto');
+        this.error.set('Unable to delete the product');
         this.confirmDeleteId.set(null);
       },
     });
@@ -501,6 +501,31 @@ export class AdminProducts implements OnInit {
   variantLabel(v: ProductVariant): string {
     const parts = [v.size, v.color, v.material].filter(Boolean);
     return parts.length ? parts.join(' / ') : v.sku;
+  }
+
+  // ─── Stock state (design: Available / Running Out / Out of Stock) ─────────
+  //
+  // Il backend ha gia' un concetto di soglia per-variante (`lowStockAlert` su
+  // ProductVariant, usato da AdminService.lowStock/GET /admin/inventory), ma
+  // non e' esposto da nessun DTO ne' impostabile da questo form: agganciarcisi
+  // vorrebbe dire aprire un endpoint che oggi questa pagina non chiama, fuori
+  // dal perimetro di un allineamento visivo. In attesa che quella soglia
+  // diventi un campo vero del prodotto, questa e' una soglia di sola
+  // visualizzazione, fissa e dichiarata in un punto solo.
+  private readonly lowStockThreshold = 5;
+
+  stockState(qty: number): 'Available' | 'Running Out' | 'Out of Stock' {
+    if (qty <= 0) return 'Out of Stock';
+    if (qty <= this.lowStockThreshold) return 'Running Out';
+    return 'Available';
+  }
+
+  stockBadgeClass(qty: number): string {
+    switch (this.stockState(qty)) {
+      case 'Available': return 'badge-success';
+      case 'Running Out': return 'badge-warning';
+      case 'Out of Stock': return 'badge-danger';
+    }
   }
 
   pagesArray(): number[] {

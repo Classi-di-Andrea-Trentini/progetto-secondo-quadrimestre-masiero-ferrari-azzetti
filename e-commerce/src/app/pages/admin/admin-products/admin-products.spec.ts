@@ -24,4 +24,12 @@ describe('AdminProducts', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  // I tre stati del magazzino nel design: Available / Running Out / Out of
+  // Stock, in questo ordine di soglia sulla quantita' in stock.
+  it('should map stock quantity to the three design stock states', () => {
+    expect(component.stockState(0)).toBe('Out of Stock');
+    expect(component.stockState(5)).toBe('Running Out');
+    expect(component.stockState(6)).toBe('Available');
+  });
 });
