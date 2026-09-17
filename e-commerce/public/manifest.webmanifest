@@ -1,7 +1,7 @@
 {
-  "name": "Common Era",
-  "short_name": "Common Era",
-  "description": "Common Era — timeless, essential clothing.",
+  "name": "CommonEra",
+  "short_name": "CommonEra",
+  "description": "CommonEra — timeless, essential clothing.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
