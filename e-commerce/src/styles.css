@@ -305,6 +305,19 @@
     background: oklch(0.44 0.185 25);
   }
 
+  /* Figma: accento teal (#6CD0D0), solo sul bottone primario delle modali
+     dell'area /admin — mai nel negozio pubblico. Prima di questa classe il
+     Task 7 scriveva la stessa terna di utility Tailwind a mano in cinque
+     template diversi (admin-orders, admin-products x3, admin-promo): la
+     stessa duplicazione che .btn-primary/.btn-danger esistono per evitare. */
+  .btn-accent-admin {
+    background: var(--color-accent-admin);
+    color: var(--color-ink-strong);
+  }
+  .btn-accent-admin:hover:not(:disabled) {
+    background: color-mix(in oklab, var(--color-accent-admin) 80%, transparent);
+  }
+
   .btn-sm {
     padding: 0.4375rem 0.875rem;
     font-size: var(--text-2xs);
@@ -344,6 +357,21 @@
     outline: 2px solid var(--color-ink);
     outline-offset: -1px;
     border-color: var(--color-ink);
+  }
+
+  /* Figma: anello di focus teal (#6CD0D0), solo dentro /admin — .field e'
+     condiviso con tutto il sito, quindi l'accento vive qui, ancorato a
+     .admin-shell (il guscio del pannello), non nel token base: altrimenti
+     ogni campo del negozio pubblico riprenderebbe questo colore. Prima di
+     questa regola il Task 7 la duplicava, identica, in sei fogli di stile di
+     componente — la stessa duplicazione che .field esiste per evitare.
+     Sta prima di .field[aria-invalid='true']:focus nell'ordine di cascata (a
+     specificita' uguale vince l'ultima regola) cosi' un campo invalido in
+     admin resta rosso, non teal: l'errore vince sull'accento. */
+  .admin-shell .field:focus {
+    border-color: var(--color-accent-admin);
+    outline-color: var(--color-accent-admin);
+    box-shadow: 0 0 0 3px var(--color-accent-admin-ring);
   }
 
   .field:disabled {

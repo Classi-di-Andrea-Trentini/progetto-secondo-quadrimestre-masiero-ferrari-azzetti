@@ -224,7 +224,7 @@
         <div class="flex gap-3 pt-2">
           <button type="button" (click)="closeModal()" class="btn btn-outline flex-1">Cancel</button>
           <button type="submit" [disabled]="promoForm.invalid || formLoading()"
-            class="btn flex-1 bg-accent-admin text-ink-strong hover:bg-accent-admin/80" [attr.data-loading]="formLoading() ? 'true' : null">
+            class="btn flex-1 btn-accent-admin" [attr.data-loading]="formLoading() ? 'true' : null">
             @if (!formLoading()) { Create code }
           </button>
         </div>

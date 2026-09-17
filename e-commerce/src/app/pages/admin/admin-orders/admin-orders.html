@@ -286,7 +286,7 @@
               <button
                 (click)="updateStatus()"
                 [disabled]="statusLoading() || newStatus() === selectedOrder()!.status"
-                class="btn btn-block bg-accent-admin text-ink-strong hover:bg-accent-admin/80"
+                class="btn btn-block btn-accent-admin"
                 [attr.data-loading]="statusLoading() ? 'true' : null"
               >
                 @if (!statusLoading()) { Update status }

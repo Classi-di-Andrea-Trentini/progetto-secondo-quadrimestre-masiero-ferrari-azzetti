@@ -1,8 +1,0 @@
-/* Qui l'accento e' il teal admin (Figma #6CD0D0), non l'inchiostro del
-   negozio pubblico: .field e' condiviso con tutto il sito, quindi lo si
-   sovrascrive solo dentro questo componente, non nel token globale. */
-.field:focus {
-  border-color: var(--color-accent-admin);
-  outline-color: var(--color-accent-admin);
-  box-shadow: 0 0 0 3px var(--color-accent-admin-ring);
-}

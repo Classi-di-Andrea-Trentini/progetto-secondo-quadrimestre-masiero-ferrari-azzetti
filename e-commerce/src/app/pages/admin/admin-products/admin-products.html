@@ -326,7 +326,7 @@
                   Cancel
                 </button>
                 <button type="submit" [disabled]="productForm.invalid || formLoading()"
-                  class="btn flex-1 bg-accent-admin text-ink-strong hover:bg-accent-admin/80" [attr.data-loading]="formLoading() ? 'true' : null">
+                  class="btn flex-1 btn-accent-admin" [attr.data-loading]="formLoading() ? 'true' : null">
                   {{ editingProduct() ? 'Save changes' : 'Create product' }}
                 </button>
               </div>
@@ -442,7 +442,7 @@
                         Cancel
                       </button>
                       <button type="submit" [disabled]="variantForm.invalid || variantFormLoading()"
-                        class="btn btn-sm flex-1 bg-accent-admin text-ink-strong hover:bg-accent-admin/80" [attr.data-loading]="variantFormLoading() ? 'true' : null">
+                        class="btn btn-sm flex-1 btn-accent-admin" [attr.data-loading]="variantFormLoading() ? 'true' : null">
                         {{ editingVariant() ? 'Save' : 'Add' }}
                       </button>
                     </div>
@@ -572,7 +572,7 @@
                         Cancel
                       </button>
                       <button type="button" (click)="saveImage()" [disabled]="imageFormLoading()"
-                        class="btn btn-sm flex-1 bg-accent-admin text-ink-strong hover:bg-accent-admin/80" [attr.data-loading]="imageFormLoading() ? 'true' : null">
+                        class="btn btn-sm flex-1 btn-accent-admin" [attr.data-loading]="imageFormLoading() ? 'true' : null">
                         Add
                       </button>
                     </div>
