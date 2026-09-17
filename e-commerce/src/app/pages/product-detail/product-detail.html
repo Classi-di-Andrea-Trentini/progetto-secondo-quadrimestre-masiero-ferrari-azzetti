@@ -73,7 +73,7 @@
           <div class="name-row">
             <h1 class="product-name">{{ product()!.name }}</h1>
             <button
-              class="heart-btn-detail"
+              class="heart-btn"
               [class.saved]="wishlist.isSaved(product()!.id)"
               (click)="toggleWishlist()"
               [title]="wishlist.isSaved(product()!.id) ? 'Remove from wishlist' : 'Save to wishlist'"

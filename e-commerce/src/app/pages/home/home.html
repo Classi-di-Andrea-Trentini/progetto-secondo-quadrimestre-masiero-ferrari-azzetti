@@ -130,9 +130,9 @@
           <div class="featured-img-wrap">
             <img [src]="getCoverImage(product)" [alt]="product.name" class="featured-img" loading="lazy" />
             @if (hasDiscount(product)) {
-              <span class="featured-badge featured-badge-sale">Sale</span>
+              <span class="badge-corner badge-sale">Sale</span>
             } @else if (product.isNewArrival) {
-              <span class="featured-badge">New</span>
+              <span class="badge-corner">New</span>
             }
           </div>
           <div class="featured-info">

@@ -188,14 +188,14 @@
 
                 <!-- Badges -->
                 @if (discountedPrice(p) !== null) {
-                  <span class="badge-pill sale">Sale</span>
+                  <span class="badge-corner badge-sale">Sale</span>
                 } @else if (p.isNewArrival) {
-                  <span class="badge-pill new">New</span>
+                  <span class="badge-corner">New</span>
                 }
 
                 <!-- Wishlist -->
                 <button
-                  class="heart-btn"
+                  class="heart-btn heart-btn-float"
                   [class.saved]="wishlist.isSaved(p.id)"
                   (click)="toggleWishlist($event, p.id)"
                   [attr.aria-label]="(wishlist.isSaved(p.id) ? 'Remove from wishlist: ' : 'Save to wishlist: ') + p.name"

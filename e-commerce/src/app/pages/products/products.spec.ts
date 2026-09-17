@@ -79,10 +79,10 @@ describe('Products', () => {
     const saleCard = Array.from(cards).find((c) => c.textContent?.includes('Discounted Jacket'))!;
     const fullCard = Array.from(cards).find((c) => c.textContent?.includes('Full Price Jacket'))!;
 
-    const saleBadge = saleCard.querySelector('.badge-pill.sale');
+    const saleBadge = saleCard.querySelector('.badge-corner.badge-sale');
     expect(saleBadge).toBeTruthy();
     expect(saleBadge!.textContent?.trim()).toBe('Sale');
 
-    expect(fullCard.querySelector('.badge-pill.sale')).toBeNull();
+    expect(fullCard.querySelector('.badge-corner.badge-sale')).toBeNull();
   });
 });

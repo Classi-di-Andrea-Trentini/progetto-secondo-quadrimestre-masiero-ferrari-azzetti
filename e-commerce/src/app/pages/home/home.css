@@ -396,29 +396,6 @@
   transform: scale(1.04);
 }
 
-.featured-badge {
-  position: absolute;
-  top: 0.625rem;
-  left: 0.625rem;
-  border-radius: 2px;
-  background: var(--color-surface);
-  padding: 0.25rem 0.5rem;
-  font-size: var(--text-2xs);
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-ink);
-}
-
-/* --color-badge-sale (Figma #C3A88D): il token dedicato al badge "Sale" delle
-   card prodotto, aggiunto dal task 1. Prima di questo passaggio la regola
-   puntava ancora a --color-accent, il rosso-terracotta usato altrove per
-   sconti e stati d'errore: due segnali diversi con lo stesso colore. */
-.featured-badge-sale {
-  background: var(--color-badge-sale);
-  color: var(--color-ink-strong);
-}
-
 .featured-info {
   padding-top: 0.875rem;
 }

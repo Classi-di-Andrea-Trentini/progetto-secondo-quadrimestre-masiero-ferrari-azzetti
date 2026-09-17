@@ -9,7 +9,7 @@
 
   <!-- Bulk action bar -->
   @if (hasSelection()) {
-    <div class="mb-4 bg-ink text-white px-4 py-3 rounded-sm flex flex-wrap items-center justify-between gap-3">
+    <div class="mb-4 bg-ink text-surface px-4 py-3 rounded-sm flex flex-wrap items-center justify-between gap-3">
       <span class="text-sm font-medium">{{ selectedIds().size }} selected</span>
       <div class="flex flex-wrap gap-2">
         <button (click)="bulkApprove()" [disabled]="bulkLoading()"

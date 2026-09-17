@@ -491,12 +491,7 @@
   height: 1rem;
 }
 
-.checkout-uppercase {
-  text-transform: uppercase;
-}
-.checkout-uppercase::placeholder {
-  text-transform: none;
-}
+/* .input-uppercase: vocabolario condiviso in styles.css. */
 
 .checkout-textarea {
   resize: none;

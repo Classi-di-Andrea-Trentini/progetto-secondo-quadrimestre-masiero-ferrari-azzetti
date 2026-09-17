@@ -247,21 +247,21 @@
           @if (activeTab() === 'info') {
             <form [formGroup]="productForm" (ngSubmit)="submitForm()" class="space-y-4">
               <div>
-                <label class="block text-sm font-medium text-ink-2 mb-1">Name *</label>
+                <label class="label">Name *</label>
                 <input formControlName="name" (blur)="autoSlug()" type="text"
                   class="field"
                   placeholder="Product name"/>
               </div>
               <div>
-                <label class="block text-sm font-medium text-ink-2 mb-1">
-                  Slug * <span class="text-ink-muted font-normal">(lowercase letters, numbers, hyphens)</span>
+                <label class="label">
+                  Slug * <span class="text-ink-muted font-normal normal-case">(lowercase letters, numbers, hyphens)</span>
                 </label>
                 <input formControlName="slug" type="text"
                   class="field font-mono"
                   placeholder="product-name"/>
               </div>
               <div>
-                <label class="block text-sm font-medium text-ink-2 mb-1">Category *</label>
+                <label class="label">Category *</label>
                 @if (showNewCategory()) {
                   <div class="flex flex-col sm:flex-row gap-2">
                     <input [(ngModel)]="newCategoryName" [ngModelOptions]="{ standalone: true }"
@@ -288,23 +288,23 @@
                 }
               </div>
               <div>
-                <label class="block text-sm font-medium text-ink-2 mb-1">Brand</label>
+                <label class="label">Brand</label>
                 <input formControlName="brand" type="text" class="field" placeholder="Brand or manufacturer"/>
               </div>
               <div>
-                <label class="block text-sm font-medium text-ink-2 mb-1">
-                  Subtitle <span class="text-ink-muted font-normal">(the line under the name, in the catalogue)</span>
+                <label class="label">
+                  Subtitle <span class="text-ink-muted font-normal normal-case">(the line under the name, in the catalogue)</span>
                 </label>
                 <input formControlName="shortDesc" type="text" class="field" placeholder="Organic cotton, straight cut"/>
               </div>
               <div>
-                <label class="block text-sm font-medium text-ink-2 mb-1">Description</label>
+                <label class="label">Description</label>
                 <textarea formControlName="description" rows="3"
                   class="field resize-none"
                   placeholder="Product description…"></textarea>
               </div>
               <div>
-                <label class="block text-sm font-medium text-ink-2 mb-1">Base price (€) *</label>
+                <label class="label">Base price (€) *</label>
                 <input formControlName="basePrice" type="number" step="0.01" min="0"
                   class="field"/>
               </div>

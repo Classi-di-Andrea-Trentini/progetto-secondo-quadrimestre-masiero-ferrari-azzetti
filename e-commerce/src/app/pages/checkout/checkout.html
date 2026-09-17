@@ -168,7 +168,7 @@
                       </div>
                       <div>
                         <label class="label">Province</label>
-                        <input formControlName="province" type="text" placeholder="e.g. RM" maxlength="2" class="field checkout-uppercase"/>
+                        <input formControlName="province" type="text" placeholder="e.g. RM" maxlength="2" class="field input-uppercase"/>
                       </div>
                     </div>
                     <div>
@@ -455,7 +455,7 @@
             type="text"
             placeholder="Discount code"
             [disabled]="reserved()"
-            class="field checkout-uppercase"
+            class="field input-uppercase"
           />
           <button type="button" (click)="applyPromo()" [disabled]="promoLoading() || !promoCode().trim() || reserved()"
             [attr.data-loading]="promoLoading() ? 'true' : null"
@@ -488,7 +488,7 @@
             type="text"
             placeholder="Gift card"
             [disabled]="reserved()"
-            class="field checkout-uppercase"
+            class="field input-uppercase"
           />
           <button type="button" (click)="applyGiftCard()" [disabled]="giftCardLoading() || !giftCardCode().trim() || reserved()"
             [attr.data-loading]="giftCardLoading() ? 'true' : null"
