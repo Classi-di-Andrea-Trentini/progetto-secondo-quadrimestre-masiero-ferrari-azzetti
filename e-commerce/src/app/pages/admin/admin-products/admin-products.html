@@ -345,14 +345,18 @@
               }
 
               @for (v of editingProduct()!.variants; track v.id) {
-                <div class="flex items-center justify-between bg-sunken rounded-sm px-4 py-3 gap-3">
+                <!-- flex-wrap: i due bottoni icona a 44px (vedi B1) allargano il
+                     cluster di destra abbastanza da non stare piu' accanto a SKU
+                     e colore sotto ~380px — invece di farli scorrere fuori dal
+                     modale, il cluster va a capo sulla riga sotto. -->
+                <div class="flex flex-wrap items-center justify-between bg-sunken rounded-sm px-4 py-3 gap-3">
                   <div class="flex items-center gap-3 min-w-0">
                     @if (v.colorHex) {
                       <span class="w-4 h-4 rounded-full border border-line flex-shrink-0"
                         [style.background-color]="v.colorHex"></span>
                     }
                     <div class="min-w-0">
-                      <p class="text-sm font-medium text-ink font-mono">{{ v.sku }}</p>
+                      <p class="text-sm font-medium text-ink font-mono truncate">{{ v.sku }}</p>
                       <p class="text-xs text-ink-muted">{{ variantLabel(v) }}</p>
                     </div>
                   </div>
